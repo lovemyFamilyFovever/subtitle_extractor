@@ -244,7 +244,7 @@ class VideoPreviewLabel(QLabel):
         video_y2 = max(0, min(video_y2, video_height))
         
         # 返回转换后的视频坐标 (x1, y1, x2, y2)
-        return (video_x1, video_y1, x2, y2)
+        return (video_x1, video_y1, video_x2, video_y2)
 
 class VideoPreviewWidget(QWidget):
     """
@@ -343,18 +343,18 @@ class VideoPreviewWidget(QWidget):
         # 坐标输入框
         coord_layout = QHBoxLayout()
         self.x1_input = QLineEdit()
-        self.x1_input.setPlaceholderText('X1')
         self.y1_input = QLineEdit()
-        self.y1_input.setPlaceholderText('Y1')
         self.x2_input = QLineEdit()
-        self.x2_input.setPlaceholderText('X2')
         self.y2_input = QLineEdit()
-        self.y2_input.setPlaceholderText('Y2')
 
         coord_layout.addWidget(QLabel('坐标:'))
+        coord_layout.addWidget(QLabel('x1:'))
         coord_layout.addWidget(self.x1_input, 1)
+        coord_layout.addWidget(QLabel('y1:'))
         coord_layout.addWidget(self.y1_input, 1)
+        coord_layout.addWidget(QLabel('x2:'))
         coord_layout.addWidget(self.x2_input, 1)
+        coord_layout.addWidget(QLabel('y2:'))
         coord_layout.addWidget(self.y2_input, 1)
 
         # 操作按钮
@@ -850,6 +850,7 @@ class VideoPreviewWidget(QWidget):
             # 3. 提取字幕区域
             subtitle_images = []
             x1, y1, x2, y2 = self.crop_rect
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
             
             for idx, (time_sec, frame_idx) in enumerate(use_points):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
@@ -857,12 +858,19 @@ class VideoPreviewWidget(QWidget):
                 if ret:
                     # 确保坐标在图像范围内
                     height, width = frame.shape[:2]
-                    rx1, rx2 = max(0, min(x1, width)), max(0, min(x2, width))
-                    ry1, ry2 = max(0, min(y1, height)), max(0, min(y2, height))
 
+                    # 【修复 Bug #1】先确保坐标顺序正确，再剪裁到图像边界内
+                    x1_norm, x2_norm = min(x1, x2), max(x1, x2)
+                    y1_norm, y2_norm = min(y1, y2), max(y1, y2)
+                    
+                    # 然后剪裁到图像实际范围
+                    rx1, rx2 = max(0, x1_norm), min(x2_norm, width)
+                    ry1, ry2 = max(0, y1_norm), min(y2_norm, height)
+
+                    # 现在可以安全地使用数组切片
                     if rx2 > rx1 and ry2 > ry1:
                         # 裁剪字幕区域
-                        subtitle_img = frame[ry1:ry2, rx1:rx2]
+                        subtitle_img = frame[int(ry1):int(ry2), int(rx1):int(rx2)]
                         subtitle_images.append(subtitle_img)
                 
                 # 更新状态栏
