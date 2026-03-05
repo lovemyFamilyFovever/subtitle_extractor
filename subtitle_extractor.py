@@ -1093,7 +1093,7 @@ class DraggableLineImage(QLabel):
         # 记录当前正在被拖动的线条编号 (1 或 2)，None 表示未拖动
         self.active_line = None
         # 设置最小宽度
-        self.setMinimumWidth(600)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         # 【新增】获取文件信息
         self._update_file_info()
@@ -1104,45 +1104,35 @@ class DraggableLineImage(QLabel):
     def update_display(self):
         """
         更新控件显示的图像
-        将 OpenCV 图像转换为 Qt 的 QPixmap 并显示，确保图片完整显示（contain模式）
+        将 OpenCV 图像转换为 Qt 的 QPixmap 并显示
         """
         # 获取图像的高度和宽度
         h, w = self.cv_img.shape[:2]
         # 从 numpy 数据创建 QImage 对象
         pixmap = QPixmap.fromImage(QImage(self.cv_img.data, w, h, w*3, QImage.Format_RGB888))
         
-        # 【优化】使用 contain 方式缩放图片
-        # 在保持纵横比的前提下，让图片完整显示在容器内
-        # 容器大小：700 x 700
-        max_width = 700
-        max_height = 700
+        # 【优化】动态获取容器的实际大小
+        # 获取当前控件的大小
+        container_width = self.width()
+        container_height = self.height()
         
-        # 计算缩放比例，确保图片在两个方向都不超出容器
-        # 计算两个方向的缩放比
-        scale_w = max_width / w
-        scale_h = max_height / h
+         # 如果容器还没初始化，不显示
+        if container_width <= 1 or container_height <= 1:
+            return
         
-        # 选择能让图片恰好填满容器的缩放比（不超出）
-        # 如果原图比例与容器相同，任选一个都行
-        # 如果原图比容器宽，以高度为准
-        # 如果原图比容器高，以宽度为准
-        if w / h > max_width / max_height:
-            # 原图相对更宽，用高度来限制
-            scale = scale_h
-        else:
-            # 原图相对更高，用宽度来限制
-            scale = scale_w
-        
+        scale = min(container_width / w, container_height / h)
+
         # 计算缩放后的尺寸
         scaled_width = int(w * scale)
         scaled_height = int(h * scale)
         
-        # 执行缩放
-        scaled_pixmap = pixmap.scaledToWidth(scaled_width, Qt.SmoothTransformation)
+        # 缩放图片
+        scaled_pixmap = pixmap.scaled(scaled_width, scaled_height, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         
+ 
         # 设置图片并居中显示
         self.setPixmap(scaled_pixmap)
-        self.setAlignment(Qt.AlignCenter)  # 【新增】图片在容器中居中
+        self.setAlignment(Qt.AlignCenter)
 
     def _update_file_info(self):
         """
@@ -1247,90 +1237,151 @@ class DraggableLineImage(QLabel):
         """
         self.active_line = None
 
+    def resizeEvent(self, event):
+        """
+        窗口大小改变时重新调整图片大小
+        """
+        super().resizeEvent(event)
+        # 重新调整图片显示大小
+        if hasattr(self, 'cv_img'):
+            self.update_display()
+
 class ImageStatusBar(QWidget):
     """
     图片状态栏
-    显示图片数量、总内存大小、创建时间等信息
+    显示图片数量、总内存大小、当前图片信息等
     """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setStyleSheet("background: #f9f9f9; border-top: 1px solid #ddd;")
         self.setMaximumHeight(50)
         self.setMinimumHeight(50)
+        self.current_image_widgets = []
+        self.current_index = 0
         
         layout = QHBoxLayout(self)
         layout.setContentsMargins(15, 5, 15, 5)
-        layout.setSpacing(30)
+        layout.setSpacing(20)
         
         # 图片数量
         self.count_label = QLabel("📊 图片数量: 0")
         self.count_label.setStyleSheet("font-size: 12px; color: #333;")
         layout.addWidget(self.count_label)
         
-        # 内存大小
+        # 总内存大小
         self.memory_label = QLabel("💾 总内存: 0 B")
         self.memory_label.setStyleSheet("font-size: 12px; color: #333;")
         layout.addWidget(self.memory_label)
         
-        # 创建时间
+        # 当前图片名称
+        self.filename_label = QLabel("📄 文件: -")
+        self.filename_label.setStyleSheet("font-size: 12px; color: #333;")
+        layout.addWidget(self.filename_label)
+        
+        # 当前图片大小
+        self.current_size_label = QLabel("💾 单张: 0 B")
+        self.current_size_label.setStyleSheet("font-size: 12px; color: #333;")
+        layout.addWidget(self.current_size_label)
+        
+        # 当前图片尺寸
+        self.resolution_label = QLabel("📐 分辨率: -")
+        self.resolution_label.setStyleSheet("font-size: 12px; color: #333;")
+        layout.addWidget(self.resolution_label)
+        
+        # 当前图片时间
         self.time_label = QLabel("⏰ 首张时间: -")
         self.time_label.setStyleSheet("font-size: 12px; color: #333;")
         layout.addWidget(self.time_label)
         
-        # 弹性空间
-        layout.addStretch()
-        
-        # 图片尺寸信息
-        self.size_label = QLabel("📐 尺寸: -")
-        self.size_label.setStyleSheet("font-size: 12px; color: #333;")
-        layout.addWidget(self.size_label)
     
     def update_info(self, image_widgets):
         """
         更新状态栏信息
         """
+        self.current_image_widgets = image_widgets
+        
         if not image_widgets:
-            self.count_label.setText("📊 图片数量: 0")
+            self.count_label.setText("📊 数量: 0")
             self.memory_label.setText("💾 总内存: 0 B")
-            self.time_label.setText("⏰ 首张时间: -")
-            self.size_label.setText("📐 尺寸: -")
+            self.filename_label.setText("📄 文件: -")
+            self.current_size_label.setText("💾 单张: 0 B")
+            self.resolution_label.setText("📐 分辨率: -")
+            self.time_label.setText("⏰ 时间: -")
             return
         
-        # 计算统计信息
+        # 计算总统计信息
         count = len(image_widgets)
         total_size = sum(w.file_size for w in image_widgets if hasattr(w, 'file_size'))
         
-        # 格式化内存大小
+         # 格式化总内存大小
         if total_size < 1024:
-            size_str = f"{total_size} B"
+            total_size_str = f"{total_size} B"
         elif total_size < 1024 * 1024:
-            size_str = f"{total_size / 1024:.2f} KB"
+            total_size_str = f"{total_size / 1024:.2f} KB"
         else:
-            size_str = f"{total_size / (1024 * 1024):.2f} MB"
+            total_size_str = f"{total_size / (1024 * 1024):.2f} MB"
         
-        # 获取第一张图的创建时间
+        # 更新总数量和总内存
+        self.count_label.setText(f"📊 数量: {count}")
+        self.memory_label.setText(f"💾 总内存: {total_size_str}")
+        
+        # 显示第一张图片的详细信息
+        self.update_current_image_info(0)
+    
+    def update_current_image_info(self, index):
+        """
+        更新当前选中图片的信息
+        """
+        self.current_index = index
+        
+        if not self.current_image_widgets or index >= len(self.current_image_widgets):
+            self.filename_label.setText("📄 文件: -")
+            self.current_size_label.setText("💾 单张: 0 B")
+            self.resolution_label.setText("📐 分辨率: -")
+            self.time_label.setText("⏰ 时间: -")
+            return
+        
+        widget = self.current_image_widgets[index]
+        
+        # 获取图片文件名和后缀
+        filename = "-"
+        if hasattr(widget, 'image_path'):
+            import os
+            filename = os.path.basename(widget.image_path)
+        self.filename_label.setText(f"📄 文件: {filename}")
+        
+        # 获取单张图片大小
+        single_size = 0
+        if hasattr(widget, 'file_size'):
+            single_size = widget.file_size
+        
+        if single_size < 1024:
+            single_size_str = f"{single_size} B"
+        elif single_size < 1024 * 1024:
+            single_size_str = f"{single_size / 1024:.2f} KB"
+        else:
+            single_size_str = f"{single_size / (1024 * 1024):.2f} MB"
+        self.current_size_label.setText(f"💾 单张: {single_size_str}")
+        
+        # 获取图片分辨率
+        resolution_str = "-"
+        if hasattr(widget, 'image_width') and hasattr(widget, 'image_height'):
+            resolution_str = f"{widget.image_width}×{widget.image_height}"
+        self.resolution_label.setText(f"📐 分辨率: {resolution_str}")
+        
+        # 获取图片创建时间
         time_str = "-"
-        if hasattr(image_widgets[0], 'create_time') and image_widgets[0].create_time:
-            time_str = image_widgets[0].create_time.strftime("%Y-%m-%d %H:%M:%S")
-        
-        # 获取图片尺寸
-        first_widget = image_widgets[0]
-        if hasattr(first_widget, 'image_width') and hasattr(first_widget, 'image_height'):
-            size_str_img = f"{first_widget.image_width}×{first_widget.image_height}"
-        else:
-            size_str_img = "-"
-        
-        # 更新标签
-        self.count_label.setText(f"📊 图片数量: {count}")
-        self.memory_label.setText(f"💾 总内存: {size_str}")
-        self.time_label.setText(f"⏰ 首张时间: {time_str}")
-        self.size_label.setText(f"📐 尺寸: {size_str_img}")
+        if hasattr(widget, 'create_time') and widget.create_time:
+            time_str = widget.create_time.strftime("%Y-%m-%d %H:%M:%S")
+        self.time_label.setText(f"⏰ 时间: {time_str}")
 
 class ImageCarouselViewer(QWidget):
     """
     图片轮播查看器 - 改进版
     使用 QStackedWidget 实现单张图片显示和切换
     """
+    # 定义信号：当图片切换时发出，携带当前索引
+    image_changed = pyqtSignal(int)
     def __init__(self, parent=None):
         super().__init__(parent)
         self.current_index = 0
@@ -1348,7 +1399,6 @@ class ImageCarouselViewer(QWidget):
         self.stacked_widget.setStyleSheet("background: #f0f0f0; border: 2px solid #ccc;")
         # 【优化】设置明确的最小高度，确保图片容器有足够空间
         self.stacked_widget.setMinimumHeight(700)
-        self.stacked_widget.setMaximumHeight(700)
         layout.addWidget(self.stacked_widget)
         
         # 底部导航按钮和页码
@@ -1392,13 +1442,15 @@ class ImageCarouselViewer(QWidget):
         for widget in image_widgets:
             # 【优化】设置与容器相匹配的大小
             # 容器高度 450-500，保留空间给导航按钮
-            widget.setMinimumSize(200, 200)
-            widget.setMaximumSize(700, 700)
+            # widget.setMinimumSize(200, 200)
+            # widget.setMaximumSize(700, 700)
             self.stacked_widget.addWidget(widget)
         
         # 显示第一张图片
         if len(image_widgets) > 0:
             self.stacked_widget.setCurrentIndex(0)
+            # 发出信号通知图片已加载
+            self.image_changed.emit(0)
         
         self.update_display()
     
@@ -1409,6 +1461,8 @@ class ImageCarouselViewer(QWidget):
         self.current_index = (self.current_index + 1) % len(self.image_widgets)
         self.stacked_widget.setCurrentIndex(self.current_index)
         self.update_display()
+        # 发出信号通知当前图片已切换
+        self.image_changed.emit(self.current_index)
     
     def show_previous(self):
         """显示上一张"""
@@ -1417,6 +1471,8 @@ class ImageCarouselViewer(QWidget):
         self.current_index = (self.current_index - 1) % len(self.image_widgets)
         self.stacked_widget.setCurrentIndex(self.current_index)
         self.update_display()
+        # 发出信号通知当前图片已切换
+        self.image_changed.emit(self.current_index)
     
     def update_display(self):
         """更新显示信息"""
@@ -1495,6 +1551,8 @@ class ImageJoinerWidget(QWidget):
         # 轮播图组件
         self.carousel = ImageCarouselViewer()
         self.carousel.setMinimumHeight(200)
+        # 连接轮播图的切换信号
+        self.carousel.image_changed.connect(self.on_image_changed)
         left_layout.addWidget(self.carousel)
         
         center_layout.addWidget(left_widget, 3)
@@ -1513,7 +1571,7 @@ class ImageJoinerWidget(QWidget):
         right_layout.addWidget(QLabel("图片间距 (px):"))
         self.spacing_spin = QSpinBox()
         self.spacing_spin.setRange(0, 50)
-        self.spacing_spin.setValue(2)
+        self.spacing_spin.setValue(0)
         right_layout.addWidget(self.spacing_spin)
         
         # 图片质量设置
@@ -1553,6 +1611,7 @@ class ImageJoinerWidget(QWidget):
             self, "选择图片", "", "Images (*.png *.jpg *.jpeg *.bmp)"
         )
         if files:
+            added_count = 0  # 统计新增的图片数
             for f in files:
                 # 为每个图片创建 DraggableLineImage 控件
                 widget = DraggableLineImage(f)
@@ -1568,10 +1627,10 @@ class ImageJoinerWidget(QWidget):
                 # 加入内部列表管理
                 self.image_widgets.append(widget)
             
-            # 【新增】更新轮播图
-            self.carousel.set_images(self.image_widgets)
-            # 【新增】更新状态栏
-            self.status_bar.update_info(self.image_widgets)
+                # 【新增】更新轮播图
+                self.carousel.set_images(self.image_widgets)
+                # 【新增】更新状态栏
+                self.status_bar.update_info(self.image_widgets)
 
     def clear_list(self):
         """
@@ -1583,6 +1642,12 @@ class ImageJoinerWidget(QWidget):
         self.image_widgets.clear()
         # 【新增】更新状态栏
         self.status_bar.update_info([])
+
+    def on_image_changed(self, index):
+        """
+        当轮播图切换图片时调用
+        """
+        self.status_bar.update_current_image_info(index)
 
     def sync_lines(self, y1, y2):
         """
