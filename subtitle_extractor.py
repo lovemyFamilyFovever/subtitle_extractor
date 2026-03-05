@@ -23,7 +23,7 @@ import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
                              QPushButton, QLabel, QFileDialog, QLineEdit,
                              QWidget, QSlider, QTextEdit, QMessageBox, QGroupBox,
-                             QSpinBox, QSplitter, QSizePolicy, QTabWidget, QScrollArea, QStackedWidget)
+                             QSpinBox, QSplitter, QSizePolicy, QTabWidget, QScrollArea, QStackedWidget, QComboBox)
 # 从 PyQt5 导入核心功能类
 # Qt: 包含各种枚举值（如对齐方式、按键码等）
 # QTimer: 定时器类，用于周期性执行任务
@@ -383,8 +383,8 @@ class VideoPreviewWidget(QWidget):
         # 文本编辑框，显示和编辑时间点
         self.time_points_display = QTextEdit()
         self.time_points_display.setReadOnly(False)  # 允许用户手动编辑
-        self.time_points_display.setFixedHeight(320)
-        self.time_points_display.setMaximumHeight(320)
+        self.time_points_display.setFixedHeight(380)
+        self.time_points_display.setMaximumHeight(380)
         self.time_points_display.setPlaceholderText('点击"标记时间"或按 Enter 键添加当前帧...\n可直接编辑此区域内容\n\n如不标记，默认每秒截取一次')
         time_layout.addWidget(self.time_points_display)
 
@@ -424,8 +424,19 @@ class VideoPreviewWidget(QWidget):
         spacing_layout.addWidget(self.spacing_input)
         spacing_layout.addWidget(QLabel('像素'))
 
+        # 图片质量设置
+        quality_layout = QHBoxLayout()
+        quality_layout.addWidget(QLabel('图片质量:'))
+        self.quality_combo = QComboBox()
+        self.quality_combo.addItem('高（不压缩）', 100)
+        self.quality_combo.addItem('中（压缩）', 80)
+        self.quality_combo.addItem('低（高压缩）', 60)
+        self.quality_combo.setCurrentIndex(0)  # 默认选择高
+        quality_layout.addWidget(self.quality_combo)
+
         export_layout.addLayout(fill_layout)
         export_layout.addLayout(spacing_layout)
+        export_layout.addLayout(quality_layout)
 
         # 开始提取按钮
         self.btn_extract = QPushButton('🎯 提取并拼接字幕')
@@ -894,7 +905,24 @@ class VideoPreviewWidget(QWidget):
             save_path, _ = QFileDialog.getSaveFileName(self, '保存字幕拼接图', default_name,
                                                     'PNG 图像 (*.png);;JPG 图像 (*.jpg)')
             if save_path:
-                cv2.imwrite(save_path, combined)
+                # 获取选择的图片质量
+                quality = self.quality_combo.currentData()
+                
+                # 根据文件格式和质量设置保存
+                if save_path.lower().endswith('.jpg') or save_path.lower().endswith('.jpeg'):
+                    # JPG 格式使用质量参数
+                    cv2.imwrite(save_path, combined, [cv2.IMWRITE_JPEG_QUALITY, quality])
+                else:
+                    # PNG 格式使用压缩级别 (0-9，9最高压缩)
+                    # 将质量值 (60-100) 转换为压缩级别 (9-0)
+                    if quality >= 100:
+                        compress_level = 0  # 最低压缩（不压缩）
+                    elif quality >= 80:
+                        compress_level = 3
+                    else:
+                        compress_level = 9  # 最高压缩
+                    cv2.imwrite(save_path, combined, [cv2.IMWRITE_PNG_COMPRESSION, compress_level])
+                
                 self.status_label.setText('✅ 处理完成!')
                 QMessageBox.information(self, '成功',
                     f'字幕拼接图已保存到:\n{save_path}\n\n'
@@ -1090,7 +1118,7 @@ class DraggableLineImage(QLabel):
         max_height = 400
         
         # 计算缩放比例，确保图片在两个方向都不超出容器
-        scale = min(max_width / w, max_height / h)
+        scale = max(max_width / w, max_height / h)
         
         # 计算缩放后的尺寸
         scaled_width = int(w * scale)
@@ -1475,6 +1503,15 @@ class ImageJoinerWidget(QWidget):
         self.spacing_spin.setValue(2)
         right_layout.addWidget(self.spacing_spin)
         
+        # 图片质量设置
+        right_layout.addWidget(QLabel("图片质量:"))
+        self.quality_combo = QComboBox()
+        self.quality_combo.addItem('高（不压缩）', 100)
+        self.quality_combo.addItem('中（压缩）', 80)
+        self.quality_combo.addItem('低（高压缩）', 60)
+        self.quality_combo.setCurrentIndex(0)  # 默认选择高
+        right_layout.addWidget(self.quality_combo)
+        
         # 生成按钮
         self.btn_generate = QPushButton("🎯 生成拼接图")
         self.btn_generate.setFixedHeight(50)
@@ -1593,11 +1630,27 @@ class ImageJoinerWidget(QWidget):
                 
             # 弹出保存对话框
             save_path, _ = QFileDialog.getSaveFileName(
-                self, "保存结果", "joined_subtitle.png", "PNG (*.png)"
+                self, "保存结果", "joined_subtitle.png", "PNG (*.png);;JPG 图像 (*.jpg)"
             )
             if save_path:
-                # 保存图片
-                cv2.imwrite(save_path, result)
+                # 获取选择的图片质量
+                quality = self.quality_combo.currentData()
+                
+                # 根据文件格式和质量设置保存
+                if save_path.lower().endswith('.jpg') or save_path.lower().endswith('.jpeg'):
+                    # JPG 格式使用质量参数
+                    cv2.imwrite(save_path, result, [cv2.IMWRITE_JPEG_QUALITY, quality])
+                else:
+                    # PNG 格式使用压缩级别 (0-9，9最高压缩)
+                    # 将质量值 (60-100) 转换为压缩级别 (9-0)
+                    if quality >= 100:
+                        compress_level = 0  # 最低压缩（不压缩）
+                    elif quality >= 80:
+                        compress_level = 3
+                    else:
+                        compress_level = 9  # 最高压缩
+                    cv2.imwrite(save_path, result, [cv2.IMWRITE_PNG_COMPRESSION, compress_level])
+                
                 QMessageBox.information(self, "成功", "图片拼接已完成！")
         except Exception as e:
             # 异常处理
