@@ -1113,12 +1113,25 @@ class DraggableLineImage(QLabel):
         
         # 【优化】使用 contain 方式缩放图片
         # 在保持纵横比的前提下，让图片完整显示在容器内
-        # 容器大小：700 x 400
+        # 容器大小：700 x 700
         max_width = 700
-        max_height = 400
+        max_height = 700
         
         # 计算缩放比例，确保图片在两个方向都不超出容器
-        scale = max(max_width / w, max_height / h)
+        # 计算两个方向的缩放比
+        scale_w = max_width / w
+        scale_h = max_height / h
+        
+        # 选择能让图片恰好填满容器的缩放比（不超出）
+        # 如果原图比例与容器相同，任选一个都行
+        # 如果原图比容器宽，以高度为准
+        # 如果原图比容器高，以宽度为准
+        if w / h > max_width / max_height:
+            # 原图相对更宽，用高度来限制
+            scale = scale_h
+        else:
+            # 原图相对更高，用宽度来限制
+            scale = scale_w
         
         # 计算缩放后的尺寸
         scaled_width = int(w * scale)
@@ -1379,7 +1392,7 @@ class ImageCarouselViewer(QWidget):
         for widget in image_widgets:
             # 【优化】设置与容器相匹配的大小
             # 容器高度 450-500，保留空间给导航按钮
-            widget.setMinimumSize(500, 500)
+            widget.setMinimumSize(200, 200)
             widget.setMaximumSize(700, 700)
             self.stacked_widget.addWidget(widget)
         
@@ -1481,7 +1494,7 @@ class ImageJoinerWidget(QWidget):
         
         # 轮播图组件
         self.carousel = ImageCarouselViewer()
-        self.carousel.setMinimumHeight(400)
+        self.carousel.setMinimumHeight(200)
         left_layout.addWidget(self.carousel)
         
         center_layout.addWidget(left_widget, 3)
