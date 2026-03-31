@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图片拼接工具</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --fg: #e8eaed;
+    --muted: #6b7280;
+    --accent: #00e09e;
+    --accent-dim: rgba(0, 224, 158, 0.12);
+    --card: #1a1d27;
+    --card-hover: #22262f;
+    --border: #2a2e3a;
+    --danger: #ff4d6a;
+    --overlay: rgba(5, 6, 10, 0.82);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== 背景页面内容（演示用） ===== */
+  .page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 20%, rgba(0,224,158,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(255,77,106,0.05) 0%, transparent 60%),
+      var(--bg);
+  }
+
+  .page-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .page-content h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--fg) 40%, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .page-content p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 460px;
+    line-height: 1.7;
+  }
+
+  .open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 2rem;
+    background: var(--accent);
+    color: #0f1117;
+    font-weight: 700;
+    font-size: 1rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 30px rgba(0,224,158,0.25);
+    font-family: inherit;
+  }
+
+  .open-btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 50px rgba(0,224,158,0.4);
+  }
+
+  .open-btn:active { transform: scale(0.97); }
+
+  /* ===== 遮罩层 ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: var(--overlay);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* ===== 悬浮弹窗 ===== */
+  .modal {
+    position: relative;
+    width: 100%;
+    max-width: 880px;
+    max-height: 92vh;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 4px 60px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(255,255,255,0.04) inset;
+    transform: scale(0.9) translateY(30px);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .modal-overlay.active .modal {
+    transform: scale(1) translateY(0);
+  }
+
+  /* ===== 弹窗头部 ===== */
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .modal-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-header h2 i { color: var(--accent); font-size: 1rem; }
+
+  .close-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .close-btn:hover {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  /* ===== 弹窗主体 ===== */
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .modal-body::-webkit-scrollbar { width: 5px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* ===== 上传区 ===== */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-dim);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .upload-zone:hover,
+  .upload-zone.drag-over {
+    border-color: var(--accent);
+  }
+
+  .upload-zone:hover::before,
+  .upload-zone.drag-over::before { opacity: 1; }
+
+  .upload-zone i {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+    display: block;
+    position: relative;
+  }
+
+  .upload-zone .upload-text {
+    position: relative;
+    font-size: 0.95rem;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  .upload-zone .upload-hint {
+    position: relative;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.35rem;
+  }
+
+  #fileInput { display: none; }
+
+  /* ===== 图片列表 ===== */
+  .image-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .image-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    cursor: grab;
+    transition: all 0.25s;
+    background: var(--bg);
+  }
+
+  .image-item:active { cursor: grabbing; }
+
+  .image-item:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+
+  .image-item.dragging {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+
+  .image-item.drag-target {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  .image-item .item-index {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 22px;
+    height: 22px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #fff;
+    backdrop-filter: blur(4px);
+  }
+
+  .image-item .item-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .image-item:hover .item-actions { opacity: 1; }
+
+  .item-actions button {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(6px);
+  }
+
+  .btn-rotate {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+
+  .btn-rotate:hover { background: rgba(255,255,255,0.3); }
+
+  .btn-remove {
+    background: rgba(255,77,106,0.7);
+    color: #fff;
+  }
+
+  .btn-remove:hover { background: var(--danger); }
+
+  /* ===== 设置面板 ===== */
+  .settings-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .settings-panel { grid-template-columns: 1fr; }
+  }
+
+  .setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .setting-group label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .setting-group select,
+  .setting-group input[type="number"] {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .setting-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+  }
+
+  .setting-group select:focus,
+  .setting-group input[type="number"]:focus {
+    border-color: var(--accent);
+  }
+
+  /* 滑块 */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .slider-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,224,158,0.4);
+    transition: transform 0.15s;
+  }
+
+  .slider-row input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  .slider-value {
+    min-width: 36px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  /* 颜色选择 */
+  .color-options {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .color-swatch:hover { transform: scale(1.12); }
+
+  .color-swatch.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+
+  .color-swatch.active::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  .color-swatch.transparent-bg {
+    background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 10px 10px;
+  }
+
+  /* 对齐方式 */
+  .align-options {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .align-btn {
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-family: inherit;
+  }
+
+  .align-btn:hover { border-color: var(--muted); color: var(--fg); }
+
+  .align-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ===== 预览区 ===== */
+  .preview-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .preview-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .preview-container {
+    width: 100%;
+    min-height: 160px;
+    max-height: 400px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .preview-container canvas {
+    max-width: 100%;
+    max-height: 380px;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
+  .preview-empty {
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .preview-empty i {
+    display: block;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.4;
+  }
+
+  .preview-info {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    background: rgba(0,0,0,0.6);
+    padding: 2px 8px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ===== 弹窗底部 ===== */
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 0.75rem;
+  }
+
+  .footer-info {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .footer-info strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 0.6rem;
+  }
+
+  .btn-secondary {
+    padding: 0.6rem 1.2rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .btn-secondary:hover {
+    background: var(--card-hover);
+    border-color: var(--muted);
+  }
+
+  .btn-primary {
+    padding: 0.6rem 1.5rem;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #0f1117;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 2px 15px rgba(0,224,158,0.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 25px rgba(0,224,158,0.4);
+  }
+
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ===== Toast ===== */
+  .toast-container {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .toast {
+    padding: 0.75rem 1.2rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-size: 0.85rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    animation: toastIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+    backdrop-filter: blur(10px);
+  }
+
+  .toast.out { animation: toastOut 0.3s ease forwards; }
+
+  .toast i { font-size: 1rem; }
+  .toast.success i { color: var(--accent); }
+  .toast.error i { color: var(--danger); }
+  .toast.info i { color: #60a5fa; }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(40px); }
+  }
+
+  /* ===== 动画装饰 ===== */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .floating-shapes {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .floating-shapes span {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.06;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-shapes span:nth-child(1) {
+    width: 300px; height: 300px;
+    background: var(--accent);
+    top: 10%; left: 5%;
+    animation-delay: 0s;
+  }
+
+  .floating-shapes span:nth-child(2) {
+    width: 200px; height: 200px;
+    background: var(--danger);
+    bottom: 15%; right: 10%;
+    animation-delay: -2s;
+  }
+
+  .floating-shapes span:nth-child(3) {
+    width: 150px; height: 150px;
+    background: #60a5fa;
+    top: 50%; left: 60%;
+    animation-delay: -4s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-shapes span { animation: none; }
+    .modal { transition: none; }
+    .modal-overlay { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 背景装饰 -->
+<div class="floating-shapes">
+  <span></span><span></span><span></span>
+</div>
+<div class="page-bg"></div>
+
+<!-- 页面内容（演示弹窗覆盖在内容上方） -->
+<main class="page-content">
+  <h1>图片拼接工具</h1>
+  <p>支持多种拼接布局、自由拖拽排序、间距与背景调节，一键导出高清拼接图</p>
+  <button class="open-btn" onclick="openModal()" aria-label="打开图片拼接工具">
+    <i class="fa-solid fa-layer-group"></i>
+    开始拼接
+  </button>
+</main>
+
+<!-- 悬浮弹窗 -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="图片拼接工具">
+  <div class="modal">
+    <!-- 头部 -->
+    <header class="modal-header">
+      <h2><i class="fa-solid fa-layer-group"></i> 图片拼接</h2>
+      <button class="close-btn" onclick="closeModal()" aria-label="关闭弹窗">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </header>
+
+    <!-- 主体 -->
+    <div class="modal-body">
+      <!-- 上传区 -->
+      <div class="upload-zone" id="uploadZone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="upload-text">点击或拖拽图片到此处</div>
+        <div class="upload-hint">支持 JPG / PNG / WebP，可多选</div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+
+      <!-- 图片列表 -->
+      <div class="image-list" id="imageList"></div>
+
+      <!-- 设置面板 -->
+      <div class="settings-panel">
+        <div class="setting-group">
+          <label>拼接方向</label>
+          <select id="layoutMode">
+            <option value="horizontal">水平横向拼接</option>
+            <option value="vertical">垂直纵向拼接</option>
+            <option value="grid">网格拼接</option>
+          </select>
+        </div>
+
+        <div class="setting-group" id="gridColGroup" style="display:none;">
+          <label>网格列数</label>
+          <select id="gridCols">
+            <option value="2">2 列</option>
+            <option value="3" selected>3 列</option>
+            <option value="4">4 列</option>
+          </select>
+        </div>
+
+        <div class="setting-group">
+          <label>图片间距</label>
+          <div class="slider-row">
+            <input type="range" id="gapSlider" min="0" max="40" value="4">
+            <span class="slider-value" id="gapValue">4px</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>圆角大小</label>
+          <div class="slider-row">
+            <input type="range" id="radiusSlider" min="0" max="30" value="0">
+            <span class="slider-value" id="radiusValue">0px</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>对齐方式</label>
+          <div class="align-options">
+            <button class="align-btn active" data-align="start" title="顶部/左侧对齐">
+              <i class="fa-solid fa-arrow-up"></i>
+            </button>
+            <button class="align-btn" data-align="center" title="居中对齐">
+              <i class="fa-solid fa-arrows-up-down"></i>
+            </button>
+            <button class="align-btn" data-align="end" title="底部/右侧对齐">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button class="align-btn" data-align="stretch" title="拉伸填满">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>背景颜色</label>
+          <div class="color-options" id="colorOptions">
+            <div class="color-swatch active" data-color="#ffffff" style="background:#ffffff;" title="白色"></div>
+            <div class="color-swatch" data-color="#000000" style="background:#000000;" title="黑色"></div>
+            <div class="color-swatch" data-color="#1a1d27" style="background:#1a1d27;" title="深灰"></div>
+            <div class="color-swatch" data-color="#f3f4f6" style="background:#f3f4f6;" title="浅灰"></div>
+            <div class="color-swatch" data-color="#fef3c7" style="background:#fef3c7;" title="暖黄"></div>
+            <div class="color-swatch" data-color="#dcfce7" style="background:#dcfce7;" title="浅绿"></div>
+            <div class="color-swatch transparent-bg" data-color="transparent" title="透明"></div>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>输出缩放</label>
+          <select id="outputScale">
+            <option value="1">1x 原始尺寸</option>
+            <option value="2" selected>2x 高清</option>
+            <option value="3">3x 超清</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 预览区 -->
+      <section class="preview-section">
+        <div class="preview-label">实时预览</div>
+        <div class="preview-container" id="previewContainer">
+          <div class="preview-empty" id="previewEmpty">
+            <i class="fa-regular fa-image"></i>
+            上传图片后在此预览拼接效果
+          </div>
+          <canvas id="previewCanvas" style="display:none;"></canvas>
+          <div class="preview-info" id="previewInfo" style="display:none;"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 底部 -->
+    <footer class="modal-footer">
+      <div class="footer-info" id="footerInfo">
+        已添加 <strong>0</strong> 张图片
+      </div>
+      <div class="footer-actions">
+        <button class="btn-secondary" onclick="clearAll()" aria-label="清空所有图片">
+          <i class="fa-solid fa-trash-can"></i> 清空
+        </button>
+        <button class="btn-primary" id="exportBtn" onclick="exportImage()" disabled aria-label="导出拼接图">
+          <i class="fa-solid fa-download"></i> 导出图片
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ===== 状态管理 =====
+  const state = {
+    images: [],       // { id, file, img, rotation }
+    layout: 'horizontal',
+    gridCols: 3,
+    gap: 4,
+    radius: 0,
+    align: 'start',
+    bgColor: '#ffffff',
+    scale: 2,
+    dragSrcIndex: null,
+  };
+
+  let idCounter = 0;
+
+  // ===== DOM 引用 =====
+  const overlay = document.getElementById('modalOverlay');
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('fileInput');
+  const imageList = document.getElementById('imageList');
+  const layoutMode = document.getElementById('layoutMode');
+  const gridColGroup = document.getElementById('gridColGroup');
+  const gridCols = document.getElementById('gridCols');
+  const gapSlider = document.getElementById('gapSlider');
+  const gapValue = document.getElementById('gapValue');
+  const radiusSlider = document.getElementById('radiusSlider');
+  const radiusValue = document.getElementById('radiusValue');
+  const outputScale = document.getElementById('outputScale');
+  const colorOptions = document.getElementById('colorOptions');
+  const previewCanvas = document.getElementById('previewCanvas');
+  const previewEmpty = document.getElementById('previewEmpty');
+  const previewInfo = document.getElementById('previewInfo');
+  const footerInfo = document.getElementById('footerInfo');
+  const exportBtn = document.getElementById('exportBtn');
+
+  // ===== 弹窗开关 =====
+  function openModal() {
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    // 聚焦到上传区
+    setTimeout(() => uploadZone.focus(), 100);
+  }
+
+  function closeModal() {
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 点击遮罩关闭
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  // ESC 关闭
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+  });
+
+  // ===== 文件上传 =====
+  uploadZone.addEventListener('click', () => fileInput.click());
+  uploadZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+
+  // 拖拽上传
+  uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const files = [...e.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+    if (files.length) addFiles(files);
+    else showToast('请拖入图片文件', 'error');
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length) addFiles([...fileInput.files]);
+    fileInput.value = '';
+  });
+
+  function addFiles(files) {
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          state.images.push({
+            id: ++idCounter,
+            file,
+            img,
+            rotation: 0,
+            name: file.name,
+          });
+          loaded++;
+          if (loaded === files.length) {
+            renderImageList();
+            updatePreview();
+            showToast(`已添加 ${files.length} 张图片`, 'success');
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ===== 渲染图片列表 =====
+  function renderImageList() {
+    imageList.innerHTML = '';
+    state.images.forEach((item, index) => {
+      const div = document.createElement('div');
+      div.className = 'image-item';
+      div.draggable = true;
+      div.dataset.index = index;
+
+      // 缩略图用 canvas 处理旋转
+      const thumbCanvas = document.createElement('canvas');
+      const size = 200;
+      thumbCanvas.width = size;
+      thumbCanvas.height = size;
+      const tCtx = thumbCanvas.getContext('2d');
+      drawRotatedImage(tCtx, item.img, item.rotation, size, size);
+
+      const imgEl = document.createElement('img');
+      imgEl.src = thumbCanvas.toDataURL();
+      imgEl.alt = item.name;
+
+      const idx = document.createElement('span');
+      idx.className = 'item-index';
+      idx.textContent = index + 1;
+
+      const actions = document.createElement('div');
+      actions.className = 'item-actions';
+
+      const rotBtn = document.createElement('button');
+      rotBtn.className = 'btn-rotate';
+      rotBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i>';
+      rotBtn.title = '旋转90°';
+      rotBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        item.rotation = (item.rotation + 90) % 360;
+        renderImageList();
+        updatePreview();
+      });
+
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'btn-remove';
+      rmBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      rmBtn.title = '移除';
+      rmBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.images.splice(index, 1);
+        renderImageList();
+        updatePreview();
+        showToast('已移除图片', 'info');
+      });
+
+      actions.append(rotBtn, rmBtn);
+      div.append(imgEl, idx, actions);
+
+      // 拖拽排序事件
+      div.addEventListener('dragstart', (e) => {
+        state.dragSrcIndex = index;
+        div.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+
+      div.addEventListener('dragend', () => {
+        div.classList.remove('dragging');
+        document.querySelectorAll('.image-item').forEach(el => el.classList.remove('drag-target'));
+      });
+
+      div.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        div.classList.add('drag-target');
+      });
+
+      div.addEventListener('dragleave', () => div.classList.remove('drag-target'));
+
+      div.addEventListener('drop', (e) => {
+        e.preventDefault();
+        div.classList.remove('drag-target');
+        const from = state.dragSrcIndex;
+        const to = index;
+        if (from !== null && from !== to) {
+          const [moved] = state.images.splice(from, 1);
+          state.images.splice(to, 0, moved);
+          renderImageList();
+          updatePreview();
+        }
+      });
+
+      imageList.appendChild(div);
+    });
+
+    // 更新底部信息
+    const count = state.images.length;
+    footerInfo.innerHTML = `已添加 <strong>${count}</strong> 张图片`;
+    exportBtn.disabled = count < 2;
+  }
+
+  // ===== 在 canvas 上绘制旋转后的图片 =====
+  function drawRotatedImage(ctx, img, rotation, maxW, maxH) {
+    const isRotated = rotation === 90 || rotation === 270;
+    const imgW = isRotated ? img.naturalHeight : img.naturalWidth;
+    const imgH = isRotated ? img.naturalWidth : img.naturalHeight;
+
+    // 等比缩放适配容器
+    const scale = Math.min(maxW / imgW, maxH / imgH, 1);
+    const w = imgW * scale;
+    const h = imgH * scale;
+    const x = (maxW - w) / 2;
+    const y = (maxH - h) / 2;
+
+    ctx.clearRect(0, 0, maxW, maxH);
+    ctx.save();
+    ctx.translate(maxW / 2, maxH / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  // ===== 获取图片旋转后的实际尺寸 =====
+  function getRotatedSize(img, rotation) {
+    const isRotated = rotation === 90 || rotation === 270;
+    return {
+      width: isRotated ? img.naturalHeight : img.naturalWidth,
+      height: isRotated ? img.naturalWidth : img.naturalHeight,
+    };
+  }
+
+  // ===== 拼接绘制核心 =====
+  function stitchImages(targetScale) {
+    const scale = targetScale || 1;
+    const images = state.images;
+    if (images.length < 2) return null;
+
+    const gap = state.gap * scale;
+    const radius = state.radius * scale;
+    const layout = state.layout;
+    const align = state.align;
+
+    // 计算每张图片缩放后的尺寸
+    const sizes = images.map(item => {
+      const s = getRotatedSize(item.img, item.rotation);
+      return { width: s.width * scale, height: s.height * scale };
+    });
+
+    let canvasW, canvasH, positions;
+
+    if (layout === 'horizontal') {
+      // 水平拼接
+      const maxH = Math.max(...sizes.map(s => s.height));
+      canvasW = sizes.reduce((sum, s) => sum + s.width, 0) + gap * (images.length - 1);
+      canvasH = maxH;
+
+      positions = sizes.map((s, i) => {
+        const x = sizes.slice(0, i).reduce((sum, ss) => sum + ss.width, 0) + gap * i;
+        let y = 0;
+        if (align === 'center') y = (maxH - s.height) / 2;
+        else if (align === 'end') y = maxH - s.height;
+        else if (align === 'stretch') {
+          // stretch 时重新计算高度
+        }
+        return { x, y, w: s.width, h: align === 'stretch' ? maxH : s.height, stretch: align === 'stretch' };
+      });
+    } else if (layout === 'vertical') {
+      // 垂直拼接
+      const maxW = Math.max(...sizes.map(s => s.width));
+      canvasW = maxW;
+      canvasH = sizes.reduce((sum, s) => sum + s.height, 0) + gap * (images.length - 1);
+
+      positions = sizes.map((s, i) => {
+        const y = sizes.slice(0, i).reduce((sum, ss) => sum + ss.height, 0) + gap * i;
+        let x = 0;
+        if (align === 'center') x = (maxW - s.width) / 2;
+        else if (align === 'end') x = maxW - s.width;
+        return { x, y, w: align === 'stretch' ? maxW : s.width, h: s.height, stretch: align === 'stretch' };
+      });
+    } else {
+      // 网格拼接
+      const cols = state.gridCols;
+      const rows = Math.ceil(images.length / cols);
+
+      // 计算每列最大宽度、每行最大高度
+      const colWidths = [];
+      const rowHeights = [];
+      for (let c = 0; c < cols; c++) {
+        let maxW = 0;
+        for (let r = 0; r < rows; r++) {
+          const idx = r * cols + c;
+          if (idx < sizes.length) maxW = Math.max(maxW, sizes[idx].width);
+        }
+        colWidths.push(maxW);
+      }
+      for (let r = 0; r < rows; r++) {
+        let maxH = 0;
+        for (let c = 0; c < cols; c++) {
+          const idx = r * cols + c;
+          if (idx < sizes.length) maxH = Math.max(maxH, sizes[idx].height);
+        }
+        rowHeights.push(maxH);
+      }
+
+      canvasW = colWidths.reduce((a, b) => a + b, 0) + gap * (cols - 1);
+      canvasH = rowHeights.reduce((a, b) => a + b, 0) + gap * (rows - 1);
+
+      positions = sizes.map((s, i) => {
+        const c = i % cols;
+        const r = Math.floor(i / cols);
+        const x = colWidths.slice(0, c).reduce((a, b) => a + b, 0) + gap * c;
+        const y = rowHeights.slice(0, r).reduce((a, b) => a + b, 0) + gap * r;
+        let px = x, py = y;
+        let pw = s.width, ph = s.height;
+
+        if (align === 'center') {
+          px = x + (colWidths[c] - pw) / 2;
+          py = y + (rowHeights[r] - ph) / 2;
+        } else if (align === 'end') {
+          px = x + colWidths[c] - pw;
+          py = y + rowHeights[r] - ph;
+        } else if (align === 'stretch') {
+          pw = colWidths[c];
+          ph = rowHeights[r];
+        }
+        // start: 默认左上角对齐
+
+        return { x: px, y: py, w: pw, h: ph, stretch: align === 'stretch' };
+      });
+    }
+
+    // 创建 canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(canvasW);
+    canvas.height = Math.ceil(canvasH);
+    const ctx = canvas.getContext('2d');
+
+    // 绘制背景
+    if (state.bgColor !== 'transparent') {
+      ctx.fillStyle = state.bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // 绘制每张图片
+    positions.forEach((pos, i) => {
+      const item = images[i];
+      const img = item.img;
+
+      ctx.save();
+
+      // 圆角裁剪
+      if (radius > 0) {
+        roundRect(ctx, pos.x, pos.y, pos.w, pos.h, radius);
+        ctx.clip();
+      }
+
+      if (pos.stretch) {
+        // 拉伸模式下先平移到中心再旋转再绘制
+        const cx = pos.x + pos.w / 2;
+        const cy = pos.y + pos.h / 2;
+        ctx.translate(cx, cy);
+        ctx.rotate((item.rotation * Math.PI) / 180);
+        ctx.drawImage(img, -pos.w / 2, -pos.h / 2, pos.w, pos.h);
+      } else {
+        // 非拉伸模式：保持比例，在指定区域内绘制
+        const rotSize = getRotatedSize(img, item.rotation);
+        const fitScale = Math.min(pos.w / rotSize.width, pos.h / rotSize.height, 1);
+        const drawW = rotSize.width * fitScale * scale;
+        const drawH = rotSize.height * fitScale * scale;
+        const offsetX = pos.x + (pos.w - drawW) / 2;
+        const offsetY = pos.y + (pos.h - drawH) / 2;
+
+        ctx.translate(offsetX + drawW / 2, offsetY + drawH / 2);
+        ctx.rotate((item.rotation * Math.PI) / 180);
+        const srcW = img.naturalWidth * fitScale * scale;
+        const srcH = img.naturalHeight * fitScale * scale;
+        ctx.drawImage(img, -srcW / 2, -srcH / 2, srcW, srcH);
+      }
+
+      ctx.restore();
+    });
+
+    return canvas;
+  }
+
+  // 圆角矩形路径
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // ===== 更新预览 =====
+  function updatePreview() {
+    const count = state.images.length;
+    if (count < 2) {
+      previewCanvas.style.display = 'none';
+      previewEmpty.style.display = '';
+      previewInfo.style.display = 'none';
+      return;
+    }
+
+    previewEmpty.style.display = 'none';
+    previewCanvas.style.display = '';
+    previewInfo.style.display = '';
+
+    // 预览用较低缩放以保持流畅
+    const previewScale = 0.5;
+    const result = stitchImages(previewScale);
+    if (!result) return;
+
+    previewCanvas.width = result.width;
+    previewCanvas.height = result.height;
+    const pCtx = previewCanvas.getContext('2d');
+    pCtx.drawImage(result, 0, 0);
+
+    // 显示实际输出尺寸信息
+    const actualScale = state.scale;
+    const actualW = Math.ceil(result.width / previewScale * actualScale);
+    const actualH = Math.ceil(result.height / previewScale * actualScale);
+    previewInfo.textContent = `${actualW} × ${actualH} px`;
+  }
+
+  // ===== 导出 =====
+  function exportImage() {
+    if (state.images.length < 2) return;
+
+    const result = stitchImages(state.scale);
+    if (!result) return;
+
+    // 确定格式
+    const isTransparent = state.bgColor === 'transparent';
+    const mimeType = isTransparent ? 'image/png' : 'image/png';
+    const ext = 'png';
+
+    result.toBlob((blob) => {
+      if (!blob) {
+        showToast('导出失败，请重试', 'error');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `stitch_${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+      showToast(`导出成功，文件大小 ${sizeMB} MB`, 'success');
+    }, mimeType);
+  }
+
+  // ===== 清空 =====
+  function clearAll() {
+    if (state.images.length === 0) return;
+    state.images = [];
+    renderImageList();
+    updatePreview();
+    showToast('已清空所有图片', 'info');
+  }
+
+  // ===== 设置事件绑定 =====
+  layoutMode.addEventListener('change', () => {
+    state.layout = layoutMode.value;
+    gridColGroup.style.display = state.layout === 'grid' ? '' : 'none';
+    updatePreview();
+  });
+
+  gridCols.addEventListener('change', () => {
+    state.gridCols = parseInt(gridCols.value);
+    updatePreview();
+  });
+
+  gapSlider.addEventListener('input', () => {
+    state.gap = parseInt(gapSlider.value);
+    gapValue.textContent = state.gap + 'px';
+    updatePreview();
+  });
+
+  radiusSlider.addEventListener('input', () => {
+    state.radius = parseInt(radiusSlider.value);
+    radiusValue.textContent = state.radius + 'px';
+    updatePreview();
+  });
+
+  outputScale.addEventListener('change', () => {
+    state.scale = parseInt(outputScale.value);
+    updatePreview();
+  });
+
+  // 对齐按钮
+  document.querySelectorAll('.align-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.align-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.align = btn.dataset.align;
+      updatePreview();
+    });
+  });
+
+  // 颜色选择
+  colorOptions.querySelectorAll('.color-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      colorOptions.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      state.bgColor = swatch.dataset.color;
+      updatePreview();
+    });
+  });
+
+  // ===== Toast 通知 =====
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    let icon = 'fa-circle-info';
+    if (type === 'success') icon = 'fa-circle-check';
+    else if (type === 'error') icon = 'fa-circle-exclamation';
+
+    toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('out');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  }
+
+  // ===== 粘贴上传支持 =====
+  document.addEventListener('paste', (e) => {
+    if (!overlay.classList.contains('active')) return;
+    const items = [...(e.clipboardData?.items || [])];
+    const imageFiles = items
+      .filter(item => item.type.startsWith('image/'))
+      .map(item => item.getAsFile())
+      .filter(Boolean);
+    if (imageFiles.length) {
+      addFiles(imageFiles);
+    }
+  });
+</script>
+</body>
+</html>
