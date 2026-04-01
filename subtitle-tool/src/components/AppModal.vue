@@ -130,7 +130,7 @@ onUnmounted(() => {
 .modal {
   position: relative;
   width: 100%;
-  max-width: 880px;        /* 最大宽度约 80vw 感觉 */
+  max-width: 990px;        /* 最大宽度约 80vw 感觉 */
   max-height: 92vh;        /* 最高不超过视口的 92% */
   background: var(--card);
   border: 1px solid var(--border);

@@ -4,7 +4,7 @@
     <!-- ==================== 左栏：视频播放器 ==================== -->
     <div class="vsub-left">
 
-      <!-- 视频文件上传 -->
+      <!-- 视频文件上传区 -->
       <div
         class="upload-zone"
         :class="{ 'drag-over': isDragOver }"
@@ -32,56 +32,108 @@
         <span><i class="fa-solid fa-weight-hanging"></i> {{ videoInfo.size }}</span>
       </div>
 
-      <!-- 视频播放器 + 覆盖层 Canvas -->
+      <!--
+        视频播放器 + 覆盖层 Canvas 容器
+        使用浏览器原生 <video controls> 保留所有播放控制功能
+        覆盖层 Canvas 只负责绘制框选矩形，不拦截视频控制栏的事件
+      -->
       <div v-if="videoUrl" class="video-wrapper" ref="videoWrapper">
-        <!--
-          视频元素：controls 显示原生控制栏
-          @loadedmetadata：视频元数据加载完成时触发（此时能拿到宽高、时长）
-        -->
+
+        <!-- 原生视频播放器 -->
         <video
           ref="videoEl"
           :src="videoUrl"
           controls
           class="video-player"
           @loadedmetadata="onVideoLoaded"
-          @resize="onVideoResize"
         ></video>
 
         <!--
-          覆盖层 Canvas：绘制框选矩形
-          position:absolute 叠在视频上方
-          pointer-events:auto 让鼠标事件穿透到这里（不被视频拦截）
+          覆盖层 Canvas：仅用于绘制框选矩形
+          pointer-events: none 时鼠标事件穿透到视频（允许播放控制）
+          pointer-events: auto 时才拦截（框选模式开启时）
+          高度比视频矮一些，避免遮住底部控制栏
         -->
         <canvas
           ref="overlayCanvas"
           class="overlay-canvas"
+          :style="{ pointerEvents: selectMode ? 'auto' : 'none', cursor: selectMode ? 'crosshair' : 'default' }"
           @mousedown="onSelectStart"
           @mousemove="onSelectMove"
           @mouseup="onSelectEnd"
-          @mouseleave="onSelectEnd"
+          @mouseleave="onSelectCancel"
         ></canvas>
+      </div>
+
+      <!-- 框选工具栏 -->
+      <div v-if="videoUrl" class="toolbar">
+        <!-- 框选模式开关 -->
+        <button
+          class="btn"
+          :class="{ 'btn-primary': selectMode }"
+          @click="toggleSelectMode"
+          :title="selectMode ? '点击退出框选模式' : '点击进入框选模式，在视频上拖拽选定字幕区域'"
+        >
+          <i class="fa-solid" :class="selectMode ? 'fa-xmark' : 'fa-crop-simple'"></i>
+          {{ selectMode ? '退出框选' : '框选字幕区域' }}
+        </button>
+
+        <!-- 清除选区 -->
+        <button
+          v-if="cropRect"
+          class="btn"
+          @click="clearCropRect"
+          title="清除当前选区"
+        >
+          <i class="fa-solid fa-eraser"></i> 清除选区
+        </button>
+
+        <!-- 设为封面帧按钮 -->
+        <button
+          class="btn"
+          :class="{ 'cover-active': coverTimeSec !== null }"
+          @click="setCoverFrame"
+          title="将当前播放位置设为封面帧（拼接图的上半部分）"
+        >
+          <i class="fa-solid fa-image"></i>
+          {{ coverTimeSec !== null ? `封面帧: ${formatTime(coverTimeSec)}` : '设为封面帧' }}
+        </button>
+
+        <!-- 清除封面帧 -->
+        <button
+          v-if="coverTimeSec !== null"
+          class="btn"
+          @click="coverTimeSec = null"
+          title="清除手动设置的封面帧，改为自动使用第一个时间点"
+        >
+          <i class="fa-solid fa-rotate-left"></i> 自动封面
+        </button>
       </div>
 
       <!-- 操作提示 -->
       <div v-if="videoUrl" class="op-hint">
-        <i class="fa-solid fa-hand-pointer"></i>
-        拖拽框选字幕区域 · 坐标自动同步到右侧
+        <template v-if="selectMode">
+          <i class="fa-solid fa-crosshairs" style="color:var(--accent)"></i>
+          框选模式已开启 · 在视频画面上拖拽选定字幕区域，完成后点击「退出框选」
+        </template>
+        <template v-else>
+          <i class="fa-solid fa-circle-info"></i>
+          点击「框选字幕区域」开始划定区域 · 空格 / Enter 快速标记时间点
+        </template>
       </div>
 
-      <!-- 结果预览区 -->
+      <!-- 结果预览区（提取完成后显示） -->
       <div v-if="resultCanvas" class="result-section">
         <div class="result-header">
           <i class="fa-solid fa-check-circle" style="color:var(--accent)"></i>
-          提取完成 · {{ resultWidth }} × {{ resultHeight }} px ·
-          共 {{ extractedCount }} 帧
+          提取完成 · {{ resultWidth }} × {{ resultHeight }} px · 共 {{ extractedCount }} 帧
         </div>
+        <!-- 结果 Canvas：显示最终拼接图预览 -->
         <canvas ref="resultCanvasEl" class="result-canvas"></canvas>
         <div class="result-actions">
-          <button class="btn btn-primary" @click="saveResult('png')">
-            <i class="fa-solid fa-download"></i> 保存 PNG
-          </button>
-          <button class="btn" @click="saveResult('jpeg')">
-            <i class="fa-solid fa-download"></i> 保存 JPEG
+          <button class="btn btn-primary" @click="saveResult">
+            <i class="fa-solid fa-download"></i>
+            保存 {{ format.toUpperCase() }}
           </button>
         </div>
       </div>
@@ -91,27 +143,47 @@
     <!-- ==================== 右栏：控制面板 ==================== -->
     <div class="vsub-right">
 
-      <!-- 裁剪坐标输入 -->
+      <!-- 裁剪坐标 -->
       <div class="settings-panel">
         <div class="panel-title">
-          <i class="fa-solid fa-crop"></i> 裁剪区域坐标
+          <i class="fa-solid fa-crop"></i> 字幕裁剪坐标
+          <span class="panel-hint">框选后自动填入</span>
         </div>
+
+        <!-- 当前选区可视化说明 -->
+        <div v-if="cropRect" class="crop-preview-info">
+          <div class="crop-row">
+            <span class="crop-label cover-label">封面帧区域</span>
+            <span class="crop-value">
+              ({{ cropRect.x1 }}, 0) → ({{ cropRect.x2 }}, {{ cropRect.y1 }})
+              <span class="crop-size">{{ cropRect.x2 - cropRect.x1 }} × {{ cropRect.y1 }} px</span>
+            </span>
+          </div>
+          <div class="crop-row">
+            <span class="crop-label sub-label">字幕区域</span>
+            <span class="crop-value">
+              ({{ cropRect.x1 }}, {{ cropRect.y1 }}) → ({{ cropRect.x2 }}, {{ cropRect.y2 }})
+              <span class="crop-size">{{ cropRect.x2 - cropRect.x1 }} × {{ cropRect.y2 - cropRect.y1 }} px</span>
+            </span>
+          </div>
+        </div>
+
         <div class="coord-grid">
           <div class="coord-item">
             <label class="form-label">左 X1</label>
-            <input type="number" v-model.number="coordX1" placeholder="x1" @change="applyCoord" />
+            <input type="number" v-model.number="coordX1" placeholder="x1" min="0" @change="applyCoord" />
           </div>
           <div class="coord-item">
-            <label class="form-label">上 Y1</label>
-            <input type="number" v-model.number="coordY1" placeholder="y1" @change="applyCoord" />
+            <label class="form-label">上 Y1（字幕上边界）</label>
+            <input type="number" v-model.number="coordY1" placeholder="y1" min="0" @change="applyCoord" />
           </div>
           <div class="coord-item">
             <label class="form-label">右 X2</label>
-            <input type="number" v-model.number="coordX2" placeholder="x2" @change="applyCoord" />
+            <input type="number" v-model.number="coordX2" placeholder="x2" min="0" @change="applyCoord" />
           </div>
           <div class="coord-item">
-            <label class="form-label">下 Y2</label>
-            <input type="number" v-model.number="coordY2" placeholder="y2" @change="applyCoord" />
+            <label class="form-label">下 Y2（字幕下边界）</label>
+            <input type="number" v-model.number="coordY2" placeholder="y2" min="0" @change="applyCoord" />
           </div>
         </div>
         <button class="btn btn-block" style="font-size:0.8rem" @click="applyCoord">
@@ -125,7 +197,6 @@
           <i class="fa-solid fa-clock"></i> 时间标记
           <span class="panel-hint">空格 / Enter 快速标记</span>
         </div>
-
         <div class="action-row">
           <button class="btn" :disabled="!videoUrl" @click="markCurrentTime">
             <i class="fa-solid fa-circle-dot"></i> 标记当前帧
@@ -138,10 +209,6 @@
           </button>
         </div>
 
-        <!--
-          时间点列表：可手动编辑
-          v-model 双向绑定，用户可以直接修改文本内容
-        -->
         <textarea
           v-model="timePointsText"
           rows="5"
@@ -153,12 +220,13 @@
         </button>
       </div>
 
-      <!-- 拼接样式设置 -->
+      <!-- 拼接设置 -->
       <div class="settings-panel">
         <div class="panel-title">
           <i class="fa-solid fa-sliders"></i> 拼接设置
         </div>
 
+        <!-- 背景色 + 间距 -->
         <div class="form-row" style="flex-wrap:wrap; gap:0.75rem">
           <div style="flex:1; min-width:80px">
             <label class="form-label">背景色</label>
@@ -170,11 +238,12 @@
           </div>
         </div>
 
+        <!-- 输出格式：新增 WebP -->
         <div>
           <label class="form-label">输出格式</label>
           <div class="seg-control">
             <button
-              v-for="fmt in ['png','jpeg']"
+              v-for="fmt in ['png', 'jpeg', 'webp']"
               :key="fmt"
               class="seg-btn"
               :class="{ active: format === fmt }"
@@ -183,6 +252,38 @@
           </div>
         </div>
 
+        <!-- 图片压缩（仅 JPEG / WebP 有效，PNG 无损不压缩） -->
+        <div>
+          <label class="form-label">
+            图片压缩
+            <span v-if="format === 'png'" style="color:var(--muted); font-weight:400">（PNG 无损，此项无效）</span>
+          </label>
+          <div class="seg-control">
+            <button
+              v-for="opt in compressionOptions"
+              :key="opt.value"
+              class="seg-btn"
+              :class="{ active: compression === opt.value }"
+              :disabled="format === 'png'"
+              @click="compression = opt.value"
+            >{{ opt.label }}</button>
+          </div>
+        </div>
+
+        <!-- 封面帧说明 -->
+        <div class="cover-hint">
+          <i class="fa-solid fa-layer-group" style="color:var(--accent)"></i>
+          <div>
+            <div>封面帧：
+              <strong>{{ coverTimeSec !== null ? `手动 · ${formatTime(coverTimeSec)}` : '自动（第一个时间点）' }}</strong>
+            </div>
+            <div style="font-size:0.72rem; color:var(--muted); margin-top:2px">
+              封面帧区域 = 字幕框选区同宽，高度为视频顶部 → 字幕上边界
+            </div>
+          </div>
+        </div>
+
+        <!-- 提取按钮 -->
         <button
           class="btn btn-primary btn-block"
           :disabled="!videoUrl || isExtracting"
@@ -206,7 +307,15 @@
 <script setup>
 // =============================================
 // VideoSubtitle.vue —— 视频字幕提取
-// 核心：视频覆盖层框选 + 逐帧 seek 截图 + 拼接
+//
+// 核心改动（相对上一版）：
+// 1. 视频改用原生 <video controls>，覆盖层 Canvas 用 pointer-events 切换
+//    避免遮住播放控制栏
+// 2. 新增封面帧逻辑：封面帧区域 = 框选区同宽，高度 = 视频顶部 → 字幕上边界(y1)
+// 3. 手动封面帧：播放中点「设为封面帧」记录时间，提取时 seek 那一帧
+// 4. 输出格式新增 WebP
+// 5. 新增压缩选项（不压缩 / 2x / 4x / 8x）
+// 6. 保存按钮直接按当前格式保存，不再二次选择
 // =============================================
 
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
@@ -215,50 +324,75 @@ import { useToast } from '../composables/useToast.js'
 const { showToast } = useToast()
 
 // ==================== DOM 引用 ====================
-const fileInput     = ref(null)
-const videoEl       = ref(null)       // <video> 元素
-const overlayCanvas = ref(null)       // 框选覆盖层 Canvas
-const videoWrapper  = ref(null)       // 视频+Canvas 的容器
+const fileInput      = ref(null)
+const videoEl        = ref(null)      // <video> 元素
+const overlayCanvas  = ref(null)      // 框选覆盖层 Canvas（不用来渲染视频）
+const videoWrapper   = ref(null)
 const resultCanvasEl = ref(null)
 
 // ==================== 视频状态 ====================
-const videoUrl    = ref(null)         // ObjectURL
-const isDragOver  = ref(false)
-const videoInfo   = ref(null)         // { name, width, height, size }
+const videoUrl   = ref(null)
+const isDragOver = ref(false)
+const videoInfo  = ref(null)    // { name, width, height, size }
 
-// 视频原始分辨率（用于坐标换算）
+// 视频原始分辨率（坐标换算用）
 const videoNativeW = ref(0)
 const videoNativeH = ref(0)
 
-// ==================== 框选状态 ====================
+// ==================== 框选模式 ====================
+/*
+  selectMode: true  → 覆盖层 Canvas pointer-events:auto，鼠标变十字，可以拖拽框选
+  selectMode: false → pointer-events:none，鼠标事件穿透到 <video>，播放器正常工作
+*/
+const selectMode     = ref(false)
 const selecting      = ref(false)
-const selectionStart = ref(null)      // { x, y } 鼠标按下时的 Canvas 坐标
-const selectionEnd   = ref(null)      // { x, y } 鼠标当前位置的 Canvas 坐标
-const cropRect       = ref(null)      // { x1, y1, x2, y2 } 原始像素坐标
+const selectionStart = ref(null)   // Canvas 坐标 { x, y }
+const selectionEnd   = ref(null)   // Canvas 坐标 { x, y }
+const cropRect       = ref(null)   // 原始像素坐标 { x1, y1, x2, y2 }
 
-// 坐标输入框的值（与 cropRect 同步）
+// 坐标输入框（与 cropRect 联动）
 const coordX1 = ref(0)
 const coordY1 = ref(0)
 const coordX2 = ref(0)
 const coordY2 = ref(0)
 
+// ==================== 封面帧 ====================
+/*
+  coverTimeSec:
+    null  → 自动模式：使用时间点列表第一个（列表空则用 t=0）
+    数值  → 手动模式：使用用户「设为封面帧」时记录的时间点
+*/
+const coverTimeSec = ref(null)
+
 // ==================== 时间标记 ====================
-// 每个元素：{ timeSec: number, frameIdx: number }
 const timePoints     = ref([])
-const timePointsText = ref('')        // textarea 显示内容
-const fps            = ref(30)        // 估算帧率
+const timePointsText = ref('')
+const fps            = ref(30)
 
 // ==================== 拼接设置 ====================
 const bgColor  = ref('#ffffff')
 const spacing  = ref(2)
 const format   = ref('png')
 
+/*
+  compressionOptions：压缩倍数选项
+  value 直接对应 toBlob 的 quality 参数（0~1）
+  PNG 是无损格式，quality 参数对它无效
+*/
+const compressionOptions = [
+  { label: '不压缩', value: 1.0  },
+  { label: '2x 压缩', value: 0.5  },
+  { label: '4x 压缩', value: 0.25 },
+  { label: '8x 压缩', value: 0.125 },
+]
+const compression = ref(1.0)
+
 // ==================== 结果状态 ====================
-const resultCanvas   = ref(null)
-const resultWidth    = ref(0)
-const resultHeight   = ref(0)
-const extractedCount = ref(0)
-const isExtracting   = ref(false)
+const resultCanvas    = ref(null)
+const resultWidth     = ref(0)
+const resultHeight    = ref(0)
+const extractedCount  = ref(0)
+const isExtracting    = ref(false)
 const extractProgress = ref('')
 
 // ==================== 状态提示 ====================
@@ -268,6 +402,23 @@ const statusType = ref('')
 const setStatus = (msg, type = '') => {
   statusMsg.value  = msg
   statusType.value = type
+}
+
+// ==================== 工具函数 ====================
+
+const formatTime = (seconds) => {
+  if (seconds === null || seconds === undefined) return '--'
+  const h  = Math.floor(seconds / 3600)
+  const m  = Math.floor((seconds % 3600) / 60)
+  const s  = Math.floor(seconds % 60)
+  const ms = Math.floor((seconds % 1) * 1000)
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}`
+}
+
+const formatBytes = (bytes) => {
+  if (!bytes) return '-'
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / 1048576).toFixed(1) + ' MB'
 }
 
 // ==================== 文件处理 ====================
@@ -285,42 +436,36 @@ const onDrop = (e) => {
 }
 
 const loadVideo = (file) => {
-  // 释放旧的 ObjectURL
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
-
   videoUrl.value = URL.createObjectURL(file)
 
   videoInfo.value = {
-    name: file.name,
-    width: '加载中...',
+    name:   file.name,
+    width:  '加载中...',
     height: '',
-    size: formatBytes(file.size)
+    size:   formatBytes(file.size)
   }
 
-  // 重置状态
-  cropRect.value   = null
-  timePoints.value = []
-  timePointsText.value = ''
-  resultCanvas.value   = null
+  // 重置所有状态
+  cropRect.value        = null
+  selectMode.value      = false
+  coverTimeSec.value    = null
+  timePoints.value      = []
+  timePointsText.value  = ''
+  resultCanvas.value    = null
 
   setStatus('视频加载中...', 'processing')
 }
 
 // ==================== 视频元素事件 ====================
 
-/**
- * 视频元数据加载完成
- * 此时可以拿到 videoWidth、videoHeight、duration
- */
 const onVideoLoaded = async () => {
   const video = videoEl.value
   if (!video) return
 
   videoNativeW.value = video.videoWidth
   videoNativeH.value = video.videoHeight
-
-  // 估算帧率（通过 duration 无法直接获取，默认 30）
-  fps.value = 30
+  fps.value = 30  // 浏览器 API 无法直接获取帧率，默认 30
 
   videoInfo.value = {
     ...videoInfo.value,
@@ -330,21 +475,19 @@ const onVideoLoaded = async () => {
 
   setStatus(`视频就绪 · ${video.videoWidth}×${video.videoHeight} · 时长 ${formatTime(video.duration)}`)
 
-  // 等 DOM 渲染完成后，初始化覆盖层 Canvas 尺寸
   await nextTick()
   resizeOverlayCanvas()
   showToast('视频加载成功', 'success')
 }
 
-/**
- * 视频窗口尺寸变化时，重新调整覆盖层 Canvas
- * （用户拖拽弹窗大小时会触发）
- */
-const onVideoResize = () => { resizeOverlayCanvas() }
+// ==================== 覆盖层 Canvas 尺寸同步 ====================
 
 /**
- * 让覆盖层 Canvas 的像素尺寸 = 视频元素的显示尺寸
- * 这样鼠标坐标才能 1:1 对应 Canvas 像素
+ * 让覆盖层 Canvas 的尺寸与视频显示区域完全一致
+ * 注意：视频控制栏在底部，高度约 40px
+ * 为了不遮挡控制栏，覆盖层高度设为视频元素高度减去控制栏高度
+ * 但由于无法精确获知控制栏高度，我们让覆盖层高度 = 视频自然内容区域
+ * 具体做法：覆盖层 CSS 设置 bottom 留出空间（见 style scoped）
  */
 const resizeOverlayCanvas = () => {
   const video  = videoEl.value
@@ -352,89 +495,96 @@ const resizeOverlayCanvas = () => {
   if (!video || !canvas) return
 
   const rect    = video.getBoundingClientRect()
-  canvas.width  = rect.width
-  canvas.height = rect.height
+  // 控制栏高度估算为 44px，覆盖层只覆盖视频画面部分
+  // 实际上浏览器原生控制栏高度因浏览器而异，40-50px 是常见值
+  const controlBarH = 44
+  const contentH    = Math.max(0, rect.height - controlBarH)
 
-  // 覆盖层用 CSS 绝对定位叠在视频上
-  canvas.style.width  = rect.width  + 'px'
-  canvas.style.height = rect.height + 'px'
+  canvas.width  = Math.round(rect.width)
+  canvas.height = Math.round(contentH)
+  canvas.style.width  = rect.width + 'px'
+  canvas.style.height = contentH   + 'px'
 
-  // 重绘已有的选区
   drawOverlay()
+}
+
+// ==================== 框选模式切换 ====================
+
+const toggleSelectMode = () => {
+  selectMode.value = !selectMode.value
+  if (!selectMode.value) {
+    // 退出框选时停止任何进行中的框选
+    selecting.value = false
+  }
+}
+
+const clearCropRect = () => {
+  cropRect.value = null
+  selecting.value = false
+  selectionStart.value = null
+  selectionEnd.value = null
+  drawOverlay()
+  setStatus('已清除选区')
 }
 
 // ==================== 框选交互 ====================
 
-/**
- * 把鼠标事件的客户端坐标转为 Canvas 内坐标
- */
 const getCanvasPos = (e) => {
   const canvas = overlayCanvas.value
   const rect   = canvas.getBoundingClientRect()
   return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
+    x: Math.max(0, Math.min(e.clientX - rect.left, canvas.width)),
+    y: Math.max(0, Math.min(e.clientY - rect.top,  canvas.height))
   }
 }
 
 /**
  * Canvas 坐标 → 视频原始像素坐标
- * 因为 Canvas 的显示尺寸 ≠ 视频原始分辨率
+ * 覆盖层 Canvas 的尺寸对应的是视频画面区域（不含控制栏）
+ * 需要换算到视频原始分辨率
  */
-const canvasToVideoCoord = (canvasX, canvasY) => {
+const canvasToVideoCoord = (cx, cy) => {
   const canvas = overlayCanvas.value
-  if (!canvas) return { x: 0, y: 0 }
-
+  if (!canvas || !canvas.width || !canvas.height) return { x: 0, y: 0 }
   return {
-    x: Math.round(canvasX / canvas.width  * videoNativeW.value),
-    y: Math.round(canvasY / canvas.height * videoNativeH.value)
+    x: Math.round(cx / canvas.width  * videoNativeW.value),
+    y: Math.round(cy / canvas.height * videoNativeH.value)
   }
 }
 
-/** 鼠标按下：开始框选 */
 const onSelectStart = (e) => {
-  if (!videoUrl.value) return
+  if (!videoUrl.value || !selectMode.value) return
   selecting.value      = true
   selectionStart.value = getCanvasPos(e)
   selectionEnd.value   = { ...selectionStart.value }
 }
 
-/** 鼠标移动：更新框选区域 */
 const onSelectMove = (e) => {
   if (!selecting.value) return
   selectionEnd.value = getCanvasPos(e)
   drawOverlay()
 }
 
-/** 鼠标释放：完成框选，保存原始像素坐标 */
 const onSelectEnd = (e) => {
   if (!selecting.value) return
   selecting.value = false
 
   const start = selectionStart.value
   const end   = selectionEnd.value
-
   if (!start || !end) return
 
-  // 确保 x1 < x2、y1 < y2（鼠标可以从任意方向拖拽）
   const minX = Math.min(start.x, end.x)
   const minY = Math.min(start.y, end.y)
   const maxX = Math.max(start.x, end.x)
   const maxY = Math.max(start.y, end.y)
 
-  // 过滤掉误点（框选区域太小）
+  // 过滤误点
   if (maxX - minX < 5 || maxY - minY < 5) return
 
-  // 转换为视频原始像素坐标
-  const topLeft     = canvasToVideoCoord(minX, minY)
-  const bottomRight = canvasToVideoCoord(maxX, maxY)
+  const tl = canvasToVideoCoord(minX, minY)
+  const br = canvasToVideoCoord(maxX, maxY)
 
-  cropRect.value = {
-    x1: topLeft.x,
-    y1: topLeft.y,
-    x2: bottomRight.x,
-    y2: bottomRight.y
-  }
+  cropRect.value = { x1: tl.x, y1: tl.y, x2: br.x, y2: br.y }
 
   // 同步到坐标输入框
   coordX1.value = cropRect.value.x1
@@ -443,29 +593,35 @@ const onSelectEnd = (e) => {
   coordY2.value = cropRect.value.y2
 
   drawOverlay()
-  setStatus(`已选区域 · (${cropRect.value.x1}, ${cropRect.value.y1}) → (${cropRect.value.x2}, ${cropRect.value.y2})`)
+  setStatus(`字幕区 (${tl.x},${tl.y})→(${br.x},${br.y}) · 封面帧区高度=${tl.y}px`)
 }
 
-/**
- * 在覆盖层 Canvas 上绘制框选矩形
- */
+// mouseleave 时：如果正在框选则取消（不保存），避免鼠标划出去导致卡住
+const onSelectCancel = () => {
+  if (selecting.value) {
+    selecting.value = false
+    drawOverlay()
+  }
+}
+
+// ==================== 绘制覆盖层 ====================
+
 const drawOverlay = () => {
   const canvas = overlayCanvas.value
   if (!canvas) return
-
   const ctx = canvas.getContext('2d')
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
   let x, y, w, h
 
   if (selecting.value && selectionStart.value && selectionEnd.value) {
-    // 正在框选中：用实时坐标绘制
+    // 正在框选中：实时绘制
     x = Math.min(selectionStart.value.x, selectionEnd.value.x)
     y = Math.min(selectionStart.value.y, selectionEnd.value.y)
     w = Math.abs(selectionEnd.value.x - selectionStart.value.x)
     h = Math.abs(selectionEnd.value.y - selectionStart.value.y)
-  } else if (cropRect.value) {
-    // 已完成框选：把原始像素坐标换算回 Canvas 坐标来绘制
+  } else if (cropRect.value && canvas.width > 0 && videoNativeW.value > 0) {
+    // 已保存选区：换算回 Canvas 坐标绘制
     const scaleX = canvas.width  / videoNativeW.value
     const scaleY = canvas.height / videoNativeH.value
     x = cropRect.value.x1 * scaleX
@@ -473,103 +629,110 @@ const drawOverlay = () => {
     w = (cropRect.value.x2 - cropRect.value.x1) * scaleX
     h = (cropRect.value.y2 - cropRect.value.y1) * scaleY
   } else {
-    return // 没有选区，不绘制
+    return
   }
 
-  // 半透明填充
+  // ---- 绘制封面帧区域（字幕选框上方到视频顶部） ----
+  // 用不同颜色区分：橙色半透明
+  ctx.fillStyle = 'rgba(251, 146, 60, 0.12)'
+  ctx.fillRect(x, 0, w, y)
+
+  ctx.save()
+  ctx.strokeStyle = '#fb923c'
+  ctx.lineWidth   = 1.5
+  ctx.setLineDash([5, 4])
+  ctx.strokeRect(x, 0, w, y)
+  ctx.setLineDash([])
+  // 封面帧标签
+  ctx.fillStyle = '#fb923c'
+  ctx.font      = 'bold 12px system-ui'
+  ctx.fillText('封面帧区域', x + 4, Math.max(16, y / 2))
+  ctx.restore()
+
+  // ---- 绘制字幕框选区域（绿色） ----
   ctx.fillStyle = 'rgba(0, 224, 158, 0.15)'
   ctx.fillRect(x, y, w, h)
 
-  // 虚线边框
-  ctx.strokeStyle = 'var(--accent, #00e09e)'
+  ctx.save()
+  ctx.strokeStyle = '#00e09e'
   ctx.lineWidth   = 2
   ctx.setLineDash([6, 4])
   ctx.strokeRect(x, y, w, h)
-
-  // 四角标记（让用户知道可以调整）
   ctx.setLineDash([])
+
+  // 字幕区标签
   ctx.fillStyle = '#00e09e'
-  const cs = 6  // 角标大小
+  ctx.font      = 'bold 12px system-ui'
+  ctx.fillText('字幕区域', x + 4, y + 16)
+
+  // 四角标记
+  ctx.fillStyle = '#00e09e'
+  const cs = 6
   ;[[x, y], [x+w, y], [x, y+h], [x+w, y+h]].forEach(([cx, cy]) => {
     ctx.fillRect(cx - cs/2, cy - cs/2, cs, cs)
   })
+  ctx.restore()
 }
 
 // ==================== 坐标手动输入 ====================
 
-/** 用户手动修改坐标输入框后，更新 cropRect 并重绘 */
 const applyCoord = () => {
-  const x1 = Math.max(0, Math.min(coordX1.value, videoNativeW.value))
-  const y1 = Math.max(0, Math.min(coordY1.value, videoNativeH.value))
-  const x2 = Math.max(0, Math.min(coordX2.value, videoNativeW.value))
-  const y2 = Math.max(0, Math.min(coordY2.value, videoNativeH.value))
+  const x1 = Math.max(0, Math.min(coordX1.value || 0, videoNativeW.value))
+  const y1 = Math.max(0, Math.min(coordY1.value || 0, videoNativeH.value))
+  const x2 = Math.max(0, Math.min(coordX2.value || 0, videoNativeW.value))
+  const y2 = Math.max(0, Math.min(coordY2.value || 0, videoNativeH.value))
 
   if (x2 > x1 && y2 > y1) {
     cropRect.value = { x1, y1, x2, y2 }
     drawOverlay()
-    setStatus(`已应用坐标 · (${x1}, ${y1}) → (${x2}, ${y2})`)
+    setStatus(`已应用坐标 · (${x1},${y1})→(${x2},${y2})`)
   }
+}
+
+// ==================== 封面帧 ====================
+
+/**
+ * 记录当前播放位置作为封面帧时间点
+ */
+const setCoverFrame = () => {
+  const video = videoEl.value
+  if (!video) return
+  coverTimeSec.value = video.currentTime
+  showToast(`封面帧已设为 ${formatTime(video.currentTime)}`, 'success')
 }
 
 // ==================== 时间标记 ====================
 
-const formatTime = (seconds) => {
-  if (!seconds && seconds !== 0) return '--'
-  const h  = Math.floor(seconds / 3600)
-  const m  = Math.floor((seconds % 3600) / 60)
-  const s  = Math.floor(seconds % 60)
-  const ms = Math.floor((seconds % 1) * 1000)
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}`
-}
-
-const formatBytes = (bytes) => {
-  if (!bytes) return '-'
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / 1048576).toFixed(1) + ' MB'
-}
-
-/** 标记当前播放时间点 */
 const markCurrentTime = () => {
   const video = videoEl.value
   if (!video) return
-
   const timeSec  = video.currentTime
   const frameIdx = Math.round(timeSec * fps.value)
-
   timePoints.value.push({ timeSec, frameIdx })
   refreshTimeText()
   setStatus(`已标记 ${timePoints.value.length} 个时间点`)
 }
 
-/** 撤销最后一个标记 */
 const undoLastMark = () => {
   timePoints.value.pop()
   refreshTimeText()
 }
 
-/** 清空所有标记 */
 const clearMarks = () => {
-  timePoints.value = []
+  timePoints.value     = []
   timePointsText.value = ''
 }
 
-/** 把 timePoints 数组刷新到 textarea 文本 */
 const refreshTimeText = () => {
   timePointsText.value = timePoints.value
     .map((p, i) => `${i + 1}. ${formatTime(p.timeSec)} (帧:${p.frameIdx})`)
     .join('\n')
 }
 
-/**
- * 解析 textarea 里的文本 → 更新 timePoints 数组
- * 支持用户手动编辑时间点
- */
 const parseTimePoints = () => {
-  const lines = timePointsText.value.trim().split('\n').filter(l => l.trim())
-  const result = []
-
-  // 时间格式正则：匹配 HH:MM:SS.mmm
+  const lines   = timePointsText.value.trim().split('\n').filter(l => l.trim())
   const timeReg = /(\d{2}):(\d{2}):(\d{2})\.(\d{3})/
+  const result  = []
 
   lines.forEach(line => {
     const m = line.match(timeReg)
@@ -585,68 +748,50 @@ const parseTimePoints = () => {
 // ==================== 键盘快捷键 ====================
 
 const onKeydown = (e) => {
-  // 空格/Enter 标记当前时间（避免在 textarea 输入时触发）
+  if (document.activeElement?.tagName === 'TEXTAREA') return
+  if (document.activeElement?.tagName === 'INPUT')    return
+
   if ((e.code === 'Space' || e.code === 'Enter') && videoUrl.value) {
-    // 如果焦点在 textarea 上，不触发
-    if (document.activeElement?.tagName === 'TEXTAREA') return
     e.preventDefault()
     markCurrentTime()
   }
 }
 
-// ==================== 逐帧截图核心 ====================
+// ==================== 逐帧截图 ====================
 
 /**
- * 把视频 seek 到指定时间，等待 seeked 事件后截图
- * 必须用 Promise + 事件监听，不能用 setTimeout
- * 因为 seek 是异步的，时间不确定
- *
+ * Seek 到指定时间并截图
  * @param {HTMLVideoElement} video
  * @param {number} timeSec - 目标时间（秒）
- * @param {Object} crop - { x1, y1, x2, y2 } 原始像素坐标
- * @returns {HTMLCanvasElement} 裁剪后的帧
+ * @param {{ x1, y1, x2, y2 }} cropArea - 裁剪区域（原始像素坐标）
+ * @returns {Promise<HTMLCanvasElement>}
  */
-const captureFrame = (video, timeSec, crop) => {
+const captureFrame = (video, timeSec, cropArea) => {
   return new Promise((resolve, reject) => {
-    // 设置超时保护（5秒内没 seeked 就报错）
     const timeout = setTimeout(() => {
-      reject(new Error(`时间点 ${formatTime(timeSec)} seek 超时`))
-    }, 5000)
+      video.removeEventListener('seeked', onSeeked)
+      reject(new Error(`Seek 超时 @ ${formatTime(timeSec)}`))
+    }, 8000)
 
     const onSeeked = () => {
       clearTimeout(timeout)
       video.removeEventListener('seeked', onSeeked)
 
       try {
-        // 把当前帧绘制到临时 Canvas
-        const w = crop.x2 - crop.x1
-        const h = crop.y2 - crop.y1
-
-        const canvas     = document.createElement('canvas')
-        canvas.width     = w
-        canvas.height    = h
-        const ctx = canvas.getContext('2d')
-
-        // drawImage 的 9 参数版本：
-        // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-        // sx/sy: 从源图的哪里开始截
-        // sWidth/sHeight: 截多大
-        // dx/dy: 画到目标 Canvas 的哪里
-        // dWidth/dHeight: 画多大
-        ctx.drawImage(
-          video,
-          crop.x1, crop.y1, w, h,  // 源：视频上的裁剪区域
-          0, 0, w, h                // 目标：铺满整个 Canvas
-        )
-
-        resolve(canvas)
+        const w = cropArea.x2 - cropArea.x1
+        const h = cropArea.y2 - cropArea.y1
+        const c = document.createElement('canvas')
+        c.width  = w
+        c.height = h
+        c.getContext('2d').drawImage(video, cropArea.x1, cropArea.y1, w, h, 0, 0, w, h)
+        resolve(c)
       } catch (err) {
         reject(err)
       }
     }
 
     video.addEventListener('seeked', onSeeked)
-    video.currentTime = timeSec  // 触发 seek
+    video.currentTime = timeSec
   })
 }
 
@@ -656,53 +801,91 @@ const extractAndStitch = async () => {
   const video = videoEl.value
   if (!video || !videoUrl.value) return
 
-  // 检查是否有裁剪区域
   if (!cropRect.value) {
     showToast('请先框选字幕区域', 'error')
-    setStatus('请先在视频上框选字幕区域', 'error')
+    setStatus('请先框选字幕区域', 'error')
     return
   }
 
-  isExtracting.value = true
-  resultCanvas.value = null
+  const crop = cropRect.value
+
+  // 验证封面帧区域：字幕上边界 y1 必须 > 0
+  if (crop.y1 <= 0) {
+    showToast('字幕上边界(Y1)需大于 0，否则封面帧区域为空', 'error')
+    setStatus('Y1 须大于 0（封面帧区域高度 = Y1）', 'error')
+    return
+  }
+
+  isExtracting.value  = true
+  resultCanvas.value  = null
   setStatus('提取中...', 'processing')
 
   try {
-    // ---- 确定要提取的时间点列表 ----
-    let points = []
+    // ---- 1. 确定字幕时间点列表 ----
+    let subtitlePoints = []
 
     if (timePoints.value.length > 0) {
-      // 用户手动标记的时间点
-      points = timePoints.value.map(p => p.timeSec)
+      subtitlePoints = timePoints.value.map(p => p.timeSec)
     } else {
       // 留空：按每秒均匀提取
       const duration = video.duration
       if (!duration || !isFinite(duration)) throw new Error('无法获取视频时长')
-
       for (let t = 0; t <= duration; t += 1) {
-        points.push(Math.min(t, duration - 0.001))
+        subtitlePoints.push(Math.min(t, duration - 0.001))
       }
     }
 
-    // ---- 逐帧截图 ----
-    const frames = []
-    const crop   = cropRect.value
-
-    for (let i = 0; i < points.length; i++) {
-      extractProgress.value = `提取中 ${i + 1} / ${points.length}`
-      setStatus(`提取中... ${i + 1} / ${points.length}`, 'processing')
-
-      const frame = await captureFrame(video, points[i], crop)
-      frames.push(frame)
+    // ---- 2. 确定封面帧时间点 ----
+    let coverTime
+    if (coverTimeSec.value !== null) {
+      // 手动设置的封面帧
+      coverTime = coverTimeSec.value
+    } else {
+      // 自动：使用字幕时间点列表中第一个
+      coverTime = subtitlePoints.length > 0 ? subtitlePoints[0] : 0
     }
 
-    if (frames.length === 0) throw new Error('没有成功提取到任何帧')
+    // ---- 3. 定义封面帧裁剪区域 ----
+    // 宽度与字幕区一致（x1 ~ x2），高度从视频顶部(0)到字幕上边界(y1)
+    const coverCrop = {
+      x1: crop.x1,
+      y1: 0,
+      x2: crop.x2,
+      y2: crop.y1   // 字幕上边界
+    }
 
-    // ---- 垂直拼接 ----
+    // ---- 4. 提取封面帧 ----
+    extractProgress.value = '提取封面帧...'
+    setStatus('提取封面帧...', 'processing')
+    const coverFrame = await captureFrame(video, coverTime, coverCrop)
+
+    // ---- 5. 逐帧提取字幕 ----
+    // 字幕裁剪区域
+    const subCrop = {
+      x1: crop.x1,
+      y1: crop.y1,
+      x2: crop.x2,
+      y2: crop.y2
+    }
+
+    const subtitleFrames = []
+    for (let i = 0; i < subtitlePoints.length; i++) {
+      extractProgress.value = `提取字幕帧 ${i + 1} / ${subtitlePoints.length}`
+      setStatus(`提取字幕帧 ${i + 1} / ${subtitlePoints.length}`, 'processing')
+      const frame = await captureFrame(video, subtitlePoints[i], subCrop)
+      subtitleFrames.push(frame)
+    }
+
+    if (subtitleFrames.length === 0) throw new Error('没有成功提取到任何字幕帧')
+
+    // ---- 6. 垂直拼接：封面帧 + 所有字幕帧 ----
     setStatus('拼接中...', 'processing')
 
-    const maxW   = Math.max(...frames.map(f => f.width))
-    const totalH = frames.reduce((sum, f) => sum + f.height, 0) + spacing.value * (frames.length - 1)
+    // 所有帧宽度应相同（都是 x2-x1），取最大值保险
+    const allFrames = [coverFrame, ...subtitleFrames]
+    const maxW      = Math.max(...allFrames.map(f => f.width))
+    const totalH    = allFrames.reduce((sum, f) => sum + f.height, 0)
+                      + spacing.value * (allFrames.length - 1)
 
     const result = document.createElement('canvas')
     result.width  = maxW
@@ -710,26 +893,28 @@ const extractAndStitch = async () => {
 
     const ctx = result.getContext('2d')
 
-    // 解析背景色（支持 #fff, white, transparent）
+    // 背景色
     const bg = bgColor.value.trim().toLowerCase()
     if (bg !== 'transparent') {
-      ctx.fillStyle = bg === 'white' ? '#ffffff' : bg
+      ctx.fillStyle = (bg === 'white') ? '#ffffff' : bg
       ctx.fillRect(0, 0, maxW, totalH)
     }
 
+    // 逐帧绘制，水平居中
     let y = 0
-    frames.forEach((frame, i) => {
-      const offsetX = Math.floor((maxW - frame.width) / 2) // 居中
+    allFrames.forEach((frame, i) => {
+      const offsetX = Math.floor((maxW - frame.width) / 2)
       ctx.drawImage(frame, offsetX, y)
       y += frame.height
-      if (i < frames.length - 1) y += spacing.value
+      if (i < allFrames.length - 1) y += spacing.value
     })
 
-    // ---- 显示结果 ----
-    resultCanvas.value   = result
-    resultWidth.value    = result.width
-    resultHeight.value   = result.height
-    extractedCount.value = frames.length
+    // ---- 7. 显示结果 ----
+    resultCanvas.value    = result
+    resultWidth.value     = result.width
+    resultHeight.value    = result.height
+    // extractedCount 只统计字幕帧数量（不含封面帧）
+    extractedCount.value  = subtitleFrames.length
 
     await nextTick()
     if (resultCanvasEl.value) {
@@ -739,8 +924,11 @@ const extractAndStitch = async () => {
       resultCanvasEl.value.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
 
-    setStatus(`提取完成！共 ${frames.length} 帧，${result.width} × ${result.height} px`, 'success')
-    showToast(`提取完成，共 ${frames.length} 帧`, 'success')
+    setStatus(
+      `完成！封面帧 1 张 + 字幕帧 ${subtitleFrames.length} 张 · ${result.width}×${result.height} px`,
+      'success'
+    )
+    showToast(`提取完成，共 ${subtitleFrames.length + 1} 帧`, 'success')
 
   } catch (err) {
     console.error('提取失败:', err)
@@ -754,41 +942,57 @@ const extractAndStitch = async () => {
 
 // ==================== 保存结果 ====================
 
-const saveResult = (fmt) => {
+/**
+ * 直接按当前 format 保存，不再二次选择
+ * 压缩 quality 仅对 jpeg / webp 有效，png 忽略
+ */
+const saveResult = () => {
   if (!resultCanvas.value) return
-  const mime = fmt === 'jpeg' ? 'image/jpeg' : 'image/png'
-  resultCanvas.value.toBlob(blob => {
+
+  // 确定 MIME type
+  const mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' }
+  const mime    = mimeMap[format.value] || 'image/png'
+
+  // 确定文件扩展名
+  const extMap  = { png: 'png', jpeg: 'jpg', webp: 'webp' }
+  const ext     = extMap[format.value] || 'png'
+
+  // PNG 无损，quality 参数无意义；jpeg/webp 使用用户选择的压缩值
+  const quality = (format.value === 'png') ? undefined : compression.value
+
+  resultCanvas.value.toBlob((blob) => {
+    if (!blob) { showToast('保存失败', 'error'); return }
     const url = URL.createObjectURL(blob)
     const a   = document.createElement('a')
     a.href     = url
-    a.download = `subtitles_${Date.now()}.${fmt === 'jpeg' ? 'jpg' : 'png'}`
+    a.download = `subtitles_${Date.now()}.${ext}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }, mime, 0.92)
+    showToast(`已保存 ${format.value.toUpperCase()}，${(blob.size / 1024).toFixed(0)} KB`, 'success')
+  }, mime, quality)
 }
 
-// ==================== 窗口 resize 处理 ====================
+// ==================== ResizeObserver ====================
 
-// 当弹窗大小变化时，重新调整覆盖层 Canvas
-// 用 ResizeObserver 监听视频元素的尺寸变化
 let resizeObserver = null
 
-onMounted(() => {
-  document.addEventListener('keydown', onKeydown)
-})
-
-// 监听 videoEl 出现（因为初始时 video 元素还不存在）
+// 监听 videoEl 挂载，绑定 ResizeObserver 响应弹窗尺寸变化
 watch(videoEl, (el) => {
+  if (resizeObserver) { resizeObserver.disconnect(); resizeObserver = null }
   if (!el) return
 
-  // ResizeObserver：专门用来监听元素尺寸变化
-  // 比 window resize 更精确，弹窗宽度变化也能捕获
   resizeObserver = new ResizeObserver(() => {
     resizeOverlayCanvas()
   })
   resizeObserver.observe(el)
+})
+
+// ==================== 生命周期 ====================
+
+onMounted(() => {
+  document.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
@@ -815,7 +1019,7 @@ onUnmounted(() => {
 }
 
 .vsub-right {
-  width: 290px;
+  width: 335px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -833,7 +1037,6 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
 }
-
 .upload-zone::before {
   content: '';
   position: absolute;
@@ -842,15 +1045,8 @@ onUnmounted(() => {
   opacity: 0;
   transition: opacity 0.3s;
 }
-
-.upload-zone:hover,
-.upload-zone.drag-over {
-  border-color: var(--accent);
-}
-
-.upload-zone:hover::before,
-.upload-zone.drag-over::before { opacity: 1; }
-
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); }
+.upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
 .upload-zone i {
   position: relative;
   font-size: 1.75rem;
@@ -858,13 +1054,11 @@ onUnmounted(() => {
   display: block;
   margin-bottom: 0.4rem;
 }
-
 .upload-text {
   position: relative;
   font-size: 0.9rem;
   font-weight: 600;
 }
-
 .upload-hint {
   position: relative;
   font-size: 0.75rem;
@@ -884,48 +1078,67 @@ onUnmounted(() => {
   border: 1px solid var(--border);
   border-radius: 50px;
 }
-
 .video-info-bar i { color: var(--accent); margin-right: 0.25rem; }
 
-/* ===== 视频播放器容器 ===== */
+/* ===== 视频容器 ===== */
 .video-wrapper {
-  position: relative;   /* 让子元素的 position:absolute 相对于它定位 */
+  position: relative;
   background: #000;
   border-radius: var(--radius);
   overflow: hidden;
-  line-height: 0;       /* 消除 video 元素下方的空白 */
+  line-height: 0;
 }
 
 .video-player {
-  /*
-    视频高度：在弹窗（max-width:880px）内，
-    用 max-height 限制不超过视口的 45%，
-    宽度自适应
-  */
   width: 100%;
-  max-height: 45vh;
+  height: 65vh;
   display: block;
   background: #000;
+  /* 视频本身在最底层，pointer-events 保持默认，控制栏可点击 */
 }
 
-/* 覆盖层 Canvas：绝对定位叠在视频上 */
+/*
+  覆盖层 Canvas 叠在视频上方
+  pointer-events 由 Vue 绑定动态控制：
+    框选模式：auto（拦截鼠标，显示十字光标）
+    普通模式：none（透传鼠标，视频控制栏可用）
+  bottom: 44px 让覆盖层不盖住底部控制栏
+*/
 .overlay-canvas {
   position: absolute;
   top: 0;
   left: 0;
-  cursor: crosshair;    /* 十字光标，提示可以框选 */
-  /* pointer-events 由 JS 控制，这里不设置 */
+  bottom: 44px;        /* 留出控制栏空间 */
+  width: 100% !important;
+  /* height 由 JS 动态设置 */
 }
 
+/* ===== 工具栏 ===== */
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* 封面帧按钮激活状态 */
+.cover-active {
+  border-color: #fb923c !important;
+  color: #fb923c !important;
+  background: rgba(251, 146, 60, 0.1) !important;
+}
+
+/* ===== 操作提示 ===== */
 .op-hint {
   font-size: 0.75rem;
   color: var(--muted);
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50px;
 }
-
-.op-hint i { color: var(--accent); }
 
 /* ===== 结果区 ===== */
 .result-section {
@@ -955,10 +1168,7 @@ onUnmounted(() => {
   border: 1px solid var(--border);
 }
 
-.result-actions {
-  display: flex;
-  gap: 0.6rem;
-}
+.result-actions { display: flex; gap: 0.6rem; }
 
 /* ===== 右栏设置面板 ===== */
 .settings-panel {
@@ -977,11 +1187,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  color: var(--fg);
 }
-
 .panel-title i { color: var(--accent); }
-
 .panel-hint {
   font-size: 0.72rem;
   color: var(--muted);
@@ -989,7 +1196,40 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-/* 坐标输入 2×2 网格 */
+/* 选区可视化说明 */
+.crop-preview-info {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.crop-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.crop-label {
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cover-label { background: rgba(251,146,60,0.2); color: #fb923c; }
+.sub-label   { background: var(--accent-dim);    color: var(--accent); }
+
+.crop-value { color: var(--muted); line-height: 1.5; }
+.crop-size  { color: var(--fg); font-weight: 600; margin-left: 0.3rem; }
+
+/* 坐标输入网格 */
 .coord-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1008,27 +1248,48 @@ onUnmounted(() => {
   display: flex;
   gap: 0.3rem;
   margin-top: 0.25rem;
+  flex-wrap: wrap;
 }
 
 .seg-btn {
   flex: 1;
-  padding: 0.35rem 0.5rem;
+  min-width: 0;
+  padding: 0.35rem 0.4rem;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
   text-align: center;
+  white-space: nowrap;
 }
 
 .seg-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.seg-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 封面帧说明框 */
+.cover-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: rgba(251, 146, 60, 0.07);
+  border: 1px solid rgba(251, 146, 60, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
 }
 
 /* ===== 响应式 ===== */
