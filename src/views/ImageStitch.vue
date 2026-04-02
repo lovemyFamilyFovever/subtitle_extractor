@@ -68,8 +68,8 @@
 
     </div>
 
-    <!-- ==================== 右栏：设置 + 预览 ==================== -->
-    <div class="stitch-right">
+    <!-- ==================== 中栏：设置区 ==================== -->
+    <div class="stitch-middle">
 
       <!-- 布局设置区 -->
       <div class="settings-panel">
@@ -169,8 +169,12 @@
         </button>
 
       </div>
+    </div>
 
-      <!-- 预览区 -->
+    <!-- ==================== 右栏：预览区 ========== -->
+
+    <div class="stitch-right">
+         <!-- 预览区 -->
       <div class="preview-area">
         <!-- 预览信息（尺寸） -->
         <div v-if="previewInfo" class="preview-info">
@@ -190,7 +194,6 @@
         -->
         <canvas v-show="images.length >= 2" ref="previewCanvas" class="preview-canvas"></canvas>
       </div>
-
     </div>
   </div>
 </template>
@@ -591,8 +594,18 @@ onUnmounted(() => {
 
 /* 左栏：图片管理 */
 .stitch-left {
-  flex: 1;
+  flex: 1 1 auto; /* 关键：让左侧占据剩余空间，但不会被压缩 */
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 700px;
+}
+
+/* 中栏：设置 + 预览 */
+.stitch-middle {
+  width: 335px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -600,12 +613,13 @@ onUnmounted(() => {
 
 /* 右栏：设置 + 预览 */
 .stitch-right {
-  width: 300px;
+  width: 335px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 
 /* ===== 上传区 ===== */
 .upload-zone {

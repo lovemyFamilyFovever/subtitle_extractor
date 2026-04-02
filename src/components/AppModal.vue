@@ -7,7 +7,7 @@
     :class 动态绑定 active 类来控制显示/隐藏
     @click.self 只响应点击遮罩本身，不冒泡到内部
   -->
-  <div class="modal-overlay" :class="{ active: modelValue }" @click.self="close">
+  <div class="modal-overlay" :class="{ active: modelValue }">
 
     <!-- 弹窗主体，阻止点击事件冒泡到遮罩 -->
     <div class="modal" role="dialog" :aria-label="title">
@@ -78,22 +78,6 @@ const close = () => {
   emit('update:modelValue', false)
 }
 
-// ===== 键盘 Esc 关闭 =====
-const handleKeydown = (e) => {
-  if (e.key === 'Escape' && props.modelValue) {
-    close()
-  }
-}
-
-// onMounted：组件挂载后执行（相当于 Vue 2 的 mounted）
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
-
-// onUnmounted：组件卸载时清理（避免内存泄漏）
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
-})
 </script>
 
 <style scoped>
@@ -129,8 +113,7 @@ onUnmounted(() => {
 /* ===== 弹窗主体 ===== */
 .modal {
   position: relative;
-  width: 100%;
-  max-width: 990px;        /* 最大宽度约 80vw 感觉 */
+
   max-height: 92vh;        /* 最高不超过视口的 92% */
   background: var(--card);
   border: 1px solid var(--border);
