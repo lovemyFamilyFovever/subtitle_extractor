@@ -5,54 +5,38 @@
     <div class="vsub-left">
 
       <!-- 视频文件上传区 -->
-      <div
-        class="upload-zone"
-        :class="{ 'drag-over': isDragOver, 'has-video': videoUrl }"
-        @click="fileInput.click()"
-        @dragover.prevent="isDragOver = true"
-        @dragleave.prevent="isDragOver = false"
-        @drop.prevent="onDrop"
-      >
+      <div class="upload-zone" :class="{ 'drag-over': isDragOver, 'has-video': videoUrl }" @click="fileInput.click()"
+        @dragover.prevent="isDragOver = true" @dragleave.prevent="isDragOver = false" @drop.prevent="onDrop">
         <i class="fa-solid fa-film upload-icon"></i>
         <p class="upload-text">
           {{ videoUrl ? '点击或拖拽新视频到此处' : '点击或拖拽视频到此处' }}
         </p>
         <p class="upload-hint">支持 MP4 / WebM / MOV 等浏览器可播放格式</p>
-        <input
-          ref="fileInput"
-          type="file"
-          accept="video/*"
-          class="hidden-input"
-          @change="onFileChange"
-        />
+        <input ref="fileInput" type="file" accept="video/*" class="hidden-input" @change="onFileChange" />
       </div>
 
       <!-- 视频播放器 + 覆盖层 Canvas 容器 -->
-      <div v-if="videoUrl" class="video-wrapper" ref="videoWrapper">
+      <div v-if="videoUrl" class="video-wrapper" ref="videoWrapper" @mouseenter="showVideoInfo = true" @mouseleave="showVideoInfo = false">
 
         <!-- 关闭按钮（悬浮显示） -->
-        <button
-          class="video-close-btn"
-          @click.stop="removeVideo"
-          title="移除当前视频"
-        >
+        <button class="video-close-btn" @click.stop="removeVideo" title="移除当前视频">
           <i class="fa-solid fa-xmark"></i>
         </button>
 
+        <!-- 新增：视频属性悬浮面板 -->
+        <div v-if="showVideoInfo && videoInfo" class="video-info-overlay">
+          <div class="info-item"><span class="info-label">Mime Type:</span> {{ videoMimeType || '-' }}</div>
+          <div class="info-item"><span class="info-label">Player Type:</span> HTML5 Video</div>
+          <div class="info-item"><span class="info-label">Resolution:</span> {{ videoNativeW }} × {{ videoNativeH }}</div>
+          <div class="info-item"><span class="info-label">DataRate:</span> {{ estimatedBitrate }}</div>
+          <div class="info-item"><span class="info-label">Render Size:</span> {{ renderWidth }} × {{ renderHeight }} px</div>
+        </div>
+
         <!-- 原生视频播放器 -->
-        <video
-          ref="videoEl"
-          :src="videoUrl"
-          controls
-          class="video-player"
-          @loadedmetadata="onVideoLoaded"
-        ></video>
+        <video ref="videoEl" :src="videoUrl" controls class="video-player" @loadedmetadata="onVideoLoaded"></video>
 
         <!-- 覆盖层 Canvas：仅视觉参考，不拦截事件 -->
-        <canvas
-          ref="overlayCanvas"
-          class="overlay-canvas"
-        ></canvas>
+        <canvas ref="overlayCanvas" class="overlay-canvas"></canvas>
       </div>
 
       <!-- 视频信息栏 -->
@@ -64,48 +48,25 @@
 
       <!-- 工具栏 -->
       <div v-if="videoUrl" class="toolbar">
-        <button
-          class="btn"
-          @click="resetCutLines"
-          title="将红线和蓝线重置到默认位置"
-        >
+        <button class="btn" @click="resetCutLines" title="将红线和蓝线重置到默认位置">
           <i class="fa-solid fa-rotate-left"></i> 重置裁剪线
         </button>
 
-        <button
-          class="btn cover-btn"
-          :class="{ 'cover-active': coverTimeSec !== null }"
-          @click="setCoverFrame"
-          @mouseenter="showCoverTip = true"
-          @mouseleave="showCoverTip = false"
-          title="将当前播放位置设为封面帧提取时间点"
-        >
+        <button class="btn cover-btn" :class="{ 'cover-active': coverTimeSec !== null }" @click="setCoverFrame"
+          @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false" title="将当前播放位置设为封面帧提取时间点">
           <i class="fa-solid fa-image"></i>
           {{ coverTimeSec !== null ? '封面帧: ' + formatTime(coverTimeSec) : '设为封面帧' }}
           <i class="fa-solid fa-circle-question cover-tip-icon"></i>
         </button>
 
-        <button
-          v-if="coverTimeSec !== null"
-          class="btn"
-          @click="coverTimeSec = null"
-          title="清除手动设置的封面帧，改为自动使用第一个时间点"
-        >
+        <button v-if="coverTimeSec !== null" class="btn" @click="coverTimeSec = null" title="清除手动设置的封面帧，改为自动使用第一个时间点">
           <i class="fa-solid fa-rotate-left"></i> 自动封面
         </button>
-      </div>
 
-      <!-- 封面帧说明浮层 -->
-      <div v-if="showCoverTip && videoUrl" class="cover-tip-popup">
-        <div class="cover-tip-title">封面帧说明</div>
-        <div class="cover-tip-body">
-          封面帧区域 = 视频顶部 → 红线（{{ Math.round(topCutRatio * 100) }}%），
-          字幕区域 = 红线 → 蓝线（{{ Math.round(bottomCutRatio * 100) }}%）
-        </div>
-        <div class="cover-tip-body">
-          点击「设为封面帧」记录当前播放时间，提取时从该时间点截取封面上半部分画面。
-          未设置时自动使用第一个时间点。
-        </div>
+        <button class="btn" :disabled="!videoUrl" @click="markCurrentTime" style="margin-left: auto;">
+          <i class="fa-solid fa-circle-dot"></i> 标记当前帧
+        </button>
+
       </div>
 
     </div>
@@ -124,14 +85,8 @@
             <span class="line-dot line-dot-red"></span>
             红线位置（字幕上边界）
           </label>
-          <SliderInput
-            :model-value="Math.round(topCutRatio * 100)"
-            label=""
-            unit="%"
-            :min="0"
-            :max="98"
-            @update:model-value="val => topCutRatio = val / 100"
-          />
+          <SliderInput :model-value="Math.round(topCutRatio * 100)" label="" unit="%" :min="0" :max="100"
+            @update:model-value="val => topCutRatio = val / 100" step="1" />
         </div>
 
         <div class="setting-item">
@@ -139,48 +94,15 @@
             <span class="line-dot line-dot-blue"></span>
             蓝线位置（字幕下边界）
           </label>
-          <SliderInput
-            :model-value="Math.round(bottomCutRatio * 100)"
-            label=""
-            unit="%"
-            :min="2"
-            :max="100"
-            @update:model-value="val => bottomCutRatio = val / 100"
-          />
-        </div>
-
-        <div class="setting-item">
-          <label class="form-label">间距 px</label>
-          <input type="number" v-model.number="spacing" min="0" />
-        </div>
-
-        <div class="setting-item">
-          <label class="form-label">背景色</label>
-          <div class="bg-color-options">
-            <button
-              v-for="opt in bgColorOptions"
-              :key="opt.value"
-              class="bg-color-btn"
-              :class="{ active: bgColor === opt.value }"
-              :style="opt.style"
-              :title="opt.label"
-              @click="bgColor = opt.value"
-            >
-              <i v-if="opt.value === 'transparent'" class="fa-solid fa-ban bg-transparent-icon"></i>
-            </button>
-          </div>
+          <SliderInput :model-value="Math.round(bottomCutRatio * 100)" label="" unit="%" :min="2" :max="100"
+            @update:model-value="val => bottomCutRatio = val / 100" step="1" />
         </div>
 
         <div>
           <label class="form-label">输出格式</label>
           <div class="seg-control">
-            <button
-              v-for="fmt in ['png', 'jpeg', 'webp']"
-              :key="fmt"
-              class="seg-btn"
-              :class="{ active: format === fmt }"
-              @click="format = fmt"
-            >{{ fmt.toUpperCase() }}</button>
+            <button v-for="fmt in ['png', 'jpeg', 'webp']" :key="fmt" class="seg-btn"
+              :class="{ active: format === fmt }" @click="format = fmt">{{ fmt.toUpperCase() }}</button>
           </div>
         </div>
 
@@ -190,14 +112,9 @@
             <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
           </label>
           <div class="seg-control">
-            <button
-              v-for="opt in compressionOptions"
-              :key="opt.value"
-              class="seg-btn"
-              :class="{ active: compression === opt.value }"
-              :disabled="format === 'png'"
-              @click="compression = opt.value"
-            >{{ opt.label }}</button>
+            <button v-for="opt in compressionOptions" :key="opt.value" class="seg-btn"
+              :class="{ active: compression === opt.value }" :disabled="format === 'png'"
+              @click="compression = opt.value">{{ opt.label }}</button>
           </div>
         </div>
       </div>
@@ -208,32 +125,21 @@
           <i class="fa-solid fa-clock"></i> 时间标记
           <span class="panel-hint">Enter 添加帧 · Space 播放/暂停</span>
         </div>
+
+        <textarea v-model="timePointsText" rows="10" style="height: 300px;"
+          placeholder="时间点列表（可手动编辑）&#10;格式: 1. 00:00:05.000 (帧:150)&#10;&#10;留空则按每秒均匀提取"></textarea>
+
+
         <div class="action-row">
-          <button class="btn" :disabled="!videoUrl" @click="markCurrentTime">
-            <i class="fa-solid fa-circle-dot"></i> 标记当前帧
-          </button>
-          <button class="btn" :disabled="timePoints.length === 0" @click="undoLastMark">
-            <i class="fa-solid fa-rotate-left"></i> 撤销
-          </button>
           <button class="btn btn-danger" :disabled="timePoints.length === 0" @click="clearMarks">
-            <i class="fa-solid fa-trash"></i>
+            <i class="fa-solid fa-trash"></i> 清除所有标记
+          </button>
+
+          <button class="btn btn-primary btn-block" :disabled="!videoUrl || isExtracting" @click="extractAndStitch">
+            <i class="fa-solid" :class="isExtracting ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
+            {{ isExtracting ? '提取中...' : '智能提取并拼接' }}
           </button>
         </div>
-
-        <textarea
-          v-model="timePointsText"
-          rows="10"
-          placeholder="时间点列表（可手动编辑）&#10;格式: 1. 00:00:05.000 (帧:150)&#10;&#10;留空则按每秒均匀提取"
-        ></textarea>
-
-        <button
-          class="btn btn-primary btn-block"
-          :disabled="!videoUrl || isExtracting"
-          @click="extractAndStitch"
-        >
-          <i class="fa-solid" :class="isExtracting ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
-          {{ isExtracting ? '提取中...' : '智能提取并拼接' }}
-        </button>
 
         <div class="status-bar" :class="statusType">
           <span class="status-dot"></span>
@@ -263,28 +169,35 @@
   </div>
 </template>
 <script setup>
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import SliderInput from '../components/SliderInput.vue'
 import { useToast } from '../composables/useToast.js'
 
 const { showToast } = useToast()
 
 // ==================== DOM 引用 ====================
-const fileInput      = ref(null)
-const videoEl        = ref(null)
-const overlayCanvas  = ref(null)
-const videoWrapper   = ref(null)
+const fileInput = ref(null)
+const videoEl = ref(null)
+const overlayCanvas = ref(null)
+const videoWrapper = ref(null)
 const resultCanvasEl = ref(null)
 
 // ==================== 视频状态 ====================
-const videoUrl   = ref(null)
+const videoUrl = ref(null)
 const isDragOver = ref(false)
-const videoInfo  = ref(null)
+const videoInfo = ref(null)
 const videoNativeW = ref(0)
 const videoNativeH = ref(0)
+const videoMimeType = ref('') // 新增：记录 MIME Type
+const estimatedBitrate = ref('-') // 新增：记录估算码率
+const renderWidth = ref(0) // 新增：记录渲染宽度
+const renderHeight = ref(0) // 新增：记录渲染高度
+
+// ==================== 悬浮面板状态 ====================
+const showVideoInfo = ref(false)
 
 // ==================== 裁剪线状态 ====================
-const topCutRatio    = ref(0.75)
+const topCutRatio = ref(0.75)
 const bottomCutRatio = ref(0.92)
 
 // ==================== 封面帧 ====================
@@ -292,39 +205,13 @@ const coverTimeSec = ref(null)
 const showCoverTip = ref(false)
 
 // ==================== 时间标记 ====================
-const timePoints     = ref([])
+const timePoints = ref([])
 const timePointsText = ref('')
-const fps            = ref(30)
+const fps = ref(30)
 
 // ==================== 拼接设置 ====================
-const bgColor = ref('#ffffff')
-const spacing = ref(2)
-const format  = ref('png')
+const format = ref('png')
 
-const bgColorOptions = [
-  {
-    value: '#ffffff',
-    label: '白色',
-    style: { background: '#ffffff', border: '2px solid var(--border)' }
-  },
-  {
-    value: '#000000',
-    label: '黑色',
-    style: { background: '#000000' }
-  },
-  {
-    value: '#808080',
-    label: '灰色',
-    style: { background: '#808080' }
-  },
-  {
-    value: 'transparent',
-    label: '透明',
-    style: {
-      background: 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 12px 12px'
-    }
-  }
-]
 
 const compressionOptions = [
   { label: '不压缩', value: 1.0 },
@@ -335,18 +222,18 @@ const compressionOptions = [
 const compression = ref(1.0)
 
 // ==================== 结果状态 ====================
-const resultCanvas   = ref(null)
-const resultWidth    = ref(0)
-const resultHeight   = ref(0)
+const resultCanvas = ref(null)
+const resultWidth = ref(0)
+const resultHeight = ref(0)
 const extractedCount = ref(0)
-const isExtracting   = ref(false)
+const isExtracting = ref(false)
 
 // ==================== 状态提示 ====================
-const statusMsg  = ref('就绪 · 上传视频后通过滑块调整裁剪线')
+const statusMsg = ref('就绪 · 上传视频后通过滑块调整裁剪线')
 const statusType = ref('')
 
 const setStatus = (msg, type = '') => {
-  statusMsg.value  = msg
+  statusMsg.value = msg
   statusType.value = type
 }
 
@@ -354,14 +241,14 @@ const setStatus = (msg, type = '') => {
 
 const formatTime = (seconds) => {
   if (seconds === null || seconds === undefined) return '--'
-  const h  = Math.floor(seconds / 3600)
-  const m  = Math.floor((seconds % 3600) / 60)
-  const s  = Math.floor(seconds % 60)
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = Math.floor(seconds % 60)
   const ms = Math.floor((seconds % 1) * 1000)
   return String(h).padStart(2, '0') + ':' +
-         String(m).padStart(2, '0') + ':' +
-         String(s).padStart(2, '0') + '.' +
-         String(ms).padStart(3, '0')
+    String(m).padStart(2, '0') + ':' +
+    String(s).padStart(2, '0') + '.' +
+    String(ms).padStart(3, '0')
 }
 
 const formatBytes = (bytes) => {
@@ -374,7 +261,10 @@ const formatBytes = (bytes) => {
 
 const onFileChange = (e) => {
   const file = e.target.files[0]
-  if (file) loadVideo(file)
+  if (file) {
+    videoMimeType.value = file.type || 'unknown'
+    loadVideo(file)
+  }
   e.target.value = ''
 }
 
@@ -389,35 +279,45 @@ const loadVideo = (file) => {
   videoUrl.value = URL.createObjectURL(file)
 
   videoInfo.value = {
-    name:   file.name,
-    width:  '加载中...',
+    name: file.name,
+    width: '加载中...',
     height: '',
-    size:   formatBytes(file.size)
+    size: formatBytes(file.size)
   }
 
-  topCutRatio.value    = 0.75
+  topCutRatio.value = 0.75
   bottomCutRatio.value = 0.92
-  coverTimeSec.value   = null
-  showCoverTip.value   = false
-  timePoints.value     = []
+  coverTimeSec.value = null
+  showCoverTip.value = false
+  timePoints.value = []
   timePointsText.value = ''
-  resultCanvas.value   = null
+  resultCanvas.value = null
+
+  videoMimeType.value = file.type || 'unknown'
+  estimatedBitrate.value = '-'
+  renderWidth.value = 0
+  renderHeight.value = 0
 
   setStatus('视频加载中...', 'processing')
 }
 
 const removeVideo = () => {
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
-  videoUrl.value     = null
-  videoInfo.value    = null
+  videoUrl.value = null
+  videoInfo.value = null
   resultCanvas.value = null
 
-  topCutRatio.value    = 0.75
+  topCutRatio.value = 0.75
   bottomCutRatio.value = 0.92
-  coverTimeSec.value   = null
-  showCoverTip.value   = false
-  timePoints.value     = []
+  coverTimeSec.value = null
+  showCoverTip.value = false
+  timePoints.value = []
   timePointsText.value = ''
+
+  videoMimeType.value = ''
+  estimatedBitrate.value = '-'
+  renderWidth.value = 0
+  renderHeight.value = 0
 
   setStatus('就绪 · 上传视频后通过滑块调整裁剪线')
   showToast('视频已移除', 'success')
@@ -433,11 +333,27 @@ const onVideoLoaded = async () => {
   videoNativeH.value = video.videoHeight
   fps.value = 30
 
+  // 计算估算码率 (bps -> Mbps)
+  if (videoInfo.value && video.duration > 0) {
+    const sizeBits = (videoInfo.value.sizeBytes || 0) * 8
+    const bitrateBps = sizeBits / video.duration
+    if (bitrateBps > 1000000) {
+      estimatedBitrate.value = (bitrateBps / 1000000).toFixed(2) + ' Mbps'
+    } else if (bitrateBps > 1000) {
+      estimatedBitrate.value = (bitrateBps / 1000).toFixed(2) + ' Kbps'
+    } else {
+      estimatedBitrate.value = bitrateBps.toFixed(0) + ' bps'
+    }
+  }
+
   videoInfo.value = {
     ...videoInfo.value,
-    width:  video.videoWidth,
+    width: video.videoWidth,
     height: video.videoHeight
   }
+
+  // 更新渲染尺寸
+  updateRenderSize()
 
   video.addEventListener('keydown', onVideoKeyDown)
 
@@ -446,6 +362,17 @@ const onVideoLoaded = async () => {
   await nextTick()
   resizeOverlayCanvas()
   showToast('视频加载成功', 'success')
+}
+
+// 辅助函数：更新渲染尺寸
+const updateRenderSize = () => {
+  const video = videoEl.value
+  if (!video) return
+  const rect = video.getBoundingClientRect()
+  renderWidth.value = Math.round(rect.width)
+  // 减去控制条高度作为有效渲染高度参考，或者直接用总高度，这里用总高度更符合"播放区域"直观感受
+  // 但考虑到 overlay 是减去 controlBar 的，这里为了准确对应画面内容，我们显示实际 video 元素的渲染高
+  renderHeight.value = Math.round(rect.height)
 }
 
 // ==================== 视频按键拦截 ====================
@@ -461,24 +388,27 @@ const onVideoKeyDown = (e) => {
 // ==================== 覆盖层 Canvas ====================
 
 const resizeOverlayCanvas = () => {
-  const video  = videoEl.value
+  const video = videoEl.value
   const canvas = overlayCanvas.value
   if (!video || !canvas) return
 
-  const rect        = video.getBoundingClientRect()
+  const rect = video.getBoundingClientRect()
   const controlBarH = 44
-  const contentH    = Math.max(0, rect.height - controlBarH)
+  const contentH = Math.max(0, rect.height - controlBarH)
 
-  canvas.width        = Math.round(rect.width)
-  canvas.height       = Math.round(contentH)
-  canvas.style.width  = rect.width + 'px'
+  canvas.width = Math.round(rect.width)
+  canvas.height = Math.round(contentH)
+  canvas.style.width = rect.width + 'px'
   canvas.style.height = contentH + 'px'
+  
+  // 同步更新渲染尺寸供悬浮窗使用
+  updateRenderSize()
 
   drawOverlay()
 }
 
 const resetCutLines = () => {
-  topCutRatio.value    = 0.75
+  topCutRatio.value = 0.75
   bottomCutRatio.value = 0.92
   showToast('裁剪线已重置', 'success')
   setStatus('裁剪线已重置到默认位置')
@@ -490,7 +420,7 @@ const drawOverlay = () => {
   const ctx = canvas.getContext('2d')
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  const topY    = Math.round(topCutRatio.value * canvas.height)
+  const topY = Math.round(topCutRatio.value * canvas.height)
   const bottomY = Math.round(bottomCutRatio.value * canvas.height)
 
   // 封面帧区域
@@ -505,10 +435,19 @@ const drawOverlay = () => {
   ctx.fillStyle = 'rgba(0, 224, 158, 0.08)'
   ctx.fillRect(0, topY, canvas.width, bottomY - topY)
 
+  // 计算原始视频坐标系下的像素值
+  const rect = videoEl.value ? videoEl.value.getBoundingClientRect() : { height: canvas.height + 44 }
+  const controlBarH = 44
+  const effectiveVisualH = rect.height - controlBarH
+  const scaleToNative = (effectiveVisualH / rect.height) * videoNativeH.value
+  
+  const nativeTopY = Math.round(topCutRatio.value * scaleToNative)
+  const nativeBottomY = Math.round(bottomCutRatio.value * scaleToNative)
+
   // 红线
   ctx.save()
   ctx.strokeStyle = '#ef4444'
-  ctx.lineWidth   = 2
+  ctx.lineWidth = 2
   ctx.setLineDash([12, 8])
   ctx.beginPath()
   ctx.moveTo(0, topY)
@@ -517,13 +456,14 @@ const drawOverlay = () => {
   ctx.setLineDash([])
   ctx.fillStyle = '#ef4444'
   ctx.font = 'bold 12px system-ui'
-  ctx.fillText('▲ 上边界 ' + Math.round(topCutRatio.value * 100) + '%', 8, topY - 6)
+  const redLabel = `▲ 上边界 ${Math.round(topCutRatio.value * 100)}% (Y: ${nativeTopY})`
+  ctx.fillText(redLabel, 8, topY - 6)
   ctx.restore()
 
   // 蓝线
   ctx.save()
   ctx.strokeStyle = '#3b82f6'
-  ctx.lineWidth   = 2
+  ctx.lineWidth = 2
   ctx.setLineDash([12, 8])
   ctx.beginPath()
   ctx.moveTo(0, bottomY)
@@ -532,7 +472,8 @@ const drawOverlay = () => {
   ctx.setLineDash([])
   ctx.fillStyle = '#3b82f6'
   ctx.font = 'bold 12px system-ui'
-  ctx.fillText('▼ 下边界 ' + Math.round(bottomCutRatio.value * 100) + '%', 8, bottomY + 18)
+  const blueLabel = `▼ 下边界 ${Math.round(bottomCutRatio.value * 100)}% (Y: ${nativeBottomY})`
+  ctx.fillText(blueLabel, 8, bottomY + 18)
   ctx.restore()
 }
 
@@ -554,20 +495,15 @@ const setCoverFrame = () => {
 const markCurrentTime = () => {
   const video = videoEl.value
   if (!video) return
-  const timeSec  = video.currentTime
+  const timeSec = video.currentTime
   const frameIdx = Math.round(timeSec * fps.value)
   timePoints.value.push({ timeSec: timeSec, frameIdx: frameIdx })
   refreshTimeText()
   setStatus('已标记 ' + timePoints.value.length + ' 个时间点')
 }
 
-const undoLastMark = () => {
-  timePoints.value.pop()
-  refreshTimeText()
-}
-
 const clearMarks = () => {
-  timePoints.value     = []
+  timePoints.value = []
   timePointsText.value = ''
 }
 
@@ -576,6 +512,23 @@ const refreshTimeText = () => {
     .map((p, i) => (i + 1) + '. ' + formatTime(p.timeSec) + ' (帧:' + p.frameIdx + ')')
     .join('\n')
 }
+
+const parseTimePoints = () => {
+  const lines   = timePointsText.value.trim().split('\n').filter(l => l.trim())
+  const timeReg = /(\d{2}):(\d{2}):(\d{2})\.(\d{3})/
+  const result  = []
+
+  lines.forEach(line => {
+    const m = line.match(timeReg)
+    if (!m) return
+    const timeSec = parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseInt(m[3]) + parseInt(m[4]) / 1000
+    result.push({ timeSec, frameIdx: Math.round(timeSec * fps.value) })
+  })
+
+  timePoints.value = result
+  showToast(`已解析 ${result.length} 个时间点`, 'success')
+}
+
 
 // ==================== 键盘快捷键 ====================
 
@@ -609,7 +562,7 @@ const onKeydown = (e) => {
 
 const captureFrame = (video, timeSec, cropArea) => {
   return new Promise((resolve, reject) => {
-    var timeout = setTimeout(function() {
+    var timeout = setTimeout(function () {
       video.removeEventListener('seeked', onSeeked)
       reject(new Error('Seek 超时 @ ' + formatTime(timeSec)))
     }, 8000)
@@ -621,7 +574,7 @@ const captureFrame = (video, timeSec, cropArea) => {
         var w = cropArea.x2 - cropArea.x1
         var h = cropArea.y2 - cropArea.y1
         var c = document.createElement('canvas')
-        c.width  = w
+        c.width = w
         c.height = h
         c.getContext('2d').drawImage(video, cropArea.x1, cropArea.y1, w, h, 0, 0, w, h)
         resolve(c)
@@ -638,6 +591,10 @@ const captureFrame = (video, timeSec, cropArea) => {
 // ==================== 主提取流程 ====================
 
 const extractAndStitch = async () => {
+
+  // 保持调用：确保在执行提取前，时间标记文本已被最新解析并验证，防止因手动编辑文本导致数据不同步
+  parseTimePoints();
+
   const video = videoEl.value
   if (!video || !videoUrl.value) return
 
@@ -656,7 +613,7 @@ const extractAndStitch = async () => {
     var subtitlePoints = []
 
     if (timePoints.value.length > 0) {
-      subtitlePoints = timePoints.value.map(function(p) { return p.timeSec })
+      subtitlePoints = timePoints.value.map(function (p) { return p.timeSec })
     } else {
       var duration = video.duration
       if (!duration || !isFinite(duration)) throw new Error('无法获取视频时长')
@@ -722,37 +679,29 @@ const extractAndStitch = async () => {
     for (var k = 0; k < allFrames.length; k++) {
       totalH += allFrames[k].height
     }
-    totalH += spacing.value * (allFrames.length - 1)
 
     var result = document.createElement('canvas')
-    result.width  = maxW
+    result.width = maxW
     result.height = totalH
 
     var ctx = result.getContext('2d')
-
-    var bg = bgColor.value.trim().toLowerCase()
-    if (bg !== 'transparent') {
-      ctx.fillStyle = (bg === 'white') ? '#ffffff' : bg
-      ctx.fillRect(0, 0, maxW, totalH)
-    }
 
     var y = 0
     for (var m = 0; m < allFrames.length; m++) {
       var offsetX = Math.floor((maxW - allFrames[m].width) / 2)
       ctx.drawImage(allFrames[m], offsetX, y)
       y += allFrames[m].height
-      if (m < allFrames.length - 1) y += spacing.value
     }
 
     // 8. 显示结果
-    resultCanvas.value   = result
-    resultWidth.value    = result.width
-    resultHeight.value   = result.height
+    resultCanvas.value = result
+    resultWidth.value = result.width
+    resultHeight.value = result.height
     extractedCount.value = subtitleFrames.length
 
     await nextTick()
     if (resultCanvasEl.value) {
-      resultCanvasEl.value.width  = result.width
+      resultCanvasEl.value.width = result.width
       resultCanvasEl.value.height = result.height
       resultCanvasEl.value.getContext('2d').drawImage(result, 0, 0)
       resultCanvasEl.value.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
@@ -781,18 +730,18 @@ const saveResult = () => {
   if (!resultCanvas.value) return
 
   var mimeMap = { png: 'image/png', jpeg: 'image/jpeg', webp: 'image/webp' }
-  var mime    = mimeMap[format.value] || 'image/png'
+  var mime = mimeMap[format.value] || 'image/png'
 
   var extMap = { png: 'png', jpeg: 'jpg', webp: 'webp' }
-  var ext    = extMap[format.value] || 'png'
+  var ext = extMap[format.value] || 'png'
 
   var quality = (format.value === 'png') ? undefined : compression.value
 
-  resultCanvas.value.toBlob(function(blob) {
+  resultCanvas.value.toBlob(function (blob) {
     if (!blob) { showToast('保存失败', 'error'); return }
     var url = URL.createObjectURL(blob)
-    var a   = document.createElement('a')
-    a.href     = url
+    var a = document.createElement('a')
+    a.href = url
     a.download = 'subtitles_' + Date.now() + '.' + ext
     document.body.appendChild(a)
     a.click()
@@ -806,11 +755,11 @@ const saveResult = () => {
 
 var resizeObserver = null
 
-watch(videoEl, function(el) {
+watch(videoEl, function (el) {
   if (resizeObserver) { resizeObserver.disconnect(); resizeObserver = null }
   if (!el) return
 
-  resizeObserver = new ResizeObserver(function() {
+  resizeObserver = new ResizeObserver(function () {
     resizeOverlayCanvas()
   })
   resizeObserver.observe(el)
@@ -818,11 +767,11 @@ watch(videoEl, function(el) {
 
 // ==================== 生命周期 ====================
 
-onMounted(function() {
+onMounted(function () {
   document.addEventListener('keydown', onKeydown)
 })
 
-onUnmounted(function() {
+onUnmounted(function () {
   document.removeEventListener('keydown', onKeydown)
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
   if (resizeObserver) resizeObserver.disconnect()
@@ -850,6 +799,7 @@ onUnmounted(function() {
 
 .vsub-middle {
   width: 335px;
+  height: 100%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -943,6 +893,38 @@ onUnmounted(function() {
   line-height: 0;
 }
 
+/* 新增：视频属性悬浮面板样式 */
+.video-info-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: monospace;
+  line-height: 1.6;
+  z-index: 20;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.2s;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.info-label {
+  color: #aaa;
+  font-weight: normal;
+}
+
 .video-player {
   width: 100%;
   height: 65vh;
@@ -1031,32 +1013,6 @@ onUnmounted(function() {
   background: rgba(251, 146, 60, 0.1) !important;
 }
 
-/* ===== 封面帧说明浮层 ===== */
-.cover-tip-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  margin-top: 4px;
-  background: var(--bg);
-  border: 1px solid rgba(251, 146, 60, 0.3);
-  border-radius: var(--radius);
-  padding: 0.75rem 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.cover-tip-title {
-  font-weight: 700;
-  color: #fb923c;
-  margin-bottom: 0.35rem;
-}
-
-.cover-tip-body {
-  color: var(--muted);
-}
 
 /* ===== 结果区 ===== */
 .result-section {
@@ -1190,6 +1146,10 @@ onUnmounted(function() {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.btn-block {
+  flex: 1;
 }
 
 /* ===== 分段控制器 ===== */

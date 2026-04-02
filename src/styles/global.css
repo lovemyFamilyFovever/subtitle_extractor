@@ -201,7 +201,7 @@ textarea:focus {
   gap: 0.5rem;
   padding: 0.6rem 1rem;
   border-radius: 50px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
   background: var(--card-hover);
   border: 1px solid var(--border);
