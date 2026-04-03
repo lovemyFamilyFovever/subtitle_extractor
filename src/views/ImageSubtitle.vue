@@ -4,31 +4,27 @@
     <!-- ==================== 左栏：图片预览 + Canvas ==================== -->
     <div class="isub-left">
 
-      <!-- 操作按钮行 -->
-      <div class="action-row">
-        <button class="btn btn-primary" @click="fileInput.click()">
-          <i class="fa-solid fa-plus"></i> 添加图片
-        </button>
-        <button class="btn" :disabled="images.length === 0" @click="clearAll">
-          <i class="fa-solid fa-trash"></i> 清空
-        </button>
+      <!-- Canvas 预览舞台（包含上传区） -->
+
+      <!-- 上传区域：仿照视频模块设计 -->
+      <div class="upload-zone" :class="{ 'drag-over': isDragOver, 'has-images': images.length > 0 }"
+        @click="fileInput.click()" @dragover.prevent="isDragOver = true" @dragleave.prevent="isDragOver = false"
+        @drop.prevent="onDrop">
+
+        <i class="fa-solid fa-image upload-icon"></i>
+        <p class="upload-text">
+          {{ images.length > 0 ? '点击或拖拽新图片到此处' : '点击或拖拽图片到此处' }}
+        </p>
+        <p class="upload-hint" v-if="images.length === 0">
+          支持 JPG / PNG / WEBP 等常见格式
+        </p>
+
         <!-- 隐藏的文件选择框，支持多选 -->
-        <input ref="fileInput" type="file" accept="image/*" multiple style="display:none" @change="onFileChange" />
+        <input ref="fileInput" type="file" accept="image/*" multiple class="hidden-input" @change="onFileChange" />
       </div>
 
-      <!-- Canvas 预览舞台 -->
-      <div class="canvas-stage">
-        <!-- 空状态 -->
-        <div v-if="images.length === 0" class="empty-state" style="min-height:320px">
-          <span class="empty-icon">🖼️</span>
-          <span>添加图片后，拖动裁剪线调整字幕区域</span>
-        </div>
-
-        <!--
-          Canvas：图片 + 裁剪线都画在这里
-          ref="canvas" 让我们在 JS 中直接操作它
-          鼠标事件直接绑在 canvas 上
-        -->
+      <!-- Canvas：仅在有图片时显示 -->
+      <div class="canvas-container">
         <canvas v-show="images.length > 0" ref="canvas" class="preview-canvas" @mousedown="onMouseDown"
           @mousemove="onMouseMove" @mouseup="onMouseUp" @mouseleave="onMouseUp" @touchstart.prevent="onTouchStart"
           @touchmove.prevent="onTouchMove" @touchend="onMouseUp"></canvas>
@@ -51,13 +47,18 @@
         <button class="btn btn-danger" @click="deleteCurrentImage" :disabled="images.length == 0">
           <i class="fa-solid fa-trash"></i> 删除
         </button>
+
+        <!-- 清空 -->
+        <button class="btn  btn-primary" @click="clearImages" :disabled="images.length == 0">
+          <i class="fa-solid fa-trash-alt"></i> 清空
+        </button>
       </div>
 
       <!-- 图片信息栏 -->
       <div v-if="images.length > 0" class="info-bar">
         <span class="nav-filename">{{ images[currentIndex]?.name }}</span>
         <span><i class="fa-solid fa-expand"></i> {{ images[currentIndex]?.width }} × {{ images[currentIndex]?.height
-          }}</span>
+        }}</span>
         <span><i class="fa-solid fa-weight-hanging"></i> {{ formatBytes(images[currentIndex]?.size) }}</span>
       </div>
 
@@ -68,16 +69,17 @@
 
       <!-- 裁剪比例精确输入 -->
       <div class="settings-panel">
+
+        <div class="panel-title">
+          <i class="fa-solid fa-sliders"></i> 拼接设置
+          <span class="panel-hint">输入框支持滚轮和键盘上下键调整</span>
+        </div>
+
         <div class="setting-item">
           <label class="form-label">
             <span class="line-dot" style="background:#ef4444;display:inline-block"></span>
             红线位置（上边界）
           </label>
-          <!--
-            这里用 SliderInput 组件
-            :model-value 和 @update:model-value 是 v-model 的展开写法
-            因为我们需要把 0~1 的 ratio 转成 0~100 的百分比显示
-          -->
           <SliderInput :model-value="Math.round(topCutRatio * 100)" label="" unit="%" :min="0" :max="98"
             @update:model-value="val => topCutRatio = val / 100" />
         </div>
@@ -91,21 +93,27 @@
             @update:model-value="val => bottomCutRatio = val / 100" />
         </div>
 
-        <div class="divider"></div>
-
-        <!-- 间距设置 -->
-        <SliderInput v-model="spacing" label="图片间距" unit="px" :min="0" :max="40" />
-
         <!-- 输出格式 -->
         <div class="setting-item">
           <label class="form-label">输出格式</label>
           <div class="seg-control">
-            <button v-for="fmt in ['png', 'jpeg']" :key="fmt" class="seg-btn" :class="{ active: format === fmt }"
-              @click="format = fmt">{{ fmt.toUpperCase() }}</button>
+            <button v-for="fmt in ['png', 'jpeg', 'webp']" :key="fmt" class="seg-btn"
+              :class="{ active: format === fmt }" @click="format = fmt">{{ fmt.toUpperCase() }}</button>
           </div>
         </div>
 
-        <div class="divider"></div>
+        <!-- 压缩选项 -->
+        <div class="setting-item">
+          <label class="form-label">
+            <label class="form-label" style="display: inline;">图片压缩</label>
+            <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
+          </label>
+          <div class="seg-control">
+            <button v-for="opt in compressionOptions" :key="opt.value" class="seg-btn"
+              :class="{ active: compression === opt.value }" :disabled="format === 'png'"
+              @click="compression = opt.value">{{ opt.label }}</button>
+          </div>
+        </div>
 
         <!-- 生成按钮 -->
         <button class="btn btn-primary btn-block" :disabled="images.length === 0 || isGenerating" @click="generate">
@@ -113,11 +121,6 @@
           {{ isGenerating ? '生成中...' : '生成长拼接图' }}
         </button>
 
-        <!-- 状态条 -->
-        <div class="status-bar" :class="statusType">
-          <span class="status-dot"></span>
-          {{ statusMsg }}
-        </div>
       </div>
 
     </div>
@@ -141,7 +144,7 @@
         <button class="btn" @click="saveResult('jpeg')">
           <i class="fa-solid fa-download"></i> 保存 JPEG
         </button>
-          <button class="btn" @click="saveResult('webp')">
+        <button class="btn" @click="saveResult('webp')">
           <i class="fa-solid fa-download"></i> 保存 WEBP
         </button>
       </div>
@@ -172,6 +175,9 @@ const resultCanvasEl = ref(null) // 结果展示 Canvas
 const images = ref([])   // [{ id, name, size, width, height, url, img }]
 const currentIndex = ref(0)    // 当前预览的图片索引
 
+// ==================== 拖拽状态 ====================
+const isDragOver = ref(false)
+
 // ==================== 裁剪线状态 ====================
 const topCutRatio = ref(0.75) // 红线位置（比例 0~1）
 const bottomCutRatio = ref(0.92) // 蓝线位置（比例 0~1）
@@ -180,6 +186,13 @@ const dragging = ref(null) // 'top' | 'bottom' | null
 // ==================== 其他设置 ====================
 const spacing = ref(0)     // 拼接间距
 const format = ref('png') // 输出格式
+const compressionOptions = [
+  { label: '不压缩', value: 1.0 },
+  { label: '2x 压缩', value: 0.5 },
+  { label: '4x 压缩', value: 0.25 },
+  { label: '8x 压缩', value: 0.125 }
+]
+const compression = ref(1) // 压缩级别: 1(不压缩), 2, 4, 8
 
 // ==================== 结果状态 ====================
 const resultCanvas = ref(null)  // 生成的 Canvas 对象（非 DOM）
@@ -188,14 +201,13 @@ const resultHeight = ref(0)
 const isGenerating = ref(false)
 
 // ==================== 状态提示 ====================
-const statusMsg = ref('就绪 · 添加图片后调整裁剪线')
-const statusType = ref('')  // '' | 'success' | 'error' | 'processing'
+const statusMsg = ref('')
+const statusType = ref('')
 
 const setStatus = (msg, type = '') => {
   statusMsg.value = msg
   statusType.value = type
 }
-
 // ==================== 工具函数 ====================
 
 const formatBytes = (bytes) => {
@@ -207,9 +219,19 @@ const formatBytes = (bytes) => {
 
 // ==================== 文件处理 ====================
 
+const onDrop = (e) => {
+  isDragOver.value = false
+  const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'))
+  if (files.length > 0) {
+    addFiles(files)
+  }
+}
+
 const onFileChange = async (e) => {
   const files = Array.from(e.target.files)
-  await addFiles(files)
+  if (files.length > 0) {
+    await addFiles(files)
+  }
   e.target.value = ''
 }
 
@@ -276,10 +298,18 @@ const deleteCurrentImage = () => {
     // 如果删除的是最后一项，则索引向前移动一位
     currentIndex.value = images.value.length - 1
   }
-  // 否则currentIndex保持不变，因为后面的项目前移了
+  // 否则 currentIndex 保持不变，因为后面的项目前移了
 
   setStatus(`已删除第 ${index + 1} 张图片`)
   showToast(`已删除第 ${index + 1} 张图片`, 'success')
+}
+
+
+const clearImages = () => {
+  clearAll()
+  if (images.value.length > 0) {
+    showToast('已清空所有图片', 'success')
+  }
 }
 
 // ==================== Canvas 绘制 ====================
@@ -493,7 +523,7 @@ const generate = async () => {
       const { img, height } = images.value[i]
 
       if (i === 0) {
-        // 第一张：从顶部(0) 裁到蓝线
+        // 第一张：从顶部 (0) 裁到蓝线
         const cropH = Math.round(height * bottomCutRatio.value)
         croppedList.push(cropImage(img, 0, cropH))
       } else {
@@ -539,12 +569,35 @@ const generate = async () => {
 
 const saveResult = (fmt) => {
   if (!resultCanvas.value) return
-  const mimeType = fmt === 'jpeg' ? 'image/jpeg' : 'image/png'
-  resultCanvas.value.toBlob(blob => {
+
+  let mimeType = 'image/png'
+  let fileExt = 'png'
+
+  if (fmt === 'jpeg') {
+    mimeType = 'image/jpeg'
+    fileExt = 'jpg'
+  } else if (fmt === 'webp') {
+    mimeType = 'image/webp'
+    fileExt = 'webp'
+  }
+
+  // 处理压缩
+  let exportCanvas = resultCanvas.value
+  if (compression.value > 1) {
+    const scale = 1 / compression.value
+    const compressedCanvas = document.createElement('canvas')
+    compressedCanvas.width = Math.round(resultCanvas.value.width * scale)
+    compressedCanvas.height = Math.round(resultCanvas.value.height * scale)
+    const ctx = compressedCanvas.getContext('2d')
+    ctx.drawImage(resultCanvas.value, 0, 0, compressedCanvas.width, compressedCanvas.height)
+    exportCanvas = compressedCanvas
+  }
+
+  exportCanvas.toBlob(blob => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `subtitles_${Date.now()}.${fmt === 'jpeg' ? 'jpg' : 'png'}`
+    a.download = `subtitles_${Date.now()}.${fileExt}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -589,6 +642,26 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
+
+/* ===== 裁剪线指示点 ===== */
+.line-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.line-dot-red {
+  background: #ef4444;
+}
+
+.line-dot-blue {
+  background: #3b82f6;
+}
+
+
 /* 右栏 */
 .isub-right {
   width: 335px;
@@ -596,13 +669,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-/* ===== 顶部操作行 ===== */
-.action-row {
-  display: flex;
-  gap: 0.6rem;
-  flex-wrap: wrap;
 }
 
 /* ===== Canvas 容器 ===== */
@@ -613,9 +679,86 @@ onUnmounted(() => {
   overflow: hidden;
   /* 防止 Canvas 超出圆角 */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 120px;
+  gap: 0;
+}
+
+/* ===== 上传区域 (仿照 VideoSubtitle.vue) ===== */
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg);
+}
+
+.upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-dim);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: var(--accent);
+}
+
+.upload-zone:hover::before,
+.upload-zone.drag-over::before {
+  opacity: 1;
+}
+
+.upload-icon {
+  position: relative;
+  font-size: 1.75rem;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.upload-text {
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.upload-hint {
+  position: relative;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+/* 有图片时：隐藏 icon 和 hint，只保留 text，缩小 padding */
+.upload-zone.has-images .upload-icon {
+  display: none;
+}
+
+.upload-zone.has-images .upload-hint {
+  display: none;
+}
+
+.upload-zone.has-images {
+  padding: 0.6rem 1rem;
+  border-style: solid;
+  border-width: 1px;
+}
+
+/* 隐藏文件输入 */
+.hidden-input {
+  display: none;
 }
 
 /*
@@ -625,6 +768,17 @@ onUnmounted(() => {
   - 这样既保持清晰度，又不超出弹窗宽度
   - cursor:ns-resize 提示用户可以上下拖拽
 */
+
+
+
+.canvas-container {
+  position: relative;
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  line-height: 0;
+}
+
 .preview-canvas {
   width: 100%;
   height: auto;
@@ -733,6 +887,28 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
+
+.panel-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.panel-title i {
+  color: var(--accent);
+}
+
+
+.panel-hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: auto;
+}
+
+
 .setting-item {
   display: flex;
   flex-direction: column;
@@ -752,7 +928,7 @@ onUnmounted(() => {
   border: 1px solid var(--border);
   background: transparent;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -764,6 +940,19 @@ onUnmounted(() => {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+.seg-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ===== 表单元素 ===== */
+.form-hint {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.75rem;
+  margin-left: auto;
 }
 
 /* ===== 响应式 ===== */

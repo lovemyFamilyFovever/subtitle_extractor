@@ -97,7 +97,7 @@
 
         <div>
           <label class="form-label">
-            图片压缩
+            <label class="form-label" style="display: inline-block;">图片压缩</label>
             <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
           </label>
           <div class="seg-control">
@@ -1007,7 +1007,7 @@ onUnmounted(function () {
 .result-canvas-container {
   overflow: hidden;
   overflow-y: scroll;
-  height: 600px;
+  height: 665px;
 }
 
 .result-canvas {
@@ -1060,7 +1060,7 @@ onUnmounted(function () {
   border-radius: var(--radius);
   padding: 1rem;
   min-height: 200px;
-  height: 290px;
+  height: 365px;
   overflow-y: scroll;
 }
 

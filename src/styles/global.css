@@ -167,13 +167,6 @@ input[type="text"]:focus {
   align-items: flex-end;
 }
 
-/* 分割线 */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 1rem 0;
-}
-
 /* 状态提示条 */
 .status-bar {
   display: flex;
