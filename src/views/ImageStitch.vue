@@ -192,7 +192,9 @@
           ref="previewCanvas" —— 让我们在 JS 里直接操作这个 DOM 元素
           这是 Vue 3 中访问 DOM 的方式，相当于 document.getElementById()
         -->
-        <canvas v-show="images.length >= 2" ref="previewCanvas" class="preview-canvas"></canvas>
+          <div class="result-canvas-container">
+            <canvas v-show="images.length >= 2" ref="previewCanvas" class="preview-canvas"></canvas>
+          </div>
       </div>
     </div>
   </div>
@@ -875,6 +877,14 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.4rem;
 }
+
+
+.result-canvas-container {
+  overflow: hidden;
+  overflow-y: scroll;
+  height: 600px;
+}
+
 
 .preview-canvas {
   width: 100%;

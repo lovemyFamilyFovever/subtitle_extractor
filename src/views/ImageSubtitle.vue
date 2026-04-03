@@ -41,16 +41,21 @@
         </button>
         <span class="nav-info">
           {{ currentIndex + 1 }} / {{ images.length }}
-          <span class="nav-filename">{{ images[currentIndex]?.name }}</span>
         </span>
         <button class="btn" @click="goNext">
           <i class="fa-solid fa-chevron-right"></i>
+        </button>
+        <button class="btn" @click="setAsCover" :disabled="images.length == 0">
+          <i class="fa-solid fa-image"></i> 设为封面
+        </button>
+        <button class="btn btn-danger" @click="deleteCurrentImage" :disabled="images.length == 0">
+          <i class="fa-solid fa-trash"></i> 删除
         </button>
       </div>
 
       <!-- 图片信息栏 -->
       <div v-if="images.length > 0" class="info-bar">
-        <span><i class="fa-solid fa-layer-group"></i> {{ images.length }} 张</span>
+        <span class="nav-filename">{{ images[currentIndex]?.name }}</span>
         <span><i class="fa-solid fa-expand"></i> {{ images[currentIndex]?.width }} × {{ images[currentIndex]?.height
           }}</span>
         <span><i class="fa-solid fa-weight-hanging"></i> {{ formatBytes(images[currentIndex]?.size) }}</span>
@@ -60,7 +65,7 @@
 
     <!-- ==================== 中栏：设置 ==================== -->
     <div class="isub-middle">
-      
+
       <!-- 裁剪比例精确输入 -->
       <div class="settings-panel">
         <div class="setting-item">
@@ -118,29 +123,28 @@
     </div>
 
 
-
     <!-- ==================== 右栏：设置 ==================== -->
 
-    <div class="isub-right">
-
-      <!-- 结果预览区（生成后显示） -->
-      <div v-if="resultCanvas" class="result-section">
-        <div class="result-header">
-          <i class="fa-solid fa-check-circle" style="color:var(--accent)"></i>
-          拼接完成 · {{ resultWidth }} × {{ resultHeight }} px
-        </div>
-        <canvas ref="resultCanvasEl" class="result-canvas"></canvas>
-        <div class="result-actions">
-          <button class="btn btn-primary" @click="saveResult('png')">
-            <i class="fa-solid fa-download"></i> 保存 PNG
-          </button>
-          <button class="btn" @click="saveResult('jpeg')">
-            <i class="fa-solid fa-download"></i> 保存 JPEG
-          </button>
-        </div>
+    <!-- 结果预览区（生成后显示） -->
+    <div v-if="resultCanvas" class="isub-right result-section">
+      <div class="result-header">
+        <i class="fa-solid fa-check-circle" style="color:var(--accent)"></i>
+        拼接完成 · {{ resultWidth }} × {{ resultHeight }} px
       </div>
-
-
+      <div class="result-canvas-container">
+        <canvas ref="resultCanvasEl" class="result-canvas"></canvas>
+      </div>
+      <div class="result-actions">
+        <button class="btn btn-primary" @click="saveResult('png')">
+          <i class="fa-solid fa-download"></i> 保存 PNG
+        </button>
+        <button class="btn" @click="saveResult('jpeg')">
+          <i class="fa-solid fa-download"></i> 保存 JPEG
+        </button>
+          <button class="btn" @click="saveResult('webp')">
+          <i class="fa-solid fa-download"></i> 保存 WEBP
+        </button>
+      </div>
     </div>
 
 
@@ -255,6 +259,27 @@ const goPrev = () => {
 const goNext = () => {
   if (images.value.length === 0) return
   currentIndex.value = (currentIndex.value + 1) % images.value.length
+}
+
+
+const setAsCover = () => {
+
+}
+
+const deleteCurrentImage = () => {
+  const index = currentIndex.value
+  images.value.splice(index, 1)
+
+  if (images.value.length === 0) {
+    currentIndex.value = 0
+  } else if (index >= images.value.length) {
+    // 如果删除的是最后一项，则索引向前移动一位
+    currentIndex.value = images.value.length - 1
+  }
+  // 否则currentIndex保持不变，因为后面的项目前移了
+
+  setStatus(`已删除第 ${index + 1} 张图片`)
+  showToast(`已删除第 ${index + 1} 张图片`, 'success')
 }
 
 // ==================== Canvas 绘制 ====================
@@ -545,12 +570,14 @@ onUnmounted(() => {
 
 /* 左栏 */
 .isub-left {
-  flex: 1 1 auto; /* 关键：让左侧占据剩余空间，但不会被压缩 */
+  flex: 1 1 auto;
+  /* 关键：让左侧占据剩余空间，但不会被压缩 */
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-    width: 700px; /* 最小宽度保证可用性 */
+  width: 700px;
+  /* 最小宽度保证可用性 */
 }
 
 /* 中栏 */
@@ -671,6 +698,14 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.4rem;
 }
+
+
+.result-canvas-container {
+  overflow: hidden;
+  overflow-y: scroll;
+  height: 600px;
+}
+
 
 .result-canvas {
   width: 100%;
