@@ -40,16 +40,23 @@
       <!-- 工具栏 -->
       <div v-if="videoUrl" class="toolbar">
 
-        <button class="btn cover-btn" :class="{ 'cover-active': coverTimeSec !== null }" @click="setCoverFrame"
-          @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false" title="将当前播放位置设为封面帧提取时间点">
-          <i class="fa-solid fa-image"></i>
-          {{ coverTimeSec !== null ? '封面帧: ' + formatTime(coverTimeSec) : '设为封面帧' }}
-          <i class="fa-solid fa-circle-question cover-tip-icon"></i>
-        </button>
+        <div class="cover-btn-container">
+          <button class="btn cover-btn" :class="{ 'cover-active': coverTimeSec !== null || customCoverImage !== null }" @click="toggleCoverOptions"
+            @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false" title="设置封面">
+            <i class="fa-solid fa-image"></i>
+            {{ customCoverImage ? '本地封面' : coverTimeSec !== null ? '当前封面' : '封面设置' }}
+            <i class="fa-solid fa-circle-question cover-tip-icon"></i>
+          </button>
 
-        <button v-if="coverTimeSec !== null" class="btn" @click="coverTimeSec = null" title="清除手动设置的封面帧，改为自动使用第一个时间点">
-          <i class="fa-solid fa-rotate-left"></i> 自动封面
-        </button>
+          <div v-if="showCoverOptions" class="cover-options">
+            <button class="btn" @click="setCoverFrameFromVideo">当前封面</button>
+            <button class="btn" @click="coverFileInput.click()">本地封面</button>
+            <button class="btn" @click="clearCoverFrame" title="清除封面帧设置">
+              <i class="fa-solid fa-rotate-left"></i> 自动封面
+            </button>
+            <input ref="coverFileInput" type="file" accept="image/*" @change="onCoverFileChange" class="hidden-input" />
+          </div>
+        </div>
 
         <button class="btn" :disabled="!videoUrl" @click="markCurrentTime" style="margin-left: auto;">
           <i class="fa-solid fa-circle-dot"></i> 标记当前帧
@@ -190,6 +197,9 @@ const bottomCutRatio = ref(1)
 // ==================== 封面帧 ====================
 const coverTimeSec = ref(null)
 const showCoverTip = ref(false)
+const showCoverOptions = ref(false)
+const customCoverImage = ref(null)
+const coverFileInput = ref(null)
 
 // ==================== 时间标记 ====================
 const timePoints = ref([])
@@ -272,6 +282,8 @@ const loadVideo = (file) => {
   bottomCutRatio.value = 1
   coverTimeSec.value = null
   showCoverTip.value = false
+  showCoverOptions.value = false
+  customCoverImage.value = null
   timePoints.value = []
   resultCanvas.value = null
 
@@ -288,6 +300,8 @@ const removeVideo = () => {
   bottomCutRatio.value = 1
   coverTimeSec.value = null
   showCoverTip.value = false
+  showCoverOptions.value = false
+  customCoverImage.value = null
   timePoints.value = []
 
   setStatus('就绪 · 上传视频后通过滑块调整裁剪线')
@@ -446,11 +460,38 @@ watch([topCutRatio, bottomCutRatio], () => {
 
 // ==================== 封面帧 ====================
 
-const setCoverFrame = () => {
+const toggleCoverOptions = () => {
+  showCoverOptions.value = !showCoverOptions.value
+}
+
+const setCoverFrameFromVideo = () => {
   const video = videoEl.value
   if (!video) return
   coverTimeSec.value = video.currentTime
+  customCoverImage.value = null
+  showCoverOptions.value = false
   showToast('封面帧已设为 ' + formatTime(video.currentTime), 'success')
+}
+
+const onCoverFileChange = (e) => {
+  const file = e.target.files[0]
+  if (file) {
+    const img = new Image()
+    img.onload = () => {
+      customCoverImage.value = img
+      coverTimeSec.value = null
+      showCoverOptions.value = false
+      showToast('自定义封面已设置', 'success')
+    }
+    img.src = URL.createObjectURL(file)
+  }
+  e.target.value = ''
+}
+
+const clearCoverFrame = () => {
+  coverTimeSec.value = null
+  customCoverImage.value = null
+  showCoverOptions.value = false
 }
 
 // ==================== 时间标记 ====================
@@ -650,7 +691,18 @@ const extractAndStitch = async () => {
     // 5. 提取封面帧
     var allFrames = []
 
-    if (coverCrop.y2 > coverCrop.y1) {
+    if (customCoverImage.value) {
+      setStatus('处理自定义封面...', 'processing')
+      const canvas = document.createElement('canvas')
+      canvas.width = videoNativeW.value
+      canvas.height = Math.round(nativeTopY)
+      const ctx = canvas.getContext('2d')
+      // 缩放图片以适应宽度，裁剪高度
+      const scale = videoNativeW.value / customCoverImage.value.width
+      const scaledHeight = customCoverImage.value.height * scale
+      ctx.drawImage(customCoverImage.value, 0, 0, videoNativeW.value, Math.min(scaledHeight, canvas.height))
+      allFrames.push(canvas)
+    } else if (coverCrop.y2 > coverCrop.y1) {
       setStatus('提取封面帧...', 'processing')
       var coverFrame = await captureFrame(video, coverTime, coverCrop)
       allFrames.push(coverFrame)
@@ -964,6 +1016,24 @@ onUnmounted(function () {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.cover-btn-container {
+  position: relative;
+}
+
+.cover-options {
+  position: absolute;
+  top: -70px;
+  left: 0;
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .cover-btn {

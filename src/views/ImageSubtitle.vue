@@ -41,9 +41,22 @@
         <button class="btn" @click="goNext">
           <i class="fa-solid fa-chevron-right"></i>
         </button>
-        <button class="btn" @click="setAsCover" :disabled="images.length == 0">
-          <i class="fa-solid fa-image"></i> 设为封面
-        </button>
+        <div class="cover-btn-container">
+          <button class="btn cover-btn" :class="{ 'cover-active': coverMode !== 'auto' || customCoverImage !== null }" @click="toggleCoverOptions"
+            :disabled="images.length == 0" title="设置封面">
+            <i class="fa-solid fa-image"></i>
+            {{ customCoverImage ? '本地封面' : coverMode === 'current' ? '当前封面' : '封面设置' }}
+          </button>
+
+          <div v-if="showCoverOptions" class="cover-options">
+            <button class="btn" @click="setCoverFromCurrentImage" :disabled="images.length == 0">当前封面</button>
+            <button class="btn" @click="coverFileInput.click()" :disabled="images.length == 0">本地封面</button>
+            <button class="btn" @click="clearCoverFrame" :disabled="images.length == 0">
+              <i class="fa-solid fa-rotate-left"></i> 自动封面
+            </button>
+            <input ref="coverFileInput" type="file" accept="image/*" @change="onCoverFileChange" class="hidden-input" />
+          </div>
+        </div>
         <button class="btn btn-danger" @click="deleteCurrentImage" :disabled="images.length == 0">
           <i class="fa-solid fa-trash"></i> 删除
         </button>
@@ -78,7 +91,7 @@
         <div class="setting-item">
           <label class="form-label">
             <span class="line-dot" style="background:#ef4444;display:inline-block"></span>
-            红线位置（上边界）
+            红线位置（字幕上边界）
           </label>
           <SliderInput :model-value="Math.round(topCutRatio * 100)" label="" unit="%" :min="0" :max="98"
             @update:model-value="val => topCutRatio = val / 100" />
@@ -87,7 +100,7 @@
         <div class="setting-item">
           <label class="form-label">
             <span class="line-dot" style="background:#3b82f6;display:inline-block"></span>
-            蓝线位置（下边界）
+            蓝线位置（字幕下边界）
           </label>
           <SliderInput :model-value="Math.round(bottomCutRatio * 100)" label="" unit="%" :min="2" :max="100"
             @update:model-value="val => bottomCutRatio = val / 100" />
@@ -138,14 +151,8 @@
         <canvas ref="resultCanvasEl" class="result-canvas"></canvas>
       </div>
       <div class="result-actions">
-        <button class="btn btn-primary" @click="saveResult('png')">
-          <i class="fa-solid fa-download"></i> 保存 PNG
-        </button>
-        <button class="btn" @click="saveResult('jpeg')">
-          <i class="fa-solid fa-download"></i> 保存 JPEG
-        </button>
-        <button class="btn" @click="saveResult('webp')">
-          <i class="fa-solid fa-download"></i> 保存 WEBP
+        <button class="btn btn-primary" @click="saveResult(format)">
+          <i class="fa-solid fa-download"></i> 保存 {{ format.toUpperCase() }}
         </button>
       </div>
     </div>
@@ -174,6 +181,13 @@ const resultCanvasEl = ref(null) // 结果展示 Canvas
 // ==================== 图片状态 ====================
 const images = ref([])   // [{ id, name, size, width, height, url, img }]
 const currentIndex = ref(0)    // 当前预览的图片索引
+
+// ==================== 封面设置 ====================
+const coverMode = ref('auto') // auto | current | custom
+const coverImageIndex = ref(null)
+const showCoverOptions = ref(false)
+const customCoverImage = ref(null)
+const coverFileInput = ref(null)
 
 // ==================== 拖拽状态 ====================
 const isDragOver = ref(false)
@@ -267,6 +281,7 @@ const clearAll = () => {
   images.value = []
   currentIndex.value = 0
   resultCanvas.value = null
+  clearCoverFrame()
   setStatus('已清空所有图片')
   clearCanvas()
 }
@@ -284,13 +299,53 @@ const goNext = () => {
 }
 
 
-const setAsCover = () => {
+const toggleCoverOptions = () => {
+  showCoverOptions.value = !showCoverOptions.value
+}
 
+const setCoverFromCurrentImage = () => {
+  if (images.value.length === 0) return
+  coverMode.value = 'current'
+  coverImageIndex.value = currentIndex.value
+  customCoverImage.value = null
+  showCoverOptions.value = false
+  showToast('已将当前图片设为封面', 'success')
+}
+
+const onCoverFileChange = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+  const img = new Image()
+  img.onload = () => {
+    customCoverImage.value = img
+    coverMode.value = 'custom'
+    coverImageIndex.value = null
+    showCoverOptions.value = false
+    showToast('自定义封面已设置', 'success')
+  }
+  img.src = URL.createObjectURL(file)
+  e.target.value = ''
+}
+
+const clearCoverFrame = () => {
+  coverMode.value = 'auto'
+  coverImageIndex.value = null
+  customCoverImage.value = null
+  showCoverOptions.value = false
+  showToast('已恢复自动封面', 'success')
 }
 
 const deleteCurrentImage = () => {
   const index = currentIndex.value
   images.value.splice(index, 1)
+
+  if (coverMode.value === 'current' && coverImageIndex.value !== null) {
+    if (coverImageIndex.value === index) {
+      clearCoverFrame()
+    } else if (coverImageIndex.value > index) {
+      coverImageIndex.value--
+    }
+  }
 
   if (images.value.length === 0) {
     currentIndex.value = 0
@@ -363,7 +418,7 @@ const drawCanvas = () => {
   // 红线标签
   ctx.fillStyle = '#ef4444'
   ctx.font = `bold ${Math.max(12, displayH * 0.018)}px system-ui`
-  ctx.fillText('▲ 上边界（后续图片从这里开始）', 8, topY - 6)
+  ctx.fillText('▲ 上边界'+ Math.round(topCutRatio.value * 100) + '%', 8, topY - 6)
 
   ctx.restore()
 
@@ -380,7 +435,7 @@ const drawCanvas = () => {
   // 蓝线标签
   ctx.fillStyle = '#3b82f6'
   ctx.font = `bold ${Math.max(12, displayH * 0.018)}px system-ui`
-  ctx.fillText('▼ 下边界（所有图片保留到这里）', 8, bottomY + Math.max(16, displayH * 0.022))
+  ctx.fillText('▼ 下边界'+ Math.round(bottomCutRatio.value * 100) + '%', 8, bottomY + Math.max(16, displayH * 0.022))
 
   ctx.restore()
 }
@@ -519,18 +574,49 @@ const generate = async () => {
   try {
     const croppedList = []
 
-    for (let i = 0; i < images.value.length; i++) {
-      const { img, height } = images.value[i]
+    // 先处理封面
+    if (coverMode.value === 'custom' && customCoverImage.value) {
+      setStatus('处理自定义封面...', 'processing')
+      const item = images.value[0] // 使用第一张图片的尺寸作为参考
+      const canvas = document.createElement('canvas')
+      canvas.width = item.width
+      canvas.height = Math.round(item.height * topCutRatio.value)
+      const ctx = canvas.getContext('2d')
+      // 等比例缩放图片以适应宽度，裁剪高度
+      const scale = item.width / customCoverImage.value.naturalWidth
+      const scaledHeight = customCoverImage.value.naturalHeight * scale
+      ctx.drawImage(customCoverImage.value, 0, 0, item.width, Math.min(scaledHeight, canvas.height))
+      croppedList.push(canvas)
+    } else if (coverMode.value === 'current' && coverImageIndex.value !== null && images.value[coverImageIndex.value]) {
+      const item = images.value[coverImageIndex.value]
+      const cropH = Math.round(item.height * topCutRatio.value)
+      if (cropH > 0) {
+        croppedList.push(cropImage(item.img, 0, cropH))
+      }
+    }
 
-      if (i === 0) {
-        // 第一张：从顶部 (0) 裁到蓝线
-        const cropH = Math.round(height * bottomCutRatio.value)
-        croppedList.push(cropImage(img, 0, cropH))
-      } else {
-        // 后续张：从红线裁到蓝线
+    if (coverMode.value === 'auto') {
+      for (let i = 0; i < images.value.length; i++) {
+        const { img, height } = images.value[i]
+
+        if (i === 0) {
+          // 第一张：从顶部 (0) 裁到蓝线
+          const cropH = Math.round(height * bottomCutRatio.value)
+          croppedList.push(cropImage(img, 0, cropH))
+        } else {
+          // 后续张：从红线裁到蓝线
+          const cropY = Math.round(height * topCutRatio.value)
+          const cropH = Math.round(height * bottomCutRatio.value) - cropY
+          if (cropH <= 0) continue
+          croppedList.push(cropImage(img, cropY, cropH))
+        }
+      }
+    } else {
+      for (let i = 0; i < images.value.length; i++) {
+        const { img, height } = images.value[i]
         const cropY = Math.round(height * topCutRatio.value)
         const cropH = Math.round(height * bottomCutRatio.value) - cropY
-        if (cropH <= 0) continue  // 跳过无效裁剪
+        if (cropH <= 0) continue
         croppedList.push(cropImage(img, cropY, cropH))
       }
     }
@@ -797,6 +883,34 @@ onUnmounted(() => {
   gap: 0.75rem;
 }
 
+.cover-btn-container {
+  position: relative;
+}
+
+.cover-options {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  display: flex;
+  gap: 0.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cover-btn {
+  position: relative;
+}
+
+.cover-active {
+  border-color: #fb923c !important;
+  color: #fb923c !important;
+  background: rgba(251, 146, 60, 0.1) !important;
+}
+
 .nav-info {
   font-weight: 700;
   font-size: 0.875rem;
@@ -872,6 +986,7 @@ onUnmounted(() => {
 .result-actions {
   display: flex;
   gap: 0.6rem;
+  justify-content: center;
 }
 
 /* ===== 右栏设置 ===== */
