@@ -688,7 +688,7 @@ const saveResult = (fmt) => {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }, mimeType, 0.92)
+  }, mimeType, compression.value)
 }
 
 // ==================== 生命周期 ====================

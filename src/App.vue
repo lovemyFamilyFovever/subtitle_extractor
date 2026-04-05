@@ -9,7 +9,7 @@
       <h1 class="page-title">字幕工具箱</h1>
       <p class="page-desc">视频字幕提取 · 图片字幕裁切 · 自由拼接</p>
 
-      <!-- ===== 三个功能入口按钮 ===== -->
+      <!-- ===== 功能入口按钮 ===== -->
       <div class="entry-grid">
 
         <!-- 功能一：视频截取字幕 -->
@@ -38,6 +38,16 @@
           <div class="entry-info">
             <span class="entry-title">图片拼接</span>
             <span class="entry-desc">水平 / 垂直 / 网格布局，自由组合多张图片</span>
+          </div>
+          <i class="fa-solid fa-arrow-right entry-arrow"></i>
+        </button>
+
+        <!-- 功能四：智能切片（九宫格） -->
+        <button class="entry-card" @click="showSeg = true">
+          <div class="entry-icon"><i class="fa-solid fa-grip"></i></div>
+          <div class="entry-info">
+            <span class="entry-title">智能切片（九宫格）</span>
+            <span class="entry-desc">把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span>
           </div>
           <i class="fa-solid fa-arrow-right entry-arrow"></i>
         </button>
@@ -85,6 +95,9 @@
       <AppModal v-model="showStitch" title="图片拼接" icon="fa-solid fa-table-cells">
         <ImageStitch v-if="showStitch" />
       </AppModal>
+      <AppModal v-model="showSeg" title="智能切片" icon="fa-solid fa-grip">
+        <ImageSegmentation v-if="showSeg" />
+      </AppModal>
 
     </main>
   </div>
@@ -105,6 +118,7 @@ import AppModal from './components/AppModal.vue'
 import VideoSubtitle from './views/VideoSubtitle.vue'
 import ImageSubtitle from './views/ImageSubtitle.vue'
 import ImageStitch from './views/ImageStitch.vue'
+import ImageSegmentation from './views/ImageSegmentation.vue'
 
 // 导入 Toast composable
 import { useToast } from './composables/useToast.js'
@@ -114,6 +128,7 @@ import { useToast } from './composables/useToast.js'
 const showVideo = ref(false)
 const showImageSub = ref(false)
 const showStitch = ref(false)
+const showSeg = ref(false)
 
 // ===== Toast =====
 const { toasts, showToast } = useToast()
