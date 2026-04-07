@@ -7621,7 +7621,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-COyCVJk-.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-DQI2vR3P.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -7873,25 +7873,25 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 		};
 		return (_ctx, _cache) => {
 			return openBlock(), createElementBlock("div", null, [_cache[14] || (_cache[14] = createBaseVNode("div", { class: "page-bg" }, null, -1)), createBaseVNode("main", _hoisted_1, [
-				_cache[12] || (_cache[12] = createBaseVNode("h1", { class: "page-title" }, "字幕工具箱", -1)),
+				_cache[12] || (_cache[12] = createBaseVNode("h1", { class: "page-title" }, "我的工具箱", -1)),
 				_cache[13] || (_cache[13] = createBaseVNode("p", { class: "page-desc" }, "视频字幕提取 · 图片字幕裁切 · 自由拼接", -1)),
 				createBaseVNode("div", _hoisted_2, [
 					createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
-					}, [..._cache[8] || (_cache[8] = [createStaticVNode("<div class=\"entry-icon\" data-v-38d12aab><i class=\"fa-solid fa-film\" data-v-38d12aab></i></div><div class=\"entry-info\" data-v-38d12aab><span class=\"entry-title\" data-v-38d12aab>视频字幕提取</span><span class=\"entry-desc\" data-v-38d12aab>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-38d12aab></i>", 3)])]),
+					}, [..._cache[8] || (_cache[8] = [createStaticVNode("<div class=\"entry-icon\" data-v-741f33fb><i class=\"fa-solid fa-film\" data-v-741f33fb></i></div><div class=\"entry-info\" data-v-741f33fb><span class=\"entry-title\" data-v-741f33fb>视频字幕提取</span><span class=\"entry-desc\" data-v-741f33fb>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-741f33fb></i>", 3)])]),
 					createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
-					}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-38d12aab><i class=\"fa-solid fa-scissors\" data-v-38d12aab></i></div><div class=\"entry-info\" data-v-38d12aab><span class=\"entry-title\" data-v-38d12aab>图片截取字幕</span><span class=\"entry-desc\" data-v-38d12aab>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-38d12aab></i>", 3)])]),
+					}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-741f33fb><i class=\"fa-solid fa-scissors\" data-v-741f33fb></i></div><div class=\"entry-info\" data-v-741f33fb><span class=\"entry-title\" data-v-741f33fb>图片截取字幕</span><span class=\"entry-desc\" data-v-741f33fb>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-741f33fb></i>", 3)])]),
 					createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
-					}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-38d12aab><i class=\"fa-solid fa-table-cells\" data-v-38d12aab></i></div><div class=\"entry-info\" data-v-38d12aab><span class=\"entry-title\" data-v-38d12aab>图片拼接</span><span class=\"entry-desc\" data-v-38d12aab>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-38d12aab></i>", 3)])]),
+					}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-741f33fb><i class=\"fa-solid fa-table-cells\" data-v-741f33fb></i></div><div class=\"entry-info\" data-v-741f33fb><span class=\"entry-title\" data-v-741f33fb>图片拼接</span><span class=\"entry-desc\" data-v-741f33fb>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-741f33fb></i>", 3)])]),
 					createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
-					}, [..._cache[11] || (_cache[11] = [createStaticVNode("<div class=\"entry-icon\" data-v-38d12aab><i class=\"fa-solid fa-grip\" data-v-38d12aab></i></div><div class=\"entry-info\" data-v-38d12aab><span class=\"entry-title\" data-v-38d12aab>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-38d12aab>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-38d12aab></i>", 3)])])
+					}, [..._cache[11] || (_cache[11] = [createStaticVNode("<div class=\"entry-icon\" data-v-741f33fb><i class=\"fa-solid fa-grip\" data-v-741f33fb></i></div><div class=\"entry-info\" data-v-741f33fb><span class=\"entry-title\" data-v-741f33fb>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-741f33fb>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-741f33fb></i>", 3)])])
 				]),
 				(openBlock(), createBlock(Teleport, { to: "body" }, [createBaseVNode("div", _hoisted_3, [createVNode(TransitionGroup, { name: "toast" }, {
 					default: withCtx(() => [(openBlock(true), createElementBlock(Fragment, null, renderList(unref(toasts), (toast) => {
@@ -7941,6 +7941,6 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-38d12aab"]])).mount("#app");
+}, [["__scopeId", "data-v-741f33fb"]])).mount("#app");
 //#endregion
 export { __require as n, __commonJSMin as t };
