@@ -852,10 +852,13 @@ onUnmounted(() => {
     overflow: hidden;
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .cell-canvas {
-    width: 100%;
+    width: auto;
     height: 100%;
     display: block;
 

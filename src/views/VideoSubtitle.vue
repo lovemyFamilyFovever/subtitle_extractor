@@ -24,7 +24,14 @@
         </button>
 
         <!-- 原生视频播放器 -->
-        <video ref="videoEl" :src="videoUrl" controls class="video-player" @loadedmetadata="onVideoLoaded"></video>
+        <video 
+          ref="videoEl" 
+          :src="videoUrl" 
+          controls 
+          class="video-player" 
+          @loadedmetadata="onVideoLoaded"
+          @error="onVideoError"
+        ></video>
 
         <!-- 覆盖层 Canvas：仅视觉参考，不拦截事件 -->
         <canvas ref="overlayCanvas" class="overlay-canvas"></canvas>
@@ -268,6 +275,19 @@ const onDrop = (e) => {
 }
 
 const loadVideo = (file) => {
+  // 验证文件类型
+  if (!file.type.startsWith('video/')) {
+    showToast('请选择有效的视频文件', 'error')
+    return
+  }
+
+  // 验证文件大小（限制 2GB）
+  const maxSize = 2 * 1024 * 1024 * 1024
+  if (file.size > maxSize) {
+    showToast('视频文件过大（最大支持 2GB）', 'error')
+    return
+  }
+
   if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
   videoUrl.value = URL.createObjectURL(file)
 
@@ -306,6 +326,30 @@ const removeVideo = () => {
 
   setStatus('就绪 · 上传视频后通过滑块调整裁剪线')
   showToast('视频已移除', 'success')
+}
+
+// ==================== 视频错误处理 ====================
+
+const onVideoError = (e) => {
+  console.error('视频加载错误:', e)
+  const errorMessages = {
+    1: '视频加载被中止',
+    2: '网络错误，请检查网络连接',
+    3: '视频解码失败，格式可能不支持',
+    4: '视频文件损坏或格式不受支持'
+  }
+  const errorCode = videoEl.value?.error?.code || 4
+  const errorMsg = errorMessages[errorCode] || '视频加载失败'
+  
+  showToast(errorMsg, 'error')
+  setStatus(`错误：${errorMsg}`, 'error')
+  
+  // 清理无效的视频 URL
+  if (videoUrl.value) {
+    URL.revokeObjectURL(videoUrl.value)
+    videoUrl.value = null
+  }
+  videoInfo.value = null
 }
 
 // ==================== 视频加载 ====================
@@ -589,6 +633,17 @@ const captureFrame = (video, timeSec, cropArea) => {
       try {
         var w = cropArea.x2 - cropArea.x1
         var h = cropArea.y2 - cropArea.y1
+        
+        // 验证裁剪区域有效性
+        if (w <= 0 || h <= 0) {
+          throw new Error(`无效的裁剪区域: ${w}x${h}`)
+        }
+        
+        if (cropArea.x1 < 0 || cropArea.y1 < 0 || 
+            cropArea.x2 > video.videoWidth || cropArea.y2 > video.videoHeight) {
+          throw new Error('裁剪区域超出视频边界')
+        }
+        
         var c = document.createElement('canvas')
         c.width = w
         c.height = h
@@ -614,10 +669,22 @@ const extractAndStitch = async () => {
   const video = videoEl.value
   if (!video || !videoUrl.value) return
 
+  // 验证裁剪区域
   if (topCutRatio.value >= bottomCutRatio.value) {
     showToast('红线必须在蓝线上方', 'error')
     setStatus('红线必须在蓝线上方', 'error')
     return
+  }
+
+  // 验证时间点数量（防止内存溢出）
+  const maxFrames = 200
+  const estimatedFrames = timePoints.value.length > 0 
+    ? timePoints.value.length 
+    : Math.ceil(video.duration)
+  
+  if (estimatedFrames > maxFrames) {
+    showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内`, 'warning')
+    setStatus(`警告：预计提取 ${estimatedFrames} 帧，可能影响性能`, 'warning')
   }
 
   isExtracting.value = true
