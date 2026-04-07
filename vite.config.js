@@ -4,6 +4,7 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/subtitle_extractor/', // GitHub Pages 路径配置
   plugins: [vue()],
   
   // 路径别名配置
@@ -30,24 +31,13 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false, // 生产环境不生成 sourcemap
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // 移除 console.log
-        drop_debugger: true
-      }
-    },
+    minify: false, // GitHub Pages 不需要压缩，加快构建速度
     rollupOptions: {
       output: {
         // 静态资源分类打包
         chunkFileNames: 'js/[name]-[hash].js',
         entryFileNames: 'js/[name]-[hash].js',
-        assetFileNames: '[ext]/[name]-[hash].[ext]',
-        // 手动分包
-        manualChunks: {
-          vue: ['vue'],
-          jszip: ['jszip']
-        }
+        assetFileNames: '[ext]/[name]-[hash].[ext]'
       }
     },
     // 限制块大小警告
