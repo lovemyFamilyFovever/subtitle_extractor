@@ -1,9 +1,9 @@
 <template>
     <!-- 整体三栏布局：左侧上传区 + 中间设置区 + 右侧预览区 -->
-    <div class="seg-layout">
+    <div class="app-layout">
 
         <!-- ==================== 左栏：上传区 ==================== -->
-        <div class="seg-left">
+        <div class="app-left">
 
             <!-- 上传区 -->
             <div class="upload-zone" :class="{ 'drag-over': isDragOver }" @click="fileInput.click()"
@@ -41,11 +41,11 @@
         </div>
 
         <!-- ==================== 中栏：设置区 ==================== -->
-        <div class="seg-middle">
+        <div class="app-middle">
             <div class="settings-panel">
 
                 <!-- 切割方式 -->
-                <div class="setting-row">
+                <div class="setting-item">
                     <span class="form-label">切割方式</span>
                     <div class="seg-control">
                         <button v-for="opt in presetOptions" :key="opt.value" class="seg-btn"
@@ -87,20 +87,14 @@
                     </div>
                 </Teleport>
 
-                <!-- 间距 -->
-                <div class="setting-row">
-                    <span class="form-label">间距</span>
-                    <SliderInput v-model="gap" label="" unit="px" :min="0" :max="100" />
-                </div>
-
                 <!-- 圆角 -->
-                <div class="setting-row">
+                <div class="setting-item">
                     <span class="form-label">圆角</span>
                     <SliderInput v-model="radius" label="" unit="px" :min="0" :max="80" />
                 </div>
 
                 <!-- 背景色 -->
-                <div class="setting-row">
+                <div class="setting-item">
                     <span class="form-label">背景色</span>
                     <div class="color-swatches">
                         <template v-for="color in bgColors" :key="color.value">
@@ -124,7 +118,7 @@
                 </div>
 
                 <!-- 输出格式 -->
-                <div class="setting-row">
+                <div class="setting-item">
                     <label class="form-label">输出格式</label>
                     <div class="seg-control">
                         <button v-for="fmt in ['png', 'jpeg', 'webp']" :key="fmt" class="seg-btn"
@@ -133,7 +127,7 @@
                 </div>
 
                 <!-- 压缩选项 -->
-                <div class="setting-row">
+                <div class="setting-item">
                     <label class="form-label">
                         图片压缩
                         <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
@@ -149,7 +143,7 @@
         </div>
 
         <!-- ==================== 右栏：预览区 ==================== -->
-        <div class="seg-right">
+        <div class="app-right">
             <div class="preview-area">
 
                 <!-- 预览信息 -->
@@ -166,7 +160,7 @@
                 <!-- 九宫格预览 -->
                 <div v-if="sourceImage" class="grid-preview" :style="{
                     gridTemplateColumns: `repeat(${cutCols}, 1fr)`,
-                    gap: gap + 'px',
+                    gap: '2px',
                     background: bgColor === 'transparent' ? 'transparent' : bgColor,
                     aspectRatio: `${sourceImage.img.naturalWidth} / ${sourceImage.img.naturalHeight}`
                 }">
@@ -177,7 +171,7 @@
                 </div>
 
                 <!-- 导出按钮 -->
-                <button class="btn btn-primary btn-block" :disabled="!sourceImage" @click="exportZip">
+                <button class="btn btn-primary btn-block" :disabled="!sourceImage" @click="exportZip"  style="margin-top: auto;">
                     <i class="fa-solid fa-file-zipper"></i>
                     {{ sourceImage ? `导出 ZIP（${cutCols} * ${cutRows} 张 ${format.toUpperCase()}）` : '请先上传图片' }}
                 </button>
@@ -220,9 +214,8 @@ const hoverRow = ref(0)
 const pickerStyle = ref({})
 
 // ==================== 其他设置 ====================
-const gap = ref(4)
 const radius = ref(0)
-const bgColor = ref('#ffffff')
+const bgColor = ref('#000000')
 const customBgColor = ref('#a78bfa')
 const format = ref('jpeg')
 const compression = ref(1.0)
@@ -235,8 +228,8 @@ const compressionOptions = [
 ]
 
 const bgColors = [
-    { value: '#ffffff', label: '白色' },
     { value: '#000000', label: '黑色' },
+    { value: '#ffffff', label: '白色' },
     { value: '#1a1d27', label: '深色' },
     { value: '#f8fafc', label: '亮灰' },
     { value: '#e0f2fe', label: '天蓝' },
@@ -482,7 +475,7 @@ const exportZip = async () => {
 
 // ==================== Watch ====================
 watch(
-    [sourceImage, cutCols, cutRows, gap, radius, bgColor],
+    [sourceImage, cutCols, cutRows, radius, bgColor],
     () => nextTick(updatePreview),
     { deep: true }
 )
@@ -497,14 +490,14 @@ onUnmounted(() => {
 
 <style scoped>
 /* ===== 整体三栏布局 ===== */
-.seg-layout {
+.app-layout {
     display: flex;
     gap: 1.25rem;
     min-height: 0;
 }
 
 /* 左栏 */
-.seg-left {
+.app-left {
     flex: 1 1 auto;
     min-width: 260px;
     width: 600px;
@@ -514,7 +507,7 @@ onUnmounted(() => {
 }
 
 /* 中栏 */
-.seg-middle {
+.app-middle {
     width: 335px;
     flex-shrink: 0;
     display: flex;
@@ -523,7 +516,7 @@ onUnmounted(() => {
 }
 
 /* 右栏 */
-.seg-right {
+.app-right {
     width: 435px;
     flex-shrink: 0;
     display: flex;
@@ -648,7 +641,7 @@ onUnmounted(() => {
     gap: 1rem;
 }
 
-.setting-row {
+.setting-item {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -877,14 +870,5 @@ onUnmounted(() => {
     margin-left: 0.25rem;
 }
 
-/* ===== 响应式 ===== */
-@media (max-width: 640px) {
-    .seg-layout {
-        flex-direction: column;
-    }
-
-    .seg-right {
-        width: 100%;
-    }
-}
+/* 响应式样式已移至 global.css 统一管理 */
 </style>

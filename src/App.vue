@@ -26,7 +26,7 @@
         <button class="entry-card" @click="showImageSub = true">
           <div class="entry-icon"><i class="fa-solid fa-scissors"></i></div>
           <div class="entry-info">
-            <span class="entry-title">图片截取字幕</span>
+            <span class="entry-title">图片拼接字幕</span>
             <span class="entry-desc">拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span>
           </div>
           <i class="fa-solid fa-arrow-right entry-arrow"></i>

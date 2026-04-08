@@ -214,9 +214,156 @@ input[type="text"]:focus {
   color: var(--muted);
   font-size: 0.875rem;
   padding: 2rem;
+  min-height: 525px;
 }
 
 .empty-state .empty-icon {
   font-size: 2rem;
   opacity: 0.5;
+}
+
+/* =============================================
+   移动端响应式统一样式
+   所有组件共享的响应式规则
+   ============================================= */
+
+/* ===== Modal 移动端适配 ===== */
+@media (max-width: 768px) {
+  /* Modal 遮罩层：撑满全屏 */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end; /* 从底部弹出 */
+  }
+
+  /* Modal 主体：全屏显示 */
+  .modal {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    max-width: 100vw !important;
+    border-radius: 0 !important;
+    transform: translateY(100%) !important;
+  }
+
+  .modal-overlay.active .modal {
+    transform: translateY(0) !important;
+  }
+
+  /* Modal 头部：调整内边距 */
+  .modal-header {
+    padding: 0.75rem 1rem !important;
+  }
+
+  .modal-header h2 {
+    font-size: 1rem !important;
+  }
+
+  /* Modal 内容区：调整内边距 */
+  .modal-body {
+    padding: 1rem !important;
+  }
+}
+
+/* ===== 布局容器移动端适配 ===== */
+@media (max-width: 768px) {
+  /* 三栏布局改为单栏 */
+  .app-layout {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+  }
+
+  /* 左中右栏宽度都设为 100% */
+  .app-left,
+  .app-middle,
+  .app-right {
+    width: 100% !important;
+    min-width: 100% !important;
+    flex-shrink: 1 !important;
+  }
+
+  /* 视频播放器高度调整 */
+  .video-player {
+    height: 40vh !important;
+  }
+
+  /* Canvas 预览区域高度调整 */
+  .preview-canvas,
+  .result-canvas-container {
+    max-height: 40vh !important;
+  }
+
+  /* 设置面板间距缩小 */
+  .settings-panel {
+    padding: 0.75rem !important;
+    gap: 0.75rem !important;
+  }
+
+  /* 上传区域内边距缩小 */
+  .upload-zone {
+    padding: 1rem 0.75rem !important;
+  }
+
+  /* 按钮尺寸调整 */
+  .btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* 信息栏字体缩小 */
+  .info-bar,
+  .video-info-bar {
+    font-size: 0.7rem !important;
+    padding: 0.4rem 0.6rem !important;
+  }
+
+  /* 分段控制器调整 */
+  .seg-control {
+    gap: 0.2rem !important;
+  }
+
+  .seg-btn {
+    padding: 0.3rem 0.4rem !important;
+    font-size: 0.72rem !important;
+  }
+}
+
+/* ===== 超小屏幕适配（手机竖屏） ===== */
+@media (max-width: 480px) {
+  /* 进一步缩小间距 */
+  .app-layout {
+    padding: 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+
+  /* 视频播放器更小 */
+  .video-player {
+    height: 35vh !important;
+  }
+
+  /* 标题字体缩小 */
+  .panel-title {
+    font-size: 0.8rem !important;
+  }
+
+  /* 表单标签字体缩小 */
+  .form-label {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* ===== 横屏优化 ===== */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* 横屏时 modal 不全屏，保留部分内容可见 */
+  .modal {
+    width: 95vw !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  /* 视频播放器使用更大比例 */
+  .video-player {
+    height: 60vh !important;
+  }
 }

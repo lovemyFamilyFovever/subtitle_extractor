@@ -1,8 +1,8 @@
 <template>
-  <div class="isub-layout">
+  <div class="app-layout">
 
     <!-- ==================== 左栏：图片预览 + Canvas ==================== -->
-    <div class="isub-left">
+    <div class="app-left">
 
       <!-- Canvas 预览舞台（包含上传区） -->
 
@@ -42,8 +42,8 @@
           <i class="fa-solid fa-chevron-right"></i>
         </button>
         <div class="cover-btn-container">
-          <button class="btn cover-btn" :class="{ 'cover-active': coverMode !== 'auto' || customCoverImage !== null }" @click="toggleCoverOptions"
-            :disabled="images.length == 0" title="设置封面">
+          <button class="btn cover-btn" :class="{ 'cover-active': coverMode !== 'auto' || customCoverImage !== null }"
+            @click="toggleCoverOptions" :disabled="images.length == 0" title="设置封面">
             <i class="fa-solid fa-image"></i>
             {{ customCoverImage ? '本地封面' : coverMode === 'current' ? '当前封面' : '封面设置' }}
           </button>
@@ -78,7 +78,7 @@
     </div>
 
     <!-- ==================== 中栏：设置 ==================== -->
-    <div class="isub-middle">
+    <div class="app-middle">
 
       <!-- 裁剪比例精确输入 -->
       <div class="settings-panel">
@@ -129,10 +129,12 @@
         </div>
 
         <!-- 生成按钮 -->
-        <button class="btn btn-primary btn-block" :disabled="images.length === 0 || isGenerating" @click="generate">
-          <i class="fa-solid" :class="isGenerating ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
-          {{ isGenerating ? '生成中...' : '生成长拼接图' }}
-        </button>
+        <div class="action-row">
+          <button class="btn btn-primary btn-block" :disabled="images.length === 0 || isGenerating" @click="generate">
+            <i class="fa-solid" :class="isGenerating ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
+            {{ isGenerating ? '生成中...' : '生成长拼接图' }}
+          </button>
+        </div>
 
       </div>
 
@@ -142,7 +144,7 @@
     <!-- ==================== 右栏：设置 ==================== -->
 
     <!-- 结果预览区（生成后显示） -->
-    <div v-if="resultCanvas" class="isub-right result-section">
+    <div v-if="resultCanvas" class="app-right result-section">
       <div class="result-header">
         <i class="fa-solid fa-check-circle" style="color:var(--accent)"></i>
         拼接完成 · {{ resultWidth }} × {{ resultHeight }} px
@@ -418,7 +420,7 @@ const drawCanvas = () => {
   // 红线标签
   ctx.fillStyle = '#ef4444'
   ctx.font = `bold ${Math.max(12, displayH * 0.018)}px system-ui`
-  ctx.fillText('▲ 上边界'+ Math.round(topCutRatio.value * 100) + '%', 8, topY - 6)
+  ctx.fillText('▲ 上边界' + Math.round(topCutRatio.value * 100) + '%', 8, topY - 6)
 
   ctx.restore()
 
@@ -435,7 +437,7 @@ const drawCanvas = () => {
   // 蓝线标签
   ctx.fillStyle = '#3b82f6'
   ctx.font = `bold ${Math.max(12, displayH * 0.018)}px system-ui`
-  ctx.fillText('▼ 下边界'+ Math.round(bottomCutRatio.value * 100) + '%', 8, bottomY + Math.max(16, displayH * 0.022))
+  ctx.fillText('▼ 下边界' + Math.round(bottomCutRatio.value * 100) + '%', 8, bottomY + Math.max(16, displayH * 0.022))
 
   ctx.restore()
 }
@@ -701,14 +703,14 @@ onUnmounted(() => {
 
 <style scoped>
 /* ===== 两栏布局 ===== */
-.isub-layout {
+.app-layout {
   display: flex;
   gap: 1.25rem;
   align-items: flex-start;
 }
 
 /* 左栏 */
-.isub-left {
+.app-left {
   flex: 1 1 auto;
   /* 关键：让左侧占据剩余空间，但不会被压缩 */
   min-width: 0;
@@ -720,7 +722,7 @@ onUnmounted(() => {
 }
 
 /* 中栏 */
-.isub-middle {
+.app-middle {
   width: 335px;
   flex-shrink: 0;
   display: flex;
@@ -749,7 +751,7 @@ onUnmounted(() => {
 
 
 /* 右栏 */
-.isub-right {
+.app-right {
   width: 335px;
   flex-shrink: 0;
   display: flex;
@@ -1070,14 +1072,5 @@ onUnmounted(() => {
   margin-left: auto;
 }
 
-/* ===== 响应式 ===== */
-@media (max-width: 640px) {
-  .isub-layout {
-    flex-direction: column;
-  }
-
-  .isub-right {
-    width: 100%;
-  }
-}
+/* 响应式样式已移至 global.css 统一管理 */
 </style>

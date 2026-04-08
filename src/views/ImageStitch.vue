@@ -1,9 +1,9 @@
 <template>
   <!-- 整体三栏布局：左侧上传区 + 中间设置区 + 右侧预览区 -->
-  <div class="stitch-layout">
+  <div class="app-layout">
 
     <!-- ==================== 左栏：设置区 ==================== -->
-    <div class="stitch-left">
+    <div class="app-left">
 
       <!-- 1. 上传区 -->
       <div class="upload-zone" :class="{ 'drag-over': isDragOver }" @click="fileInput.click()"
@@ -51,13 +51,13 @@
     </div>
 
     <!-- ==================== 中栏：设置区 ==================== -->
-    <div class="stitch-middle">
+    <div class="app-middle">
 
       <!-- 布局设置区 -->
       <div class="settings-panel">
 
         <!-- 布局方式 -->
-        <div class="setting-row">
+        <div class="setting-item">
           <span class="form-label">布局方式</span>
           <div class="seg-control">
             <button v-for="opt in layoutOptions" :key="opt.value" class="seg-btn"
@@ -68,7 +68,7 @@
         </div>
 
         <!-- 网格列数（仅 grid 模式显示） -->
-        <div v-if="layout === 'grid'" class="setting-row">
+        <div v-if="layout === 'grid'" class="setting-item">
           <span class="form-label">网格列数</span>
           <div class="seg-control">
             <button v-for="n in [2, 3, 4, 5]" :key="n" class="seg-btn" :class="{ active: gridCols === n }"
@@ -76,18 +76,18 @@
           </div>
         </div>
 
-        <div class="setting-row">
+        <div class="setting-item">
           <span class="form-label">间距滑块</span>
           <SliderInput v-model="gap" label="" unit="px" :min="0" :max="100" />
         </div>
 
-        <div class="setting-row">
+        <div class="setting-item">
           <span class="form-label">圆角滑块</span>
           <SliderInput v-model="radius" label="" unit="px" :min="0" :max="80" />
         </div>
 
         <!-- 背景色 -->
-        <div class="setting-row">
+        <div class="setting-item">
           <span class="form-label">背景色</span>
           <div class="color-swatches">
             <template v-for="color in bgColors" :key="color.value">
@@ -108,7 +108,7 @@
 
 
         <!-- 输出格式 -->
-        <div class="setting-row">
+        <div class="setting-item">
           <label class="form-label">输出格式</label>
           <div class="seg-control">
             <button v-for="fmt in ['png', 'jpeg', 'webp']" :key="fmt" class="seg-btn"
@@ -117,7 +117,7 @@
         </div>
 
         <!-- 压缩选项 -->
-        <div class="setting-row">
+        <div class="setting-item">
           <label class="form-label">
             <label class="form-label" style="display: inline;">图片压缩</label>
             <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
@@ -134,7 +134,7 @@
     </div>
 
     <!-- ==================== 右栏：预览区 ========== -->
-    <div class="stitch-right">
+    <div class="app-right">
       <!-- 预览区 -->
       <div class="preview-area">
         <!-- 预览信息（尺寸） -->
@@ -143,7 +143,7 @@
         </div>
 
         <!-- 无图片时的空状态 -->
-        <div v-if="images.length < 2" class="empty-state" style="min-height: 525px;">
+        <div v-if="images.length < 2" class="empty-state">
           <span class="empty-icon">🖼️</span>
           <span>添加至少 2 张图片后预览</span>
         </div>
@@ -648,7 +648,7 @@ onUnmounted(() => {
 
 <style scoped>
 /* ===== 整体两栏布局 ===== */
-.stitch-layout {
+.app-layout {
   display: flex;
   gap: 1.25rem;
   min-height: 0;
@@ -656,7 +656,7 @@ onUnmounted(() => {
 }
 
 /* 左栏：图片管理 */
-.stitch-left {
+.app-left {
   flex: 1 1 auto;
   /* 关键：让左侧占据剩余空间，但不会被压缩 */
   min-width: 355px;
@@ -667,7 +667,7 @@ onUnmounted(() => {
 }
 
 /* 中栏：设置 + 预览 */
-.stitch-middle {
+.app-middle {
   width: 335px;
   flex-shrink: 0;
   display: flex;
@@ -676,7 +676,7 @@ onUnmounted(() => {
 }
 
 /* 右栏：设置 + 预览 */
-.stitch-right {
+.app-right {
   width: 435px;
   flex-shrink: 0;
   display: flex;
@@ -856,7 +856,7 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.setting-row {
+.setting-item {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -991,14 +991,5 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* ===== 响应式：窄屏改为单栏 ===== */
-@media (max-width: 640px) {
-  .stitch-layout {
-    flex-direction: column;
-  }
-
-  .stitch-right {
-    width: 100%;
-  }
-}
+/* 响应式样式已移至 global.css 统一管理 */
 </style>

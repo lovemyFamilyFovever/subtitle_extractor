@@ -92,11 +92,9 @@ const close = () => {
   inset: 0;                  /* 等价于 top:0; right:0; bottom:0; left:0 */
   z-index: 1000;
   background: var(--overlay);
-  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
 
   /* 默认不可见 */
   opacity: 0;

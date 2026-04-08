@@ -1,8 +1,8 @@
 <template>
-  <div class="vsub-layout">
+  <div class="app-layout">
 
     <!-- ==================== 左栏：视频播放器 ==================== -->
-    <div class="vsub-left">
+    <div class="app-left">
 
       <!-- 视频文件上传区 -->
       <div class="upload-zone" :class="{ 'drag-over': isDragOver, 'has-video': videoUrl }" @click="fileInput.click()"
@@ -74,7 +74,7 @@
     </div>
 
     <!-- ==================== 中栏：控制面板 ==================== -->
-    <div class="vsub-middle">
+    <div class="app-middle">
 
       <!-- 拼接设置 -->
       <div class="settings-panel">
@@ -101,7 +101,7 @@
             @update:model-value="val => bottomCutRatio = val / 100" step="1" />
         </div>
 
-        <div>
+        <div class="setting-item">
           <label class="form-label">输出格式</label>
           <div class="seg-control">
             <button v-for="fmt in ['png', 'jpeg', 'webp']" :key="fmt" class="seg-btn"
@@ -109,7 +109,7 @@
           </div>
         </div>
 
-        <div>
+        <div class="setting-item">
           <label class="form-label">
             <label class="form-label" style="display: inline-block;">图片压缩</label>
             <span v-if="format === 'png'" class="form-hint">（PNG 无损，此项无效）</span>
@@ -154,7 +154,7 @@
     </div>
 
     <!-- ==================== 右栏：结果预览 ==================== -->
-    <div class="vsub-right" v-if="resultCanvas">
+    <div class="app-right" v-if="resultCanvas">
 
       <div class="result-section">
         <div class="result-header">
@@ -899,7 +899,7 @@ onUnmounted(function () {
 </script>
 <style scoped>
 /* ===== 三栏布局 ===== */
-.vsub-layout {
+.app-layout {
   display: flex;
   gap: 1.25rem;
   align-items: flex-start;
@@ -907,7 +907,7 @@ onUnmounted(function () {
   min-height: 0;
 }
 
-.vsub-left {
+.app-left {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
@@ -917,7 +917,7 @@ onUnmounted(function () {
   position: relative;
 }
 
-.vsub-middle {
+.app-middle {
   width: 335px;
   height: 100%;
   flex-shrink: 0;
@@ -926,7 +926,7 @@ onUnmounted(function () {
   gap: 1rem;
 }
 
-.vsub-right {
+.app-right {
   width: 335px;
   flex-shrink: 0;
   display: flex;
@@ -1197,7 +1197,7 @@ onUnmounted(function () {
   border-radius: var(--radius);
   padding: 1rem;
   min-height: 200px;
-  height: 365px;
+  height: 270px;
   overflow-y: scroll;
 }
 
@@ -1249,8 +1249,6 @@ onUnmounted(function () {
 .time-item-text {
   flex: 1;
 }
-
-.time-item-btn {}
 
 .setting-item {
   display: flex;
@@ -1363,14 +1361,6 @@ onUnmounted(function () {
   cursor: not-allowed;
 }
 
-/* ===== 响应式 ===== */
-@media (max-width: 640px) {
-  .vsub-layout {
-    flex-direction: column;
-  }
-
-  .vsub-right {
-    width: 100%;
-  }
-}
+/* 组件特定样式已在上方定义 */
+/* 响应式样式已移至 global.css 统一管理 */
 </style>
