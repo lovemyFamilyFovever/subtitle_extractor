@@ -24,14 +24,8 @@
         </button>
 
         <!-- 原生视频播放器 -->
-        <video 
-          ref="videoEl" 
-          :src="videoUrl" 
-          controls 
-          class="video-player" 
-          @loadedmetadata="onVideoLoaded"
-          @error="onVideoError"
-        ></video>
+        <video ref="videoEl" :src="videoUrl" controls muted class="video-player" @loadedmetadata="onVideoLoaded"
+          @error="onVideoError"></video>
 
         <!-- 覆盖层 Canvas：仅视觉参考，不拦截事件 -->
         <canvas ref="overlayCanvas" class="overlay-canvas"></canvas>
@@ -48,8 +42,9 @@
       <div v-if="videoUrl" class="toolbar">
 
         <div class="cover-btn-container">
-          <button class="btn cover-btn" :class="{ 'cover-active': coverTimeSec !== null || customCoverImage !== null }" @click="toggleCoverOptions"
-            @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false" title="设置封面">
+          <button class="btn cover-btn" :class="{ 'cover-active': coverTimeSec !== null || customCoverImage !== null }"
+            @click="toggleCoverOptions" @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false"
+            title="设置封面">
             <i class="fa-solid fa-image"></i>
             {{ customCoverImage ? '本地封面' : coverTimeSec !== null ? '当前封面' : '封面设置' }}
             <i class="fa-solid fa-circle-question cover-tip-icon"></i>
@@ -142,23 +137,13 @@
 
         <div class="action-row">
           <!-- 撤销/重做按钮 -->
-          <button 
-            class="btn" 
-            :disabled="!canUndo()" 
-            @click="handleUndo"
-            title="撤销 (Ctrl+Z)"
-            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;"
-          >
+          <button class="btn" :disabled="!canUndo()" @click="handleUndo" title="撤销 (Ctrl+Z)"
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;">
             <i class="fa-solid fa-undo"></i>
           </button>
-          
-          <button 
-            class="btn" 
-            :disabled="!canRedo()" 
-            @click="handleRedo"
-            title="重做 (Ctrl+Y)"
-            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;"
-          >
+
+          <button class="btn" :disabled="!canRedo()" @click="handleRedo" title="重做 (Ctrl+Y)"
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;">
             <i class="fa-solid fa-redo"></i>
           </button>
 
@@ -181,14 +166,11 @@
             </span>
             <span class="progress-percent">{{ progressInfo.percent }}%</span>
           </div>
-          
+
           <div class="progress-bar">
-            <div 
-              class="progress-fill" 
-              :style="{ width: progressInfo.percent + '%' }"
-            ></div>
+            <div class="progress-fill" :style="{ width: progressInfo.percent + '%' }"></div>
           </div>
-          
+
           <div class="progress-footer">
             <span v-if="progressInfo.estimatedTime > 0" class="progress-time">
               <i class="fa-regular fa-clock"></i>
@@ -271,7 +253,7 @@ const videoNativeH = ref(0)
 
 // ==================== 裁剪线状态 ====================
 const topCutRatio = ref(0.75)
-const bottomCutRatio = ref(1)
+const bottomCutRatio = ref(0.83)
 
 // ==================== 封面帧 ====================
 const coverTimeSec = ref(null)
@@ -334,7 +316,7 @@ const updateProgress = (current, total) => {
   progressInfo.value.current = current
   progressInfo.value.total = total
   progressInfo.value.percent = Math.floor((current / total) * 100)
-  
+
   // 计算预计剩余时间
   if (progressInfo.value.startTime && current > 0) {
     const elapsed = (Date.now() - progressInfo.value.startTime) / 1000
@@ -425,8 +407,8 @@ const loadVideo = (file) => {
     size: formatBytes(file.size)
   }
 
-  topCutRatio.value = 0.88
-  bottomCutRatio.value = 1
+  topCutRatio.value = 0.75
+  bottomCutRatio.value = 0.83
   coverTimeSec.value = null
   showCoverTip.value = false
   showCoverOptions.value = false
@@ -467,10 +449,10 @@ const onVideoError = (e) => {
   }
   const errorCode = videoEl.value?.error?.code || 4
   const errorMsg = errorMessages[errorCode] || '视频加载失败，请检查文件是否完整'
-  
+
   showToast(errorMsg, 'error')
   setStatus(`错误：${errorMsg}`, 'error')
-  
+
   // 清理无效的视频 URL
   if (videoUrl.value) {
     URL.revokeObjectURL(videoUrl.value)
@@ -484,6 +466,9 @@ const onVideoError = (e) => {
 const onVideoLoaded = async () => {
   const video = videoEl.value
   if (!video) return
+
+  // 确保视频默认静音
+  video.muted = true
 
   videoNativeW.value = video.videoWidth
   videoNativeH.value = video.videoHeight
@@ -774,17 +759,17 @@ const captureFrame = (video, timeSec, cropArea) => {
       try {
         const w = cropArea.x2 - cropArea.x1
         const h = cropArea.y2 - cropArea.y1
-        
+
         // 验证裁剪区域有效性
         if (w <= 0 || h <= 0) {
           throw new Error(`无效的裁剪区域: ${w}x${h}`)
         }
-        
-        if (cropArea.x1 < 0 || cropArea.y1 < 0 || 
-            cropArea.x2 > video.videoWidth || cropArea.y2 > video.videoHeight) {
+
+        if (cropArea.x1 < 0 || cropArea.y1 < 0 ||
+          cropArea.x2 > video.videoWidth || cropArea.y2 > video.videoHeight) {
           throw new Error('裁剪区域超出视频边界')
         }
-        
+
         const c = document.createElement('canvas')
         c.width = w
         c.height = h
@@ -814,7 +799,7 @@ const checkMemoryUsage = () => {
     const usedMB = performance.memory.usedJSHeapSize / 1024 / 1024
     const totalMB = performance.memory.jsHeapSizeLimit / 1024 / 1024
     const percent = (usedMB / totalMB) * 100
-    
+
     return {
       used: usedMB.toFixed(1),
       total: totalMB.toFixed(1),
@@ -840,13 +825,13 @@ const estimateCanvasMemory = (canvas) => {
  */
 const releaseCanvas = (canvas) => {
   if (!canvas) return
-  
+
   // 清空画布内容
   const ctx = canvas.getContext('2d')
   if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
   }
-  
+
   // 重置尺寸（触发内存释放）
   canvas.width = 0
   canvas.height = 0
@@ -868,17 +853,17 @@ const extractAndStitch = async () => {
 
   // 验证时间点数量（防止内存溢出）
   const maxFrames = 200
-  const estimatedFrames = timePoints.value.length > 0 
-    ? timePoints.value.length 
+  const estimatedFrames = timePoints.value.length > 0
+    ? timePoints.value.length
     : Math.ceil(video.duration)
-  
+
   if (estimatedFrames > maxFrames) {
     const memInfo = checkMemoryUsage()
     const memWarning = memInfo ? ` (当前内存: ${memInfo.used}MB / ${memInfo.total}MB)` : ''
-    
+
     showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内${memWarning}`, 'warning')
     setStatus(`警告：预计提取 ${estimatedFrames} 帧，可能影响性能`, 'warning')
-    
+
     // 如果内存使用率已经超过 50%，强烈建议减少帧数
     if (memInfo && parseFloat(memInfo.percent) > 50) {
       const confirmed = confirm(`内存使用率已达 ${memInfo.percent}%，处理 ${estimatedFrames} 帧可能导致浏览器崩溃。\n\n是否继续？`)
@@ -891,11 +876,11 @@ const extractAndStitch = async () => {
 
   isExtracting.value = true
   resultCanvas.value = null
-  
+
   // 初始化进度信息
   resetProgress()
   progressInfo.value.startTime = Date.now()
-  
+
   setStatus('提取中...', 'processing')
 
   try {
@@ -985,14 +970,14 @@ const extractAndStitch = async () => {
     // 6. 分块逐帧提取字幕（每10帧处理一次，避免内存溢出）
     const CHUNK_SIZE = 10 // 每块处理的帧数
     const subtitleFrames = []
-    
+
     for (let i = 0; i < subtitlePoints.length; i++) {
       // 更新进度
       updateProgress(i + 1, subtitlePoints.length)
-      
+
       const frame = await captureFrame(video, subtitlePoints[i], subCrop)
       subtitleFrames.push(frame)
-      
+
       // 检查内存使用情况
       if ((i + 1) % CHUNK_SIZE === 0 || i === subtitlePoints.length - 1) {
         const memInfo = checkMemoryUsage()
@@ -1000,7 +985,7 @@ const extractAndStitch = async () => {
           console.warn(`内存使用率较高: ${memInfo.used}MB / ${memInfo.total}MB (${memInfo.percent}%)`)
           showToast(`内存使用率较高 (${memInfo.percent}%)，建议减少提取帧数`, 'warning')
         }
-        
+
         // 如果是最后一块，继续；否则可以提示用户
         if (i < subtitlePoints.length - 1) {
           console.log(`已处理 ${i + 1} 帧，继续处理...`)
@@ -1011,7 +996,7 @@ const extractAndStitch = async () => {
     if (subtitleFrames.length === 0) throw new Error('没有成功提取到任何字幕帧')
 
     allFrames.push(...subtitleFrames)
-    
+
     // 释放字幕帧数组中的 Canvas（拼接后不再需要单独引用）
     // 注意：这里不立即释放，因为后面还需要用于拼接
 
@@ -1039,7 +1024,7 @@ const extractAndStitch = async () => {
       const offsetX = Math.floor((maxW - allFrames[m].width) / 2)
       ctx.drawImage(allFrames[m], offsetX, y)
       y += allFrames[m].height
-      
+
       // 拼接完成后释放单个帧的内存
       if (m > 0) { // 保留第一个（封面）用于可能的调试
         releaseCanvas(allFrames[m])
@@ -1067,7 +1052,7 @@ const extractAndStitch = async () => {
       'success'
     )
     showToast('提取完成，共 ' + allFrames.length + ' 帧', 'success')
-    
+
     // 9. 最终内存清理提示
     const finalMem = checkMemoryUsage()
     if (finalMem) {
@@ -1460,7 +1445,7 @@ onUnmounted(function () {
 .time-item:hover {
   transform: translateX(10px);
   background: var(--accent);
-    color: var(--bg);
+  color: var(--bg);
 }
 
 .time-item-btn {
@@ -1620,6 +1605,7 @@ onUnmounted(function () {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

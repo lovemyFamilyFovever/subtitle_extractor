@@ -6,7 +6,7 @@
     <!-- 页面主内容 -->
     <main class="page-content">
       <!-- 标题区 -->
-      <h1 class="page-title">我的工具箱</h1>
+      <h1 class="page-title">工具箱</h1>
       <p class="page-desc">视频字幕提取 · 图片字幕裁切 · 自由拼接</p>
 
       <!-- GitHub Star 按钮 -->
