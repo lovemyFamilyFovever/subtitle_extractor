@@ -9,50 +9,87 @@
       <h1 class="page-title">我的工具箱</h1>
       <p class="page-desc">视频字幕提取 · 图片字幕裁切 · 自由拼接</p>
 
+      <!-- GitHub Star 按钮 -->
+      <a href="https://github.com/lovemyFamilyFovever/subtitle_extractor" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         class="github-star-btn"
+         title="在 GitHub 上查看项目">
+        <i class="fa-brands fa-github"></i>
+        <span>Star on GitHub</span>
+      </a>
+
       <!-- ===== 功能入口按钮 ===== -->
-      <div class="entry-grid">
+      <div class="entry-container">
 
-        <!-- 功能一：视频截取字幕 -->
-        <button class="entry-card" @click="showVideo = true">
-          <div class="entry-icon"><i class="fa-solid fa-film"></i></div>
-          <div class="entry-info">
-            <span class="entry-title">视频字幕提取</span>
-            <span class="entry-desc">上传视频，框选字幕区域，自动逐帧提取拼接</span>
-          </div>
-          <i class="fa-solid fa-arrow-right entry-arrow"></i>
-        </button>
+        <!-- 分组一：字幕处理 -->
+        <div class="feature-group">
+          <h2 class="group-title">
+            <i class="fa-solid fa-closed-captioning"></i>
+            字幕处理
+          </h2>
+          <div class="entry-grid">
 
-        <!-- 功能二：图片截取字幕 -->
-        <button class="entry-card" @click="showImageSub = true">
-          <div class="entry-icon"><i class="fa-solid fa-scissors"></i></div>
-          <div class="entry-info">
-            <span class="entry-title">图片拼接字幕</span>
-            <span class="entry-desc">拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span>
-          </div>
-          <i class="fa-solid fa-arrow-right entry-arrow"></i>
-        </button>
+            <!-- 功能一：视频截取字幕 -->
+            <button class="entry-card" @click="showVideo = true">
+              <div class="entry-icon"><i class="fa-solid fa-film"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">视频字幕提取</span>
+                <span class="entry-desc">上传视频，框选字幕区域，自动逐帧提取拼接</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
 
-        <!-- 功能三：图片拼接 -->
-        <button class="entry-card" @click="showStitch = true">
-          <div class="entry-icon"><i class="fa-solid fa-table-cells"></i></div>
-          <div class="entry-info">
-            <span class="entry-title">图片拼接</span>
-            <span class="entry-desc">水平 / 垂直 / 网格布局，自由组合多张图片</span>
-          </div>
-          <i class="fa-solid fa-arrow-right entry-arrow"></i>
-        </button>
+            <!-- 功能二：图片截取字幕 -->
+            <button class="entry-card" @click="showImageSub = true">
+              <div class="entry-icon"><i class="fa-solid fa-scissors"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">图片截取字幕</span>
+                <span class="entry-desc">拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
 
-        <!-- 功能四：智能切片（九宫格） -->
-        <button class="entry-card" @click="showSeg = true">
-          <div class="entry-icon"><i class="fa-solid fa-grip"></i></div>
-          <div class="entry-info">
-            <span class="entry-title">智能切片（九宫格）</span>
-            <span class="entry-desc">把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span>
           </div>
-          <i class="fa-solid fa-arrow-right entry-arrow"></i>
-        </button>
+        </div>
+
+        <!-- 分组二：图片处理 -->
+        <div class="feature-group">
+          <h2 class="group-title">
+            <i class="fa-solid fa-image"></i>
+            图片处理
+          </h2>
+          <div class="entry-grid">
+
+            <!-- 功能三：图片拼接 -->
+            <button class="entry-card" @click="showStitch = true">
+              <div class="entry-icon"><i class="fa-solid fa-table-cells"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">图片拼接</span>
+                <span class="entry-desc">水平 / 垂直 / 网格布局，自由组合多张图片</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
+
+            <!-- 功能四：智能切片（九宫格） -->
+            <button class="entry-card" @click="showSeg = true">
+              <div class="entry-icon"><i class="fa-solid fa-grip"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">智能切片（九宫格）</span>
+                <span class="entry-desc">把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
+
+          </div>
+        </div>
 
       </div>
+
+      <!-- ===== 主题切换按钮 ===== -->
+      <button class="theme-toggle" @click="toggleTheme" :title="isLight() ? '切换到暗色主题' : '切换到亮色主题'" aria-label="切换主题">
+        <i :class="isLight() ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
+      </button>
 
       <!-- ===== Toast 通知容器（全局） ===== -->
       <!--
@@ -109,7 +146,7 @@
 // 职责：展示三个入口，控制弹窗显隐
 // =============================================
 
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 // 导入通用弹窗组件
 import AppModal from './components/AppModal.vue'
@@ -122,6 +159,9 @@ import ImageSegmentation from './views/ImageSegmentation.vue'
 
 // 导入 Toast composable
 import { useToast } from './composables/useToast.js'
+
+// 导入主题切换 composable
+import { useTheme } from './composables/useTheme.js'
 
 // ===== 弹窗显隐状态 =====
 // ref(false) 创建一个响应式的布尔值，初始为 false（隐藏）
@@ -139,6 +179,35 @@ const toastIcon = (type) => {
   if (type === 'error') return 'fa-solid fa-circle-exclamation'
   return 'fa-solid fa-circle-info'
 }
+
+// ===== 主题切换 =====
+const { initTheme, toggleTheme, isLight } = useTheme()
+
+// 组件挂载时初始化
+onMounted(() => {
+  initTheme()
+  
+  // 添加全局键盘快捷键
+  document.addEventListener('keydown', handleGlobalKeydown)
+})
+
+// 组件卸载时清理
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleGlobalKeydown)
+})
+
+// 全局键盘快捷键处理
+const handleGlobalKeydown = (e) => {
+  // Ctrl+S / Cmd+S 保存（如果在结果页面）
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    // 触发当前活动模态框的保存功能
+    const saveBtn = document.querySelector('.modal .btn-primary')
+    if (saveBtn && !saveBtn.disabled) {
+      saveBtn.click()
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -148,8 +217,8 @@ const toastIcon = (type) => {
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(0, 224, 158, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(255, 77, 106, 0.05) 0%, transparent 60%),
+    var(--gradient-1),
+    var(--gradient-2),
     var(--bg);
 }
 
@@ -183,13 +252,75 @@ const toastIcon = (type) => {
   margin-bottom: 1rem;
 }
 
+/* ===== GitHub Star 按钮 ===== */
+.github-star-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.github-star-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md), 0 0 20px var(--accent-dim);
+}
+
+.github-star-btn i {
+  font-size: 1.1rem;
+}
+
+/* ===== 功能容器 ===== */
+.entry-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 520px;
+}
+
+/* ===== 功能分组 ===== */
+.feature-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ===== 分组标题 ===== */
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  padding-left: 0.25rem;
+}
+
+.group-title i {
+  font-size: 0.85rem;
+}
+
 /* ===== 功能卡片网格 ===== */
 .entry-grid {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   width: 100%;
-  max-width: 520px;
 }
 
 /* ===== 单个功能卡片 ===== */

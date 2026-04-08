@@ -141,6 +141,27 @@
 
 
         <div class="action-row">
+          <!-- 撤销/重做按钮 -->
+          <button 
+            class="btn" 
+            :disabled="!canUndo()" 
+            @click="handleUndo"
+            title="撤销 (Ctrl+Z)"
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;"
+          >
+            <i class="fa-solid fa-undo"></i>
+          </button>
+          
+          <button 
+            class="btn" 
+            :disabled="!canRedo()" 
+            @click="handleRedo"
+            title="重做 (Ctrl+Y)"
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;"
+          >
+            <i class="fa-solid fa-redo"></i>
+          </button>
+
           <button class="btn btn-danger" :disabled="timePoints.length === 0" @click="clearMarks">
             <i class="fa-solid fa-trash"></i> 清空标记
           </button>
@@ -149,6 +170,35 @@
             <i class="fa-solid" :class="isExtracting ? 'fa-spinner fa-spin' : 'fa-wand-magic-sparkles'"></i>
             {{ isExtracting ? statusMsg : '智能提取并拼接' }}
           </button>
+        </div>
+
+        <!-- 进度条（处理时显示） -->
+        <div v-if="isExtracting && progressInfo.total > 0" class="progress-container">
+          <div class="progress-header">
+            <span class="progress-text">
+              <i class="fa-solid fa-layer-group"></i>
+              处理进度：{{ progressInfo.current }} / {{ progressInfo.total }} 帧
+            </span>
+            <span class="progress-percent">{{ progressInfo.percent }}%</span>
+          </div>
+          
+          <div class="progress-bar">
+            <div 
+              class="progress-fill" 
+              :style="{ width: progressInfo.percent + '%' }"
+            ></div>
+          </div>
+          
+          <div class="progress-footer">
+            <span v-if="progressInfo.estimatedTime > 0" class="progress-time">
+              <i class="fa-regular fa-clock"></i>
+              剩余时间：{{ formatRemainingTime(progressInfo.estimatedTime) }}
+            </span>
+            <span v-else class="progress-time">
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              正在初始化...
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -180,8 +230,30 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import SliderInput from '../components/SliderInput.vue'
 import { useToast } from '../composables/useToast.js'
+import { useUndoRedo } from '../composables/useUndoRedo.js'
 
 const { showToast } = useToast()
+
+// ==================== 撤销/重做 ====================
+const { pushState: pushHistory, undo, redo, canUndo, canRedo } = useUndoRedo(20)
+
+// 撤销操作
+const handleUndo = () => {
+  const previousState = undo()
+  if (previousState && previousState.timePoints) {
+    timePoints.value = previousState.timePoints
+    showToast('已撤销', 'success')
+  }
+}
+
+// 重做操作
+const handleRedo = () => {
+  const nextState = redo()
+  if (nextState && nextState.timePoints) {
+    timePoints.value = nextState.timePoints
+    showToast('已重做', 'success')
+  }
+}
 
 // ==================== DOM 引用 ====================
 const fileInput = ref(null)
@@ -212,9 +284,23 @@ const coverFileInput = ref(null)
 const timePoints = ref([])
 const fps = ref(30)
 
+// 监听时间点变化，保存到历史（用于撤销/重做）
+watch(timePoints, (newVal) => {
+  pushHistory({ timePoints: JSON.parse(JSON.stringify(newVal)) })
+}, { deep: true })
+
+// ==================== 进度状态 ====================
+const progressInfo = ref({
+  current: 0,      // 当前处理的帧数
+  total: 0,        // 总帧数
+  percent: 0,      // 进度百分比
+  startTime: null, // 开始时间
+  estimatedTime: 0 // 预计剩余时间（秒）
+})
+
 // ==================== 拼接设置 ====================
 const format = ref('png')
-
+const compression = ref(1.0)
 
 const compressionOptions = [
   { label: '不压缩', value: 1.0 },
@@ -222,7 +308,6 @@ const compressionOptions = [
   { label: '4x 压缩', value: 0.25 },
   { label: '8x 压缩', value: 0.125 }
 ]
-const compression = ref(1.0)
 
 // ==================== 结果状态 ====================
 const resultCanvas = ref(null)
@@ -238,6 +323,48 @@ const statusType = ref('')
 const setStatus = (msg, type = '') => {
   statusMsg.value = msg
   statusType.value = type
+}
+
+/**
+ * 更新进度信息
+ * @param {number} current - 当前处理的帧数
+ * @param {number} total - 总帧数
+ */
+const updateProgress = (current, total) => {
+  progressInfo.value.current = current
+  progressInfo.value.total = total
+  progressInfo.value.percent = Math.floor((current / total) * 100)
+  
+  // 计算预计剩余时间
+  if (progressInfo.value.startTime && current > 0) {
+    const elapsed = (Date.now() - progressInfo.value.startTime) / 1000
+    const avgTimePerFrame = elapsed / current
+    const remaining = (total - current) * avgTimePerFrame
+    progressInfo.value.estimatedTime = Math.ceil(remaining)
+  }
+}
+
+/**
+ * 重置进度信息
+ */
+const resetProgress = () => {
+  progressInfo.value = {
+    current: 0,
+    total: 0,
+    percent: 0,
+    startTime: null,
+    estimatedTime: 0
+  }
+}
+
+/**
+ * 格式化剩余时间
+ */
+const formatRemainingTime = (seconds) => {
+  if (seconds < 60) return `约 ${seconds} 秒`
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `约 ${minutes} 分 ${secs} 秒`
 }
 
 // ==================== 工具函数 ====================
@@ -277,14 +404,14 @@ const onDrop = (e) => {
 const loadVideo = (file) => {
   // 验证文件类型
   if (!file.type.startsWith('video/')) {
-    showToast('请选择有效的视频文件', 'error')
+    showToast('请选择有效的视频文件（支持 MP4、WebM、MOV 等格式）', 'error')
     return
   }
 
   // 验证文件大小（限制 2GB）
   const maxSize = 2 * 1024 * 1024 * 1024
   if (file.size > maxSize) {
-    showToast('视频文件过大（最大支持 2GB）', 'error')
+    showToast('视频文件过大，请选择小于 2GB 的文件', 'error')
     return
   }
 
@@ -333,13 +460,13 @@ const removeVideo = () => {
 const onVideoError = (e) => {
   console.error('视频加载错误:', e)
   const errorMessages = {
-    1: '视频加载被中止',
-    2: '网络错误，请检查网络连接',
-    3: '视频解码失败，格式可能不支持',
-    4: '视频文件损坏或格式不受支持'
+    1: '视频加载被中止，请重试',
+    2: '网络错误，请检查网络连接后重新上传',
+    3: '视频解码失败，您的浏览器可能不支持此格式，请转换为 MP4 后重试',
+    4: '视频文件损坏或格式不受支持，请尝试其他文件'
   }
   const errorCode = videoEl.value?.error?.code || 4
-  const errorMsg = errorMessages[errorCode] || '视频加载失败'
+  const errorMsg = errorMessages[errorCode] || '视频加载失败，请检查文件是否完整'
   
   showToast(errorMsg, 'error')
   setStatus(`错误：${errorMsg}`, 'error')
@@ -601,6 +728,20 @@ const onKeydown = (e) => {
   const video = videoEl.value
   if (!video) return
 
+  // Ctrl+Z 撤销
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault()
+    handleUndo()
+    return
+  }
+
+  // Ctrl+Y 或 Ctrl+Shift+Z 重做
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    e.preventDefault()
+    handleRedo()
+    return
+  }
+
   if (e.code === 'Space') {
     e.preventDefault()
     e.stopPropagation()
@@ -622,7 +763,7 @@ const onKeydown = (e) => {
 
 const captureFrame = (video, timeSec, cropArea) => {
   return new Promise((resolve, reject) => {
-    var timeout = setTimeout(function () {
+    const timeout = setTimeout(function () {
       video.removeEventListener('seeked', onSeeked)
       reject(new Error('Seek 超时 @ ' + formatTime(timeSec)))
     }, 8000)
@@ -631,8 +772,8 @@ const captureFrame = (video, timeSec, cropArea) => {
       clearTimeout(timeout)
       video.removeEventListener('seeked', onSeeked)
       try {
-        var w = cropArea.x2 - cropArea.x1
-        var h = cropArea.y2 - cropArea.y1
+        const w = cropArea.x2 - cropArea.x1
+        const h = cropArea.y2 - cropArea.y1
         
         // 验证裁剪区域有效性
         if (w <= 0 || h <= 0) {
@@ -644,7 +785,7 @@ const captureFrame = (video, timeSec, cropArea) => {
           throw new Error('裁剪区域超出视频边界')
         }
         
-        var c = document.createElement('canvas')
+        const c = document.createElement('canvas')
         c.width = w
         c.height = h
 
@@ -662,6 +803,55 @@ const captureFrame = (video, timeSec, cropArea) => {
   })
 }
 
+// ==================== 内存监控 ====================
+
+/**
+ * 检查当前内存使用情况
+ * @returns {Object|null} 内存信息或 null（如果浏览器不支持）
+ */
+const checkMemoryUsage = () => {
+  if (performance.memory) {
+    const usedMB = performance.memory.usedJSHeapSize / 1024 / 1024
+    const totalMB = performance.memory.jsHeapSizeLimit / 1024 / 1024
+    const percent = (usedMB / totalMB) * 100
+    
+    return {
+      used: usedMB.toFixed(1),
+      total: totalMB.toFixed(1),
+      percent: percent.toFixed(1)
+    }
+  }
+  return null
+}
+
+/**
+ * 估算 Canvas 占用的内存（字节）
+ * @param {HTMLCanvasElement} canvas 
+ * @returns {number} 估算的内存占用
+ */
+const estimateCanvasMemory = (canvas) => {
+  // 每个像素约 4 字节 (RGBA)
+  return canvas.width * canvas.height * 4
+}
+
+/**
+ * 释放 Canvas 内存
+ * @param {HTMLCanvasElement} canvas 
+ */
+const releaseCanvas = (canvas) => {
+  if (!canvas) return
+  
+  // 清空画布内容
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+  }
+  
+  // 重置尺寸（触发内存释放）
+  canvas.width = 0
+  canvas.height = 0
+}
+
 // ==================== 主提取流程 ====================
 
 const extractAndStitch = async () => {
@@ -671,8 +861,8 @@ const extractAndStitch = async () => {
 
   // 验证裁剪区域
   if (topCutRatio.value >= bottomCutRatio.value) {
-    showToast('红线必须在蓝线上方', 'error')
-    setStatus('红线必须在蓝线上方', 'error')
+    showToast('裁剪区域无效：红线必须在蓝线上方', 'error')
+    setStatus('裁剪区域无效：红线必须在蓝线上方', 'error')
     return
   }
 
@@ -683,12 +873,29 @@ const extractAndStitch = async () => {
     : Math.ceil(video.duration)
   
   if (estimatedFrames > maxFrames) {
-    showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内`, 'warning')
+    const memInfo = checkMemoryUsage()
+    const memWarning = memInfo ? ` (当前内存: ${memInfo.used}MB / ${memInfo.total}MB)` : ''
+    
+    showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内${memWarning}`, 'warning')
     setStatus(`警告：预计提取 ${estimatedFrames} 帧，可能影响性能`, 'warning')
+    
+    // 如果内存使用率已经超过 50%，强烈建议减少帧数
+    if (memInfo && parseFloat(memInfo.percent) > 50) {
+      const confirmed = confirm(`内存使用率已达 ${memInfo.percent}%，处理 ${estimatedFrames} 帧可能导致浏览器崩溃。\n\n是否继续？`)
+      if (!confirmed) {
+        isExtracting.value = false
+        return
+      }
+    }
   }
 
   isExtracting.value = true
   resultCanvas.value = null
+  
+  // 初始化进度信息
+  resetProgress()
+  progressInfo.value.startTime = Date.now()
+  
   setStatus('提取中...', 'processing')
 
   try {
@@ -756,7 +963,7 @@ const extractAndStitch = async () => {
     }
 
     // 5. 提取封面帧
-    var allFrames = []
+    const allFrames = []
 
     if (customCoverImage.value) {
       setStatus('处理自定义封面...', 'processing')
@@ -771,46 +978,72 @@ const extractAndStitch = async () => {
       allFrames.push(canvas)
     } else if (coverCrop.y2 > coverCrop.y1) {
       setStatus('提取封面帧...', 'processing')
-      var coverFrame = await captureFrame(video, coverTime, coverCrop)
+      const coverFrame = await captureFrame(video, coverTime, coverCrop)
       allFrames.push(coverFrame)
     }
 
-    // 6. 逐帧提取字幕
-    var subtitleFrames = []
-    for (var i = 0; i < subtitlePoints.length; i++) {
-      setStatus('提取字幕帧 ' + (i + 1) + ' / ' + subtitlePoints.length, 'processing')
-      var frame = await captureFrame(video, subtitlePoints[i], subCrop)
+    // 6. 分块逐帧提取字幕（每10帧处理一次，避免内存溢出）
+    const CHUNK_SIZE = 10 // 每块处理的帧数
+    const subtitleFrames = []
+    
+    for (let i = 0; i < subtitlePoints.length; i++) {
+      // 更新进度
+      updateProgress(i + 1, subtitlePoints.length)
+      
+      const frame = await captureFrame(video, subtitlePoints[i], subCrop)
       subtitleFrames.push(frame)
+      
+      // 检查内存使用情况
+      if ((i + 1) % CHUNK_SIZE === 0 || i === subtitlePoints.length - 1) {
+        const memInfo = checkMemoryUsage()
+        if (memInfo && parseFloat(memInfo.percent) > 70) {
+          console.warn(`内存使用率较高: ${memInfo.used}MB / ${memInfo.total}MB (${memInfo.percent}%)`)
+          showToast(`内存使用率较高 (${memInfo.percent}%)，建议减少提取帧数`, 'warning')
+        }
+        
+        // 如果是最后一块，继续；否则可以提示用户
+        if (i < subtitlePoints.length - 1) {
+          console.log(`已处理 ${i + 1} 帧，继续处理...`)
+        }
+      }
     }
 
     if (subtitleFrames.length === 0) throw new Error('没有成功提取到任何字幕帧')
 
-    allFrames.push.apply(allFrames, subtitleFrames)
+    allFrames.push(...subtitleFrames)
+    
+    // 释放字幕帧数组中的 Canvas（拼接后不再需要单独引用）
+    // 注意：这里不立即释放，因为后面还需要用于拼接
 
     // 7. 垂直拼接
     setStatus('拼接中...', 'processing')
 
-    var maxW = 0
-    for (var j = 0; j < allFrames.length; j++) {
+    let maxW = 0
+    for (let j = 0; j < allFrames.length; j++) {
       if (allFrames[j].width > maxW) maxW = allFrames[j].width
     }
 
-    var totalH = 0
-    for (var k = 0; k < allFrames.length; k++) {
+    let totalH = 0
+    for (let k = 0; k < allFrames.length; k++) {
       totalH += allFrames[k].height
     }
 
-    var result = document.createElement('canvas')
+    const result = document.createElement('canvas')
     result.width = maxW
     result.height = totalH
 
-    var ctx = result.getContext('2d')
+    const ctx = result.getContext('2d')
 
-    var y = 0
-    for (var m = 0; m < allFrames.length; m++) {
-      var offsetX = Math.floor((maxW - allFrames[m].width) / 2)
+    let y = 0
+    for (let m = 0; m < allFrames.length; m++) {
+      const offsetX = Math.floor((maxW - allFrames[m].width) / 2)
       ctx.drawImage(allFrames[m], offsetX, y)
       y += allFrames[m].height
+      
+      // 拼接完成后释放单个帧的内存
+      if (m > 0) { // 保留第一个（封面）用于可能的调试
+        releaseCanvas(allFrames[m])
+      }
     }
 
     // 8. 显示结果
@@ -827,20 +1060,31 @@ const extractAndStitch = async () => {
       resultCanvasEl.value.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
     }
 
-    var coverCount = allFrames.length - subtitleFrames.length
-    var coverLabel = coverCount > 0 ? ('封面帧 ' + coverCount + ' 张 + ') : ''
+    const coverCount = allFrames.length - subtitleFrames.length
+    const coverLabel = coverCount > 0 ? ('封面帧 ' + coverCount + ' 张 + ') : ''
     setStatus(
       '完成！' + coverLabel + '字幕帧 ' + subtitleFrames.length + ' 张 · ' + result.width + '×' + result.height + ' px',
       'success'
     )
     showToast('提取完成，共 ' + allFrames.length + ' 帧', 'success')
+    
+    // 9. 最终内存清理提示
+    const finalMem = checkMemoryUsage()
+    if (finalMem) {
+      console.log(`处理完成，当前内存使用: ${finalMem.used}MB / ${finalMem.total}MB (${finalMem.percent}%)`)
+    }
 
   } catch (err) {
     console.error('提取失败:', err)
-    setStatus('提取失败：' + err.message, 'error')
-    showToast('提取失败：' + err.message, 'error')
+    const errorMsg = err.message || '未知错误'
+    setStatus('提取失败：' + errorMsg, 'error')
+    showToast('字幕提取失败：' + errorMsg + '，请检查视频文件后重试', 'error')
   } finally {
     isExtracting.value = false
+    // 重置进度（延迟一下让用户看到100%）
+    setTimeout(() => {
+      resetProgress()
+    }, 1000)
   }
 }
 
@@ -1359,6 +1603,79 @@ onUnmounted(function () {
 .seg-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* ===== 进度条样式 ===== */
+.progress-container {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.progress-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.progress-percent {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #00ffaa);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--accent-dim);
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.progress-time {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--muted);
 }
 
 /* 组件特定样式已在上方定义 */

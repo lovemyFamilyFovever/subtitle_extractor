@@ -3,26 +3,36 @@
 
 <template>
   <!--
-    遮罩层：点击遮罩本身（不是弹窗内部）可关闭
+    遮罩层：只能通过关闭按钮关闭，防止误操作
     :class 动态绑定 active 类来控制显示/隐藏
-    @click.self 只响应点击遮罩本身，不冒泡到内部
   -->
-  <div class="modal-overlay" :class="{ active: modelValue }">
+  <div class="modal-overlay" :class="{ active: modelValue }" role="presentation">
 
-    <!-- 弹窗主体，阻止点击事件冒泡到遮罩 -->
-    <div class="modal" role="dialog" :aria-label="title">
+    <!-- 弹窗主体 -->
+    <div 
+      class="modal" 
+      role="dialog" 
+      aria-modal="true"
+      :aria-labelledby="titleId"
+      tabindex="-1"
+    >
 
       <!-- ===== 弹窗头部 ===== -->
       <div class="modal-header">
-        <h2>
+        <h2 :id="titleId">
           <!-- icon 插槽：调用者可以放图标 -->
-          <i v-if="icon" :class="icon"></i>
+          <i v-if="icon" :class="icon" aria-hidden="true"></i>
           {{ title }}
         </h2>
 
         <!-- 关闭按钮 -->
-        <button class="close-btn" @click="close" title="关闭 (Esc)">
-          <i class="fa-solid fa-xmark"></i>
+        <button 
+          class="close-btn" 
+          @click="close" 
+          :aria-label="`关闭${title ? ' ' + title : ''}对话框`"
+          title="关闭"
+        >
+          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
       </div>
 
@@ -47,7 +57,7 @@
 // 使用 Vue 3 的 <script setup> 语法
 // =============================================
 
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 
 // ===== Props：父组件传入的属性 =====
 // defineProps 声明这个组件接受哪些属性
@@ -69,6 +79,12 @@ const props = defineProps({
   }
 })
 
+// ===== Computed =====
+// 生成唯一的标题 ID（用于 ARIA）
+const titleId = computed(() => {
+  return `modal-title-${props.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`
+})
+
 // ===== Emits：这个组件会向父组件发出哪些事件 =====
 // Vue 3 中子组件通过 emit 向父组件通信
 const emit = defineEmits(['update:modelValue'])
@@ -77,6 +93,27 @@ const emit = defineEmits(['update:modelValue'])
 const close = () => {
   emit('update:modelValue', false)
 }
+
+// ===== 焦点管理 =====
+let previousFocusElement = null
+
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) {
+    // 保存当前焦点元素
+    previousFocusElement = document.activeElement
+    
+    // 聚焦到关闭按钮（可访问性）
+    nextTick(() => {
+      const closeBtn = document.querySelector('.modal .close-btn')
+      if (closeBtn) closeBtn.focus()
+    })
+  } else {
+    // 恢复之前的焦点
+    if (previousFocusElement && previousFocusElement.focus) {
+      previousFocusElement.focus()
+    }
+  }
+})
 
 </script>
 

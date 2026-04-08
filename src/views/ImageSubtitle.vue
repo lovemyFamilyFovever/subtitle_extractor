@@ -643,11 +643,12 @@ const generate = async () => {
     }
 
     setStatus(`拼接完成！${result.width} × ${result.height} px`, 'success')
-    showToast('拼接完成', 'success')
+    showToast('字幕拼接完成', 'success')
   } catch (err) {
     console.error(err)
-    setStatus('生成失败：' + err.message, 'error')
-    showToast('生成失败', 'error')
+    const errorMsg = err.message || '未知错误'
+    setStatus('生成失败：' + errorMsg, 'error')
+    showToast('字幕拼接失败：' + errorMsg + '，请检查图片后重试', 'error')
   } finally {
     isGenerating.value = false
   }

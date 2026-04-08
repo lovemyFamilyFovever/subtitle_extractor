@@ -469,7 +469,8 @@ const exportZip = async () => {
         showToast(`导出成功，共 ${total} 张，${(zipBlob.size / 1024 / 1024).toFixed(2)} MB`, 'success')
     } catch (err) {
         console.error(err)
-        showToast('导出失败：' + err.message, 'error')
+        const errorMsg = err.message || '未知错误'
+        showToast('切片导出失败：' + errorMsg + '，请重试', 'error')
     }
 }
 
@@ -776,7 +777,7 @@ onUnmounted(() => {
     height: 28px;
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 1px solid #a49b9b;
     transition: all 0.2s;
     display: flex;
     align-items: center;

@@ -7,6 +7,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
+/* =============================================
+   暗色主题（默认）
+   ============================================= */
 :root {
   /* 背景色系 */
   --bg: #0f1117;          /* 页面最底层背景 */
@@ -34,13 +37,67 @@
   --radius: 14px;
   --radius-sm: 8px;
   --radius-lg: 20px;
+
+  /* 阴影 */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* 渐变装饰 */
+  --gradient-1: radial-gradient(ellipse 60% 50% at 20% 20%, rgba(0, 224, 158, 0.06) 0%, transparent 60%);
+  --gradient-2: radial-gradient(ellipse 50% 40% at 80% 70%, rgba(255, 77, 106, 0.05) 0%, transparent 60%);
 }
 
-/* 全局重置 */
+/* =============================================
+   亮色主题
+   ============================================= */
+[data-theme="light"] {
+  /* 背景色系 */
+  --bg: #f5f7fa;          /* 页面最底层背景 - 浅灰白 */
+  --card: #ffffff;        /* 卡片/弹窗背景 - 纯白 */
+  --card-hover: #f8fafc;  /* 卡片 hover 状态 - 极浅灰 */
+
+  /* 文字色系 */
+  --fg: #1a1d27;          /* 主要文字 - 深灰黑 */
+  --muted: #64748b;       /* 次要/提示文字 - 中灰 */
+
+  /* 强调色 */
+  --accent: #00b882;                      /* 品牌绿色 - 稍深以保持对比度 */
+  --accent-dim: rgba(0, 184, 130, 0.08);  /* 绿色半透明（背景用） */
+
+  /* 边框 & 遮罩 */
+  --border: #e2e8f0;
+  --overlay: rgba(0, 0, 0, 0.5);  /* 弹窗背后的遮罩 */
+
+  /* 状态色 */
+  --danger: #ef4444;
+  --success: #00b882;
+  --warning: #f59e0b;
+
+  /* 圆角保持不变 */
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+
+  /* 阴影 - 亮色主题下更柔和 */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+
+  /* 渐变装饰 - 亮色主题下更淡 */
+  --gradient-1: radial-gradient(ellipse 60% 50% at 20% 20%, rgba(0, 184, 130, 0.08) 0%, transparent 60%);
+  --gradient-2: radial-gradient(ellipse 50% 40% at 80% 70%, rgba(239, 68, 68, 0.06) 0%, transparent 60%);
+}
+
+/* 全局过渡动画 - 主题切换时平滑过渡 */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  transition: background-color 0.3s ease,
+              border-color 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease;
 }
 
 body {
@@ -49,6 +106,55 @@ body {
   color: var(--fg);
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* =============================================
+   主题切换按钮（固定在右下角）
+   ============================================= */
+.theme-toggle {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9998;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1) rotate(15deg);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--shadow-lg), 0 0 20px var(--accent-dim);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle i {
+  transition: transform 0.3s ease;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .theme-toggle {
+    bottom: 1rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
 }
 
 /* 全局滚动条样式 */

@@ -616,7 +616,7 @@ const exportImage = () => {
   if (!result) return
 
   result.toBlob((blob) => {
-    if (!blob) { showToast('导出失败', 'error'); return }
+    if (!blob) { showToast('图片导出失败，请重试', 'error'); return }
 
     // 创建临时 <a> 标签触发下载
     const url = URL.createObjectURL(blob)
