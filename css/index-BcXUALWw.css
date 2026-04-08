@@ -1676,7 +1676,7 @@ to {
 /* 响应式样式已移至 global.css 统一管理 */
 
 /* ===== 背景渐变 ===== */
-.page-bg[data-v-8b4823e6] {
+.page-bg[data-v-194532c1] {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -1687,7 +1687,7 @@ to {
 }
 
 /* ===== 页面内容居中 ===== */
-.page-content[data-v-8b4823e6] {
+.page-content[data-v-194532c1] {
   position: relative;
   z-index: 1;
   display: flex;
@@ -1700,7 +1700,7 @@ to {
 }
 
 /* ===== 标题 ===== */
-.page-title[data-v-8b4823e6] {
+.page-title[data-v-194532c1] {
   font-size: clamp(2rem, 5vw, 3.2rem);
   font-weight: 900;
   letter-spacing: -0.03em;
@@ -1709,14 +1709,14 @@ to {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.page-desc[data-v-8b4823e6] {
+.page-desc[data-v-194532c1] {
   color: var(--muted);
   font-size: 1rem;
   margin-bottom: 1rem;
 }
 
 /* ===== GitHub Star 按钮 ===== */
-.github-star-btn[data-v-8b4823e6] {
+.github-star-btn[data-v-194532c1] {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1732,18 +1732,18 @@ to {
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-sm);
 }
-.github-star-btn[data-v-8b4823e6]:hover {
+.github-star-btn[data-v-194532c1]:hover {
   border-color: var(--accent);
   color: var(--accent);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md), 0 0 20px var(--accent-dim);
 }
-.github-star-btn i[data-v-8b4823e6] {
+.github-star-btn i[data-v-194532c1] {
   font-size: 1.1rem;
 }
 
 /* ===== 功能容器 ===== */
-.entry-container[data-v-8b4823e6] {
+.entry-container[data-v-194532c1] {
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -1752,14 +1752,14 @@ to {
 }
 
 /* ===== 功能分组 ===== */
-.feature-group[data-v-8b4823e6] {
+.feature-group[data-v-194532c1] {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
 /* ===== 分组标题 ===== */
-.group-title[data-v-8b4823e6] {
+.group-title[data-v-194532c1] {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -1771,12 +1771,12 @@ to {
   margin: 0;
   padding-left: 0.25rem;
 }
-.group-title i[data-v-8b4823e6] {
+.group-title i[data-v-194532c1] {
   font-size: 0.85rem;
 }
 
 /* ===== 功能卡片网格 ===== */
-.entry-grid[data-v-8b4823e6] {
+.entry-grid[data-v-194532c1] {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1784,7 +1784,7 @@ to {
 }
 
 /* ===== 单个功能卡片 ===== */
-.entry-card[data-v-8b4823e6] {
+.entry-card[data-v-194532c1] {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -1799,13 +1799,13 @@ to {
   color: var(--fg);
   width: 100%;
 }
-.entry-card[data-v-8b4823e6]:hover {
+.entry-card[data-v-194532c1]:hover {
   border-color: var(--accent);
   background: var(--card-hover);
   transform: translateX(4px);
   box-shadow: 0 0 30px rgba(0, 224, 158, 0.08);
 }
-.entry-icon[data-v-8b4823e6] {
+.entry-icon[data-v-194532c1] {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-sm);
@@ -1817,33 +1817,33 @@ to {
   font-size: 1.1rem;
   color: var(--accent);
 }
-.entry-info[data-v-8b4823e6] {
+.entry-info[data-v-194532c1] {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
-.entry-title[data-v-8b4823e6] {
+.entry-title[data-v-194532c1] {
   font-size: 0.95rem;
   font-weight: 700;
 }
-.entry-desc[data-v-8b4823e6] {
+.entry-desc[data-v-194532c1] {
   font-size: 0.78rem;
   color: var(--muted);
   line-height: 1.4;
 }
-.entry-arrow[data-v-8b4823e6] {
+.entry-arrow[data-v-194532c1] {
   color: var(--muted);
   font-size: 0.85rem;
   transition: transform 0.2s, color 0.2s;
 }
-.entry-card:hover .entry-arrow[data-v-8b4823e6] {
+.entry-card:hover .entry-arrow[data-v-194532c1] {
   transform: translateX(3px);
   color: var(--accent);
 }
 
 /* ===== Toast 容器 ===== */
-.toast-container[data-v-8b4823e6] {
+.toast-container[data-v-194532c1] {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
@@ -1853,7 +1853,7 @@ to {
   gap: 0.5rem;
   pointer-events: none;
 }
-.toast[data-v-8b4823e6] {
+.toast[data-v-194532c1] {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -1867,27 +1867,27 @@ to {
   color: var(--fg);
   white-space: nowrap;
 }
-.toast.success[data-v-8b4823e6] {
+.toast.success[data-v-194532c1] {
   border-color: var(--accent);
   color: var(--accent);
 }
-.toast.error[data-v-8b4823e6] {
+.toast.error[data-v-194532c1] {
   border-color: var(--danger);
   color: var(--danger);
 }
 
 /* ===== Toast 动画（TransitionGroup） ===== */
-.toast-enter-active[data-v-8b4823e6] {
+.toast-enter-active[data-v-194532c1] {
   transition: all 0.3s ease;
 }
-.toast-leave-active[data-v-8b4823e6] {
+.toast-leave-active[data-v-194532c1] {
   transition: all 0.3s ease;
 }
-.toast-enter-from[data-v-8b4823e6] {
+.toast-enter-from[data-v-194532c1] {
   opacity: 0;
   transform: translateY(10px) scale(0.95);
 }
-.toast-leave-to[data-v-8b4823e6] {
+.toast-leave-to[data-v-194532c1] {
   opacity: 0;
   transform: translateY(10px) scale(0.95);
 }

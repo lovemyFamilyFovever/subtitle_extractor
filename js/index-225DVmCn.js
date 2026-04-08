@@ -7889,7 +7889,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-BaGAE9Qu.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-Dtde1n5h.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -8187,7 +8187,7 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 		};
 		return (_ctx, _cache) => {
 			return openBlock(), createElementBlock("div", null, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "page-bg" }, null, -1)), createBaseVNode("main", _hoisted_1, [
-				_cache[15] || (_cache[15] = createBaseVNode("h1", { class: "page-title" }, "我的工具箱", -1)),
+				_cache[15] || (_cache[15] = createBaseVNode("h1", { class: "page-title" }, "工具箱", -1)),
 				_cache[16] || (_cache[16] = createBaseVNode("p", { class: "page-desc" }, "视频字幕提取 · 图片字幕裁切 · 自由拼接", -1)),
 				_cache[17] || (_cache[17] = createBaseVNode("a", {
 					href: "https://github.com/lovemyFamilyFovever/subtitle_extractor",
@@ -8199,16 +8199,16 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 				createBaseVNode("div", _hoisted_2, [createBaseVNode("div", _hoisted_3, [_cache[11] || (_cache[11] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-closed-captioning" }), createTextVNode(" 字幕处理 ")], -1)), createBaseVNode("div", _hoisted_4, [createBaseVNode("button", {
 					class: "entry-card",
 					onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
-				}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-film\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>视频字幕提取</span><span class=\"entry-desc\" data-v-8b4823e6>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])]), createBaseVNode("button", {
+				}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-194532c1><i class=\"fa-solid fa-film\" data-v-194532c1></i></div><div class=\"entry-info\" data-v-194532c1><span class=\"entry-title\" data-v-194532c1>视频字幕提取</span><span class=\"entry-desc\" data-v-194532c1>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-194532c1></i>", 3)])]), createBaseVNode("button", {
 					class: "entry-card",
 					onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
-				}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-scissors\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>图片截取字幕</span><span class=\"entry-desc\" data-v-8b4823e6>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])])])]), createBaseVNode("div", _hoisted_5, [_cache[14] || (_cache[14] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-image" }), createTextVNode(" 图片处理 ")], -1)), createBaseVNode("div", _hoisted_6, [createBaseVNode("button", {
+				}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-194532c1><i class=\"fa-solid fa-scissors\" data-v-194532c1></i></div><div class=\"entry-info\" data-v-194532c1><span class=\"entry-title\" data-v-194532c1>图片截取字幕</span><span class=\"entry-desc\" data-v-194532c1>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-194532c1></i>", 3)])])])]), createBaseVNode("div", _hoisted_5, [_cache[14] || (_cache[14] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-image" }), createTextVNode(" 图片处理 ")], -1)), createBaseVNode("div", _hoisted_6, [createBaseVNode("button", {
 					class: "entry-card",
 					onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
-				}, [..._cache[12] || (_cache[12] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-table-cells\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>图片拼接</span><span class=\"entry-desc\" data-v-8b4823e6>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])]), createBaseVNode("button", {
+				}, [..._cache[12] || (_cache[12] = [createStaticVNode("<div class=\"entry-icon\" data-v-194532c1><i class=\"fa-solid fa-table-cells\" data-v-194532c1></i></div><div class=\"entry-info\" data-v-194532c1><span class=\"entry-title\" data-v-194532c1>图片拼接</span><span class=\"entry-desc\" data-v-194532c1>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-194532c1></i>", 3)])]), createBaseVNode("button", {
 					class: "entry-card",
 					onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
-				}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-grip\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-8b4823e6>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])])])])]),
+				}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-194532c1><i class=\"fa-solid fa-grip\" data-v-194532c1></i></div><div class=\"entry-info\" data-v-194532c1><span class=\"entry-title\" data-v-194532c1>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-194532c1>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-194532c1></i>", 3)])])])])]),
 				createBaseVNode("button", {
 					class: "theme-toggle",
 					onClick: _cache[4] || (_cache[4] = (...args) => unref(toggleTheme) && unref(toggleTheme)(...args)),
@@ -8263,6 +8263,6 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-8b4823e6"]])).mount("#app");
+}, [["__scopeId", "data-v-194532c1"]])).mount("#app");
 //#endregion
 export { __require as n, __commonJSMin as t };
