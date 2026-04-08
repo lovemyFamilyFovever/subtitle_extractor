@@ -5060,9 +5060,11 @@ var _plugin_vue_export_helper_default = (sfc, props) => {
 };
 //#endregion
 //#region src/components/AppModal.vue
-var _hoisted_1$6 = ["aria-label"];
+var _hoisted_1$6 = ["aria-labelledby"];
 var _hoisted_2$6 = { class: "modal-header" };
-var _hoisted_3$6 = { class: "modal-body" };
+var _hoisted_3$6 = ["id"];
+var _hoisted_4$6 = ["aria-label"];
+var _hoisted_5$6 = { class: "modal-body" };
 var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "AppModal",
 	props: {
@@ -5081,26 +5083,50 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	},
 	emits: ["update:modelValue"],
 	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const titleId = computed(() => {
+			return `modal-title-${props.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
+		});
 		const emit = __emit;
 		const close = () => {
 			emit("update:modelValue", false);
 		};
+		let previousFocusElement = null;
+		watch(() => props.modelValue, (isOpen) => {
+			if (isOpen) {
+				previousFocusElement = document.activeElement;
+				nextTick(() => {
+					const closeBtn = document.querySelector(".modal .close-btn");
+					if (closeBtn) closeBtn.focus();
+				});
+			} else if (previousFocusElement && previousFocusElement.focus) previousFocusElement.focus();
+		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", { class: normalizeClass(["modal-overlay", { active: __props.modelValue }]) }, [createBaseVNode("div", {
+			return openBlock(), createElementBlock("div", {
+				class: normalizeClass(["modal-overlay", { active: __props.modelValue }]),
+				role: "presentation"
+			}, [createBaseVNode("div", {
 				class: "modal",
 				role: "dialog",
-				"aria-label": __props.title
-			}, [createBaseVNode("div", _hoisted_2$6, [createBaseVNode("h2", null, [__props.icon ? (openBlock(), createElementBlock("i", {
+				"aria-modal": "true",
+				"aria-labelledby": titleId.value,
+				tabindex: "-1"
+			}, [createBaseVNode("div", _hoisted_2$6, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
 				key: 0,
-				class: normalizeClass(__props.icon)
-			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)]), createBaseVNode("button", {
+				class: normalizeClass(__props.icon),
+				"aria-hidden": "true"
+			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$6), createBaseVNode("button", {
 				class: "close-btn",
 				onClick: close,
-				title: "关闭 (Esc)"
-			}, [..._cache[0] || (_cache[0] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_3$6, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 8, _hoisted_1$6)], 2);
+				"aria-label": `关闭${__props.title ? " " + __props.title : ""}对话框`,
+				title: "关闭"
+			}, [..._cache[0] || (_cache[0] = [createBaseVNode("i", {
+				class: "fa-solid fa-xmark",
+				"aria-hidden": "true"
+			}, null, -1)])], 8, _hoisted_4$6)]), createBaseVNode("div", _hoisted_5$6, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 8, _hoisted_1$6)], 2);
 		};
 	}
-}, [["__scopeId", "data-v-64f1be7d"]]);
+}, [["__scopeId", "data-v-c8b3afea"]]);
 //#endregion
 //#region src/components/SliderInput.vue
 var _hoisted_1$5 = { class: "slider-input" };
@@ -5111,8 +5137,8 @@ var _hoisted_2$5 = [
 	"value"
 ];
 var _hoisted_3$5 = { class: "slider-header" };
-var _hoisted_4$4 = { class: "form-label" };
-var _hoisted_5$4 = ["value"];
+var _hoisted_4$5 = { class: "form-label" };
+var _hoisted_5$5 = ["value"];
 var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "SliderInput",
 	props: {
@@ -5198,19 +5224,19 @@ var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				onInput,
 				class: "slider"
 			}, null, 44, _hoisted_2$5), createBaseVNode("div", _hoisted_3$5, [
-				createBaseVNode("span", _hoisted_4$4, toDisplayString(__props.label), 1),
+				createBaseVNode("span", _hoisted_4$5, toDisplayString(__props.label), 1),
 				createBaseVNode("input", {
 					class: "form-input",
 					type: "text",
 					value: __props.modelValue,
 					onInput: onTextChange,
 					onFocus: onTextFocus
-				}, null, 40, _hoisted_5$4),
+				}, null, 40, _hoisted_5$5),
 				createTextVNode(toDisplayString(__props.unit), 1)
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-196ca14e"]]);
+}, [["__scopeId", "data-v-952349e6"]]);
 //#endregion
 //#region src/composables/useToast.js
 var toasts = /* @__PURE__ */ ref([]);
@@ -5251,21 +5277,88 @@ function useToast() {
 	};
 }
 //#endregion
+//#region src/composables/useUndoRedo.js
+/**
+* 撤销/重做组合式函数
+* 支持任意状态的撤销和重做操作
+*/
+function useUndoRedo(maxHistory = 20) {
+	const history = /* @__PURE__ */ ref([]);
+	const currentIndex = /* @__PURE__ */ ref(-1);
+	/**
+	* 添加新状态到历史
+	* @param {*} state - 要保存的状态
+	*/
+	const pushState = (state) => {
+		if (currentIndex.value < history.value.length - 1) history.value = history.value.slice(0, currentIndex.value + 1);
+		history.value.push(JSON.parse(JSON.stringify(state)));
+		if (history.value.length > maxHistory) history.value.shift();
+		else currentIndex.value++;
+	};
+	/**
+	* 撤销
+	* @returns {*} 撤销后的状态，如果没有可撤销的返回 null
+	*/
+	const undo = () => {
+		if (currentIndex.value > 0) {
+			currentIndex.value--;
+			return JSON.parse(JSON.stringify(history.value[currentIndex.value]));
+		}
+		return null;
+	};
+	/**
+	* 重做
+	* @returns {*} 重做后的状态，如果没有可重做的返回 null
+	*/
+	const redo = () => {
+		if (currentIndex.value < history.value.length - 1) {
+			currentIndex.value++;
+			return JSON.parse(JSON.stringify(history.value[currentIndex.value]));
+		}
+		return null;
+	};
+	/**
+	* 是否可以撤销
+	*/
+	const canUndo = () => currentIndex.value > 0;
+	/**
+	* 是否可以重做
+	*/
+	const canRedo = () => currentIndex.value < history.value.length - 1;
+	/**
+	* 清空历史
+	*/
+	const clearHistory = () => {
+		history.value = [];
+		currentIndex.value = -1;
+	};
+	return {
+		history,
+		currentIndex,
+		pushState,
+		undo,
+		redo,
+		canUndo,
+		canRedo,
+		clearHistory
+	};
+}
+//#endregion
 //#region src/views/VideoSubtitle.vue
 var _hoisted_1$4 = { class: "app-layout" };
 var _hoisted_2$4 = { class: "app-left" };
 var _hoisted_3$4 = { class: "upload-text" };
-var _hoisted_4$3 = ["src"];
-var _hoisted_5$3 = {
+var _hoisted_4$4 = ["src"];
+var _hoisted_5$4 = {
 	key: 1,
 	class: "video-info-bar"
 };
-var _hoisted_6$3 = {
+var _hoisted_6$4 = {
 	key: 2,
 	class: "toolbar"
 };
-var _hoisted_7$3 = { class: "cover-btn-container" };
-var _hoisted_8$3 = {
+var _hoisted_7$4 = { class: "cover-btn-container" };
+var _hoisted_8$4 = {
 	key: 0,
 	class: "cover-options"
 };
@@ -5292,18 +5385,52 @@ var _hoisted_25$3 = ["onClick"];
 var _hoisted_26$3 = { class: "action-row" };
 var _hoisted_27$3 = ["disabled"];
 var _hoisted_28$3 = ["disabled"];
-var _hoisted_29$3 = {
+var _hoisted_29$3 = ["disabled"];
+var _hoisted_30$3 = ["disabled"];
+var _hoisted_31$3 = {
+	key: 0,
+	class: "progress-container"
+};
+var _hoisted_32$3 = { class: "progress-header" };
+var _hoisted_33$3 = { class: "progress-text" };
+var _hoisted_34$3 = { class: "progress-percent" };
+var _hoisted_35$3 = { class: "progress-bar" };
+var _hoisted_36$2 = { class: "progress-footer" };
+var _hoisted_37$2 = {
+	key: 0,
+	class: "progress-time"
+};
+var _hoisted_38$1 = {
+	key: 1,
+	class: "progress-time"
+};
+var _hoisted_39 = {
 	key: 0,
 	class: "app-right"
 };
-var _hoisted_30$3 = { class: "result-section" };
-var _hoisted_31$3 = { class: "result-header" };
-var _hoisted_32$3 = { class: "result-canvas-container" };
-var _hoisted_33$3 = { class: "result-actions" };
+var _hoisted_40 = { class: "result-section" };
+var _hoisted_41 = { class: "result-header" };
+var _hoisted_42 = { class: "result-canvas-container" };
+var _hoisted_43 = { class: "result-actions" };
 var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "VideoSubtitle",
 	setup(__props) {
 		const { showToast } = useToast();
+		const { pushState: pushHistory, undo, redo, canUndo, canRedo } = useUndoRedo(20);
+		const handleUndo = () => {
+			const previousState = undo();
+			if (previousState && previousState.timePoints) {
+				timePoints.value = previousState.timePoints;
+				showToast("已撤销", "success");
+			}
+		};
+		const handleRedo = () => {
+			const nextState = redo();
+			if (nextState && nextState.timePoints) {
+				timePoints.value = nextState.timePoints;
+				showToast("已重做", "success");
+			}
+		};
 		const fileInput = /* @__PURE__ */ ref(null);
 		const videoEl = /* @__PURE__ */ ref(null);
 		const overlayCanvas = /* @__PURE__ */ ref(null);
@@ -5323,7 +5450,18 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		const coverFileInput = /* @__PURE__ */ ref(null);
 		const timePoints = /* @__PURE__ */ ref([]);
 		const fps = /* @__PURE__ */ ref(30);
+		watch(timePoints, (newVal) => {
+			pushHistory({ timePoints: JSON.parse(JSON.stringify(newVal)) });
+		}, { deep: true });
+		const progressInfo = /* @__PURE__ */ ref({
+			current: 0,
+			total: 0,
+			percent: 0,
+			startTime: null,
+			estimatedTime: 0
+		});
 		const format = /* @__PURE__ */ ref("png");
+		const compression = /* @__PURE__ */ ref(1);
 		const compressionOptions = [
 			{
 				label: "不压缩",
@@ -5342,7 +5480,6 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				value: .125
 			}
 		];
-		const compression = /* @__PURE__ */ ref(1);
 		const resultCanvas = /* @__PURE__ */ ref(null);
 		const resultWidth = /* @__PURE__ */ ref(0);
 		const resultHeight = /* @__PURE__ */ ref(0);
@@ -5353,6 +5490,40 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		const setStatus = (msg, type = "") => {
 			statusMsg.value = msg;
 			statusType.value = type;
+		};
+		/**
+		* 更新进度信息
+		* @param {number} current - 当前处理的帧数
+		* @param {number} total - 总帧数
+		*/
+		const updateProgress = (current, total) => {
+			progressInfo.value.current = current;
+			progressInfo.value.total = total;
+			progressInfo.value.percent = Math.floor(current / total * 100);
+			if (progressInfo.value.startTime && current > 0) {
+				const avgTimePerFrame = (Date.now() - progressInfo.value.startTime) / 1e3 / current;
+				const remaining = (total - current) * avgTimePerFrame;
+				progressInfo.value.estimatedTime = Math.ceil(remaining);
+			}
+		};
+		/**
+		* 重置进度信息
+		*/
+		const resetProgress = () => {
+			progressInfo.value = {
+				current: 0,
+				total: 0,
+				percent: 0,
+				startTime: null,
+				estimatedTime: 0
+			};
+		};
+		/**
+		* 格式化剩余时间
+		*/
+		const formatRemainingTime = (seconds) => {
+			if (seconds < 60) return `约 ${seconds} 秒`;
+			return `约 ${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`;
 		};
 		const formatTime = (seconds) => {
 			if (seconds === null || seconds === void 0) return "--";
@@ -5379,11 +5550,11 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		};
 		const loadVideo = (file) => {
 			if (!file.type.startsWith("video/")) {
-				showToast("请选择有效的视频文件", "error");
+				showToast("请选择有效的视频文件（支持 MP4、WebM、MOV 等格式）", "error");
 				return;
 			}
 			if (file.size > 2 * 1024 * 1024 * 1024) {
-				showToast("视频文件过大（最大支持 2GB）", "error");
+				showToast("视频文件过大，请选择小于 2GB 的文件", "error");
 				return;
 			}
 			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
@@ -5422,11 +5593,11 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		const onVideoError = (e) => {
 			console.error("视频加载错误:", e);
 			const errorMsg = {
-				1: "视频加载被中止",
-				2: "网络错误，请检查网络连接",
-				3: "视频解码失败，格式可能不支持",
-				4: "视频文件损坏或格式不受支持"
-			}[videoEl.value?.error?.code || 4] || "视频加载失败";
+				1: "视频加载被中止，请重试",
+				2: "网络错误，请检查网络连接后重新上传",
+				3: "视频解码失败，您的浏览器可能不支持此格式，请转换为 MP4 后重试",
+				4: "视频文件损坏或格式不受支持，请尝试其他文件"
+			}[videoEl.value?.error?.code || 4] || "视频加载失败，请检查文件是否完整";
 			showToast(errorMsg, "error");
 			setStatus(`错误：${errorMsg}`, "error");
 			if (videoUrl.value) {
@@ -5610,6 +5781,16 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (!videoUrl.value) return;
 			const video = videoEl.value;
 			if (!video) return;
+			if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+				e.preventDefault();
+				handleUndo();
+				return;
+			}
+			if ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "z" && e.shiftKey)) {
+				e.preventDefault();
+				handleRedo();
+				return;
+			}
 			if (e.code === "Space") {
 				e.preventDefault();
 				e.stopPropagation();
@@ -5624,7 +5805,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		};
 		const captureFrame = (video, timeSec, cropArea) => {
 			return new Promise((resolve, reject) => {
-				var timeout = setTimeout(function() {
+				const timeout = setTimeout(function() {
 					video.removeEventListener("seeked", onSeeked);
 					reject(/* @__PURE__ */ new Error("Seek 超时 @ " + formatTime(timeSec)));
 				}, 8e3);
@@ -5632,11 +5813,11 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					clearTimeout(timeout);
 					video.removeEventListener("seeked", onSeeked);
 					try {
-						var w = cropArea.x2 - cropArea.x1;
-						var h = cropArea.y2 - cropArea.y1;
+						const w = cropArea.x2 - cropArea.x1;
+						const h = cropArea.y2 - cropArea.y1;
 						if (w <= 0 || h <= 0) throw new Error(`无效的裁剪区域: ${w}x${h}`);
 						if (cropArea.x1 < 0 || cropArea.y1 < 0 || cropArea.x2 > video.videoWidth || cropArea.y2 > video.videoHeight) throw new Error("裁剪区域超出视频边界");
-						var c = document.createElement("canvas");
+						const c = document.createElement("canvas");
 						c.width = w;
 						c.height = h;
 						console.log(`捕获帧 @ ${formatTime(timeSec)}，裁剪区域: (${cropArea.x1}, ${cropArea.y1}) - (${cropArea.x2}, ${cropArea.y2})`);
@@ -5650,22 +5831,59 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				video.currentTime = timeSec;
 			});
 		};
+		/**
+		* 检查当前内存使用情况
+		* @returns {Object|null} 内存信息或 null（如果浏览器不支持）
+		*/
+		const checkMemoryUsage = () => {
+			if (performance.memory) {
+				const usedMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+				const totalMB = performance.memory.jsHeapSizeLimit / 1024 / 1024;
+				const percent = usedMB / totalMB * 100;
+				return {
+					used: usedMB.toFixed(1),
+					total: totalMB.toFixed(1),
+					percent: percent.toFixed(1)
+				};
+			}
+			return null;
+		};
+		/**
+		* 释放 Canvas 内存
+		* @param {HTMLCanvasElement} canvas 
+		*/
+		const releaseCanvas = (canvas) => {
+			if (!canvas) return;
+			const ctx = canvas.getContext("2d");
+			if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+			canvas.width = 0;
+			canvas.height = 0;
+		};
 		const extractAndStitch = async () => {
 			const video = videoEl.value;
 			if (!video || !videoUrl.value) return;
 			if (topCutRatio.value >= bottomCutRatio.value) {
-				showToast("红线必须在蓝线上方", "error");
-				setStatus("红线必须在蓝线上方", "error");
+				showToast("裁剪区域无效：红线必须在蓝线上方", "error");
+				setStatus("裁剪区域无效：红线必须在蓝线上方", "error");
 				return;
 			}
 			const maxFrames = 200;
 			const estimatedFrames = timePoints.value.length > 0 ? timePoints.value.length : Math.ceil(video.duration);
 			if (estimatedFrames > maxFrames) {
-				showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内`, "warning");
+				const memInfo = checkMemoryUsage();
+				showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内${memInfo ? ` (当前内存: ${memInfo.used}MB / ${memInfo.total}MB)` : ""}`, "warning");
 				setStatus(`警告：预计提取 ${estimatedFrames} 帧，可能影响性能`, "warning");
+				if (memInfo && parseFloat(memInfo.percent) > 50) {
+					if (!confirm(`内存使用率已达 ${memInfo.percent}%，处理 ${estimatedFrames} 帧可能导致浏览器崩溃。\n\n是否继续？`)) {
+						isExtracting.value = false;
+						return;
+					}
+				}
 			}
 			isExtracting.value = true;
 			resultCanvas.value = null;
+			resetProgress();
+			progressInfo.value.startTime = Date.now();
 			setStatus("提取中...", "processing");
 			try {
 				const rect = video.getBoundingClientRect();
@@ -5701,7 +5919,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					x2: videoNativeW.value,
 					y2: Math.round(nativeBottomY)
 				};
-				var allFrames = [];
+				const allFrames = [];
 				if (customCoverImage.value) {
 					setStatus("处理自定义封面...", "processing");
 					const canvas = document.createElement("canvas");
@@ -5714,31 +5932,41 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					allFrames.push(canvas);
 				} else if (coverCrop.y2 > coverCrop.y1) {
 					setStatus("提取封面帧...", "processing");
-					var coverFrame = await captureFrame(video, coverTime, coverCrop);
+					const coverFrame = await captureFrame(video, coverTime, coverCrop);
 					allFrames.push(coverFrame);
 				}
-				var subtitleFrames = [];
-				for (var i = 0; i < subtitlePoints.length; i++) {
-					setStatus("提取字幕帧 " + (i + 1) + " / " + subtitlePoints.length, "processing");
-					var frame = await captureFrame(video, subtitlePoints[i], subCrop);
+				const CHUNK_SIZE = 10;
+				const subtitleFrames = [];
+				for (let i = 0; i < subtitlePoints.length; i++) {
+					updateProgress(i + 1, subtitlePoints.length);
+					const frame = await captureFrame(video, subtitlePoints[i], subCrop);
 					subtitleFrames.push(frame);
+					if ((i + 1) % CHUNK_SIZE === 0 || i === subtitlePoints.length - 1) {
+						const memInfo = checkMemoryUsage();
+						if (memInfo && parseFloat(memInfo.percent) > 70) {
+							console.warn(`内存使用率较高: ${memInfo.used}MB / ${memInfo.total}MB (${memInfo.percent}%)`);
+							showToast(`内存使用率较高 (${memInfo.percent}%)，建议减少提取帧数`, "warning");
+						}
+						if (i < subtitlePoints.length - 1) console.log(`已处理 ${i + 1} 帧，继续处理...`);
+					}
 				}
 				if (subtitleFrames.length === 0) throw new Error("没有成功提取到任何字幕帧");
-				allFrames.push.apply(allFrames, subtitleFrames);
+				allFrames.push(...subtitleFrames);
 				setStatus("拼接中...", "processing");
-				var maxW = 0;
-				for (var j = 0; j < allFrames.length; j++) if (allFrames[j].width > maxW) maxW = allFrames[j].width;
-				var totalH = 0;
-				for (var k = 0; k < allFrames.length; k++) totalH += allFrames[k].height;
-				var result = document.createElement("canvas");
+				let maxW = 0;
+				for (let j = 0; j < allFrames.length; j++) if (allFrames[j].width > maxW) maxW = allFrames[j].width;
+				let totalH = 0;
+				for (let k = 0; k < allFrames.length; k++) totalH += allFrames[k].height;
+				const result = document.createElement("canvas");
 				result.width = maxW;
 				result.height = totalH;
-				var ctx = result.getContext("2d");
-				var y = 0;
-				for (var m = 0; m < allFrames.length; m++) {
-					var offsetX = Math.floor((maxW - allFrames[m].width) / 2);
+				const ctx = result.getContext("2d");
+				let y = 0;
+				for (let m = 0; m < allFrames.length; m++) {
+					const offsetX = Math.floor((maxW - allFrames[m].width) / 2);
 					ctx.drawImage(allFrames[m], offsetX, y);
 					y += allFrames[m].height;
+					if (m > 0) releaseCanvas(allFrames[m]);
 				}
 				resultCanvas.value = result;
 				resultWidth.value = result.width;
@@ -5754,15 +5982,21 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						block: "nearest"
 					});
 				}
-				var coverCount = allFrames.length - subtitleFrames.length;
+				const coverCount = allFrames.length - subtitleFrames.length;
 				setStatus("完成！" + (coverCount > 0 ? "封面帧 " + coverCount + " 张 + " : "") + "字幕帧 " + subtitleFrames.length + " 张 · " + result.width + "×" + result.height + " px", "success");
 				showToast("提取完成，共 " + allFrames.length + " 帧", "success");
+				const finalMem = checkMemoryUsage();
+				if (finalMem) console.log(`处理完成，当前内存使用: ${finalMem.used}MB / ${finalMem.total}MB (${finalMem.percent}%)`);
 			} catch (err) {
 				console.error("提取失败:", err);
-				setStatus("提取失败：" + err.message, "error");
-				showToast("提取失败：" + err.message, "error");
+				const errorMsg = err.message || "未知错误";
+				setStatus("提取失败：" + errorMsg, "error");
+				showToast("字幕提取失败：" + errorMsg + "，请检查视频文件后重试", "error");
 			} finally {
 				isExtracting.value = false;
+				setTimeout(() => {
+					resetProgress();
+				}, 1e3);
 			}
 		};
 		const saveResult = () => {
@@ -5858,19 +6092,19 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "video-player",
 							onLoadedmetadata: onVideoLoaded,
 							onError: onVideoError
-						}, null, 40, _hoisted_4$3),
+						}, null, 40, _hoisted_4$4),
 						createBaseVNode("canvas", {
 							ref_key: "overlayCanvas",
 							ref: overlayCanvas,
 							class: "overlay-canvas"
 						}, null, 512)
 					], 512)) : createCommentVNode("", true),
-					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$3, [
+					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$4, [
 						createBaseVNode("span", null, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
 						createBaseVNode("span", null, [_cache[12] || (_cache[12] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.width) + " × " + toDisplayString(videoInfo.value.height), 1)]),
 						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
 					])) : createCommentVNode("", true),
-					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$3, [createBaseVNode("div", _hoisted_7$3, [createBaseVNode("button", {
+					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$4, [createBaseVNode("div", _hoisted_7$4, [createBaseVNode("button", {
 						class: normalizeClass(["btn cover-btn", { "cover-active": coverTimeSec.value !== null || customCoverImage.value !== null }]),
 						onClick: toggleCoverOptions,
 						onMouseenter: _cache[3] || (_cache[3] = ($event) => showCoverTip.value = true),
@@ -5880,7 +6114,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)),
 						createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "封面设置") + " ", 1),
 						_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-circle-question cover-tip-icon" }, null, -1))
-					], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$3, [
+					], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$4, [
 						createBaseVNode("button", {
 							class: "btn",
 							onClick: setCoverFrameFromVideo
@@ -5910,7 +6144,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					}, [..._cache[17] || (_cache[17] = [createBaseVNode("i", { class: "fa-solid fa-circle-dot" }, null, -1), createTextVNode(" 标记当前帧 ", -1)])], 8, _hoisted_9$3)])) : createCommentVNode("", true)
 				]),
 				createBaseVNode("div", _hoisted_10$3, [createBaseVNode("div", _hoisted_11$3, [
-					_cache[24] || (_cache[24] = createBaseVNode("div", { class: "panel-title" }, [
+					_cache[29] || (_cache[29] = createBaseVNode("div", { class: "panel-title" }, [
 						createBaseVNode("i", { class: "fa-solid fa-sliders" }),
 						createTextVNode(" 拼接设置 "),
 						createBaseVNode("span", { class: "panel-hint" }, "输入框支持滚轮和键盘上下键调整")
@@ -5955,7 +6189,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onClick: ($event) => compression.value = opt.value
 						}, toDisplayString(opt.label), 11, _hoisted_21$3);
 					}), 64))])]),
-					_cache[25] || (_cache[25] = createBaseVNode("div", { class: "panel-title" }, [
+					_cache[30] || (_cache[30] = createBaseVNode("div", { class: "panel-title" }, [
 						createBaseVNode("i", { class: "fa-solid fa-clock" }),
 						createTextVNode(" 时间标记 "),
 						createBaseVNode("span", { class: "panel-hint" }, "Enter 添加帧 · Space 播放/暂停")
@@ -5970,51 +6204,82 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onClick: ($event) => removeTimePoint(time)
 						}, [..._cache[22] || (_cache[22] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_25$3)], 8, _hoisted_23$3);
 					}), 128))]),
-					createBaseVNode("div", _hoisted_26$3, [createBaseVNode("button", {
-						class: "btn btn-danger",
-						disabled: timePoints.value.length === 0,
-						onClick: clearMarks
-					}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 清空标记 ", -1)])], 8, _hoisted_27$3), createBaseVNode("button", {
-						class: "btn btn-primary btn-block",
-						disabled: !videoUrl.value || isExtracting.value,
-						onClick: extractAndStitch
-					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_28$3)])
+					createBaseVNode("div", _hoisted_26$3, [
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !unref(canUndo)(),
+							onClick: handleUndo,
+							title: "撤销 (Ctrl+Z)",
+							style: {
+								"flex": "0 0 auto",
+								"padding": "0.6rem 0.8rem"
+							}
+						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_27$3),
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !unref(canRedo)(),
+							onClick: handleRedo,
+							title: "重做 (Ctrl+Y)",
+							style: {
+								"flex": "0 0 auto",
+								"padding": "0.6rem 0.8rem"
+							}
+						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_28$3),
+						createBaseVNode("button", {
+							class: "btn btn-danger",
+							disabled: timePoints.value.length === 0,
+							onClick: clearMarks
+						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 清空标记 ", -1)])], 8, _hoisted_29$3),
+						createBaseVNode("button", {
+							class: "btn btn-primary btn-block",
+							disabled: !videoUrl.value || isExtracting.value,
+							onClick: extractAndStitch
+						}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_30$3)
+					]),
+					isExtracting.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_31$3, [
+						createBaseVNode("div", _hoisted_32$3, [createBaseVNode("span", _hoisted_33$3, [_cache[26] || (_cache[26] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_34$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+						createBaseVNode("div", _hoisted_35$3, [createBaseVNode("div", {
+							class: "progress-fill",
+							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
+						}, null, 4)]),
+						createBaseVNode("div", _hoisted_36$2, [progressInfo.value.estimatedTime > 0 ? (openBlock(), createElementBlock("span", _hoisted_37$2, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-regular fa-clock" }, null, -1)), createTextVNode(" 剩余时间：" + toDisplayString(formatRemainingTime(progressInfo.value.estimatedTime)), 1)])) : (openBlock(), createElementBlock("span", _hoisted_38$1, [..._cache[28] || (_cache[28] = [createBaseVNode("i", { class: "fa-solid fa-spinner fa-spin" }, null, -1), createTextVNode(" 正在初始化... ", -1)])]))])
+					])) : createCommentVNode("", true)
 				])]),
-				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_29$3, [createBaseVNode("div", _hoisted_30$3, [
-					createBaseVNode("div", _hoisted_31$3, [_cache[26] || (_cache[26] = createBaseVNode("i", {
+				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_39, [createBaseVNode("div", _hoisted_40, [
+					createBaseVNode("div", _hoisted_41, [_cache[31] || (_cache[31] = createBaseVNode("i", {
 						class: "fa-solid fa-check-circle",
 						style: { "color": "var(--accent)" }
 					}, null, -1)), createTextVNode(" 提取完成 · " + toDisplayString(resultWidth.value) + " × " + toDisplayString(resultHeight.value) + " px · 共 " + toDisplayString(extractedCount.value) + " 帧 ", 1)]),
-					createBaseVNode("div", _hoisted_32$3, [createBaseVNode("canvas", {
+					createBaseVNode("div", _hoisted_42, [createBaseVNode("canvas", {
 						ref_key: "resultCanvasEl",
 						ref: resultCanvasEl,
 						class: "result-canvas"
 					}, null, 512)]),
-					createBaseVNode("div", _hoisted_33$3, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_43, [createBaseVNode("button", {
 						class: "btn btn-primary",
 						onClick: saveResult
-					}, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
+					}, [_cache[32] || (_cache[32] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
 				])])) : createCommentVNode("", true)
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-bb1f3351"]]);
+}, [["__scopeId", "data-v-1dfa7ca3"]]);
 //#endregion
 //#region src/views/ImageSubtitle.vue
 var _hoisted_1$3 = { class: "app-layout" };
 var _hoisted_2$3 = { class: "app-left" };
 var _hoisted_3$3 = { class: "upload-text" };
-var _hoisted_4$2 = {
+var _hoisted_4$3 = {
 	key: 0,
 	class: "upload-hint"
 };
-var _hoisted_5$2 = { class: "canvas-container" };
-var _hoisted_6$2 = {
+var _hoisted_5$3 = { class: "canvas-container" };
+var _hoisted_6$3 = {
 	key: 0,
 	class: "nav-bar"
 };
-var _hoisted_7$2 = { class: "nav-info" };
-var _hoisted_8$2 = { class: "cover-btn-container" };
+var _hoisted_7$3 = { class: "nav-info" };
+var _hoisted_8$3 = { class: "cover-btn-container" };
 var _hoisted_9$2 = ["disabled"];
 var _hoisted_10$2 = {
 	key: 0,
@@ -6395,11 +6660,12 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					});
 				}
 				setStatus(`拼接完成！${result.width} × ${result.height} px`, "success");
-				showToast("拼接完成", "success");
+				showToast("字幕拼接完成", "success");
 			} catch (err) {
 				console.error(err);
-				setStatus("生成失败：" + err.message, "error");
-				showToast("生成失败", "error");
+				const errorMsg = err.message || "未知错误";
+				setStatus("生成失败：" + errorMsg, "error");
+				showToast("字幕拼接失败：" + errorMsg + "，请检查图片后重试", "error");
 			} finally {
 				isGenerating.value = false;
 			}
@@ -6453,7 +6719,7 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					}, [
 						_cache[7] || (_cache[7] = createBaseVNode("i", { class: "fa-solid fa-image upload-icon" }, null, -1)),
 						createBaseVNode("p", _hoisted_3$3, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
-						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$2, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
+						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$3, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
 							ref: fileInput,
@@ -6464,7 +6730,7 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					createBaseVNode("div", _hoisted_5$2, [withDirectives(createBaseVNode("canvas", {
+					createBaseVNode("div", _hoisted_5$3, [withDirectives(createBaseVNode("canvas", {
 						ref_key: "canvas",
 						ref: canvas,
 						class: "preview-canvas",
@@ -6476,17 +6742,17 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onTouchmove: withModifiers(onTouchMove, ["prevent"]),
 						onTouchend: onMouseUp
 					}, null, 544), [[vShow, images.value.length > 0]])]),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_6$2, [
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_6$3, [
 						createBaseVNode("button", {
 							class: "btn",
 							onClick: goPrev
 						}, [..._cache[8] || (_cache[8] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])]),
-						createBaseVNode("span", _hoisted_7$2, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(images.value.length), 1),
+						createBaseVNode("span", _hoisted_7$3, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(images.value.length), 1),
 						createBaseVNode("button", {
 							class: "btn",
 							onClick: goNext
 						}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])]),
-						createBaseVNode("div", _hoisted_8$2, [createBaseVNode("button", {
+						createBaseVNode("div", _hoisted_8$3, [createBaseVNode("button", {
 							class: normalizeClass(["btn cover-btn", { "cover-active": coverMode.value !== "auto" || customCoverImage.value !== null }]),
 							onClick: toggleCoverOptions,
 							disabled: images.value.length == 0,
@@ -6613,17 +6879,17 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-11834e30"]]);
+}, [["__scopeId", "data-v-0414f43e"]]);
 //#endregion
 //#region src/views/ImageStitch.vue
 var _hoisted_1$2 = { class: "app-layout" };
 var _hoisted_2$2 = { class: "app-left" };
 var _hoisted_3$2 = { key: 0 };
-var _hoisted_4$1 = { class: "form-label" };
-var _hoisted_5$1 = { class: "image-list" };
-var _hoisted_6$1 = ["onDragstart", "onDragover"];
-var _hoisted_7$1 = ["src", "alt"];
-var _hoisted_8$1 = { class: "item-index" };
+var _hoisted_4$2 = { class: "form-label" };
+var _hoisted_5$2 = { class: "image-list" };
+var _hoisted_6$2 = ["onDragstart", "onDragover"];
+var _hoisted_7$2 = ["src", "alt"];
+var _hoisted_8$2 = { class: "item-index" };
 var _hoisted_9$1 = ["onClick"];
 var _hoisted_10$1 = ["onClick"];
 var _hoisted_11$1 = { class: "app-middle" };
@@ -7055,7 +7321,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (!result) return;
 			result.toBlob((blob) => {
 				if (!blob) {
-					showToast("导出失败", "error");
+					showToast("图片导出失败，请重试", "error");
 					return;
 				}
 				const url = URL.createObjectURL(blob);
@@ -7099,7 +7365,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$2, [createBaseVNode("span", _hoisted_4$1, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$1, [(openBlock(true), createElementBlock(Fragment, null, renderList(images.value, (item, index) => {
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$2, [createBaseVNode("span", _hoisted_4$2, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$2, [(openBlock(true), createElementBlock(Fragment, null, renderList(images.value, (item, index) => {
 						return openBlock(), createElementBlock("div", {
 							key: item.id,
 							class: normalizeClass(["image-item", {
@@ -7114,8 +7380,8 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							createBaseVNode("img", {
 								src: item.url,
 								alt: item.name
-							}, null, 8, _hoisted_7$1),
-							createBaseVNode("span", _hoisted_8$1, toDisplayString(index + 1), 1),
+							}, null, 8, _hoisted_7$2),
+							createBaseVNode("span", _hoisted_8$2, toDisplayString(index + 1), 1),
 							createBaseVNode("button", {
 								class: "item-rotate",
 								onClick: withModifiers(($event) => rotateImage(index), ["stop"]),
@@ -7126,7 +7392,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								onClick: withModifiers(($event) => removeImage(index), ["stop"]),
 								title: "删除"
 							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$1)
-						], 42, _hoisted_6$1);
+						], 42, _hoisted_6$2);
 					}), 128))])])) : createCommentVNode("", true),
 					images.value.length > 0 ? (openBlock(), createElementBlock("button", {
 						key: 1,
@@ -7257,7 +7523,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-73eac7e5"]]);
+}, [["__scopeId", "data-v-c52b704b"]]);
 //#endregion
 //#region \0vite/preload-helper.js
 var scriptRel = "modulepreload";
@@ -7326,14 +7592,14 @@ var _hoisted_3$1 = {
 	key: 0,
 	class: "source-preview-wrap"
 };
-var _hoisted_4 = { class: "source-preview" };
-var _hoisted_5 = ["src", "alt"];
-var _hoisted_6 = {
+var _hoisted_4$1 = { class: "source-preview" };
+var _hoisted_5$1 = ["src", "alt"];
+var _hoisted_6$1 = {
 	key: 1,
 	class: "nav-bar"
 };
-var _hoisted_7 = ["disabled"];
-var _hoisted_8 = {
+var _hoisted_7$1 = ["disabled"];
+var _hoisted_8$1 = {
 	key: 2,
 	class: "info-bar"
 };
@@ -7621,7 +7887,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-BK7UXaud.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-CkJ2z4WO.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -7649,7 +7915,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 				showToast(`导出成功，共 ${total} 张，${(zipBlob.size / 1024 / 1024).toFixed(2)} MB`, "success");
 			} catch (err) {
 				console.error(err);
-				showToast("导出失败：" + err.message, "error");
+				showToast("切片导出失败：" + (err.message || "未知错误") + "，请重试", "error");
 			}
 		};
 		watch([
@@ -7686,17 +7952,17 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$1, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4, [createBaseVNode("img", {
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$1, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$1, [createBaseVNode("img", {
 						src: sourceImage.value.url,
 						alt: sourceImage.value.name,
 						class: "source-thumb"
-					}, null, 8, _hoisted_5)])])) : createCommentVNode("", true),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_6, [createBaseVNode("button", {
+					}, null, 8, _hoisted_5$1)])])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_6$1, [createBaseVNode("button", {
 						class: "btn btn-danger",
 						onClick: clearSource,
 						disabled: !sourceImage.value
-					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7)])) : createCommentVNode("", true),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8, [
+					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7$1)])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$1, [
 						createBaseVNode("span", _hoisted_9, toDisplayString(sourceImage.value.name), 1),
 						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(sourceImage.value.img.naturalWidth) + " × " + toDisplayString(sourceImage.value.img.naturalHeight) + " px", 1)]),
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(sourceImage.value.size)), 1)])
@@ -7842,12 +8108,51 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-909cad5b"]]);
+}, [["__scopeId", "data-v-6b854ad7"]]);
+//#endregion
+//#region src/composables/useTheme.js
+var THEME_KEY = "subtitle-extractor-theme";
+var currentTheme = /* @__PURE__ */ ref("dark");
+/**
+* 主题切换组合式函数
+* 支持暗色/亮色主题切换，持久化到 localStorage
+*/
+function useTheme() {
+	const initTheme = () => {
+		const savedTheme = localStorage.getItem(THEME_KEY);
+		if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) currentTheme.value = savedTheme;
+		else currentTheme.value = "dark";
+		applyTheme(currentTheme.value);
+	};
+	const applyTheme = (theme) => {
+		if (theme === "light") document.documentElement.setAttribute("data-theme", "light");
+		else document.documentElement.removeAttribute("data-theme");
+	};
+	const toggleTheme = () => {
+		currentTheme.value = currentTheme.value === "dark" ? "light" : "dark";
+		applyTheme(currentTheme.value);
+		localStorage.setItem(THEME_KEY, currentTheme.value);
+	};
+	const isLight = () => currentTheme.value === "light";
+	const getTheme = () => currentTheme.value;
+	return {
+		currentTheme,
+		initTheme,
+		toggleTheme,
+		isLight,
+		getTheme
+	};
+}
 //#endregion
 //#region src/App.vue
 var _hoisted_1 = { class: "page-content" };
-var _hoisted_2 = { class: "entry-grid" };
-var _hoisted_3 = { class: "toast-container" };
+var _hoisted_2 = { class: "entry-container" };
+var _hoisted_3 = { class: "feature-group" };
+var _hoisted_4 = { class: "entry-grid" };
+var _hoisted_5 = { class: "feature-group" };
+var _hoisted_6 = { class: "entry-grid" };
+var _hoisted_7 = ["title"];
+var _hoisted_8 = { class: "toast-container" };
 //#endregion
 //#region src/main.js
 createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
@@ -7863,29 +8168,52 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (type === "error") return "fa-solid fa-circle-exclamation";
 			return "fa-solid fa-circle-info";
 		};
+		const { initTheme, toggleTheme, isLight } = useTheme();
+		onMounted(() => {
+			initTheme();
+			document.addEventListener("keydown", handleGlobalKeydown);
+		});
+		onUnmounted(() => {
+			document.removeEventListener("keydown", handleGlobalKeydown);
+		});
+		const handleGlobalKeydown = (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+				e.preventDefault();
+				const saveBtn = document.querySelector(".modal .btn-primary");
+				if (saveBtn && !saveBtn.disabled) saveBtn.click();
+			}
+		};
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", null, [_cache[14] || (_cache[14] = createBaseVNode("div", { class: "page-bg" }, null, -1)), createBaseVNode("main", _hoisted_1, [
-				_cache[12] || (_cache[12] = createBaseVNode("h1", { class: "page-title" }, "我的工具箱", -1)),
-				_cache[13] || (_cache[13] = createBaseVNode("p", { class: "page-desc" }, "视频字幕提取 · 图片字幕裁切 · 自由拼接", -1)),
-				createBaseVNode("div", _hoisted_2, [
-					createBaseVNode("button", {
-						class: "entry-card",
-						onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
-					}, [..._cache[8] || (_cache[8] = [createStaticVNode("<div class=\"entry-icon\" data-v-dc556da3><i class=\"fa-solid fa-film\" data-v-dc556da3></i></div><div class=\"entry-info\" data-v-dc556da3><span class=\"entry-title\" data-v-dc556da3>视频字幕提取</span><span class=\"entry-desc\" data-v-dc556da3>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-dc556da3></i>", 3)])]),
-					createBaseVNode("button", {
-						class: "entry-card",
-						onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
-					}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-dc556da3><i class=\"fa-solid fa-scissors\" data-v-dc556da3></i></div><div class=\"entry-info\" data-v-dc556da3><span class=\"entry-title\" data-v-dc556da3>图片拼接字幕</span><span class=\"entry-desc\" data-v-dc556da3>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-dc556da3></i>", 3)])]),
-					createBaseVNode("button", {
-						class: "entry-card",
-						onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
-					}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-dc556da3><i class=\"fa-solid fa-table-cells\" data-v-dc556da3></i></div><div class=\"entry-info\" data-v-dc556da3><span class=\"entry-title\" data-v-dc556da3>图片拼接</span><span class=\"entry-desc\" data-v-dc556da3>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-dc556da3></i>", 3)])]),
-					createBaseVNode("button", {
-						class: "entry-card",
-						onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
-					}, [..._cache[11] || (_cache[11] = [createStaticVNode("<div class=\"entry-icon\" data-v-dc556da3><i class=\"fa-solid fa-grip\" data-v-dc556da3></i></div><div class=\"entry-info\" data-v-dc556da3><span class=\"entry-title\" data-v-dc556da3>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-dc556da3>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-dc556da3></i>", 3)])])
-				]),
-				(openBlock(), createBlock(Teleport, { to: "body" }, [createBaseVNode("div", _hoisted_3, [createVNode(TransitionGroup, { name: "toast" }, {
+			return openBlock(), createElementBlock("div", null, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "page-bg" }, null, -1)), createBaseVNode("main", _hoisted_1, [
+				_cache[15] || (_cache[15] = createBaseVNode("h1", { class: "page-title" }, "我的工具箱", -1)),
+				_cache[16] || (_cache[16] = createBaseVNode("p", { class: "page-desc" }, "视频字幕提取 · 图片字幕裁切 · 自由拼接", -1)),
+				_cache[17] || (_cache[17] = createBaseVNode("a", {
+					href: "https://github.com/lovemyFamilyFovever/subtitle_extractor",
+					target: "_blank",
+					rel: "noopener noreferrer",
+					class: "github-star-btn",
+					title: "在 GitHub 上查看项目"
+				}, [createBaseVNode("i", { class: "fa-brands fa-github" }), createBaseVNode("span", null, "Star on GitHub")], -1)),
+				createBaseVNode("div", _hoisted_2, [createBaseVNode("div", _hoisted_3, [_cache[11] || (_cache[11] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-closed-captioning" }), createTextVNode(" 字幕处理 ")], -1)), createBaseVNode("div", _hoisted_4, [createBaseVNode("button", {
+					class: "entry-card",
+					onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
+				}, [..._cache[9] || (_cache[9] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-film\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>视频字幕提取</span><span class=\"entry-desc\" data-v-8b4823e6>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])]), createBaseVNode("button", {
+					class: "entry-card",
+					onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
+				}, [..._cache[10] || (_cache[10] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-scissors\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>图片截取字幕</span><span class=\"entry-desc\" data-v-8b4823e6>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])])])]), createBaseVNode("div", _hoisted_5, [_cache[14] || (_cache[14] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-image" }), createTextVNode(" 图片处理 ")], -1)), createBaseVNode("div", _hoisted_6, [createBaseVNode("button", {
+					class: "entry-card",
+					onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
+				}, [..._cache[12] || (_cache[12] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-table-cells\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>图片拼接</span><span class=\"entry-desc\" data-v-8b4823e6>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])]), createBaseVNode("button", {
+					class: "entry-card",
+					onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
+				}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-8b4823e6><i class=\"fa-solid fa-grip\" data-v-8b4823e6></i></div><div class=\"entry-info\" data-v-8b4823e6><span class=\"entry-title\" data-v-8b4823e6>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-8b4823e6>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-8b4823e6></i>", 3)])])])])]),
+				createBaseVNode("button", {
+					class: "theme-toggle",
+					onClick: _cache[4] || (_cache[4] = (...args) => unref(toggleTheme) && unref(toggleTheme)(...args)),
+					title: unref(isLight)() ? "切换到暗色主题" : "切换到亮色主题",
+					"aria-label": "切换主题"
+				}, [createBaseVNode("i", { class: normalizeClass(unref(isLight)() ? "fa-solid fa-sun" : "fa-solid fa-moon") }, null, 2)], 8, _hoisted_7),
+				(openBlock(), createBlock(Teleport, { to: "body" }, [createBaseVNode("div", _hoisted_8, [createVNode(TransitionGroup, { name: "toast" }, {
 					default: withCtx(() => [(openBlock(true), createElementBlock(Fragment, null, renderList(unref(toasts), (toast) => {
 						return openBlock(), createElementBlock("div", {
 							key: toast.id,
@@ -7896,7 +8224,7 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 				})])])),
 				createVNode(AppModal_default, {
 					modelValue: showVideo.value,
-					"onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => showVideo.value = $event),
+					"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => showVideo.value = $event),
 					title: "视频字幕提取",
 					icon: "fa-solid fa-film"
 				}, {
@@ -7905,7 +8233,7 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 				}, 8, ["modelValue"]),
 				createVNode(AppModal_default, {
 					modelValue: showImageSub.value,
-					"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => showImageSub.value = $event),
+					"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => showImageSub.value = $event),
 					title: "图片截取字幕",
 					icon: "fa-solid fa-scissors"
 				}, {
@@ -7914,7 +8242,7 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 				}, 8, ["modelValue"]),
 				createVNode(AppModal_default, {
 					modelValue: showStitch.value,
-					"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => showStitch.value = $event),
+					"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => showStitch.value = $event),
 					title: "图片拼接",
 					icon: "fa-solid fa-table-cells"
 				}, {
@@ -7923,7 +8251,7 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 				}, 8, ["modelValue"]),
 				createVNode(AppModal_default, {
 					modelValue: showSeg.value,
-					"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => showSeg.value = $event),
+					"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => showSeg.value = $event),
 					title: "智能切片",
 					icon: "fa-solid fa-grip"
 				}, {
@@ -7933,6 +8261,6 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-dc556da3"]])).mount("#app");
+}, [["__scopeId", "data-v-8b4823e6"]])).mount("#app");
 //#endregion
 export { __require as n, __commonJSMin as t };
