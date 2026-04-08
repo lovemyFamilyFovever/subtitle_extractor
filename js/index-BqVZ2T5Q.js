@@ -5442,7 +5442,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		const videoNativeW = /* @__PURE__ */ ref(0);
 		const videoNativeH = /* @__PURE__ */ ref(0);
 		const topCutRatio = /* @__PURE__ */ ref(.75);
-		const bottomCutRatio = /* @__PURE__ */ ref(1);
+		const bottomCutRatio = /* @__PURE__ */ ref(.83);
 		const coverTimeSec = /* @__PURE__ */ ref(null);
 		const showCoverTip = /* @__PURE__ */ ref(false);
 		const showCoverOptions = /* @__PURE__ */ ref(false);
@@ -5565,8 +5565,8 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				height: "",
 				size: formatBytes(file.size)
 			};
-			topCutRatio.value = .88;
-			bottomCutRatio.value = 1;
+			topCutRatio.value = .75;
+			bottomCutRatio.value = .83;
 			coverTimeSec.value = null;
 			showCoverTip.value = false;
 			showCoverOptions.value = false;
@@ -5609,6 +5609,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		const onVideoLoaded = async () => {
 			const video = videoEl.value;
 			if (!video) return;
+			video.muted = true;
 			videoNativeW.value = video.videoWidth;
 			videoNativeH.value = video.videoHeight;
 			fps.value = 30;
@@ -6089,6 +6090,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							ref: videoEl,
 							src: videoUrl.value,
 							controls: "",
+							muted: "",
 							class: "video-player",
 							onLoadedmetadata: onVideoLoaded,
 							onError: onVideoError
@@ -6263,7 +6265,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-1dfa7ca3"]]);
+}, [["__scopeId", "data-v-f2a6d0b6"]]);
 //#endregion
 //#region src/views/ImageSubtitle.vue
 var _hoisted_1$3 = { class: "app-layout" };
@@ -7887,7 +7889,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-CkJ2z4WO.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-BaGAE9Qu.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();

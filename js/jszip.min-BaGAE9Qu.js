@@ -1,4 +1,4 @@
-import { n as __require, t as __commonJSMin } from "./index-BT3pxmje.js";
+import { n as __require, t as __commonJSMin } from "./index-BqVZ2T5Q.js";
 //#region node_modules/jszip/dist/jszip.min.js
 var require_jszip_min = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	/*!
