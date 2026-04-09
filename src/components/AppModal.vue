@@ -6,11 +6,18 @@
     遮罩层：只能通过关闭按钮关闭，防止误操作
     :class 动态绑定 active 类来控制显示/隐藏
   -->
-  <div class="modal-overlay" :class="{ active: modelValue }" role="presentation">
+  <div class="modal-overlay" :class="{ 
+    active: modelValue, 
+    'full-screen': fullScreen,
+    'size-small': size === 'small',
+    'size-medium': size === 'medium',
+    'size-large': size === 'large'
+  }" role="presentation">
 
     <!-- 弹窗主体 -->
     <div 
-      class="modal" 
+      class="modal add-image-modal" 
+      :class="{ 'full-screen-modal': fullScreen }"
       role="dialog" 
       aria-modal="true"
       :aria-labelledby="titleId"
@@ -76,6 +83,17 @@ const props = defineProps({
   icon: {
     type: String,
     default: ''
+  },
+  // 是否全屏模式（用于思维导图等需要大空间的场景）
+  fullScreen: {
+    type: Boolean,
+    default: false
+  },
+  // 弹窗尺寸：'small' | 'medium' | 'large' | 'full'
+  size: {
+    type: String,
+    default: 'medium',
+    validator: (value) => ['small', 'medium', 'large', 'full'].includes(value)
   }
 })
 
@@ -167,6 +185,31 @@ watch(() => props.modelValue, (isOpen) => {
 
 .modal-overlay.active .modal {
   transform: scale(1) translateY(0);
+}
+
+/* ===== 全屏模式 ===== */
+.modal-overlay.full-screen {
+  padding: 0;
+}
+
+.modal-overlay.full-screen .modal {
+  max-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+.full-screen-modal {
+  max-height: 100vh !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+}
+
+.add-image-modal{
+      width: 700px;
+    height: 95vh;
 }
 
 /* ===== 弹窗头部 ===== */

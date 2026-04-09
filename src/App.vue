@@ -7,7 +7,7 @@
     <main class="page-content">
       <!-- 标题区 -->
       <h1 class="page-title">工具箱</h1>
-      <p class="page-desc">视频字幕提取 · 动图剪辑 · 图片处理</p>
+      <p class="page-desc">视频字幕提取 · 动图剪辑 · 图片处理 · 思维导图</p>
 
       <!-- GitHub Star 按钮 -->
       <a href="https://github.com/lovemyFamilyFovever/subtitle_extractor" target="_blank" rel="noopener noreferrer"
@@ -101,6 +101,27 @@
 
           </div>
         </div>
+
+        <!-- 分组四：思维导图 -->
+        <div class="feature-group">
+          <h2 class="group-title">
+            <i class="fa-solid fa-diagram-project"></i>
+            思维导图
+          </h2>
+          <div class="entry-grid">
+
+            <!-- 功能六：思维导图 -->
+            <button class="entry-card" @click="showMindMap = true">
+              <div class="entry-icon"><i class="fa-solid fa-brain"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">思维导图</span>
+                <span class="entry-desc">创建和编辑思维导图，支持插入图片、导出 PNG/SVG</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
+
+          </div>
+        </div>
       </div>
 
       <!-- ===== 主题切换按钮 ===== -->
@@ -167,6 +188,10 @@
         <VideoToGif v-if="showGif" />
       </AppModal>
 
+      <AppModal v-model="showMindMap" title="思维导图" icon="fa-solid fa-brain" :full-screen="true">
+        <MindMap v-if="showMindMap" />
+      </AppModal>
+
     </main>
   </div>
 </template>
@@ -188,6 +213,7 @@ import ImageSubtitle from './views/ImageSubtitle.vue'
 import ImageStitch from './views/ImageStitch.vue'
 import ImageSegmentation from './views/ImageSegmentation.vue'
 import VideoToGif from './views/VideoToGif.vue'
+import MindMap from './views/MindMap.vue'
 
 // 导入 Toast composable
 import { useToast } from './composables/useToast.js'
@@ -202,6 +228,7 @@ const showImageSub = ref(false)
 const showStitch = ref(false)
 const showSeg = ref(false)
 const showGif = ref(false)
+const showMindMap = ref(false)
 
 // ===== Toast =====
 const { toasts, showToast } = useToast()
@@ -319,13 +346,13 @@ const handleGlobalKeydown = (e) => {
   font-size: 1.1rem;
 }
 
-/* ===== 功能容器（三栏布局）===== */
+/* ===== 功能容器（四栏布局）===== */
 .entry-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
 }
 
 /* ===== 功能分组 ===== */
@@ -336,7 +363,14 @@ const handleGlobalKeydown = (e) => {
 }
 
 /* ===== 移动端响应式：单栏布局 ===== */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
+  .entry-container {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
   .entry-container {
     grid-template-columns: 1fr;
     max-width: 520px;
