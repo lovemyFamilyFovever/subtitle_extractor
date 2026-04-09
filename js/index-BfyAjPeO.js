@@ -1,0 +1,25163 @@
+//#region \0rolldown/runtime.js
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJSMin = (cb, mod) => () => (mod || cb((mod = { exports: {} }).exports, mod), mod.exports);
+var __copyProps = (to, from, except, desc) => {
+	if (from && typeof from === "object" || typeof from === "function") for (var keys = __getOwnPropNames(from), i = 0, n = keys.length, key; i < n; i++) {
+		key = keys[i];
+		if (!__hasOwnProp.call(to, key) && key !== except) __defProp(to, key, {
+			get: ((k) => from[k]).bind(null, key),
+			enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable
+		});
+	}
+	return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", {
+	value: mod,
+	enumerable: true
+}) : target, mod));
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, { get: (a, b) => (typeof require !== "undefined" ? require : a)[b] }) : x)(function(x) {
+	if (typeof require !== "undefined") return require.apply(this, arguments);
+	throw Error("Calling `require` for \"" + x + "\" in an environment that doesn't expose the `require` function. See https://rolldown.rs/in-depth/bundling-cjs#require-external-modules for more details.");
+});
+//#endregion
+//#region \0vite/modulepreload-polyfill.js
+(function polyfill() {
+	const relList = document.createElement("link").relList;
+	if (relList && relList.supports && relList.supports("modulepreload")) return;
+	for (const link of document.querySelectorAll("link[rel=\"modulepreload\"]")) processPreload(link);
+	new MutationObserver((mutations) => {
+		for (const mutation of mutations) {
+			if (mutation.type !== "childList") continue;
+			for (const node of mutation.addedNodes) if (node.tagName === "LINK" && node.rel === "modulepreload") processPreload(node);
+		}
+	}).observe(document, {
+		childList: true,
+		subtree: true
+	});
+	function getFetchOpts(link) {
+		const fetchOpts = {};
+		if (link.integrity) fetchOpts.integrity = link.integrity;
+		if (link.referrerPolicy) fetchOpts.referrerPolicy = link.referrerPolicy;
+		if (link.crossOrigin === "use-credentials") fetchOpts.credentials = "include";
+		else if (link.crossOrigin === "anonymous") fetchOpts.credentials = "omit";
+		else fetchOpts.credentials = "same-origin";
+		return fetchOpts;
+	}
+	function processPreload(link) {
+		if (link.ep) return;
+		link.ep = true;
+		const fetchOpts = getFetchOpts(link);
+		fetch(link.href, fetchOpts);
+	}
+})();
+//#endregion
+//#region node_modules/@vue/shared/dist/shared.esm-bundler.js
+/**
+* @vue/shared v3.5.31
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+/* @__NO_SIDE_EFFECTS__ */
+function makeMap(str) {
+	const map = /* @__PURE__ */ Object.create(null);
+	for (const key of str.split(",")) map[key] = 1;
+	return (val) => val in map;
+}
+var EMPTY_OBJ = {};
+var EMPTY_ARR = [];
+var NOOP = () => {};
+var NO = () => false;
+var isOn = (key) => key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110 && (key.charCodeAt(2) > 122 || key.charCodeAt(2) < 97);
+var isModelListener = (key) => key.startsWith("onUpdate:");
+var extend$1 = Object.assign;
+var remove$1 = (arr, el) => {
+	const i = arr.indexOf(el);
+	if (i > -1) arr.splice(i, 1);
+};
+var hasOwnProperty$1 = Object.prototype.hasOwnProperty;
+var hasOwn = (val, key) => hasOwnProperty$1.call(val, key);
+var isArray = Array.isArray;
+var isMap = (val) => toTypeString(val) === "[object Map]";
+var isSet = (val) => toTypeString(val) === "[object Set]";
+var isDate = (val) => toTypeString(val) === "[object Date]";
+var isFunction = (val) => typeof val === "function";
+var isString = (val) => typeof val === "string";
+var isSymbol = (val) => typeof val === "symbol";
+var isObject = (val) => val !== null && typeof val === "object";
+var isPromise = (val) => {
+	return (isObject(val) || isFunction(val)) && isFunction(val.then) && isFunction(val.catch);
+};
+var objectToString = Object.prototype.toString;
+var toTypeString = (value) => objectToString.call(value);
+var toRawType = (value) => {
+	return toTypeString(value).slice(8, -1);
+};
+var isPlainObject = (val) => toTypeString(val) === "[object Object]";
+var isIntegerKey = (key) => isString(key) && key !== "NaN" && key[0] !== "-" && "" + parseInt(key, 10) === key;
+var isReservedProp = /* @__PURE__ */ makeMap(",key,ref,ref_for,ref_key,onVnodeBeforeMount,onVnodeMounted,onVnodeBeforeUpdate,onVnodeUpdated,onVnodeBeforeUnmount,onVnodeUnmounted");
+var cacheStringFunction = (fn) => {
+	const cache = /* @__PURE__ */ Object.create(null);
+	return ((str) => {
+		return cache[str] || (cache[str] = fn(str));
+	});
+};
+var camelizeRE = /-\w/g;
+var camelize = cacheStringFunction((str) => {
+	return str.replace(camelizeRE, (c) => c.slice(1).toUpperCase());
+});
+var hyphenateRE = /\B([A-Z])/g;
+var hyphenate = cacheStringFunction((str) => str.replace(hyphenateRE, "-$1").toLowerCase());
+var capitalize$1 = cacheStringFunction((str) => {
+	return str.charAt(0).toUpperCase() + str.slice(1);
+});
+var toHandlerKey = cacheStringFunction((str) => {
+	return str ? `on${capitalize$1(str)}` : ``;
+});
+var hasChanged = (value, oldValue) => !Object.is(value, oldValue);
+var invokeArrayFns = (fns, ...arg) => {
+	for (let i = 0; i < fns.length; i++) fns[i](...arg);
+};
+var def = (obj, key, value, writable = false) => {
+	Object.defineProperty(obj, key, {
+		configurable: true,
+		enumerable: false,
+		writable,
+		value
+	});
+};
+var looseToNumber = (val) => {
+	const n = parseFloat(val);
+	return isNaN(n) ? val : n;
+};
+var toNumber = (val) => {
+	const n = isString(val) ? Number(val) : NaN;
+	return isNaN(n) ? val : n;
+};
+var _globalThis;
+var getGlobalThis = () => {
+	return _globalThis || (_globalThis = typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {});
+};
+function normalizeStyle(value) {
+	if (isArray(value)) {
+		const res = {};
+		for (let i = 0; i < value.length; i++) {
+			const item = value[i];
+			const normalized = isString(item) ? parseStringStyle(item) : normalizeStyle(item);
+			if (normalized) for (const key in normalized) res[key] = normalized[key];
+		}
+		return res;
+	} else if (isString(value) || isObject(value)) return value;
+}
+var listDelimiterRE = /;(?![^(]*\))/g;
+var propertyDelimiterRE = /:([^]+)/;
+var styleCommentRE = /\/\*[^]*?\*\//g;
+function parseStringStyle(cssText) {
+	const ret = {};
+	cssText.replace(styleCommentRE, "").split(listDelimiterRE).forEach((item) => {
+		if (item) {
+			const tmp = item.split(propertyDelimiterRE);
+			tmp.length > 1 && (ret[tmp[0].trim()] = tmp[1].trim());
+		}
+	});
+	return ret;
+}
+function normalizeClass(value) {
+	let res = "";
+	if (isString(value)) res = value;
+	else if (isArray(value)) for (let i = 0; i < value.length; i++) {
+		const normalized = normalizeClass(value[i]);
+		if (normalized) res += normalized + " ";
+	}
+	else if (isObject(value)) {
+		for (const name in value) if (value[name]) res += name + " ";
+	}
+	return res.trim();
+}
+var specialBooleanAttrs = `itemscope,allowfullscreen,formnovalidate,ismap,nomodule,novalidate,readonly`;
+var isSpecialBooleanAttr = /* @__PURE__ */ makeMap(specialBooleanAttrs);
+specialBooleanAttrs + "";
+function includeBooleanAttr(value) {
+	return !!value || value === "";
+}
+function looseCompareArrays(a, b) {
+	if (a.length !== b.length) return false;
+	let equal = true;
+	for (let i = 0; equal && i < a.length; i++) equal = looseEqual(a[i], b[i]);
+	return equal;
+}
+function looseEqual(a, b) {
+	if (a === b) return true;
+	let aValidType = isDate(a);
+	let bValidType = isDate(b);
+	if (aValidType || bValidType) return aValidType && bValidType ? a.getTime() === b.getTime() : false;
+	aValidType = isSymbol(a);
+	bValidType = isSymbol(b);
+	if (aValidType || bValidType) return a === b;
+	aValidType = isArray(a);
+	bValidType = isArray(b);
+	if (aValidType || bValidType) return aValidType && bValidType ? looseCompareArrays(a, b) : false;
+	aValidType = isObject(a);
+	bValidType = isObject(b);
+	if (aValidType || bValidType) {
+		if (!aValidType || !bValidType) return false;
+		if (Object.keys(a).length !== Object.keys(b).length) return false;
+		for (const key in a) {
+			const aHasKey = a.hasOwnProperty(key);
+			const bHasKey = b.hasOwnProperty(key);
+			if (aHasKey && !bHasKey || !aHasKey && bHasKey || !looseEqual(a[key], b[key])) return false;
+		}
+	}
+	return String(a) === String(b);
+}
+function looseIndexOf(arr, val) {
+	return arr.findIndex((item) => looseEqual(item, val));
+}
+var isRef$1 = (val) => {
+	return !!(val && val["__v_isRef"] === true);
+};
+var toDisplayString = (val) => {
+	return isString(val) ? val : val == null ? "" : isArray(val) || isObject(val) && (val.toString === objectToString || !isFunction(val.toString)) ? isRef$1(val) ? toDisplayString(val.value) : JSON.stringify(val, replacer, 2) : String(val);
+};
+var replacer = (_key, val) => {
+	if (isRef$1(val)) return replacer(_key, val.value);
+	else if (isMap(val)) return { [`Map(${val.size})`]: [...val.entries()].reduce((entries, [key, val2], i) => {
+		entries[stringifySymbol(key, i) + " =>"] = val2;
+		return entries;
+	}, {}) };
+	else if (isSet(val)) return { [`Set(${val.size})`]: [...val.values()].map((v) => stringifySymbol(v)) };
+	else if (isSymbol(val)) return stringifySymbol(val);
+	else if (isObject(val) && !isArray(val) && !isPlainObject(val)) return String(val);
+	return val;
+};
+var stringifySymbol = (v, i = "") => {
+	var _a;
+	return isSymbol(v) ? `Symbol(${(_a = v.description) != null ? _a : i})` : v;
+};
+//#endregion
+//#region node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js
+/**
+* @vue/reactivity v3.5.31
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+var activeEffectScope;
+var EffectScope = class {
+	constructor(detached = false) {
+		this.detached = detached;
+		/**
+		* @internal
+		*/
+		this._active = true;
+		/**
+		* @internal track `on` calls, allow `on` call multiple times
+		*/
+		this._on = 0;
+		/**
+		* @internal
+		*/
+		this.effects = [];
+		/**
+		* @internal
+		*/
+		this.cleanups = [];
+		this._isPaused = false;
+		this.__v_skip = true;
+		this.parent = activeEffectScope;
+		if (!detached && activeEffectScope) this.index = (activeEffectScope.scopes || (activeEffectScope.scopes = [])).push(this) - 1;
+	}
+	get active() {
+		return this._active;
+	}
+	pause() {
+		if (this._active) {
+			this._isPaused = true;
+			let i, l;
+			if (this.scopes) for (i = 0, l = this.scopes.length; i < l; i++) this.scopes[i].pause();
+			for (i = 0, l = this.effects.length; i < l; i++) this.effects[i].pause();
+		}
+	}
+	/**
+	* Resumes the effect scope, including all child scopes and effects.
+	*/
+	resume() {
+		if (this._active) {
+			if (this._isPaused) {
+				this._isPaused = false;
+				let i, l;
+				if (this.scopes) for (i = 0, l = this.scopes.length; i < l; i++) this.scopes[i].resume();
+				for (i = 0, l = this.effects.length; i < l; i++) this.effects[i].resume();
+			}
+		}
+	}
+	run(fn) {
+		if (this._active) {
+			const currentEffectScope = activeEffectScope;
+			try {
+				activeEffectScope = this;
+				return fn();
+			} finally {
+				activeEffectScope = currentEffectScope;
+			}
+		}
+	}
+	/**
+	* This should only be called on non-detached scopes
+	* @internal
+	*/
+	on() {
+		if (++this._on === 1) {
+			this.prevScope = activeEffectScope;
+			activeEffectScope = this;
+		}
+	}
+	/**
+	* This should only be called on non-detached scopes
+	* @internal
+	*/
+	off() {
+		if (this._on > 0 && --this._on === 0) {
+			activeEffectScope = this.prevScope;
+			this.prevScope = void 0;
+		}
+	}
+	stop(fromParent) {
+		if (this._active) {
+			this._active = false;
+			let i, l;
+			for (i = 0, l = this.effects.length; i < l; i++) this.effects[i].stop();
+			this.effects.length = 0;
+			for (i = 0, l = this.cleanups.length; i < l; i++) this.cleanups[i]();
+			this.cleanups.length = 0;
+			if (this.scopes) {
+				for (i = 0, l = this.scopes.length; i < l; i++) this.scopes[i].stop(true);
+				this.scopes.length = 0;
+			}
+			if (!this.detached && this.parent && !fromParent) {
+				const last = this.parent.scopes.pop();
+				if (last && last !== this) {
+					this.parent.scopes[this.index] = last;
+					last.index = this.index;
+				}
+			}
+			this.parent = void 0;
+		}
+	}
+};
+function getCurrentScope() {
+	return activeEffectScope;
+}
+var activeSub;
+var pausedQueueEffects = /* @__PURE__ */ new WeakSet();
+var ReactiveEffect = class {
+	constructor(fn) {
+		this.fn = fn;
+		/**
+		* @internal
+		*/
+		this.deps = void 0;
+		/**
+		* @internal
+		*/
+		this.depsTail = void 0;
+		/**
+		* @internal
+		*/
+		this.flags = 5;
+		/**
+		* @internal
+		*/
+		this.next = void 0;
+		/**
+		* @internal
+		*/
+		this.cleanup = void 0;
+		this.scheduler = void 0;
+		if (activeEffectScope && activeEffectScope.active) activeEffectScope.effects.push(this);
+	}
+	pause() {
+		this.flags |= 64;
+	}
+	resume() {
+		if (this.flags & 64) {
+			this.flags &= -65;
+			if (pausedQueueEffects.has(this)) {
+				pausedQueueEffects.delete(this);
+				this.trigger();
+			}
+		}
+	}
+	/**
+	* @internal
+	*/
+	notify() {
+		if (this.flags & 2 && !(this.flags & 32)) return;
+		if (!(this.flags & 8)) batch(this);
+	}
+	run() {
+		if (!(this.flags & 1)) return this.fn();
+		this.flags |= 2;
+		cleanupEffect(this);
+		prepareDeps(this);
+		const prevEffect = activeSub;
+		const prevShouldTrack = shouldTrack;
+		activeSub = this;
+		shouldTrack = true;
+		try {
+			return this.fn();
+		} finally {
+			cleanupDeps(this);
+			activeSub = prevEffect;
+			shouldTrack = prevShouldTrack;
+			this.flags &= -3;
+		}
+	}
+	stop() {
+		if (this.flags & 1) {
+			for (let link = this.deps; link; link = link.nextDep) removeSub(link);
+			this.deps = this.depsTail = void 0;
+			cleanupEffect(this);
+			this.onStop && this.onStop();
+			this.flags &= -2;
+		}
+	}
+	trigger() {
+		if (this.flags & 64) pausedQueueEffects.add(this);
+		else if (this.scheduler) this.scheduler();
+		else this.runIfDirty();
+	}
+	/**
+	* @internal
+	*/
+	runIfDirty() {
+		if (isDirty(this)) this.run();
+	}
+	get dirty() {
+		return isDirty(this);
+	}
+};
+var batchDepth = 0;
+var batchedSub;
+var batchedComputed;
+function batch(sub, isComputed = false) {
+	sub.flags |= 8;
+	if (isComputed) {
+		sub.next = batchedComputed;
+		batchedComputed = sub;
+		return;
+	}
+	sub.next = batchedSub;
+	batchedSub = sub;
+}
+function startBatch() {
+	batchDepth++;
+}
+function endBatch() {
+	if (--batchDepth > 0) return;
+	if (batchedComputed) {
+		let e = batchedComputed;
+		batchedComputed = void 0;
+		while (e) {
+			const next = e.next;
+			e.next = void 0;
+			e.flags &= -9;
+			e = next;
+		}
+	}
+	let error;
+	while (batchedSub) {
+		let e = batchedSub;
+		batchedSub = void 0;
+		while (e) {
+			const next = e.next;
+			e.next = void 0;
+			e.flags &= -9;
+			if (e.flags & 1) try {
+				e.trigger();
+			} catch (err) {
+				if (!error) error = err;
+			}
+			e = next;
+		}
+	}
+	if (error) throw error;
+}
+function prepareDeps(sub) {
+	for (let link = sub.deps; link; link = link.nextDep) {
+		link.version = -1;
+		link.prevActiveLink = link.dep.activeLink;
+		link.dep.activeLink = link;
+	}
+}
+function cleanupDeps(sub) {
+	let head;
+	let tail = sub.depsTail;
+	let link = tail;
+	while (link) {
+		const prev = link.prevDep;
+		if (link.version === -1) {
+			if (link === tail) tail = prev;
+			removeSub(link);
+			removeDep(link);
+		} else head = link;
+		link.dep.activeLink = link.prevActiveLink;
+		link.prevActiveLink = void 0;
+		link = prev;
+	}
+	sub.deps = head;
+	sub.depsTail = tail;
+}
+function isDirty(sub) {
+	for (let link = sub.deps; link; link = link.nextDep) if (link.dep.version !== link.version || link.dep.computed && (refreshComputed(link.dep.computed) || link.dep.version !== link.version)) return true;
+	if (sub._dirty) return true;
+	return false;
+}
+function refreshComputed(computed) {
+	if (computed.flags & 4 && !(computed.flags & 16)) return;
+	computed.flags &= -17;
+	if (computed.globalVersion === globalVersion) return;
+	computed.globalVersion = globalVersion;
+	if (!computed.isSSR && computed.flags & 128 && (!computed.deps && !computed._dirty || !isDirty(computed))) return;
+	computed.flags |= 2;
+	const dep = computed.dep;
+	const prevSub = activeSub;
+	const prevShouldTrack = shouldTrack;
+	activeSub = computed;
+	shouldTrack = true;
+	try {
+		prepareDeps(computed);
+		const value = computed.fn(computed._value);
+		if (dep.version === 0 || hasChanged(value, computed._value)) {
+			computed.flags |= 128;
+			computed._value = value;
+			dep.version++;
+		}
+	} catch (err) {
+		dep.version++;
+		throw err;
+	} finally {
+		activeSub = prevSub;
+		shouldTrack = prevShouldTrack;
+		cleanupDeps(computed);
+		computed.flags &= -3;
+	}
+}
+function removeSub(link, soft = false) {
+	const { dep, prevSub, nextSub } = link;
+	if (prevSub) {
+		prevSub.nextSub = nextSub;
+		link.prevSub = void 0;
+	}
+	if (nextSub) {
+		nextSub.prevSub = prevSub;
+		link.nextSub = void 0;
+	}
+	if (dep.subs === link) {
+		dep.subs = prevSub;
+		if (!prevSub && dep.computed) {
+			dep.computed.flags &= -5;
+			for (let l = dep.computed.deps; l; l = l.nextDep) removeSub(l, true);
+		}
+	}
+	if (!soft && !--dep.sc && dep.map) dep.map.delete(dep.key);
+}
+function removeDep(link) {
+	const { prevDep, nextDep } = link;
+	if (prevDep) {
+		prevDep.nextDep = nextDep;
+		link.prevDep = void 0;
+	}
+	if (nextDep) {
+		nextDep.prevDep = prevDep;
+		link.nextDep = void 0;
+	}
+}
+var shouldTrack = true;
+var trackStack = [];
+function pauseTracking() {
+	trackStack.push(shouldTrack);
+	shouldTrack = false;
+}
+function resetTracking() {
+	const last = trackStack.pop();
+	shouldTrack = last === void 0 ? true : last;
+}
+function cleanupEffect(e) {
+	const { cleanup } = e;
+	e.cleanup = void 0;
+	if (cleanup) {
+		const prevSub = activeSub;
+		activeSub = void 0;
+		try {
+			cleanup();
+		} finally {
+			activeSub = prevSub;
+		}
+	}
+}
+var globalVersion = 0;
+var Link = class {
+	constructor(sub, dep) {
+		this.sub = sub;
+		this.dep = dep;
+		this.version = dep.version;
+		this.nextDep = this.prevDep = this.nextSub = this.prevSub = this.prevActiveLink = void 0;
+	}
+};
+var Dep = class {
+	constructor(computed) {
+		this.computed = computed;
+		this.version = 0;
+		/**
+		* Link between this dep and the current active effect
+		*/
+		this.activeLink = void 0;
+		/**
+		* Doubly linked list representing the subscribing effects (tail)
+		*/
+		this.subs = void 0;
+		/**
+		* For object property deps cleanup
+		*/
+		this.map = void 0;
+		this.key = void 0;
+		/**
+		* Subscriber counter
+		*/
+		this.sc = 0;
+		/**
+		* @internal
+		*/
+		this.__v_skip = true;
+	}
+	track(debugInfo) {
+		if (!activeSub || !shouldTrack || activeSub === this.computed) return;
+		let link = this.activeLink;
+		if (link === void 0 || link.sub !== activeSub) {
+			link = this.activeLink = new Link(activeSub, this);
+			if (!activeSub.deps) activeSub.deps = activeSub.depsTail = link;
+			else {
+				link.prevDep = activeSub.depsTail;
+				activeSub.depsTail.nextDep = link;
+				activeSub.depsTail = link;
+			}
+			addSub(link);
+		} else if (link.version === -1) {
+			link.version = this.version;
+			if (link.nextDep) {
+				const next = link.nextDep;
+				next.prevDep = link.prevDep;
+				if (link.prevDep) link.prevDep.nextDep = next;
+				link.prevDep = activeSub.depsTail;
+				link.nextDep = void 0;
+				activeSub.depsTail.nextDep = link;
+				activeSub.depsTail = link;
+				if (activeSub.deps === link) activeSub.deps = next;
+			}
+		}
+		return link;
+	}
+	trigger(debugInfo) {
+		this.version++;
+		globalVersion++;
+		this.notify(debugInfo);
+	}
+	notify(debugInfo) {
+		startBatch();
+		try {
+			for (let link = this.subs; link; link = link.prevSub) if (link.sub.notify()) link.sub.dep.notify();
+		} finally {
+			endBatch();
+		}
+	}
+};
+function addSub(link) {
+	link.dep.sc++;
+	if (link.sub.flags & 4) {
+		const computed = link.dep.computed;
+		if (computed && !link.dep.subs) {
+			computed.flags |= 20;
+			for (let l = computed.deps; l; l = l.nextDep) addSub(l);
+		}
+		const currentTail = link.dep.subs;
+		if (currentTail !== link) {
+			link.prevSub = currentTail;
+			if (currentTail) currentTail.nextSub = link;
+		}
+		link.dep.subs = link;
+	}
+}
+var targetMap = /* @__PURE__ */ new WeakMap();
+var ITERATE_KEY = /* @__PURE__ */ Symbol("");
+var MAP_KEY_ITERATE_KEY = /* @__PURE__ */ Symbol("");
+var ARRAY_ITERATE_KEY = /* @__PURE__ */ Symbol("");
+function track(target, type, key) {
+	if (shouldTrack && activeSub) {
+		let depsMap = targetMap.get(target);
+		if (!depsMap) targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
+		let dep = depsMap.get(key);
+		if (!dep) {
+			depsMap.set(key, dep = new Dep());
+			dep.map = depsMap;
+			dep.key = key;
+		}
+		dep.track();
+	}
+}
+function trigger(target, type, key, newValue, oldValue, oldTarget) {
+	const depsMap = targetMap.get(target);
+	if (!depsMap) {
+		globalVersion++;
+		return;
+	}
+	const run = (dep) => {
+		if (dep) dep.trigger();
+	};
+	startBatch();
+	if (type === "clear") depsMap.forEach(run);
+	else {
+		const targetIsArray = isArray(target);
+		const isArrayIndex = targetIsArray && isIntegerKey(key);
+		if (targetIsArray && key === "length") {
+			const newLength = Number(newValue);
+			depsMap.forEach((dep, key2) => {
+				if (key2 === "length" || key2 === ARRAY_ITERATE_KEY || !isSymbol(key2) && key2 >= newLength) run(dep);
+			});
+		} else {
+			if (key !== void 0 || depsMap.has(void 0)) run(depsMap.get(key));
+			if (isArrayIndex) run(depsMap.get(ARRAY_ITERATE_KEY));
+			switch (type) {
+				case "add":
+					if (!targetIsArray) {
+						run(depsMap.get(ITERATE_KEY));
+						if (isMap(target)) run(depsMap.get(MAP_KEY_ITERATE_KEY));
+					} else if (isArrayIndex) run(depsMap.get("length"));
+					break;
+				case "delete":
+					if (!targetIsArray) {
+						run(depsMap.get(ITERATE_KEY));
+						if (isMap(target)) run(depsMap.get(MAP_KEY_ITERATE_KEY));
+					}
+					break;
+				case "set":
+					if (isMap(target)) run(depsMap.get(ITERATE_KEY));
+					break;
+			}
+		}
+	}
+	endBatch();
+}
+function reactiveReadArray(array) {
+	const raw = /* @__PURE__ */ toRaw(array);
+	if (raw === array) return raw;
+	track(raw, "iterate", ARRAY_ITERATE_KEY);
+	return /* @__PURE__ */ isShallow(array) ? raw : raw.map(toReactive);
+}
+function shallowReadArray(arr) {
+	track(arr = /* @__PURE__ */ toRaw(arr), "iterate", ARRAY_ITERATE_KEY);
+	return arr;
+}
+function toWrapped(target, item) {
+	if (/* @__PURE__ */ isReadonly(target)) return /* @__PURE__ */ isReactive(target) ? toReadonly(toReactive(item)) : toReadonly(item);
+	return toReactive(item);
+}
+var arrayInstrumentations = {
+	__proto__: null,
+	[Symbol.iterator]() {
+		return iterator(this, Symbol.iterator, (item) => toWrapped(this, item));
+	},
+	concat(...args) {
+		return reactiveReadArray(this).concat(...args.map((x) => isArray(x) ? reactiveReadArray(x) : x));
+	},
+	entries() {
+		return iterator(this, "entries", (value) => {
+			value[1] = toWrapped(this, value[1]);
+			return value;
+		});
+	},
+	every(fn, thisArg) {
+		return apply(this, "every", fn, thisArg, void 0, arguments);
+	},
+	filter(fn, thisArg) {
+		return apply(this, "filter", fn, thisArg, (v) => v.map((item) => toWrapped(this, item)), arguments);
+	},
+	find(fn, thisArg) {
+		return apply(this, "find", fn, thisArg, (item) => toWrapped(this, item), arguments);
+	},
+	findIndex(fn, thisArg) {
+		return apply(this, "findIndex", fn, thisArg, void 0, arguments);
+	},
+	findLast(fn, thisArg) {
+		return apply(this, "findLast", fn, thisArg, (item) => toWrapped(this, item), arguments);
+	},
+	findLastIndex(fn, thisArg) {
+		return apply(this, "findLastIndex", fn, thisArg, void 0, arguments);
+	},
+	forEach(fn, thisArg) {
+		return apply(this, "forEach", fn, thisArg, void 0, arguments);
+	},
+	includes(...args) {
+		return searchProxy(this, "includes", args);
+	},
+	indexOf(...args) {
+		return searchProxy(this, "indexOf", args);
+	},
+	join(separator) {
+		return reactiveReadArray(this).join(separator);
+	},
+	lastIndexOf(...args) {
+		return searchProxy(this, "lastIndexOf", args);
+	},
+	map(fn, thisArg) {
+		return apply(this, "map", fn, thisArg, void 0, arguments);
+	},
+	pop() {
+		return noTracking(this, "pop");
+	},
+	push(...args) {
+		return noTracking(this, "push", args);
+	},
+	reduce(fn, ...args) {
+		return reduce(this, "reduce", fn, args);
+	},
+	reduceRight(fn, ...args) {
+		return reduce(this, "reduceRight", fn, args);
+	},
+	shift() {
+		return noTracking(this, "shift");
+	},
+	some(fn, thisArg) {
+		return apply(this, "some", fn, thisArg, void 0, arguments);
+	},
+	splice(...args) {
+		return noTracking(this, "splice", args);
+	},
+	toReversed() {
+		return reactiveReadArray(this).toReversed();
+	},
+	toSorted(comparer) {
+		return reactiveReadArray(this).toSorted(comparer);
+	},
+	toSpliced(...args) {
+		return reactiveReadArray(this).toSpliced(...args);
+	},
+	unshift(...args) {
+		return noTracking(this, "unshift", args);
+	},
+	values() {
+		return iterator(this, "values", (item) => toWrapped(this, item));
+	}
+};
+function iterator(self, method, wrapValue) {
+	const arr = shallowReadArray(self);
+	const iter = arr[method]();
+	if (arr !== self && !/* @__PURE__ */ isShallow(self)) {
+		iter._next = iter.next;
+		iter.next = () => {
+			const result = iter._next();
+			if (!result.done) result.value = wrapValue(result.value);
+			return result;
+		};
+	}
+	return iter;
+}
+var arrayProto = Array.prototype;
+function apply(self, method, fn, thisArg, wrappedRetFn, args) {
+	const arr = shallowReadArray(self);
+	const needsWrap = arr !== self && !/* @__PURE__ */ isShallow(self);
+	const methodFn = arr[method];
+	if (methodFn !== arrayProto[method]) {
+		const result2 = methodFn.apply(self, args);
+		return needsWrap ? toReactive(result2) : result2;
+	}
+	let wrappedFn = fn;
+	if (arr !== self) {
+		if (needsWrap) wrappedFn = function(item, index) {
+			return fn.call(this, toWrapped(self, item), index, self);
+		};
+		else if (fn.length > 2) wrappedFn = function(item, index) {
+			return fn.call(this, item, index, self);
+		};
+	}
+	const result = methodFn.call(arr, wrappedFn, thisArg);
+	return needsWrap && wrappedRetFn ? wrappedRetFn(result) : result;
+}
+function reduce(self, method, fn, args) {
+	const arr = shallowReadArray(self);
+	const needsWrap = arr !== self && !/* @__PURE__ */ isShallow(self);
+	let wrappedFn = fn;
+	let wrapInitialAccumulator = false;
+	if (arr !== self) {
+		if (needsWrap) {
+			wrapInitialAccumulator = args.length === 0;
+			wrappedFn = function(acc, item, index) {
+				if (wrapInitialAccumulator) {
+					wrapInitialAccumulator = false;
+					acc = toWrapped(self, acc);
+				}
+				return fn.call(this, acc, toWrapped(self, item), index, self);
+			};
+		} else if (fn.length > 3) wrappedFn = function(acc, item, index) {
+			return fn.call(this, acc, item, index, self);
+		};
+	}
+	const result = arr[method](wrappedFn, ...args);
+	return wrapInitialAccumulator ? toWrapped(self, result) : result;
+}
+function searchProxy(self, method, args) {
+	const arr = /* @__PURE__ */ toRaw(self);
+	track(arr, "iterate", ARRAY_ITERATE_KEY);
+	const res = arr[method](...args);
+	if ((res === -1 || res === false) && /* @__PURE__ */ isProxy(args[0])) {
+		args[0] = /* @__PURE__ */ toRaw(args[0]);
+		return arr[method](...args);
+	}
+	return res;
+}
+function noTracking(self, method, args = []) {
+	pauseTracking();
+	startBatch();
+	const res = (/* @__PURE__ */ toRaw(self))[method].apply(self, args);
+	endBatch();
+	resetTracking();
+	return res;
+}
+var isNonTrackableKeys = /* @__PURE__ */ makeMap(`__proto__,__v_isRef,__isVue`);
+var builtInSymbols = new Set(/* @__PURE__ */ Object.getOwnPropertyNames(Symbol).filter((key) => key !== "arguments" && key !== "caller").map((key) => Symbol[key]).filter(isSymbol));
+function hasOwnProperty(key) {
+	if (!isSymbol(key)) key = String(key);
+	const obj = /* @__PURE__ */ toRaw(this);
+	track(obj, "has", key);
+	return obj.hasOwnProperty(key);
+}
+var BaseReactiveHandler = class {
+	constructor(_isReadonly = false, _isShallow = false) {
+		this._isReadonly = _isReadonly;
+		this._isShallow = _isShallow;
+	}
+	get(target, key, receiver) {
+		if (key === "__v_skip") return target["__v_skip"];
+		const isReadonly2 = this._isReadonly, isShallow2 = this._isShallow;
+		if (key === "__v_isReactive") return !isReadonly2;
+		else if (key === "__v_isReadonly") return isReadonly2;
+		else if (key === "__v_isShallow") return isShallow2;
+		else if (key === "__v_raw") {
+			if (receiver === (isReadonly2 ? isShallow2 ? shallowReadonlyMap : readonlyMap : isShallow2 ? shallowReactiveMap : reactiveMap).get(target) || Object.getPrototypeOf(target) === Object.getPrototypeOf(receiver)) return target;
+			return;
+		}
+		const targetIsArray = isArray(target);
+		if (!isReadonly2) {
+			let fn;
+			if (targetIsArray && (fn = arrayInstrumentations[key])) return fn;
+			if (key === "hasOwnProperty") return hasOwnProperty;
+		}
+		const res = Reflect.get(target, key, /* @__PURE__ */ isRef(target) ? target : receiver);
+		if (isSymbol(key) ? builtInSymbols.has(key) : isNonTrackableKeys(key)) return res;
+		if (!isReadonly2) track(target, "get", key);
+		if (isShallow2) return res;
+		if (/* @__PURE__ */ isRef(res)) {
+			const value = targetIsArray && isIntegerKey(key) ? res : res.value;
+			return isReadonly2 && isObject(value) ? /* @__PURE__ */ readonly(value) : value;
+		}
+		if (isObject(res)) return isReadonly2 ? /* @__PURE__ */ readonly(res) : /* @__PURE__ */ reactive(res);
+		return res;
+	}
+};
+var MutableReactiveHandler = class extends BaseReactiveHandler {
+	constructor(isShallow2 = false) {
+		super(false, isShallow2);
+	}
+	set(target, key, value, receiver) {
+		let oldValue = target[key];
+		const isArrayWithIntegerKey = isArray(target) && isIntegerKey(key);
+		if (!this._isShallow) {
+			const isOldValueReadonly = /* @__PURE__ */ isReadonly(oldValue);
+			if (!/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value)) {
+				oldValue = /* @__PURE__ */ toRaw(oldValue);
+				value = /* @__PURE__ */ toRaw(value);
+			}
+			if (!isArrayWithIntegerKey && /* @__PURE__ */ isRef(oldValue) && !/* @__PURE__ */ isRef(value)) if (isOldValueReadonly) return true;
+			else {
+				oldValue.value = value;
+				return true;
+			}
+		}
+		const hadKey = isArrayWithIntegerKey ? Number(key) < target.length : hasOwn(target, key);
+		const result = Reflect.set(target, key, value, /* @__PURE__ */ isRef(target) ? target : receiver);
+		if (target === /* @__PURE__ */ toRaw(receiver)) {
+			if (!hadKey) trigger(target, "add", key, value);
+			else if (hasChanged(value, oldValue)) trigger(target, "set", key, value, oldValue);
+		}
+		return result;
+	}
+	deleteProperty(target, key) {
+		const hadKey = hasOwn(target, key);
+		const oldValue = target[key];
+		const result = Reflect.deleteProperty(target, key);
+		if (result && hadKey) trigger(target, "delete", key, void 0, oldValue);
+		return result;
+	}
+	has(target, key) {
+		const result = Reflect.has(target, key);
+		if (!isSymbol(key) || !builtInSymbols.has(key)) track(target, "has", key);
+		return result;
+	}
+	ownKeys(target) {
+		track(target, "iterate", isArray(target) ? "length" : ITERATE_KEY);
+		return Reflect.ownKeys(target);
+	}
+};
+var ReadonlyReactiveHandler = class extends BaseReactiveHandler {
+	constructor(isShallow2 = false) {
+		super(true, isShallow2);
+	}
+	set(target, key) {
+		return true;
+	}
+	deleteProperty(target, key) {
+		return true;
+	}
+};
+var mutableHandlers = /* @__PURE__ */ new MutableReactiveHandler();
+var readonlyHandlers = /* @__PURE__ */ new ReadonlyReactiveHandler();
+var shallowReactiveHandlers = /* @__PURE__ */ new MutableReactiveHandler(true);
+var toShallow = (value) => value;
+var getProto = (v) => Reflect.getPrototypeOf(v);
+function createIterableMethod(method, isReadonly2, isShallow2) {
+	return function(...args) {
+		const target = this["__v_raw"];
+		const rawTarget = /* @__PURE__ */ toRaw(target);
+		const targetIsMap = isMap(rawTarget);
+		const isPair = method === "entries" || method === Symbol.iterator && targetIsMap;
+		const isKeyOnly = method === "keys" && targetIsMap;
+		const innerIterator = target[method](...args);
+		const wrap = isShallow2 ? toShallow : isReadonly2 ? toReadonly : toReactive;
+		!isReadonly2 && track(rawTarget, "iterate", isKeyOnly ? MAP_KEY_ITERATE_KEY : ITERATE_KEY);
+		return extend$1(Object.create(innerIterator), { next() {
+			const { value, done } = innerIterator.next();
+			return done ? {
+				value,
+				done
+			} : {
+				value: isPair ? [wrap(value[0]), wrap(value[1])] : wrap(value),
+				done
+			};
+		} });
+	};
+}
+function createReadonlyMethod(type) {
+	return function(...args) {
+		return type === "delete" ? false : type === "clear" ? void 0 : this;
+	};
+}
+function createInstrumentations(readonly, shallow) {
+	const instrumentations = {
+		get(key) {
+			const target = this["__v_raw"];
+			const rawTarget = /* @__PURE__ */ toRaw(target);
+			const rawKey = /* @__PURE__ */ toRaw(key);
+			if (!readonly) {
+				if (hasChanged(key, rawKey)) track(rawTarget, "get", key);
+				track(rawTarget, "get", rawKey);
+			}
+			const { has } = getProto(rawTarget);
+			const wrap = shallow ? toShallow : readonly ? toReadonly : toReactive;
+			if (has.call(rawTarget, key)) return wrap(target.get(key));
+			else if (has.call(rawTarget, rawKey)) return wrap(target.get(rawKey));
+			else if (target !== rawTarget) target.get(key);
+		},
+		get size() {
+			const target = this["__v_raw"];
+			!readonly && track(/* @__PURE__ */ toRaw(target), "iterate", ITERATE_KEY);
+			return target.size;
+		},
+		has(key) {
+			const target = this["__v_raw"];
+			const rawTarget = /* @__PURE__ */ toRaw(target);
+			const rawKey = /* @__PURE__ */ toRaw(key);
+			if (!readonly) {
+				if (hasChanged(key, rawKey)) track(rawTarget, "has", key);
+				track(rawTarget, "has", rawKey);
+			}
+			return key === rawKey ? target.has(key) : target.has(key) || target.has(rawKey);
+		},
+		forEach(callback, thisArg) {
+			const observed = this;
+			const target = observed["__v_raw"];
+			const rawTarget = /* @__PURE__ */ toRaw(target);
+			const wrap = shallow ? toShallow : readonly ? toReadonly : toReactive;
+			!readonly && track(rawTarget, "iterate", ITERATE_KEY);
+			return target.forEach((value, key) => {
+				return callback.call(thisArg, wrap(value), wrap(key), observed);
+			});
+		}
+	};
+	extend$1(instrumentations, readonly ? {
+		add: createReadonlyMethod("add"),
+		set: createReadonlyMethod("set"),
+		delete: createReadonlyMethod("delete"),
+		clear: createReadonlyMethod("clear")
+	} : {
+		add(value) {
+			const target = /* @__PURE__ */ toRaw(this);
+			const proto = getProto(target);
+			const rawValue = /* @__PURE__ */ toRaw(value);
+			const valueToAdd = !shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value) ? rawValue : value;
+			if (!(proto.has.call(target, valueToAdd) || hasChanged(value, valueToAdd) && proto.has.call(target, value) || hasChanged(rawValue, valueToAdd) && proto.has.call(target, rawValue))) {
+				target.add(valueToAdd);
+				trigger(target, "add", valueToAdd, valueToAdd);
+			}
+			return this;
+		},
+		set(key, value) {
+			if (!shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value)) value = /* @__PURE__ */ toRaw(value);
+			const target = /* @__PURE__ */ toRaw(this);
+			const { has, get } = getProto(target);
+			let hadKey = has.call(target, key);
+			if (!hadKey) {
+				key = /* @__PURE__ */ toRaw(key);
+				hadKey = has.call(target, key);
+			}
+			const oldValue = get.call(target, key);
+			target.set(key, value);
+			if (!hadKey) trigger(target, "add", key, value);
+			else if (hasChanged(value, oldValue)) trigger(target, "set", key, value, oldValue);
+			return this;
+		},
+		delete(key) {
+			const target = /* @__PURE__ */ toRaw(this);
+			const { has, get } = getProto(target);
+			let hadKey = has.call(target, key);
+			if (!hadKey) {
+				key = /* @__PURE__ */ toRaw(key);
+				hadKey = has.call(target, key);
+			}
+			const oldValue = get ? get.call(target, key) : void 0;
+			const result = target.delete(key);
+			if (hadKey) trigger(target, "delete", key, void 0, oldValue);
+			return result;
+		},
+		clear() {
+			const target = /* @__PURE__ */ toRaw(this);
+			const hadItems = target.size !== 0;
+			const oldTarget = void 0;
+			const result = target.clear();
+			if (hadItems) trigger(target, "clear", void 0, void 0, oldTarget);
+			return result;
+		}
+	});
+	[
+		"keys",
+		"values",
+		"entries",
+		Symbol.iterator
+	].forEach((method) => {
+		instrumentations[method] = createIterableMethod(method, readonly, shallow);
+	});
+	return instrumentations;
+}
+function createInstrumentationGetter(isReadonly2, shallow) {
+	const instrumentations = createInstrumentations(isReadonly2, shallow);
+	return (target, key, receiver) => {
+		if (key === "__v_isReactive") return !isReadonly2;
+		else if (key === "__v_isReadonly") return isReadonly2;
+		else if (key === "__v_raw") return target;
+		return Reflect.get(hasOwn(instrumentations, key) && key in target ? instrumentations : target, key, receiver);
+	};
+}
+var mutableCollectionHandlers = { get: /* @__PURE__ */ createInstrumentationGetter(false, false) };
+var shallowCollectionHandlers = { get: /* @__PURE__ */ createInstrumentationGetter(false, true) };
+var readonlyCollectionHandlers = { get: /* @__PURE__ */ createInstrumentationGetter(true, false) };
+var reactiveMap = /* @__PURE__ */ new WeakMap();
+var shallowReactiveMap = /* @__PURE__ */ new WeakMap();
+var readonlyMap = /* @__PURE__ */ new WeakMap();
+var shallowReadonlyMap = /* @__PURE__ */ new WeakMap();
+function targetTypeMap(rawType) {
+	switch (rawType) {
+		case "Object":
+		case "Array": return 1;
+		case "Map":
+		case "Set":
+		case "WeakMap":
+		case "WeakSet": return 2;
+		default: return 0;
+	}
+}
+function getTargetType(value) {
+	return value["__v_skip"] || !Object.isExtensible(value) ? 0 : targetTypeMap(toRawType(value));
+}
+/* @__NO_SIDE_EFFECTS__ */
+function reactive(target) {
+	if (/* @__PURE__ */ isReadonly(target)) return target;
+	return createReactiveObject(target, false, mutableHandlers, mutableCollectionHandlers, reactiveMap);
+}
+/* @__NO_SIDE_EFFECTS__ */
+function shallowReactive(target) {
+	return createReactiveObject(target, false, shallowReactiveHandlers, shallowCollectionHandlers, shallowReactiveMap);
+}
+/* @__NO_SIDE_EFFECTS__ */
+function readonly(target) {
+	return createReactiveObject(target, true, readonlyHandlers, readonlyCollectionHandlers, readonlyMap);
+}
+function createReactiveObject(target, isReadonly2, baseHandlers, collectionHandlers, proxyMap) {
+	if (!isObject(target)) return target;
+	if (target["__v_raw"] && !(isReadonly2 && target["__v_isReactive"])) return target;
+	const targetType = getTargetType(target);
+	if (targetType === 0) return target;
+	const existingProxy = proxyMap.get(target);
+	if (existingProxy) return existingProxy;
+	const proxy = new Proxy(target, targetType === 2 ? collectionHandlers : baseHandlers);
+	proxyMap.set(target, proxy);
+	return proxy;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function isReactive(value) {
+	if (/* @__PURE__ */ isReadonly(value)) return /* @__PURE__ */ isReactive(value["__v_raw"]);
+	return !!(value && value["__v_isReactive"]);
+}
+/* @__NO_SIDE_EFFECTS__ */
+function isReadonly(value) {
+	return !!(value && value["__v_isReadonly"]);
+}
+/* @__NO_SIDE_EFFECTS__ */
+function isShallow(value) {
+	return !!(value && value["__v_isShallow"]);
+}
+/* @__NO_SIDE_EFFECTS__ */
+function isProxy(value) {
+	return value ? !!value["__v_raw"] : false;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function toRaw(observed) {
+	const raw = observed && observed["__v_raw"];
+	return raw ? /* @__PURE__ */ toRaw(raw) : observed;
+}
+function markRaw(value) {
+	if (!hasOwn(value, "__v_skip") && Object.isExtensible(value)) def(value, "__v_skip", true);
+	return value;
+}
+var toReactive = (value) => isObject(value) ? /* @__PURE__ */ reactive(value) : value;
+var toReadonly = (value) => isObject(value) ? /* @__PURE__ */ readonly(value) : value;
+/* @__NO_SIDE_EFFECTS__ */
+function isRef(r) {
+	return r ? r["__v_isRef"] === true : false;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function ref(value) {
+	return createRef(value, false);
+}
+function createRef(rawValue, shallow) {
+	if (/* @__PURE__ */ isRef(rawValue)) return rawValue;
+	return new RefImpl(rawValue, shallow);
+}
+var RefImpl = class {
+	constructor(value, isShallow2) {
+		this.dep = new Dep();
+		this["__v_isRef"] = true;
+		this["__v_isShallow"] = false;
+		this._rawValue = isShallow2 ? value : /* @__PURE__ */ toRaw(value);
+		this._value = isShallow2 ? value : toReactive(value);
+		this["__v_isShallow"] = isShallow2;
+	}
+	get value() {
+		this.dep.track();
+		return this._value;
+	}
+	set value(newValue) {
+		const oldValue = this._rawValue;
+		const useDirectValue = this["__v_isShallow"] || /* @__PURE__ */ isShallow(newValue) || /* @__PURE__ */ isReadonly(newValue);
+		newValue = useDirectValue ? newValue : /* @__PURE__ */ toRaw(newValue);
+		if (hasChanged(newValue, oldValue)) {
+			this._rawValue = newValue;
+			this._value = useDirectValue ? newValue : toReactive(newValue);
+			this.dep.trigger();
+		}
+	}
+};
+function unref(ref2) {
+	return /* @__PURE__ */ isRef(ref2) ? ref2.value : ref2;
+}
+var shallowUnwrapHandlers = {
+	get: (target, key, receiver) => key === "__v_raw" ? target : unref(Reflect.get(target, key, receiver)),
+	set: (target, key, value, receiver) => {
+		const oldValue = target[key];
+		if (/* @__PURE__ */ isRef(oldValue) && !/* @__PURE__ */ isRef(value)) {
+			oldValue.value = value;
+			return true;
+		} else return Reflect.set(target, key, value, receiver);
+	}
+};
+function proxyRefs(objectWithRefs) {
+	return /* @__PURE__ */ isReactive(objectWithRefs) ? objectWithRefs : new Proxy(objectWithRefs, shallowUnwrapHandlers);
+}
+var ComputedRefImpl = class {
+	constructor(fn, setter, isSSR) {
+		this.fn = fn;
+		this.setter = setter;
+		/**
+		* @internal
+		*/
+		this._value = void 0;
+		/**
+		* @internal
+		*/
+		this.dep = new Dep(this);
+		/**
+		* @internal
+		*/
+		this.__v_isRef = true;
+		/**
+		* @internal
+		*/
+		this.deps = void 0;
+		/**
+		* @internal
+		*/
+		this.depsTail = void 0;
+		/**
+		* @internal
+		*/
+		this.flags = 16;
+		/**
+		* @internal
+		*/
+		this.globalVersion = globalVersion - 1;
+		/**
+		* @internal
+		*/
+		this.next = void 0;
+		this.effect = this;
+		this["__v_isReadonly"] = !setter;
+		this.isSSR = isSSR;
+	}
+	/**
+	* @internal
+	*/
+	notify() {
+		this.flags |= 16;
+		if (!(this.flags & 8) && activeSub !== this) {
+			batch(this, true);
+			return true;
+		}
+	}
+	get value() {
+		const link = this.dep.track();
+		refreshComputed(this);
+		if (link) link.version = this.dep.version;
+		return this._value;
+	}
+	set value(newValue) {
+		if (this.setter) this.setter(newValue);
+	}
+};
+/* @__NO_SIDE_EFFECTS__ */
+function computed$1(getterOrOptions, debugOptions, isSSR = false) {
+	let getter;
+	let setter;
+	if (isFunction(getterOrOptions)) getter = getterOrOptions;
+	else {
+		getter = getterOrOptions.get;
+		setter = getterOrOptions.set;
+	}
+	return new ComputedRefImpl(getter, setter, isSSR);
+}
+var INITIAL_WATCHER_VALUE = {};
+var cleanupMap = /* @__PURE__ */ new WeakMap();
+var activeWatcher = void 0;
+function onWatcherCleanup(cleanupFn, failSilently = false, owner = activeWatcher) {
+	if (owner) {
+		let cleanups = cleanupMap.get(owner);
+		if (!cleanups) cleanupMap.set(owner, cleanups = []);
+		cleanups.push(cleanupFn);
+	}
+}
+function watch$1(source, cb, options = EMPTY_OBJ) {
+	const { immediate, deep, once, scheduler, augmentJob, call } = options;
+	const reactiveGetter = (source2) => {
+		if (deep) return source2;
+		if (/* @__PURE__ */ isShallow(source2) || deep === false || deep === 0) return traverse(source2, 1);
+		return traverse(source2);
+	};
+	let effect;
+	let getter;
+	let cleanup;
+	let boundCleanup;
+	let forceTrigger = false;
+	let isMultiSource = false;
+	if (/* @__PURE__ */ isRef(source)) {
+		getter = () => source.value;
+		forceTrigger = /* @__PURE__ */ isShallow(source);
+	} else if (/* @__PURE__ */ isReactive(source)) {
+		getter = () => reactiveGetter(source);
+		forceTrigger = true;
+	} else if (isArray(source)) {
+		isMultiSource = true;
+		forceTrigger = source.some((s) => /* @__PURE__ */ isReactive(s) || /* @__PURE__ */ isShallow(s));
+		getter = () => source.map((s) => {
+			if (/* @__PURE__ */ isRef(s)) return s.value;
+			else if (/* @__PURE__ */ isReactive(s)) return reactiveGetter(s);
+			else if (isFunction(s)) return call ? call(s, 2) : s();
+		});
+	} else if (isFunction(source)) if (cb) getter = call ? () => call(source, 2) : source;
+	else getter = () => {
+		if (cleanup) {
+			pauseTracking();
+			try {
+				cleanup();
+			} finally {
+				resetTracking();
+			}
+		}
+		const currentEffect = activeWatcher;
+		activeWatcher = effect;
+		try {
+			return call ? call(source, 3, [boundCleanup]) : source(boundCleanup);
+		} finally {
+			activeWatcher = currentEffect;
+		}
+	};
+	else getter = NOOP;
+	if (cb && deep) {
+		const baseGetter = getter;
+		const depth = deep === true ? Infinity : deep;
+		getter = () => traverse(baseGetter(), depth);
+	}
+	const scope = getCurrentScope();
+	const watchHandle = () => {
+		effect.stop();
+		if (scope && scope.active) remove$1(scope.effects, effect);
+	};
+	if (once && cb) {
+		const _cb = cb;
+		cb = (...args) => {
+			_cb(...args);
+			watchHandle();
+		};
+	}
+	let oldValue = isMultiSource ? new Array(source.length).fill(INITIAL_WATCHER_VALUE) : INITIAL_WATCHER_VALUE;
+	const job = (immediateFirstRun) => {
+		if (!(effect.flags & 1) || !effect.dirty && !immediateFirstRun) return;
+		if (cb) {
+			const newValue = effect.run();
+			if (deep || forceTrigger || (isMultiSource ? newValue.some((v, i) => hasChanged(v, oldValue[i])) : hasChanged(newValue, oldValue))) {
+				if (cleanup) cleanup();
+				const currentWatcher = activeWatcher;
+				activeWatcher = effect;
+				try {
+					const args = [
+						newValue,
+						oldValue === INITIAL_WATCHER_VALUE ? void 0 : isMultiSource && oldValue[0] === INITIAL_WATCHER_VALUE ? [] : oldValue,
+						boundCleanup
+					];
+					oldValue = newValue;
+					call ? call(cb, 3, args) : cb(...args);
+				} finally {
+					activeWatcher = currentWatcher;
+				}
+			}
+		} else effect.run();
+	};
+	if (augmentJob) augmentJob(job);
+	effect = new ReactiveEffect(getter);
+	effect.scheduler = scheduler ? () => scheduler(job, false) : job;
+	boundCleanup = (fn) => onWatcherCleanup(fn, false, effect);
+	cleanup = effect.onStop = () => {
+		const cleanups = cleanupMap.get(effect);
+		if (cleanups) {
+			if (call) call(cleanups, 4);
+			else for (const cleanup2 of cleanups) cleanup2();
+			cleanupMap.delete(effect);
+		}
+	};
+	if (cb) if (immediate) job(true);
+	else oldValue = effect.run();
+	else if (scheduler) scheduler(job.bind(null, true), true);
+	else effect.run();
+	watchHandle.pause = effect.pause.bind(effect);
+	watchHandle.resume = effect.resume.bind(effect);
+	watchHandle.stop = watchHandle;
+	return watchHandle;
+}
+function traverse(value, depth = Infinity, seen) {
+	if (depth <= 0 || !isObject(value) || value["__v_skip"]) return value;
+	seen = seen || /* @__PURE__ */ new Map();
+	if ((seen.get(value) || 0) >= depth) return value;
+	seen.set(value, depth);
+	depth--;
+	if (/* @__PURE__ */ isRef(value)) traverse(value.value, depth, seen);
+	else if (isArray(value)) for (let i = 0; i < value.length; i++) traverse(value[i], depth, seen);
+	else if (isSet(value) || isMap(value)) value.forEach((v) => {
+		traverse(v, depth, seen);
+	});
+	else if (isPlainObject(value)) {
+		for (const key in value) traverse(value[key], depth, seen);
+		for (const key of Object.getOwnPropertySymbols(value)) if (Object.prototype.propertyIsEnumerable.call(value, key)) traverse(value[key], depth, seen);
+	}
+	return value;
+}
+//#endregion
+//#region node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js
+/**
+* @vue/runtime-core v3.5.31
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+function callWithErrorHandling(fn, instance, type, args) {
+	try {
+		return args ? fn(...args) : fn();
+	} catch (err) {
+		handleError(err, instance, type);
+	}
+}
+function callWithAsyncErrorHandling(fn, instance, type, args) {
+	if (isFunction(fn)) {
+		const res = callWithErrorHandling(fn, instance, type, args);
+		if (res && isPromise(res)) res.catch((err) => {
+			handleError(err, instance, type);
+		});
+		return res;
+	}
+	if (isArray(fn)) {
+		const values = [];
+		for (let i = 0; i < fn.length; i++) values.push(callWithAsyncErrorHandling(fn[i], instance, type, args));
+		return values;
+	}
+}
+function handleError(err, instance, type, throwInDev = true) {
+	const contextVNode = instance ? instance.vnode : null;
+	const { errorHandler, throwUnhandledErrorInProduction } = instance && instance.appContext.config || EMPTY_OBJ;
+	if (instance) {
+		let cur = instance.parent;
+		const exposedInstance = instance.proxy;
+		const errorInfo = `https://vuejs.org/error-reference/#runtime-${type}`;
+		while (cur) {
+			const errorCapturedHooks = cur.ec;
+			if (errorCapturedHooks) {
+				for (let i = 0; i < errorCapturedHooks.length; i++) if (errorCapturedHooks[i](err, exposedInstance, errorInfo) === false) return;
+			}
+			cur = cur.parent;
+		}
+		if (errorHandler) {
+			pauseTracking();
+			callWithErrorHandling(errorHandler, null, 10, [
+				err,
+				exposedInstance,
+				errorInfo
+			]);
+			resetTracking();
+			return;
+		}
+	}
+	logError(err, type, contextVNode, throwInDev, throwUnhandledErrorInProduction);
+}
+function logError(err, type, contextVNode, throwInDev = true, throwInProd = false) {
+	if (throwInProd) throw err;
+	else console.error(err);
+}
+var queue = [];
+var flushIndex = -1;
+var pendingPostFlushCbs = [];
+var activePostFlushCbs = null;
+var postFlushIndex = 0;
+var resolvedPromise = /* @__PURE__ */ Promise.resolve();
+var currentFlushPromise = null;
+function nextTick$1(fn) {
+	const p = currentFlushPromise || resolvedPromise;
+	return fn ? p.then(this ? fn.bind(this) : fn) : p;
+}
+function findInsertionIndex(id) {
+	let start = flushIndex + 1;
+	let end = queue.length;
+	while (start < end) {
+		const middle = start + end >>> 1;
+		const middleJob = queue[middle];
+		const middleJobId = getId(middleJob);
+		if (middleJobId < id || middleJobId === id && middleJob.flags & 2) start = middle + 1;
+		else end = middle;
+	}
+	return start;
+}
+function queueJob(job) {
+	if (!(job.flags & 1)) {
+		const jobId = getId(job);
+		const lastJob = queue[queue.length - 1];
+		if (!lastJob || !(job.flags & 2) && jobId >= getId(lastJob)) queue.push(job);
+		else queue.splice(findInsertionIndex(jobId), 0, job);
+		job.flags |= 1;
+		queueFlush();
+	}
+}
+function queueFlush() {
+	if (!currentFlushPromise) currentFlushPromise = resolvedPromise.then(flushJobs);
+}
+function queuePostFlushCb(cb) {
+	if (!isArray(cb)) {
+		if (activePostFlushCbs && cb.id === -1) activePostFlushCbs.splice(postFlushIndex + 1, 0, cb);
+		else if (!(cb.flags & 1)) {
+			pendingPostFlushCbs.push(cb);
+			cb.flags |= 1;
+		}
+	} else pendingPostFlushCbs.push(...cb);
+	queueFlush();
+}
+function flushPreFlushCbs(instance, seen, i = flushIndex + 1) {
+	for (; i < queue.length; i++) {
+		const cb = queue[i];
+		if (cb && cb.flags & 2) {
+			if (instance && cb.id !== instance.uid) continue;
+			queue.splice(i, 1);
+			i--;
+			if (cb.flags & 4) cb.flags &= -2;
+			cb();
+			if (!(cb.flags & 4)) cb.flags &= -2;
+		}
+	}
+}
+function flushPostFlushCbs(seen) {
+	if (pendingPostFlushCbs.length) {
+		const deduped = [...new Set(pendingPostFlushCbs)].sort((a, b) => getId(a) - getId(b));
+		pendingPostFlushCbs.length = 0;
+		if (activePostFlushCbs) {
+			activePostFlushCbs.push(...deduped);
+			return;
+		}
+		activePostFlushCbs = deduped;
+		for (postFlushIndex = 0; postFlushIndex < activePostFlushCbs.length; postFlushIndex++) {
+			const cb = activePostFlushCbs[postFlushIndex];
+			if (cb.flags & 4) cb.flags &= -2;
+			if (!(cb.flags & 8)) cb();
+			cb.flags &= -2;
+		}
+		activePostFlushCbs = null;
+		postFlushIndex = 0;
+	}
+}
+var getId = (job) => job.id == null ? job.flags & 2 ? -1 : Infinity : job.id;
+function flushJobs(seen) {
+	try {
+		for (flushIndex = 0; flushIndex < queue.length; flushIndex++) {
+			const job = queue[flushIndex];
+			if (job && !(job.flags & 8)) {
+				if (job.flags & 4) job.flags &= -2;
+				callWithErrorHandling(job, job.i, job.i ? 15 : 14);
+				if (!(job.flags & 4)) job.flags &= -2;
+			}
+		}
+	} finally {
+		for (; flushIndex < queue.length; flushIndex++) {
+			const job = queue[flushIndex];
+			if (job) job.flags &= -2;
+		}
+		flushIndex = -1;
+		queue.length = 0;
+		flushPostFlushCbs(seen);
+		currentFlushPromise = null;
+		if (queue.length || pendingPostFlushCbs.length) flushJobs(seen);
+	}
+}
+var currentRenderingInstance = null;
+var currentScopeId = null;
+function setCurrentRenderingInstance(instance) {
+	const prev = currentRenderingInstance;
+	currentRenderingInstance = instance;
+	currentScopeId = instance && instance.type.__scopeId || null;
+	return prev;
+}
+function withCtx(fn, ctx = currentRenderingInstance, isNonScopedSlot) {
+	if (!ctx) return fn;
+	if (fn._n) return fn;
+	const renderFnWithContext = (...args) => {
+		if (renderFnWithContext._d) setBlockTracking(-1);
+		const prevInstance = setCurrentRenderingInstance(ctx);
+		let res;
+		try {
+			res = fn(...args);
+		} finally {
+			setCurrentRenderingInstance(prevInstance);
+			if (renderFnWithContext._d) setBlockTracking(1);
+		}
+		return res;
+	};
+	renderFnWithContext._n = true;
+	renderFnWithContext._c = true;
+	renderFnWithContext._d = true;
+	return renderFnWithContext;
+}
+function withDirectives(vnode, directives) {
+	if (currentRenderingInstance === null) return vnode;
+	const instance = getComponentPublicInstance(currentRenderingInstance);
+	const bindings = vnode.dirs || (vnode.dirs = []);
+	for (let i = 0; i < directives.length; i++) {
+		let [dir, value, arg, modifiers = EMPTY_OBJ] = directives[i];
+		if (dir) {
+			if (isFunction(dir)) dir = {
+				mounted: dir,
+				updated: dir
+			};
+			if (dir.deep) traverse(value);
+			bindings.push({
+				dir,
+				instance,
+				value,
+				oldValue: void 0,
+				arg,
+				modifiers
+			});
+		}
+	}
+	return vnode;
+}
+function invokeDirectiveHook(vnode, prevVNode, instance, name) {
+	const bindings = vnode.dirs;
+	const oldBindings = prevVNode && prevVNode.dirs;
+	for (let i = 0; i < bindings.length; i++) {
+		const binding = bindings[i];
+		if (oldBindings) binding.oldValue = oldBindings[i].value;
+		let hook = binding.dir[name];
+		if (hook) {
+			pauseTracking();
+			callWithAsyncErrorHandling(hook, instance, 8, [
+				vnode.el,
+				binding,
+				vnode,
+				prevVNode
+			]);
+			resetTracking();
+		}
+	}
+}
+function provide(key, value) {
+	if (currentInstance) {
+		let provides = currentInstance.provides;
+		const parentProvides = currentInstance.parent && currentInstance.parent.provides;
+		if (parentProvides === provides) provides = currentInstance.provides = Object.create(parentProvides);
+		provides[key] = value;
+	}
+}
+function inject(key, defaultValue, treatDefaultAsFactory = false) {
+	const instance = getCurrentInstance();
+	if (instance || currentApp) {
+		let provides = currentApp ? currentApp._context.provides : instance ? instance.parent == null || instance.ce ? instance.vnode.appContext && instance.vnode.appContext.provides : instance.parent.provides : void 0;
+		if (provides && key in provides) return provides[key];
+		else if (arguments.length > 1) return treatDefaultAsFactory && isFunction(defaultValue) ? defaultValue.call(instance && instance.proxy) : defaultValue;
+	}
+}
+var ssrContextKey = /* @__PURE__ */ Symbol.for("v-scx");
+var useSSRContext = () => {
+	{
+		const ctx = inject(ssrContextKey);
+		if (!ctx) {}
+		return ctx;
+	}
+};
+function watch(source, cb, options) {
+	return doWatch(source, cb, options);
+}
+function doWatch(source, cb, options = EMPTY_OBJ) {
+	const { immediate, deep, flush, once } = options;
+	const baseWatchOptions = extend$1({}, options);
+	const runsImmediately = cb && immediate || !cb && flush !== "post";
+	let ssrCleanup;
+	if (isInSSRComponentSetup) {
+		if (flush === "sync") {
+			const ctx = useSSRContext();
+			ssrCleanup = ctx.__watcherHandles || (ctx.__watcherHandles = []);
+		} else if (!runsImmediately) {
+			const watchStopHandle = () => {};
+			watchStopHandle.stop = NOOP;
+			watchStopHandle.resume = NOOP;
+			watchStopHandle.pause = NOOP;
+			return watchStopHandle;
+		}
+	}
+	const instance = currentInstance;
+	baseWatchOptions.call = (fn, type, args) => callWithAsyncErrorHandling(fn, instance, type, args);
+	let isPre = false;
+	if (flush === "post") baseWatchOptions.scheduler = (job) => {
+		queuePostRenderEffect(job, instance && instance.suspense);
+	};
+	else if (flush !== "sync") {
+		isPre = true;
+		baseWatchOptions.scheduler = (job, isFirstRun) => {
+			if (isFirstRun) job();
+			else queueJob(job);
+		};
+	}
+	baseWatchOptions.augmentJob = (job) => {
+		if (cb) job.flags |= 4;
+		if (isPre) {
+			job.flags |= 2;
+			if (instance) {
+				job.id = instance.uid;
+				job.i = instance;
+			}
+		}
+	};
+	const watchHandle = watch$1(source, cb, baseWatchOptions);
+	if (isInSSRComponentSetup) {
+		if (ssrCleanup) ssrCleanup.push(watchHandle);
+		else if (runsImmediately) watchHandle();
+	}
+	return watchHandle;
+}
+function instanceWatch(source, value, options) {
+	const publicThis = this.proxy;
+	const getter = isString(source) ? source.includes(".") ? createPathGetter(publicThis, source) : () => publicThis[source] : source.bind(publicThis, publicThis);
+	let cb;
+	if (isFunction(value)) cb = value;
+	else {
+		cb = value.handler;
+		options = value;
+	}
+	const reset = setCurrentInstance(this);
+	const res = doWatch(getter, cb.bind(publicThis), options);
+	reset();
+	return res;
+}
+function createPathGetter(ctx, path) {
+	const segments = path.split(".");
+	return () => {
+		let cur = ctx;
+		for (let i = 0; i < segments.length && cur; i++) cur = cur[segments[i]];
+		return cur;
+	};
+}
+var TeleportEndKey = /* @__PURE__ */ Symbol("_vte");
+var isTeleport = (type) => type.__isTeleport;
+var isTeleportDisabled = (props) => props && (props.disabled || props.disabled === "");
+var isTeleportDeferred = (props) => props && (props.defer || props.defer === "");
+var isTargetSVG = (target) => typeof SVGElement !== "undefined" && target instanceof SVGElement;
+var isTargetMathML = (target) => typeof MathMLElement === "function" && target instanceof MathMLElement;
+var resolveTarget = (props, select) => {
+	const targetSelector = props && props.to;
+	if (isString(targetSelector)) if (!select) return null;
+	else return select(targetSelector);
+	else return targetSelector;
+};
+var TeleportImpl = {
+	name: "Teleport",
+	__isTeleport: true,
+	process(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, internals) {
+		const { mc: mountChildren, pc: patchChildren, pbc: patchBlockChildren, o: { insert, querySelector, createText, createComment } } = internals;
+		const disabled = isTeleportDisabled(n2.props);
+		let { shapeFlag, children, dynamicChildren } = n2;
+		if (n1 == null) {
+			const placeholder = n2.el = createText("");
+			const mainAnchor = n2.anchor = createText("");
+			insert(placeholder, container, anchor);
+			insert(mainAnchor, container, anchor);
+			const mount = (container2, anchor2) => {
+				if (shapeFlag & 16) mountChildren(children, container2, anchor2, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			};
+			const mountToTarget = () => {
+				const target = n2.target = resolveTarget(n2.props, querySelector);
+				const targetAnchor = prepareAnchor(target, n2, createText, insert);
+				if (target) {
+					if (namespace !== "svg" && isTargetSVG(target)) namespace = "svg";
+					else if (namespace !== "mathml" && isTargetMathML(target)) namespace = "mathml";
+					if (parentComponent && parentComponent.isCE) (parentComponent.ce._teleportTargets || (parentComponent.ce._teleportTargets = /* @__PURE__ */ new Set())).add(target);
+					if (!disabled) {
+						mount(target, targetAnchor);
+						updateCssVars(n2, false);
+					}
+				}
+			};
+			if (disabled) {
+				mount(container, mainAnchor);
+				updateCssVars(n2, true);
+			}
+			if (isTeleportDeferred(n2.props) || parentSuspense && parentSuspense.pendingBranch) {
+				n2.el.__isMounted = false;
+				queuePostRenderEffect(() => {
+					if (n2.el.__isMounted !== false) return;
+					mountToTarget();
+					delete n2.el.__isMounted;
+				}, parentSuspense);
+			} else mountToTarget();
+		} else {
+			n2.el = n1.el;
+			n2.targetStart = n1.targetStart;
+			const mainAnchor = n2.anchor = n1.anchor;
+			const target = n2.target = n1.target;
+			const targetAnchor = n2.targetAnchor = n1.targetAnchor;
+			if (n1.el.__isMounted === false) {
+				queuePostRenderEffect(() => {
+					TeleportImpl.process(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, internals);
+				}, parentSuspense);
+				return;
+			}
+			const wasDisabled = isTeleportDisabled(n1.props);
+			const currentContainer = wasDisabled ? container : target;
+			const currentAnchor = wasDisabled ? mainAnchor : targetAnchor;
+			if (namespace === "svg" || isTargetSVG(target)) namespace = "svg";
+			else if (namespace === "mathml" || isTargetMathML(target)) namespace = "mathml";
+			if (dynamicChildren) {
+				patchBlockChildren(n1.dynamicChildren, dynamicChildren, currentContainer, parentComponent, parentSuspense, namespace, slotScopeIds);
+				traverseStaticChildren(n1, n2, true);
+			} else if (!optimized) patchChildren(n1, n2, currentContainer, currentAnchor, parentComponent, parentSuspense, namespace, slotScopeIds, false);
+			if (disabled) {
+				if (!wasDisabled) moveTeleport(n2, container, mainAnchor, internals, 1);
+				else if (n2.props && n1.props && n2.props.to !== n1.props.to) n2.props.to = n1.props.to;
+			} else if ((n2.props && n2.props.to) !== (n1.props && n1.props.to)) {
+				const nextTarget = n2.target = resolveTarget(n2.props, querySelector);
+				if (nextTarget) moveTeleport(n2, nextTarget, null, internals, 0);
+			} else if (wasDisabled) moveTeleport(n2, target, targetAnchor, internals, 1);
+			updateCssVars(n2, disabled);
+		}
+	},
+	remove(vnode, parentComponent, parentSuspense, { um: unmount, o: { remove: hostRemove } }, doRemove) {
+		const { shapeFlag, children, anchor, targetStart, targetAnchor, target, props } = vnode;
+		if (target) {
+			hostRemove(targetStart);
+			hostRemove(targetAnchor);
+		}
+		doRemove && hostRemove(anchor);
+		if (shapeFlag & 16) {
+			const shouldRemove = doRemove || !isTeleportDisabled(props);
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				unmount(child, parentComponent, parentSuspense, shouldRemove, !!child.dynamicChildren);
+			}
+		}
+	},
+	move: moveTeleport,
+	hydrate: hydrateTeleport
+};
+function moveTeleport(vnode, container, parentAnchor, { o: { insert }, m: move }, moveType = 2) {
+	if (moveType === 0) insert(vnode.targetAnchor, container, parentAnchor);
+	const { el, anchor, shapeFlag, children, props } = vnode;
+	const isReorder = moveType === 2;
+	if (isReorder) insert(el, container, parentAnchor);
+	if (!isReorder || isTeleportDisabled(props)) {
+		if (shapeFlag & 16) for (let i = 0; i < children.length; i++) move(children[i], container, parentAnchor, 2);
+	}
+	if (isReorder) insert(anchor, container, parentAnchor);
+}
+function hydrateTeleport(node, vnode, parentComponent, parentSuspense, slotScopeIds, optimized, { o: { nextSibling, parentNode, querySelector, insert, createText } }, hydrateChildren) {
+	function hydrateAnchor(target2, targetNode) {
+		let targetAnchor = targetNode;
+		while (targetAnchor) {
+			if (targetAnchor && targetAnchor.nodeType === 8) {
+				if (targetAnchor.data === "teleport start anchor") vnode.targetStart = targetAnchor;
+				else if (targetAnchor.data === "teleport anchor") {
+					vnode.targetAnchor = targetAnchor;
+					target2._lpa = vnode.targetAnchor && nextSibling(vnode.targetAnchor);
+					break;
+				}
+			}
+			targetAnchor = nextSibling(targetAnchor);
+		}
+	}
+	function hydrateDisabledTeleport(node2, vnode2) {
+		vnode2.anchor = hydrateChildren(nextSibling(node2), vnode2, parentNode(node2), parentComponent, parentSuspense, slotScopeIds, optimized);
+	}
+	const target = vnode.target = resolveTarget(vnode.props, querySelector);
+	const disabled = isTeleportDisabled(vnode.props);
+	if (target) {
+		const targetNode = target._lpa || target.firstChild;
+		if (vnode.shapeFlag & 16) if (disabled) {
+			hydrateDisabledTeleport(node, vnode);
+			hydrateAnchor(target, targetNode);
+			if (!vnode.targetAnchor) prepareAnchor(target, vnode, createText, insert, parentNode(node) === target ? node : null);
+		} else {
+			vnode.anchor = nextSibling(node);
+			hydrateAnchor(target, targetNode);
+			if (!vnode.targetAnchor) prepareAnchor(target, vnode, createText, insert);
+			hydrateChildren(targetNode && nextSibling(targetNode), vnode, target, parentComponent, parentSuspense, slotScopeIds, optimized);
+		}
+		updateCssVars(vnode, disabled);
+	} else if (disabled) {
+		if (vnode.shapeFlag & 16) {
+			hydrateDisabledTeleport(node, vnode);
+			vnode.targetStart = node;
+			vnode.targetAnchor = nextSibling(node);
+		}
+	}
+	return vnode.anchor && nextSibling(vnode.anchor);
+}
+var Teleport = TeleportImpl;
+function updateCssVars(vnode, isDisabled) {
+	const ctx = vnode.ctx;
+	if (ctx && ctx.ut) {
+		let node, anchor;
+		if (isDisabled) {
+			node = vnode.el;
+			anchor = vnode.anchor;
+		} else {
+			node = vnode.targetStart;
+			anchor = vnode.targetAnchor;
+		}
+		while (node && node !== anchor) {
+			if (node.nodeType === 1) node.setAttribute("data-v-owner", ctx.uid);
+			node = node.nextSibling;
+		}
+		ctx.ut();
+	}
+}
+function prepareAnchor(target, vnode, createText, insert, anchor = null) {
+	const targetStart = vnode.targetStart = createText("");
+	const targetAnchor = vnode.targetAnchor = createText("");
+	targetStart[TeleportEndKey] = targetAnchor;
+	if (target) {
+		insert(targetStart, target, anchor);
+		insert(targetAnchor, target, anchor);
+	}
+	return targetAnchor;
+}
+var leaveCbKey = /* @__PURE__ */ Symbol("_leaveCb");
+var enterCbKey$1 = /* @__PURE__ */ Symbol("_enterCb");
+function useTransitionState() {
+	const state = {
+		isMounted: false,
+		isLeaving: false,
+		isUnmounting: false,
+		leavingVNodes: /* @__PURE__ */ new Map()
+	};
+	onMounted(() => {
+		state.isMounted = true;
+	});
+	onBeforeUnmount(() => {
+		state.isUnmounting = true;
+	});
+	return state;
+}
+var TransitionHookValidator = [Function, Array];
+var BaseTransitionPropsValidators = {
+	mode: String,
+	appear: Boolean,
+	persisted: Boolean,
+	onBeforeEnter: TransitionHookValidator,
+	onEnter: TransitionHookValidator,
+	onAfterEnter: TransitionHookValidator,
+	onEnterCancelled: TransitionHookValidator,
+	onBeforeLeave: TransitionHookValidator,
+	onLeave: TransitionHookValidator,
+	onAfterLeave: TransitionHookValidator,
+	onLeaveCancelled: TransitionHookValidator,
+	onBeforeAppear: TransitionHookValidator,
+	onAppear: TransitionHookValidator,
+	onAfterAppear: TransitionHookValidator,
+	onAppearCancelled: TransitionHookValidator
+};
+var recursiveGetSubtree = (instance) => {
+	const subTree = instance.subTree;
+	return subTree.component ? recursiveGetSubtree(subTree.component) : subTree;
+};
+var BaseTransitionImpl = {
+	name: `BaseTransition`,
+	props: BaseTransitionPropsValidators,
+	setup(props, { slots }) {
+		const instance = getCurrentInstance();
+		const state = useTransitionState();
+		return () => {
+			const children = slots.default && getTransitionRawChildren(slots.default(), true);
+			if (!children || !children.length) return;
+			const child = findNonCommentChild(children);
+			const rawProps = /* @__PURE__ */ toRaw(props);
+			const { mode } = rawProps;
+			if (state.isLeaving) return emptyPlaceholder(child);
+			const innerChild = getInnerChild$1(child);
+			if (!innerChild) return emptyPlaceholder(child);
+			let enterHooks = resolveTransitionHooks(innerChild, rawProps, state, instance, (hooks) => enterHooks = hooks);
+			if (innerChild.type !== Comment) setTransitionHooks(innerChild, enterHooks);
+			let oldInnerChild = instance.subTree && getInnerChild$1(instance.subTree);
+			if (oldInnerChild && oldInnerChild.type !== Comment && !isSameVNodeType(oldInnerChild, innerChild) && recursiveGetSubtree(instance).type !== Comment) {
+				let leavingHooks = resolveTransitionHooks(oldInnerChild, rawProps, state, instance);
+				setTransitionHooks(oldInnerChild, leavingHooks);
+				if (mode === "out-in" && innerChild.type !== Comment) {
+					state.isLeaving = true;
+					leavingHooks.afterLeave = () => {
+						state.isLeaving = false;
+						if (!(instance.job.flags & 8)) instance.update();
+						delete leavingHooks.afterLeave;
+						oldInnerChild = void 0;
+					};
+					return emptyPlaceholder(child);
+				} else if (mode === "in-out" && innerChild.type !== Comment) leavingHooks.delayLeave = (el, earlyRemove, delayedLeave) => {
+					const leavingVNodesCache = getLeavingNodesForType(state, oldInnerChild);
+					leavingVNodesCache[String(oldInnerChild.key)] = oldInnerChild;
+					el[leaveCbKey] = () => {
+						earlyRemove();
+						el[leaveCbKey] = void 0;
+						delete enterHooks.delayedLeave;
+						oldInnerChild = void 0;
+					};
+					enterHooks.delayedLeave = () => {
+						delayedLeave();
+						delete enterHooks.delayedLeave;
+						oldInnerChild = void 0;
+					};
+				};
+				else oldInnerChild = void 0;
+			} else if (oldInnerChild) oldInnerChild = void 0;
+			return child;
+		};
+	}
+};
+function findNonCommentChild(children) {
+	let child = children[0];
+	if (children.length > 1) {
+		for (const c of children) if (c.type !== Comment) {
+			child = c;
+			break;
+		}
+	}
+	return child;
+}
+var BaseTransition = BaseTransitionImpl;
+function getLeavingNodesForType(state, vnode) {
+	const { leavingVNodes } = state;
+	let leavingVNodesCache = leavingVNodes.get(vnode.type);
+	if (!leavingVNodesCache) {
+		leavingVNodesCache = /* @__PURE__ */ Object.create(null);
+		leavingVNodes.set(vnode.type, leavingVNodesCache);
+	}
+	return leavingVNodesCache;
+}
+function resolveTransitionHooks(vnode, props, state, instance, postClone) {
+	const { appear, mode, persisted = false, onBeforeEnter, onEnter, onAfterEnter, onEnterCancelled, onBeforeLeave, onLeave, onAfterLeave, onLeaveCancelled, onBeforeAppear, onAppear, onAfterAppear, onAppearCancelled } = props;
+	const key = String(vnode.key);
+	const leavingVNodesCache = getLeavingNodesForType(state, vnode);
+	const callHook = (hook, args) => {
+		hook && callWithAsyncErrorHandling(hook, instance, 9, args);
+	};
+	const callAsyncHook = (hook, args) => {
+		const done = args[1];
+		callHook(hook, args);
+		if (isArray(hook)) {
+			if (hook.every((hook2) => hook2.length <= 1)) done();
+		} else if (hook.length <= 1) done();
+	};
+	const hooks = {
+		mode,
+		persisted,
+		beforeEnter(el) {
+			let hook = onBeforeEnter;
+			if (!state.isMounted) if (appear) hook = onBeforeAppear || onBeforeEnter;
+			else return;
+			if (el[leaveCbKey]) el[leaveCbKey](true);
+			const leavingVNode = leavingVNodesCache[key];
+			if (leavingVNode && isSameVNodeType(vnode, leavingVNode) && leavingVNode.el[leaveCbKey]) leavingVNode.el[leaveCbKey]();
+			callHook(hook, [el]);
+		},
+		enter(el) {
+			if (leavingVNodesCache[key] === vnode) return;
+			let hook = onEnter;
+			let afterHook = onAfterEnter;
+			let cancelHook = onEnterCancelled;
+			if (!state.isMounted) if (appear) {
+				hook = onAppear || onEnter;
+				afterHook = onAfterAppear || onAfterEnter;
+				cancelHook = onAppearCancelled || onEnterCancelled;
+			} else return;
+			let called = false;
+			el[enterCbKey$1] = (cancelled) => {
+				if (called) return;
+				called = true;
+				if (cancelled) callHook(cancelHook, [el]);
+				else callHook(afterHook, [el]);
+				if (hooks.delayedLeave) hooks.delayedLeave();
+				el[enterCbKey$1] = void 0;
+			};
+			const done = el[enterCbKey$1].bind(null, false);
+			if (hook) callAsyncHook(hook, [el, done]);
+			else done();
+		},
+		leave(el, remove) {
+			const key2 = String(vnode.key);
+			if (el[enterCbKey$1]) el[enterCbKey$1](true);
+			if (state.isUnmounting) return remove();
+			callHook(onBeforeLeave, [el]);
+			let called = false;
+			el[leaveCbKey] = (cancelled) => {
+				if (called) return;
+				called = true;
+				remove();
+				if (cancelled) callHook(onLeaveCancelled, [el]);
+				else callHook(onAfterLeave, [el]);
+				el[leaveCbKey] = void 0;
+				if (leavingVNodesCache[key2] === vnode) delete leavingVNodesCache[key2];
+			};
+			const done = el[leaveCbKey].bind(null, false);
+			leavingVNodesCache[key2] = vnode;
+			if (onLeave) callAsyncHook(onLeave, [el, done]);
+			else done();
+		},
+		clone(vnode2) {
+			const hooks2 = resolveTransitionHooks(vnode2, props, state, instance, postClone);
+			if (postClone) postClone(hooks2);
+			return hooks2;
+		}
+	};
+	return hooks;
+}
+function emptyPlaceholder(vnode) {
+	if (isKeepAlive(vnode)) {
+		vnode = cloneVNode(vnode);
+		vnode.children = null;
+		return vnode;
+	}
+}
+function getInnerChild$1(vnode) {
+	if (!isKeepAlive(vnode)) {
+		if (isTeleport(vnode.type) && vnode.children) return findNonCommentChild(vnode.children);
+		return vnode;
+	}
+	if (vnode.component) return vnode.component.subTree;
+	const { shapeFlag, children } = vnode;
+	if (children) {
+		if (shapeFlag & 16) return children[0];
+		if (shapeFlag & 32 && isFunction(children.default)) return children.default();
+	}
+}
+function setTransitionHooks(vnode, hooks) {
+	if (vnode.shapeFlag & 6 && vnode.component) {
+		vnode.transition = hooks;
+		setTransitionHooks(vnode.component.subTree, hooks);
+	} else if (vnode.shapeFlag & 128) {
+		vnode.ssContent.transition = hooks.clone(vnode.ssContent);
+		vnode.ssFallback.transition = hooks.clone(vnode.ssFallback);
+	} else vnode.transition = hooks;
+}
+function getTransitionRawChildren(children, keepComment = false, parentKey) {
+	let ret = [];
+	let keyedFragmentCount = 0;
+	for (let i = 0; i < children.length; i++) {
+		let child = children[i];
+		const key = parentKey == null ? child.key : String(parentKey) + String(child.key != null ? child.key : i);
+		if (child.type === Fragment$1) {
+			if (child.patchFlag & 128) keyedFragmentCount++;
+			ret = ret.concat(getTransitionRawChildren(child.children, keepComment, key));
+		} else if (keepComment || child.type !== Comment) ret.push(key != null ? cloneVNode(child, { key }) : child);
+	}
+	if (keyedFragmentCount > 1) for (let i = 0; i < ret.length; i++) ret[i].patchFlag = -2;
+	return ret;
+}
+function markAsyncBoundary(instance) {
+	instance.ids = [
+		instance.ids[0] + instance.ids[2]++ + "-",
+		0,
+		0
+	];
+}
+function isTemplateRefKey(refs, key) {
+	let desc;
+	return !!((desc = Object.getOwnPropertyDescriptor(refs, key)) && !desc.configurable);
+}
+var pendingSetRefMap = /* @__PURE__ */ new WeakMap();
+function setRef(rawRef, oldRawRef, parentSuspense, vnode, isUnmount = false) {
+	if (isArray(rawRef)) {
+		rawRef.forEach((r, i) => setRef(r, oldRawRef && (isArray(oldRawRef) ? oldRawRef[i] : oldRawRef), parentSuspense, vnode, isUnmount));
+		return;
+	}
+	if (isAsyncWrapper(vnode) && !isUnmount) {
+		if (vnode.shapeFlag & 512 && vnode.type.__asyncResolved && vnode.component.subTree.component) setRef(rawRef, oldRawRef, parentSuspense, vnode.component.subTree);
+		return;
+	}
+	const refValue = vnode.shapeFlag & 4 ? getComponentPublicInstance(vnode.component) : vnode.el;
+	const value = isUnmount ? null : refValue;
+	const { i: owner, r: ref } = rawRef;
+	const oldRef = oldRawRef && oldRawRef.r;
+	const refs = owner.refs === EMPTY_OBJ ? owner.refs = {} : owner.refs;
+	const setupState = owner.setupState;
+	const rawSetupState = /* @__PURE__ */ toRaw(setupState);
+	const canSetSetupRef = setupState === EMPTY_OBJ ? NO : (key) => {
+		if (isTemplateRefKey(refs, key)) return false;
+		return hasOwn(rawSetupState, key);
+	};
+	const canSetRef = (ref2, key) => {
+		if (key && isTemplateRefKey(refs, key)) return false;
+		return true;
+	};
+	if (oldRef != null && oldRef !== ref) {
+		invalidatePendingSetRef(oldRawRef);
+		if (isString(oldRef)) {
+			refs[oldRef] = null;
+			if (canSetSetupRef(oldRef)) setupState[oldRef] = null;
+		} else if (/* @__PURE__ */ isRef(oldRef)) {
+			const oldRawRefAtom = oldRawRef;
+			if (canSetRef(oldRef, oldRawRefAtom.k)) oldRef.value = null;
+			if (oldRawRefAtom.k) refs[oldRawRefAtom.k] = null;
+		}
+	}
+	if (isFunction(ref)) callWithErrorHandling(ref, owner, 12, [value, refs]);
+	else {
+		const _isString = isString(ref);
+		const _isRef = /* @__PURE__ */ isRef(ref);
+		if (_isString || _isRef) {
+			const doSet = () => {
+				if (rawRef.f) {
+					const existing = _isString ? canSetSetupRef(ref) ? setupState[ref] : refs[ref] : canSetRef(ref) || !rawRef.k ? ref.value : refs[rawRef.k];
+					if (isUnmount) isArray(existing) && remove$1(existing, refValue);
+					else if (!isArray(existing)) if (_isString) {
+						refs[ref] = [refValue];
+						if (canSetSetupRef(ref)) setupState[ref] = refs[ref];
+					} else {
+						const newVal = [refValue];
+						if (canSetRef(ref, rawRef.k)) ref.value = newVal;
+						if (rawRef.k) refs[rawRef.k] = newVal;
+					}
+					else if (!existing.includes(refValue)) existing.push(refValue);
+				} else if (_isString) {
+					refs[ref] = value;
+					if (canSetSetupRef(ref)) setupState[ref] = value;
+				} else if (_isRef) {
+					if (canSetRef(ref, rawRef.k)) ref.value = value;
+					if (rawRef.k) refs[rawRef.k] = value;
+				}
+			};
+			if (value) {
+				const job = () => {
+					doSet();
+					pendingSetRefMap.delete(rawRef);
+				};
+				job.id = -1;
+				pendingSetRefMap.set(rawRef, job);
+				queuePostRenderEffect(job, parentSuspense);
+			} else {
+				invalidatePendingSetRef(rawRef);
+				doSet();
+			}
+		}
+	}
+}
+function invalidatePendingSetRef(rawRef) {
+	const pendingSetRef = pendingSetRefMap.get(rawRef);
+	if (pendingSetRef) {
+		pendingSetRef.flags |= 8;
+		pendingSetRefMap.delete(rawRef);
+	}
+}
+getGlobalThis().requestIdleCallback;
+getGlobalThis().cancelIdleCallback;
+var isAsyncWrapper = (i) => !!i.type.__asyncLoader;
+var isKeepAlive = (vnode) => vnode.type.__isKeepAlive;
+function onActivated(hook, target) {
+	registerKeepAliveHook(hook, "a", target);
+}
+function onDeactivated(hook, target) {
+	registerKeepAliveHook(hook, "da", target);
+}
+function registerKeepAliveHook(hook, type, target = currentInstance) {
+	const wrappedHook = hook.__wdc || (hook.__wdc = () => {
+		let current = target;
+		while (current) {
+			if (current.isDeactivated) return;
+			current = current.parent;
+		}
+		return hook();
+	});
+	injectHook(type, wrappedHook, target);
+	if (target) {
+		let current = target.parent;
+		while (current && current.parent) {
+			if (isKeepAlive(current.parent.vnode)) injectToKeepAliveRoot(wrappedHook, type, target, current);
+			current = current.parent;
+		}
+	}
+}
+function injectToKeepAliveRoot(hook, type, target, keepAliveRoot) {
+	const injected = injectHook(type, hook, keepAliveRoot, true);
+	onUnmounted(() => {
+		remove$1(keepAliveRoot[type], injected);
+	}, target);
+}
+function injectHook(type, hook, target = currentInstance, prepend = false) {
+	if (target) {
+		const hooks = target[type] || (target[type] = []);
+		const wrappedHook = hook.__weh || (hook.__weh = (...args) => {
+			pauseTracking();
+			const reset = setCurrentInstance(target);
+			const res = callWithAsyncErrorHandling(hook, target, type, args);
+			reset();
+			resetTracking();
+			return res;
+		});
+		if (prepend) hooks.unshift(wrappedHook);
+		else hooks.push(wrappedHook);
+		return wrappedHook;
+	}
+}
+var createHook = (lifecycle) => (hook, target = currentInstance) => {
+	if (!isInSSRComponentSetup || lifecycle === "sp") injectHook(lifecycle, (...args) => hook(...args), target);
+};
+var onBeforeMount = createHook("bm");
+var onMounted = createHook("m");
+var onBeforeUpdate = createHook("bu");
+var onUpdated = createHook("u");
+var onBeforeUnmount = createHook("bum");
+var onUnmounted = createHook("um");
+var onServerPrefetch = createHook("sp");
+var onRenderTriggered = createHook("rtg");
+var onRenderTracked = createHook("rtc");
+function onErrorCaptured(hook, target = currentInstance) {
+	injectHook("ec", hook, target);
+}
+var NULL_DYNAMIC_COMPONENT = /* @__PURE__ */ Symbol.for("v-ndc");
+function renderList(source, renderItem, cache, index) {
+	let ret;
+	const cached = cache && cache[index];
+	const sourceIsArray = isArray(source);
+	if (sourceIsArray || isString(source)) {
+		const sourceIsReactiveArray = sourceIsArray && /* @__PURE__ */ isReactive(source);
+		let needsWrap = false;
+		let isReadonlySource = false;
+		if (sourceIsReactiveArray) {
+			needsWrap = !/* @__PURE__ */ isShallow(source);
+			isReadonlySource = /* @__PURE__ */ isReadonly(source);
+			source = shallowReadArray(source);
+		}
+		ret = new Array(source.length);
+		for (let i = 0, l = source.length; i < l; i++) ret[i] = renderItem(needsWrap ? isReadonlySource ? toReadonly(toReactive(source[i])) : toReactive(source[i]) : source[i], i, void 0, cached && cached[i]);
+	} else if (typeof source === "number") {
+		ret = new Array(source);
+		for (let i = 0; i < source; i++) ret[i] = renderItem(i + 1, i, void 0, cached && cached[i]);
+	} else if (isObject(source)) if (source[Symbol.iterator]) ret = Array.from(source, (item, i) => renderItem(item, i, void 0, cached && cached[i]));
+	else {
+		const keys = Object.keys(source);
+		ret = new Array(keys.length);
+		for (let i = 0, l = keys.length; i < l; i++) {
+			const key = keys[i];
+			ret[i] = renderItem(source[key], key, i, cached && cached[i]);
+		}
+	}
+	else ret = [];
+	if (cache) cache[index] = ret;
+	return ret;
+}
+function renderSlot(slots, name, props = {}, fallback, noSlotted) {
+	if (currentRenderingInstance.ce || currentRenderingInstance.parent && isAsyncWrapper(currentRenderingInstance.parent) && currentRenderingInstance.parent.ce) {
+		const hasProps = Object.keys(props).length > 0;
+		if (name !== "default") props.name = name;
+		return openBlock(), createBlock(Fragment$1, null, [createVNode("slot", props, fallback && fallback())], hasProps ? -2 : 64);
+	}
+	let slot = slots[name];
+	if (slot && slot._c) slot._d = false;
+	openBlock();
+	const validSlotContent = slot && ensureValidVNode(slot(props));
+	const slotKey = props.key || validSlotContent && validSlotContent.key;
+	const rendered = createBlock(Fragment$1, { key: (slotKey && !isSymbol(slotKey) ? slotKey : `_${name}`) + (!validSlotContent && fallback ? "_fb" : "") }, validSlotContent || (fallback ? fallback() : []), validSlotContent && slots._ === 1 ? 64 : -2);
+	if (!noSlotted && rendered.scopeId) rendered.slotScopeIds = [rendered.scopeId + "-s"];
+	if (slot && slot._c) slot._d = true;
+	return rendered;
+}
+function ensureValidVNode(vnodes) {
+	return vnodes.some((child) => {
+		if (!isVNode(child)) return true;
+		if (child.type === Comment) return false;
+		if (child.type === Fragment$1 && !ensureValidVNode(child.children)) return false;
+		return true;
+	}) ? vnodes : null;
+}
+var getPublicInstance = (i) => {
+	if (!i) return null;
+	if (isStatefulComponent(i)) return getComponentPublicInstance(i);
+	return getPublicInstance(i.parent);
+};
+var publicPropertiesMap = /* @__PURE__ */ extend$1(/* @__PURE__ */ Object.create(null), {
+	$: (i) => i,
+	$el: (i) => i.vnode.el,
+	$data: (i) => i.data,
+	$props: (i) => i.props,
+	$attrs: (i) => i.attrs,
+	$slots: (i) => i.slots,
+	$refs: (i) => i.refs,
+	$parent: (i) => getPublicInstance(i.parent),
+	$root: (i) => getPublicInstance(i.root),
+	$host: (i) => i.ce,
+	$emit: (i) => i.emit,
+	$options: (i) => resolveMergedOptions(i),
+	$forceUpdate: (i) => i.f || (i.f = () => {
+		queueJob(i.update);
+	}),
+	$nextTick: (i) => i.n || (i.n = nextTick$1.bind(i.proxy)),
+	$watch: (i) => instanceWatch.bind(i)
+});
+var hasSetupBinding = (state, key) => state !== EMPTY_OBJ && !state.__isScriptSetup && hasOwn(state, key);
+var PublicInstanceProxyHandlers = {
+	get({ _: instance }, key) {
+		if (key === "__v_skip") return true;
+		const { ctx, setupState, data, props, accessCache, type, appContext } = instance;
+		if (key[0] !== "$") {
+			const n = accessCache[key];
+			if (n !== void 0) switch (n) {
+				case 1: return setupState[key];
+				case 2: return data[key];
+				case 4: return ctx[key];
+				case 3: return props[key];
+			}
+			else if (hasSetupBinding(setupState, key)) {
+				accessCache[key] = 1;
+				return setupState[key];
+			} else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
+				accessCache[key] = 2;
+				return data[key];
+			} else if (hasOwn(props, key)) {
+				accessCache[key] = 3;
+				return props[key];
+			} else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
+				accessCache[key] = 4;
+				return ctx[key];
+			} else if (shouldCacheAccess) accessCache[key] = 0;
+		}
+		const publicGetter = publicPropertiesMap[key];
+		let cssModule, globalProperties;
+		if (publicGetter) {
+			if (key === "$attrs") track(instance.attrs, "get", "");
+			return publicGetter(instance);
+		} else if ((cssModule = type.__cssModules) && (cssModule = cssModule[key])) return cssModule;
+		else if (ctx !== EMPTY_OBJ && hasOwn(ctx, key)) {
+			accessCache[key] = 4;
+			return ctx[key];
+		} else if (globalProperties = appContext.config.globalProperties, hasOwn(globalProperties, key)) return globalProperties[key];
+	},
+	set({ _: instance }, key, value) {
+		const { data, setupState, ctx } = instance;
+		if (hasSetupBinding(setupState, key)) {
+			setupState[key] = value;
+			return true;
+		} else if (data !== EMPTY_OBJ && hasOwn(data, key)) {
+			data[key] = value;
+			return true;
+		} else if (hasOwn(instance.props, key)) return false;
+		if (key[0] === "$" && key.slice(1) in instance) return false;
+		else ctx[key] = value;
+		return true;
+	},
+	has({ _: { data, setupState, accessCache, ctx, appContext, props, type } }, key) {
+		let cssModules;
+		return !!(accessCache[key] || data !== EMPTY_OBJ && key[0] !== "$" && hasOwn(data, key) || hasSetupBinding(setupState, key) || hasOwn(props, key) || hasOwn(ctx, key) || hasOwn(publicPropertiesMap, key) || hasOwn(appContext.config.globalProperties, key) || (cssModules = type.__cssModules) && cssModules[key]);
+	},
+	defineProperty(target, key, descriptor) {
+		if (descriptor.get != null) target._.accessCache[key] = 0;
+		else if (hasOwn(descriptor, "value")) this.set(target, key, descriptor.value, null);
+		return Reflect.defineProperty(target, key, descriptor);
+	}
+};
+function normalizePropsOrEmits(props) {
+	return isArray(props) ? props.reduce((normalized, p) => (normalized[p] = null, normalized), {}) : props;
+}
+var shouldCacheAccess = true;
+function applyOptions(instance) {
+	const options = resolveMergedOptions(instance);
+	const publicThis = instance.proxy;
+	const ctx = instance.ctx;
+	shouldCacheAccess = false;
+	if (options.beforeCreate) callHook$1(options.beforeCreate, instance, "bc");
+	const { data: dataOptions, computed: computedOptions, methods, watch: watchOptions, provide: provideOptions, inject: injectOptions, created, beforeMount, mounted, beforeUpdate, updated, activated, deactivated, beforeDestroy, beforeUnmount, destroyed, unmounted, render, renderTracked, renderTriggered, errorCaptured, serverPrefetch, expose, inheritAttrs, components, directives, filters } = options;
+	const checkDuplicateProperties = null;
+	if (injectOptions) resolveInjections(injectOptions, ctx, checkDuplicateProperties);
+	if (methods) for (const key in methods) {
+		const methodHandler = methods[key];
+		if (isFunction(methodHandler)) ctx[key] = methodHandler.bind(publicThis);
+	}
+	if (dataOptions) {
+		const data = dataOptions.call(publicThis, publicThis);
+		if (!isObject(data)) {} else instance.data = /* @__PURE__ */ reactive(data);
+	}
+	shouldCacheAccess = true;
+	if (computedOptions) for (const key in computedOptions) {
+		const opt = computedOptions[key];
+		const c = computed({
+			get: isFunction(opt) ? opt.bind(publicThis, publicThis) : isFunction(opt.get) ? opt.get.bind(publicThis, publicThis) : NOOP,
+			set: !isFunction(opt) && isFunction(opt.set) ? opt.set.bind(publicThis) : NOOP
+		});
+		Object.defineProperty(ctx, key, {
+			enumerable: true,
+			configurable: true,
+			get: () => c.value,
+			set: (v) => c.value = v
+		});
+	}
+	if (watchOptions) for (const key in watchOptions) createWatcher(watchOptions[key], ctx, publicThis, key);
+	if (provideOptions) {
+		const provides = isFunction(provideOptions) ? provideOptions.call(publicThis) : provideOptions;
+		Reflect.ownKeys(provides).forEach((key) => {
+			provide(key, provides[key]);
+		});
+	}
+	if (created) callHook$1(created, instance, "c");
+	function registerLifecycleHook(register, hook) {
+		if (isArray(hook)) hook.forEach((_hook) => register(_hook.bind(publicThis)));
+		else if (hook) register(hook.bind(publicThis));
+	}
+	registerLifecycleHook(onBeforeMount, beforeMount);
+	registerLifecycleHook(onMounted, mounted);
+	registerLifecycleHook(onBeforeUpdate, beforeUpdate);
+	registerLifecycleHook(onUpdated, updated);
+	registerLifecycleHook(onActivated, activated);
+	registerLifecycleHook(onDeactivated, deactivated);
+	registerLifecycleHook(onErrorCaptured, errorCaptured);
+	registerLifecycleHook(onRenderTracked, renderTracked);
+	registerLifecycleHook(onRenderTriggered, renderTriggered);
+	registerLifecycleHook(onBeforeUnmount, beforeUnmount);
+	registerLifecycleHook(onUnmounted, unmounted);
+	registerLifecycleHook(onServerPrefetch, serverPrefetch);
+	if (isArray(expose)) {
+		if (expose.length) {
+			const exposed = instance.exposed || (instance.exposed = {});
+			expose.forEach((key) => {
+				Object.defineProperty(exposed, key, {
+					get: () => publicThis[key],
+					set: (val) => publicThis[key] = val,
+					enumerable: true
+				});
+			});
+		} else if (!instance.exposed) instance.exposed = {};
+	}
+	if (render && instance.render === NOOP) instance.render = render;
+	if (inheritAttrs != null) instance.inheritAttrs = inheritAttrs;
+	if (components) instance.components = components;
+	if (directives) instance.directives = directives;
+	if (serverPrefetch) markAsyncBoundary(instance);
+}
+function resolveInjections(injectOptions, ctx, checkDuplicateProperties = NOOP) {
+	if (isArray(injectOptions)) injectOptions = normalizeInject(injectOptions);
+	for (const key in injectOptions) {
+		const opt = injectOptions[key];
+		let injected;
+		if (isObject(opt)) if ("default" in opt) injected = inject(opt.from || key, opt.default, true);
+		else injected = inject(opt.from || key);
+		else injected = inject(opt);
+		if (/* @__PURE__ */ isRef(injected)) Object.defineProperty(ctx, key, {
+			enumerable: true,
+			configurable: true,
+			get: () => injected.value,
+			set: (v) => injected.value = v
+		});
+		else ctx[key] = injected;
+	}
+}
+function callHook$1(hook, instance, type) {
+	callWithAsyncErrorHandling(isArray(hook) ? hook.map((h) => h.bind(instance.proxy)) : hook.bind(instance.proxy), instance, type);
+}
+function createWatcher(raw, ctx, publicThis, key) {
+	let getter = key.includes(".") ? createPathGetter(publicThis, key) : () => publicThis[key];
+	if (isString(raw)) {
+		const handler = ctx[raw];
+		if (isFunction(handler)) watch(getter, handler);
+	} else if (isFunction(raw)) watch(getter, raw.bind(publicThis));
+	else if (isObject(raw)) if (isArray(raw)) raw.forEach((r) => createWatcher(r, ctx, publicThis, key));
+	else {
+		const handler = isFunction(raw.handler) ? raw.handler.bind(publicThis) : ctx[raw.handler];
+		if (isFunction(handler)) watch(getter, handler, raw);
+	}
+}
+function resolveMergedOptions(instance) {
+	const base = instance.type;
+	const { mixins, extends: extendsOptions } = base;
+	const { mixins: globalMixins, optionsCache: cache, config: { optionMergeStrategies } } = instance.appContext;
+	const cached = cache.get(base);
+	let resolved;
+	if (cached) resolved = cached;
+	else if (!globalMixins.length && !mixins && !extendsOptions) resolved = base;
+	else {
+		resolved = {};
+		if (globalMixins.length) globalMixins.forEach((m) => mergeOptions(resolved, m, optionMergeStrategies, true));
+		mergeOptions(resolved, base, optionMergeStrategies);
+	}
+	if (isObject(base)) cache.set(base, resolved);
+	return resolved;
+}
+function mergeOptions(to, from, strats, asMixin = false) {
+	const { mixins, extends: extendsOptions } = from;
+	if (extendsOptions) mergeOptions(to, extendsOptions, strats, true);
+	if (mixins) mixins.forEach((m) => mergeOptions(to, m, strats, true));
+	for (const key in from) if (asMixin && key === "expose") {} else {
+		const strat = internalOptionMergeStrats[key] || strats && strats[key];
+		to[key] = strat ? strat(to[key], from[key]) : from[key];
+	}
+	return to;
+}
+var internalOptionMergeStrats = {
+	data: mergeDataFn,
+	props: mergeEmitsOrPropsOptions,
+	emits: mergeEmitsOrPropsOptions,
+	methods: mergeObjectOptions,
+	computed: mergeObjectOptions,
+	beforeCreate: mergeAsArray,
+	created: mergeAsArray,
+	beforeMount: mergeAsArray,
+	mounted: mergeAsArray,
+	beforeUpdate: mergeAsArray,
+	updated: mergeAsArray,
+	beforeDestroy: mergeAsArray,
+	beforeUnmount: mergeAsArray,
+	destroyed: mergeAsArray,
+	unmounted: mergeAsArray,
+	activated: mergeAsArray,
+	deactivated: mergeAsArray,
+	errorCaptured: mergeAsArray,
+	serverPrefetch: mergeAsArray,
+	components: mergeObjectOptions,
+	directives: mergeObjectOptions,
+	watch: mergeWatchOptions,
+	provide: mergeDataFn,
+	inject: mergeInject
+};
+function mergeDataFn(to, from) {
+	if (!from) return to;
+	if (!to) return from;
+	return function mergedDataFn() {
+		return extend$1(isFunction(to) ? to.call(this, this) : to, isFunction(from) ? from.call(this, this) : from);
+	};
+}
+function mergeInject(to, from) {
+	return mergeObjectOptions(normalizeInject(to), normalizeInject(from));
+}
+function normalizeInject(raw) {
+	if (isArray(raw)) {
+		const res = {};
+		for (let i = 0; i < raw.length; i++) res[raw[i]] = raw[i];
+		return res;
+	}
+	return raw;
+}
+function mergeAsArray(to, from) {
+	return to ? [...new Set([].concat(to, from))] : from;
+}
+function mergeObjectOptions(to, from) {
+	return to ? extend$1(/* @__PURE__ */ Object.create(null), to, from) : from;
+}
+function mergeEmitsOrPropsOptions(to, from) {
+	if (to) {
+		if (isArray(to) && isArray(from)) return [.../* @__PURE__ */ new Set([...to, ...from])];
+		return extend$1(/* @__PURE__ */ Object.create(null), normalizePropsOrEmits(to), normalizePropsOrEmits(from != null ? from : {}));
+	} else return from;
+}
+function mergeWatchOptions(to, from) {
+	if (!to) return from;
+	if (!from) return to;
+	const merged = extend$1(/* @__PURE__ */ Object.create(null), to);
+	for (const key in from) merged[key] = mergeAsArray(to[key], from[key]);
+	return merged;
+}
+function createAppContext() {
+	return {
+		app: null,
+		config: {
+			isNativeTag: NO,
+			performance: false,
+			globalProperties: {},
+			optionMergeStrategies: {},
+			errorHandler: void 0,
+			warnHandler: void 0,
+			compilerOptions: {}
+		},
+		mixins: [],
+		components: {},
+		directives: {},
+		provides: /* @__PURE__ */ Object.create(null),
+		optionsCache: /* @__PURE__ */ new WeakMap(),
+		propsCache: /* @__PURE__ */ new WeakMap(),
+		emitsCache: /* @__PURE__ */ new WeakMap()
+	};
+}
+var uid$1 = 0;
+function createAppAPI(render, hydrate) {
+	return function createApp(rootComponent, rootProps = null) {
+		if (!isFunction(rootComponent)) rootComponent = extend$1({}, rootComponent);
+		if (rootProps != null && !isObject(rootProps)) rootProps = null;
+		const context = createAppContext();
+		const installedPlugins = /* @__PURE__ */ new WeakSet();
+		const pluginCleanupFns = [];
+		let isMounted = false;
+		const app = context.app = {
+			_uid: uid$1++,
+			_component: rootComponent,
+			_props: rootProps,
+			_container: null,
+			_context: context,
+			_instance: null,
+			version: version$1,
+			get config() {
+				return context.config;
+			},
+			set config(v) {},
+			use(plugin, ...options) {
+				if (installedPlugins.has(plugin)) {} else if (plugin && isFunction(plugin.install)) {
+					installedPlugins.add(plugin);
+					plugin.install(app, ...options);
+				} else if (isFunction(plugin)) {
+					installedPlugins.add(plugin);
+					plugin(app, ...options);
+				}
+				return app;
+			},
+			mixin(mixin) {
+				if (!context.mixins.includes(mixin)) context.mixins.push(mixin);
+				return app;
+			},
+			component(name, component) {
+				if (!component) return context.components[name];
+				context.components[name] = component;
+				return app;
+			},
+			directive(name, directive) {
+				if (!directive) return context.directives[name];
+				context.directives[name] = directive;
+				return app;
+			},
+			mount(rootContainer, isHydrate, namespace) {
+				if (!isMounted) {
+					const vnode = app._ceVNode || createVNode(rootComponent, rootProps);
+					vnode.appContext = context;
+					if (namespace === true) namespace = "svg";
+					else if (namespace === false) namespace = void 0;
+					if (isHydrate && hydrate) hydrate(vnode, rootContainer);
+					else render(vnode, rootContainer, namespace);
+					isMounted = true;
+					app._container = rootContainer;
+					rootContainer.__vue_app__ = app;
+					return getComponentPublicInstance(vnode.component);
+				}
+			},
+			onUnmount(cleanupFn) {
+				pluginCleanupFns.push(cleanupFn);
+			},
+			unmount() {
+				if (isMounted) {
+					callWithAsyncErrorHandling(pluginCleanupFns, app._instance, 16);
+					render(null, app._container);
+					delete app._container.__vue_app__;
+				}
+			},
+			provide(key, value) {
+				context.provides[key] = value;
+				return app;
+			},
+			runWithContext(fn) {
+				const lastApp = currentApp;
+				currentApp = app;
+				try {
+					return fn();
+				} finally {
+					currentApp = lastApp;
+				}
+			}
+		};
+		return app;
+	};
+}
+var currentApp = null;
+var getModelModifiers = (props, modelName) => {
+	return modelName === "modelValue" || modelName === "model-value" ? props.modelModifiers : props[`${modelName}Modifiers`] || props[`${camelize(modelName)}Modifiers`] || props[`${hyphenate(modelName)}Modifiers`];
+};
+function emit(instance, event, ...rawArgs) {
+	if (instance.isUnmounted) return;
+	const props = instance.vnode.props || EMPTY_OBJ;
+	let args = rawArgs;
+	const isModelListener = event.startsWith("update:");
+	const modifiers = isModelListener && getModelModifiers(props, event.slice(7));
+	if (modifiers) {
+		if (modifiers.trim) args = rawArgs.map((a) => isString(a) ? a.trim() : a);
+		if (modifiers.number) args = rawArgs.map(looseToNumber);
+	}
+	let handlerName;
+	let handler = props[handlerName = toHandlerKey(event)] || props[handlerName = toHandlerKey(camelize(event))];
+	if (!handler && isModelListener) handler = props[handlerName = toHandlerKey(hyphenate(event))];
+	if (handler) callWithAsyncErrorHandling(handler, instance, 6, args);
+	const onceHandler = props[handlerName + `Once`];
+	if (onceHandler) {
+		if (!instance.emitted) instance.emitted = {};
+		else if (instance.emitted[handlerName]) return;
+		instance.emitted[handlerName] = true;
+		callWithAsyncErrorHandling(onceHandler, instance, 6, args);
+	}
+}
+var mixinEmitsCache = /* @__PURE__ */ new WeakMap();
+function normalizeEmitsOptions(comp, appContext, asMixin = false) {
+	const cache = asMixin ? mixinEmitsCache : appContext.emitsCache;
+	const cached = cache.get(comp);
+	if (cached !== void 0) return cached;
+	const raw = comp.emits;
+	let normalized = {};
+	let hasExtends = false;
+	if (!isFunction(comp)) {
+		const extendEmits = (raw2) => {
+			const normalizedFromExtend = normalizeEmitsOptions(raw2, appContext, true);
+			if (normalizedFromExtend) {
+				hasExtends = true;
+				extend$1(normalized, normalizedFromExtend);
+			}
+		};
+		if (!asMixin && appContext.mixins.length) appContext.mixins.forEach(extendEmits);
+		if (comp.extends) extendEmits(comp.extends);
+		if (comp.mixins) comp.mixins.forEach(extendEmits);
+	}
+	if (!raw && !hasExtends) {
+		if (isObject(comp)) cache.set(comp, null);
+		return null;
+	}
+	if (isArray(raw)) raw.forEach((key) => normalized[key] = null);
+	else extend$1(normalized, raw);
+	if (isObject(comp)) cache.set(comp, normalized);
+	return normalized;
+}
+function isEmitListener(options, key) {
+	if (!options || !isOn(key)) return false;
+	key = key.slice(2).replace(/Once$/, "");
+	return hasOwn(options, key[0].toLowerCase() + key.slice(1)) || hasOwn(options, hyphenate(key)) || hasOwn(options, key);
+}
+function renderComponentRoot(instance) {
+	const { type: Component, vnode, proxy, withProxy, propsOptions: [propsOptions], slots, attrs, emit, render, renderCache, props, data, setupState, ctx, inheritAttrs } = instance;
+	const prev = setCurrentRenderingInstance(instance);
+	let result;
+	let fallthroughAttrs;
+	try {
+		if (vnode.shapeFlag & 4) {
+			const proxyToUse = withProxy || proxy;
+			const thisProxy = proxyToUse;
+			result = normalizeVNode(render.call(thisProxy, proxyToUse, renderCache, props, setupState, data, ctx));
+			fallthroughAttrs = attrs;
+		} else {
+			const render2 = Component;
+			result = normalizeVNode(render2.length > 1 ? render2(props, {
+				attrs,
+				slots,
+				emit
+			}) : render2(props, null));
+			fallthroughAttrs = Component.props ? attrs : getFunctionalFallthrough(attrs);
+		}
+	} catch (err) {
+		blockStack.length = 0;
+		handleError(err, instance, 1);
+		result = createVNode(Comment);
+	}
+	let root = result;
+	if (fallthroughAttrs && inheritAttrs !== false) {
+		const keys = Object.keys(fallthroughAttrs);
+		const { shapeFlag } = root;
+		if (keys.length) {
+			if (shapeFlag & 7) {
+				if (propsOptions && keys.some(isModelListener)) fallthroughAttrs = filterModelListeners(fallthroughAttrs, propsOptions);
+				root = cloneVNode(root, fallthroughAttrs, false, true);
+			}
+		}
+	}
+	if (vnode.dirs) {
+		root = cloneVNode(root, null, false, true);
+		root.dirs = root.dirs ? root.dirs.concat(vnode.dirs) : vnode.dirs;
+	}
+	if (vnode.transition) setTransitionHooks(root, vnode.transition);
+	result = root;
+	setCurrentRenderingInstance(prev);
+	return result;
+}
+var getFunctionalFallthrough = (attrs) => {
+	let res;
+	for (const key in attrs) if (key === "class" || key === "style" || isOn(key)) (res || (res = {}))[key] = attrs[key];
+	return res;
+};
+var filterModelListeners = (attrs, props) => {
+	const res = {};
+	for (const key in attrs) if (!isModelListener(key) || !(key.slice(9) in props)) res[key] = attrs[key];
+	return res;
+};
+function shouldUpdateComponent(prevVNode, nextVNode, optimized) {
+	const { props: prevProps, children: prevChildren, component } = prevVNode;
+	const { props: nextProps, children: nextChildren, patchFlag } = nextVNode;
+	const emits = component.emitsOptions;
+	if (nextVNode.dirs || nextVNode.transition) return true;
+	if (optimized && patchFlag >= 0) {
+		if (patchFlag & 1024) return true;
+		if (patchFlag & 16) {
+			if (!prevProps) return !!nextProps;
+			return hasPropsChanged(prevProps, nextProps, emits);
+		} else if (patchFlag & 8) {
+			const dynamicProps = nextVNode.dynamicProps;
+			for (let i = 0; i < dynamicProps.length; i++) {
+				const key = dynamicProps[i];
+				if (hasPropValueChanged(nextProps, prevProps, key) && !isEmitListener(emits, key)) return true;
+			}
+		}
+	} else {
+		if (prevChildren || nextChildren) {
+			if (!nextChildren || !nextChildren.$stable) return true;
+		}
+		if (prevProps === nextProps) return false;
+		if (!prevProps) return !!nextProps;
+		if (!nextProps) return true;
+		return hasPropsChanged(prevProps, nextProps, emits);
+	}
+	return false;
+}
+function hasPropsChanged(prevProps, nextProps, emitsOptions) {
+	const nextKeys = Object.keys(nextProps);
+	if (nextKeys.length !== Object.keys(prevProps).length) return true;
+	for (let i = 0; i < nextKeys.length; i++) {
+		const key = nextKeys[i];
+		if (hasPropValueChanged(nextProps, prevProps, key) && !isEmitListener(emitsOptions, key)) return true;
+	}
+	return false;
+}
+function hasPropValueChanged(nextProps, prevProps, key) {
+	const nextProp = nextProps[key];
+	const prevProp = prevProps[key];
+	if (key === "style" && isObject(nextProp) && isObject(prevProp)) return !looseEqual(nextProp, prevProp);
+	return nextProp !== prevProp;
+}
+function updateHOCHostEl({ vnode, parent, suspense }, el) {
+	while (parent) {
+		const root = parent.subTree;
+		if (root.suspense && root.suspense.activeBranch === vnode) {
+			root.suspense.vnode.el = root.el = el;
+			vnode = root;
+		}
+		if (root === vnode) {
+			(vnode = parent.vnode).el = el;
+			parent = parent.parent;
+		} else break;
+	}
+	if (suspense && suspense.activeBranch === vnode) suspense.vnode.el = el;
+}
+var internalObjectProto = {};
+var createInternalObject = () => Object.create(internalObjectProto);
+var isInternalObject = (obj) => Object.getPrototypeOf(obj) === internalObjectProto;
+function initProps(instance, rawProps, isStateful, isSSR = false) {
+	const props = {};
+	const attrs = createInternalObject();
+	instance.propsDefaults = /* @__PURE__ */ Object.create(null);
+	setFullProps(instance, rawProps, props, attrs);
+	for (const key in instance.propsOptions[0]) if (!(key in props)) props[key] = void 0;
+	if (isStateful) instance.props = isSSR ? props : /* @__PURE__ */ shallowReactive(props);
+	else if (!instance.type.props) instance.props = attrs;
+	else instance.props = props;
+	instance.attrs = attrs;
+}
+function updateProps(instance, rawProps, rawPrevProps, optimized) {
+	const { props, attrs, vnode: { patchFlag } } = instance;
+	const rawCurrentProps = /* @__PURE__ */ toRaw(props);
+	const [options] = instance.propsOptions;
+	let hasAttrsChanged = false;
+	if ((optimized || patchFlag > 0) && !(patchFlag & 16)) {
+		if (patchFlag & 8) {
+			const propsToUpdate = instance.vnode.dynamicProps;
+			for (let i = 0; i < propsToUpdate.length; i++) {
+				let key = propsToUpdate[i];
+				if (isEmitListener(instance.emitsOptions, key)) continue;
+				const value = rawProps[key];
+				if (options) if (hasOwn(attrs, key)) {
+					if (value !== attrs[key]) {
+						attrs[key] = value;
+						hasAttrsChanged = true;
+					}
+				} else {
+					const camelizedKey = camelize(key);
+					props[camelizedKey] = resolvePropValue(options, rawCurrentProps, camelizedKey, value, instance, false);
+				}
+				else if (value !== attrs[key]) {
+					attrs[key] = value;
+					hasAttrsChanged = true;
+				}
+			}
+		}
+	} else {
+		if (setFullProps(instance, rawProps, props, attrs)) hasAttrsChanged = true;
+		let kebabKey;
+		for (const key in rawCurrentProps) if (!rawProps || !hasOwn(rawProps, key) && ((kebabKey = hyphenate(key)) === key || !hasOwn(rawProps, kebabKey))) if (options) {
+			if (rawPrevProps && (rawPrevProps[key] !== void 0 || rawPrevProps[kebabKey] !== void 0)) props[key] = resolvePropValue(options, rawCurrentProps, key, void 0, instance, true);
+		} else delete props[key];
+		if (attrs !== rawCurrentProps) {
+			for (const key in attrs) if (!rawProps || !hasOwn(rawProps, key) && true) {
+				delete attrs[key];
+				hasAttrsChanged = true;
+			}
+		}
+	}
+	if (hasAttrsChanged) trigger(instance.attrs, "set", "");
+}
+function setFullProps(instance, rawProps, props, attrs) {
+	const [options, needCastKeys] = instance.propsOptions;
+	let hasAttrsChanged = false;
+	let rawCastValues;
+	if (rawProps) for (let key in rawProps) {
+		if (isReservedProp(key)) continue;
+		const value = rawProps[key];
+		let camelKey;
+		if (options && hasOwn(options, camelKey = camelize(key))) if (!needCastKeys || !needCastKeys.includes(camelKey)) props[camelKey] = value;
+		else (rawCastValues || (rawCastValues = {}))[camelKey] = value;
+		else if (!isEmitListener(instance.emitsOptions, key)) {
+			if (!(key in attrs) || value !== attrs[key]) {
+				attrs[key] = value;
+				hasAttrsChanged = true;
+			}
+		}
+	}
+	if (needCastKeys) {
+		const rawCurrentProps = /* @__PURE__ */ toRaw(props);
+		const castValues = rawCastValues || EMPTY_OBJ;
+		for (let i = 0; i < needCastKeys.length; i++) {
+			const key = needCastKeys[i];
+			props[key] = resolvePropValue(options, rawCurrentProps, key, castValues[key], instance, !hasOwn(castValues, key));
+		}
+	}
+	return hasAttrsChanged;
+}
+function resolvePropValue(options, props, key, value, instance, isAbsent) {
+	const opt = options[key];
+	if (opt != null) {
+		const hasDefault = hasOwn(opt, "default");
+		if (hasDefault && value === void 0) {
+			const defaultValue = opt.default;
+			if (opt.type !== Function && !opt.skipFactory && isFunction(defaultValue)) {
+				const { propsDefaults } = instance;
+				if (key in propsDefaults) value = propsDefaults[key];
+				else {
+					const reset = setCurrentInstance(instance);
+					value = propsDefaults[key] = defaultValue.call(null, props);
+					reset();
+				}
+			} else value = defaultValue;
+			if (instance.ce) instance.ce._setProp(key, value);
+		}
+		if (opt[0]) {
+			if (isAbsent && !hasDefault) value = false;
+			else if (opt[1] && (value === "" || value === hyphenate(key))) value = true;
+		}
+	}
+	return value;
+}
+var mixinPropsCache = /* @__PURE__ */ new WeakMap();
+function normalizePropsOptions(comp, appContext, asMixin = false) {
+	const cache = asMixin ? mixinPropsCache : appContext.propsCache;
+	const cached = cache.get(comp);
+	if (cached) return cached;
+	const raw = comp.props;
+	const normalized = {};
+	const needCastKeys = [];
+	let hasExtends = false;
+	if (!isFunction(comp)) {
+		const extendProps = (raw2) => {
+			hasExtends = true;
+			const [props, keys] = normalizePropsOptions(raw2, appContext, true);
+			extend$1(normalized, props);
+			if (keys) needCastKeys.push(...keys);
+		};
+		if (!asMixin && appContext.mixins.length) appContext.mixins.forEach(extendProps);
+		if (comp.extends) extendProps(comp.extends);
+		if (comp.mixins) comp.mixins.forEach(extendProps);
+	}
+	if (!raw && !hasExtends) {
+		if (isObject(comp)) cache.set(comp, EMPTY_ARR);
+		return EMPTY_ARR;
+	}
+	if (isArray(raw)) for (let i = 0; i < raw.length; i++) {
+		const normalizedKey = camelize(raw[i]);
+		if (validatePropName(normalizedKey)) normalized[normalizedKey] = EMPTY_OBJ;
+	}
+	else if (raw) for (const key in raw) {
+		const normalizedKey = camelize(key);
+		if (validatePropName(normalizedKey)) {
+			const opt = raw[key];
+			const prop = normalized[normalizedKey] = isArray(opt) || isFunction(opt) ? { type: opt } : extend$1({}, opt);
+			const propType = prop.type;
+			let shouldCast = false;
+			let shouldCastTrue = true;
+			if (isArray(propType)) for (let index = 0; index < propType.length; ++index) {
+				const type = propType[index];
+				const typeName = isFunction(type) && type.name;
+				if (typeName === "Boolean") {
+					shouldCast = true;
+					break;
+				} else if (typeName === "String") shouldCastTrue = false;
+			}
+			else shouldCast = isFunction(propType) && propType.name === "Boolean";
+			prop[0] = shouldCast;
+			prop[1] = shouldCastTrue;
+			if (shouldCast || hasOwn(prop, "default")) needCastKeys.push(normalizedKey);
+		}
+	}
+	const res = [normalized, needCastKeys];
+	if (isObject(comp)) cache.set(comp, res);
+	return res;
+}
+function validatePropName(key) {
+	if (key[0] !== "$" && !isReservedProp(key)) return true;
+	return false;
+}
+var isInternalKey = (key) => key === "_" || key === "_ctx" || key === "$stable";
+var normalizeSlotValue = (value) => isArray(value) ? value.map(normalizeVNode) : [normalizeVNode(value)];
+var normalizeSlot = (key, rawSlot, ctx) => {
+	if (rawSlot._n) return rawSlot;
+	const normalized = withCtx((...args) => {
+		return normalizeSlotValue(rawSlot(...args));
+	}, ctx);
+	normalized._c = false;
+	return normalized;
+};
+var normalizeObjectSlots = (rawSlots, slots, instance) => {
+	const ctx = rawSlots._ctx;
+	for (const key in rawSlots) {
+		if (isInternalKey(key)) continue;
+		const value = rawSlots[key];
+		if (isFunction(value)) slots[key] = normalizeSlot(key, value, ctx);
+		else if (value != null) {
+			const normalized = normalizeSlotValue(value);
+			slots[key] = () => normalized;
+		}
+	}
+};
+var normalizeVNodeSlots = (instance, children) => {
+	const normalized = normalizeSlotValue(children);
+	instance.slots.default = () => normalized;
+};
+var assignSlots = (slots, children, optimized) => {
+	for (const key in children) if (optimized || !isInternalKey(key)) slots[key] = children[key];
+};
+var initSlots = (instance, children, optimized) => {
+	const slots = instance.slots = createInternalObject();
+	if (instance.vnode.shapeFlag & 32) {
+		const type = children._;
+		if (type) {
+			assignSlots(slots, children, optimized);
+			if (optimized) def(slots, "_", type, true);
+		} else normalizeObjectSlots(children, slots);
+	} else if (children) normalizeVNodeSlots(instance, children);
+};
+var updateSlots = (instance, children, optimized) => {
+	const { vnode, slots } = instance;
+	let needDeletionCheck = true;
+	let deletionComparisonTarget = EMPTY_OBJ;
+	if (vnode.shapeFlag & 32) {
+		const type = children._;
+		if (type) if (optimized && type === 1) needDeletionCheck = false;
+		else assignSlots(slots, children, optimized);
+		else {
+			needDeletionCheck = !children.$stable;
+			normalizeObjectSlots(children, slots);
+		}
+		deletionComparisonTarget = children;
+	} else if (children) {
+		normalizeVNodeSlots(instance, children);
+		deletionComparisonTarget = { default: 1 };
+	}
+	if (needDeletionCheck) {
+		for (const key in slots) if (!isInternalKey(key) && deletionComparisonTarget[key] == null) delete slots[key];
+	}
+};
+function initFeatureFlags() {}
+var queuePostRenderEffect = queueEffectWithSuspense;
+function createRenderer(options) {
+	return baseCreateRenderer(options);
+}
+function baseCreateRenderer(options, createHydrationFns) {
+	initFeatureFlags();
+	const target = getGlobalThis();
+	target.__VUE__ = true;
+	const { insert: hostInsert, remove: hostRemove, patchProp: hostPatchProp, createElement: hostCreateElement, createText: hostCreateText, createComment: hostCreateComment, setText: hostSetText, setElementText: hostSetElementText, parentNode: hostParentNode, nextSibling: hostNextSibling, setScopeId: hostSetScopeId = NOOP, insertStaticContent: hostInsertStaticContent } = options;
+	const patch = (n1, n2, container, anchor = null, parentComponent = null, parentSuspense = null, namespace = void 0, slotScopeIds = null, optimized = !!n2.dynamicChildren) => {
+		if (n1 === n2) return;
+		if (n1 && !isSameVNodeType(n1, n2)) {
+			anchor = getNextHostNode(n1);
+			unmount(n1, parentComponent, parentSuspense, true);
+			n1 = null;
+		}
+		if (n2.patchFlag === -2) {
+			optimized = false;
+			n2.dynamicChildren = null;
+		}
+		const { type, ref, shapeFlag } = n2;
+		switch (type) {
+			case Text$1:
+				processText(n1, n2, container, anchor);
+				break;
+			case Comment:
+				processCommentNode(n1, n2, container, anchor);
+				break;
+			case Static:
+				if (n1 == null) mountStaticNode(n2, container, anchor, namespace);
+				break;
+			case Fragment$1:
+				processFragment(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+				break;
+			default: if (shapeFlag & 1) processElement(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			else if (shapeFlag & 6) processComponent(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			else if (shapeFlag & 64) type.process(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, internals);
+			else if (shapeFlag & 128) type.process(n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, internals);
+		}
+		if (ref != null && parentComponent) setRef(ref, n1 && n1.ref, parentSuspense, n2 || n1, !n2);
+		else if (ref == null && n1 && n1.ref != null) setRef(n1.ref, null, parentSuspense, n1, true);
+	};
+	const processText = (n1, n2, container, anchor) => {
+		if (n1 == null) hostInsert(n2.el = hostCreateText(n2.children), container, anchor);
+		else {
+			const el = n2.el = n1.el;
+			if (n2.children !== n1.children) hostSetText(el, n2.children);
+		}
+	};
+	const processCommentNode = (n1, n2, container, anchor) => {
+		if (n1 == null) hostInsert(n2.el = hostCreateComment(n2.children || ""), container, anchor);
+		else n2.el = n1.el;
+	};
+	const mountStaticNode = (n2, container, anchor, namespace) => {
+		[n2.el, n2.anchor] = hostInsertStaticContent(n2.children, container, anchor, namespace, n2.el, n2.anchor);
+	};
+	const moveStaticNode = ({ el, anchor }, container, nextSibling) => {
+		let next;
+		while (el && el !== anchor) {
+			next = hostNextSibling(el);
+			hostInsert(el, container, nextSibling);
+			el = next;
+		}
+		hostInsert(anchor, container, nextSibling);
+	};
+	const removeStaticNode = ({ el, anchor }) => {
+		let next;
+		while (el && el !== anchor) {
+			next = hostNextSibling(el);
+			hostRemove(el);
+			el = next;
+		}
+		hostRemove(anchor);
+	};
+	const processElement = (n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		if (n2.type === "svg") namespace = "svg";
+		else if (n2.type === "math") namespace = "mathml";
+		if (n1 == null) mountElement(n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+		else {
+			const customElement = n1.el && n1.el._isVueCE ? n1.el : null;
+			try {
+				if (customElement) customElement._beginPatch();
+				patchElement(n1, n2, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			} finally {
+				if (customElement) customElement._endPatch();
+			}
+		}
+	};
+	const mountElement = (vnode, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		let el;
+		let vnodeHook;
+		const { props, shapeFlag, transition, dirs } = vnode;
+		el = vnode.el = hostCreateElement(vnode.type, namespace, props && props.is, props);
+		if (shapeFlag & 8) hostSetElementText(el, vnode.children);
+		else if (shapeFlag & 16) mountChildren(vnode.children, el, null, parentComponent, parentSuspense, resolveChildrenNamespace(vnode, namespace), slotScopeIds, optimized);
+		if (dirs) invokeDirectiveHook(vnode, null, parentComponent, "created");
+		setScopeId(el, vnode, vnode.scopeId, slotScopeIds, parentComponent);
+		if (props) {
+			for (const key in props) if (key !== "value" && !isReservedProp(key)) hostPatchProp(el, key, null, props[key], namespace, parentComponent);
+			if ("value" in props) hostPatchProp(el, "value", null, props.value, namespace);
+			if (vnodeHook = props.onVnodeBeforeMount) invokeVNodeHook(vnodeHook, parentComponent, vnode);
+		}
+		if (dirs) invokeDirectiveHook(vnode, null, parentComponent, "beforeMount");
+		const needCallTransitionHooks = needTransition(parentSuspense, transition);
+		if (needCallTransitionHooks) transition.beforeEnter(el);
+		hostInsert(el, container, anchor);
+		if ((vnodeHook = props && props.onVnodeMounted) || needCallTransitionHooks || dirs) queuePostRenderEffect(() => {
+			try {
+				vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, vnode);
+				needCallTransitionHooks && transition.enter(el);
+				dirs && invokeDirectiveHook(vnode, null, parentComponent, "mounted");
+			} finally {}
+		}, parentSuspense);
+	};
+	const setScopeId = (el, vnode, scopeId, slotScopeIds, parentComponent) => {
+		if (scopeId) hostSetScopeId(el, scopeId);
+		if (slotScopeIds) for (let i = 0; i < slotScopeIds.length; i++) hostSetScopeId(el, slotScopeIds[i]);
+		if (parentComponent) {
+			let subTree = parentComponent.subTree;
+			if (vnode === subTree || isSuspense(subTree.type) && (subTree.ssContent === vnode || subTree.ssFallback === vnode)) {
+				const parentVNode = parentComponent.vnode;
+				setScopeId(el, parentVNode, parentVNode.scopeId, parentVNode.slotScopeIds, parentComponent.parent);
+			}
+		}
+	};
+	const mountChildren = (children, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, start = 0) => {
+		for (let i = start; i < children.length; i++) patch(null, children[i] = optimized ? cloneIfMounted(children[i]) : normalizeVNode(children[i]), container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+	};
+	const patchElement = (n1, n2, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		const el = n2.el = n1.el;
+		let { patchFlag, dynamicChildren, dirs } = n2;
+		patchFlag |= n1.patchFlag & 16;
+		const oldProps = n1.props || EMPTY_OBJ;
+		const newProps = n2.props || EMPTY_OBJ;
+		let vnodeHook;
+		parentComponent && toggleRecurse(parentComponent, false);
+		if (vnodeHook = newProps.onVnodeBeforeUpdate) invokeVNodeHook(vnodeHook, parentComponent, n2, n1);
+		if (dirs) invokeDirectiveHook(n2, n1, parentComponent, "beforeUpdate");
+		parentComponent && toggleRecurse(parentComponent, true);
+		if (oldProps.innerHTML && newProps.innerHTML == null || oldProps.textContent && newProps.textContent == null) hostSetElementText(el, "");
+		if (dynamicChildren) patchBlockChildren(n1.dynamicChildren, dynamicChildren, el, parentComponent, parentSuspense, resolveChildrenNamespace(n2, namespace), slotScopeIds);
+		else if (!optimized) patchChildren(n1, n2, el, null, parentComponent, parentSuspense, resolveChildrenNamespace(n2, namespace), slotScopeIds, false);
+		if (patchFlag > 0) {
+			if (patchFlag & 16) patchProps(el, oldProps, newProps, parentComponent, namespace);
+			else {
+				if (patchFlag & 2) {
+					if (oldProps.class !== newProps.class) hostPatchProp(el, "class", null, newProps.class, namespace);
+				}
+				if (patchFlag & 4) hostPatchProp(el, "style", oldProps.style, newProps.style, namespace);
+				if (patchFlag & 8) {
+					const propsToUpdate = n2.dynamicProps;
+					for (let i = 0; i < propsToUpdate.length; i++) {
+						const key = propsToUpdate[i];
+						const prev = oldProps[key];
+						const next = newProps[key];
+						if (next !== prev || key === "value") hostPatchProp(el, key, prev, next, namespace, parentComponent);
+					}
+				}
+			}
+			if (patchFlag & 1) {
+				if (n1.children !== n2.children) hostSetElementText(el, n2.children);
+			}
+		} else if (!optimized && dynamicChildren == null) patchProps(el, oldProps, newProps, parentComponent, namespace);
+		if ((vnodeHook = newProps.onVnodeUpdated) || dirs) queuePostRenderEffect(() => {
+			vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, n2, n1);
+			dirs && invokeDirectiveHook(n2, n1, parentComponent, "updated");
+		}, parentSuspense);
+	};
+	const patchBlockChildren = (oldChildren, newChildren, fallbackContainer, parentComponent, parentSuspense, namespace, slotScopeIds) => {
+		for (let i = 0; i < newChildren.length; i++) {
+			const oldVNode = oldChildren[i];
+			const newVNode = newChildren[i];
+			patch(oldVNode, newVNode, oldVNode.el && (oldVNode.type === Fragment$1 || !isSameVNodeType(oldVNode, newVNode) || oldVNode.shapeFlag & 198) ? hostParentNode(oldVNode.el) : fallbackContainer, null, parentComponent, parentSuspense, namespace, slotScopeIds, true);
+		}
+	};
+	const patchProps = (el, oldProps, newProps, parentComponent, namespace) => {
+		if (oldProps !== newProps) {
+			if (oldProps !== EMPTY_OBJ) {
+				for (const key in oldProps) if (!isReservedProp(key) && !(key in newProps)) hostPatchProp(el, key, oldProps[key], null, namespace, parentComponent);
+			}
+			for (const key in newProps) {
+				if (isReservedProp(key)) continue;
+				const next = newProps[key];
+				const prev = oldProps[key];
+				if (next !== prev && key !== "value") hostPatchProp(el, key, prev, next, namespace, parentComponent);
+			}
+			if ("value" in newProps) hostPatchProp(el, "value", oldProps.value, newProps.value, namespace);
+		}
+	};
+	const processFragment = (n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		const fragmentStartAnchor = n2.el = n1 ? n1.el : hostCreateText("");
+		const fragmentEndAnchor = n2.anchor = n1 ? n1.anchor : hostCreateText("");
+		let { patchFlag, dynamicChildren, slotScopeIds: fragmentSlotScopeIds } = n2;
+		if (fragmentSlotScopeIds) slotScopeIds = slotScopeIds ? slotScopeIds.concat(fragmentSlotScopeIds) : fragmentSlotScopeIds;
+		if (n1 == null) {
+			hostInsert(fragmentStartAnchor, container, anchor);
+			hostInsert(fragmentEndAnchor, container, anchor);
+			mountChildren(n2.children || [], container, fragmentEndAnchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+		} else if (patchFlag > 0 && patchFlag & 64 && dynamicChildren && n1.dynamicChildren && n1.dynamicChildren.length === dynamicChildren.length) {
+			patchBlockChildren(n1.dynamicChildren, dynamicChildren, container, parentComponent, parentSuspense, namespace, slotScopeIds);
+			if (n2.key != null || parentComponent && n2 === parentComponent.subTree) traverseStaticChildren(n1, n2, true);
+		} else patchChildren(n1, n2, container, fragmentEndAnchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+	};
+	const processComponent = (n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		n2.slotScopeIds = slotScopeIds;
+		if (n1 == null) if (n2.shapeFlag & 512) parentComponent.ctx.activate(n2, container, anchor, namespace, optimized);
+		else mountComponent(n2, container, anchor, parentComponent, parentSuspense, namespace, optimized);
+		else updateComponent(n1, n2, optimized);
+	};
+	const mountComponent = (initialVNode, container, anchor, parentComponent, parentSuspense, namespace, optimized) => {
+		const instance = initialVNode.component = createComponentInstance(initialVNode, parentComponent, parentSuspense);
+		if (isKeepAlive(initialVNode)) instance.ctx.renderer = internals;
+		setupComponent(instance, false, optimized);
+		if (instance.asyncDep) {
+			parentSuspense && parentSuspense.registerDep(instance, setupRenderEffect, optimized);
+			if (!initialVNode.el) {
+				const placeholder = instance.subTree = createVNode(Comment);
+				processCommentNode(null, placeholder, container, anchor);
+				initialVNode.placeholder = placeholder.el;
+			}
+		} else setupRenderEffect(instance, initialVNode, container, anchor, parentSuspense, namespace, optimized);
+	};
+	const updateComponent = (n1, n2, optimized) => {
+		const instance = n2.component = n1.component;
+		if (shouldUpdateComponent(n1, n2, optimized)) if (instance.asyncDep && !instance.asyncResolved) {
+			updateComponentPreRender(instance, n2, optimized);
+			return;
+		} else {
+			instance.next = n2;
+			instance.update();
+		}
+		else {
+			n2.el = n1.el;
+			instance.vnode = n2;
+		}
+	};
+	const setupRenderEffect = (instance, initialVNode, container, anchor, parentSuspense, namespace, optimized) => {
+		const componentUpdateFn = () => {
+			if (!instance.isMounted) {
+				let vnodeHook;
+				const { el, props } = initialVNode;
+				const { bm, m, parent, root, type } = instance;
+				const isAsyncWrapperVNode = isAsyncWrapper(initialVNode);
+				toggleRecurse(instance, false);
+				if (bm) invokeArrayFns(bm);
+				if (!isAsyncWrapperVNode && (vnodeHook = props && props.onVnodeBeforeMount)) invokeVNodeHook(vnodeHook, parent, initialVNode);
+				toggleRecurse(instance, true);
+				if (el && hydrateNode) {
+					const hydrateSubTree = () => {
+						instance.subTree = renderComponentRoot(instance);
+						hydrateNode(el, instance.subTree, instance, parentSuspense, null);
+					};
+					if (isAsyncWrapperVNode && type.__asyncHydrate) type.__asyncHydrate(el, instance, hydrateSubTree);
+					else hydrateSubTree();
+				} else {
+					if (root.ce && root.ce._hasShadowRoot()) root.ce._injectChildStyle(type, instance.parent ? instance.parent.type : void 0);
+					const subTree = instance.subTree = renderComponentRoot(instance);
+					patch(null, subTree, container, anchor, instance, parentSuspense, namespace);
+					initialVNode.el = subTree.el;
+				}
+				if (m) queuePostRenderEffect(m, parentSuspense);
+				if (!isAsyncWrapperVNode && (vnodeHook = props && props.onVnodeMounted)) {
+					const scopedInitialVNode = initialVNode;
+					queuePostRenderEffect(() => invokeVNodeHook(vnodeHook, parent, scopedInitialVNode), parentSuspense);
+				}
+				if (initialVNode.shapeFlag & 256 || parent && isAsyncWrapper(parent.vnode) && parent.vnode.shapeFlag & 256) instance.a && queuePostRenderEffect(instance.a, parentSuspense);
+				instance.isMounted = true;
+				initialVNode = container = anchor = null;
+			} else {
+				let { next, bu, u, parent, vnode } = instance;
+				{
+					const nonHydratedAsyncRoot = locateNonHydratedAsyncRoot(instance);
+					if (nonHydratedAsyncRoot) {
+						if (next) {
+							next.el = vnode.el;
+							updateComponentPreRender(instance, next, optimized);
+						}
+						nonHydratedAsyncRoot.asyncDep.then(() => {
+							queuePostRenderEffect(() => {
+								if (!instance.isUnmounted) update();
+							}, parentSuspense);
+						});
+						return;
+					}
+				}
+				let originNext = next;
+				let vnodeHook;
+				toggleRecurse(instance, false);
+				if (next) {
+					next.el = vnode.el;
+					updateComponentPreRender(instance, next, optimized);
+				} else next = vnode;
+				if (bu) invokeArrayFns(bu);
+				if (vnodeHook = next.props && next.props.onVnodeBeforeUpdate) invokeVNodeHook(vnodeHook, parent, next, vnode);
+				toggleRecurse(instance, true);
+				const nextTree = renderComponentRoot(instance);
+				const prevTree = instance.subTree;
+				instance.subTree = nextTree;
+				patch(prevTree, nextTree, hostParentNode(prevTree.el), getNextHostNode(prevTree), instance, parentSuspense, namespace);
+				next.el = nextTree.el;
+				if (originNext === null) updateHOCHostEl(instance, nextTree.el);
+				if (u) queuePostRenderEffect(u, parentSuspense);
+				if (vnodeHook = next.props && next.props.onVnodeUpdated) queuePostRenderEffect(() => invokeVNodeHook(vnodeHook, parent, next, vnode), parentSuspense);
+			}
+		};
+		instance.scope.on();
+		const effect = instance.effect = new ReactiveEffect(componentUpdateFn);
+		instance.scope.off();
+		const update = instance.update = effect.run.bind(effect);
+		const job = instance.job = effect.runIfDirty.bind(effect);
+		job.i = instance;
+		job.id = instance.uid;
+		effect.scheduler = () => queueJob(job);
+		toggleRecurse(instance, true);
+		update();
+	};
+	const updateComponentPreRender = (instance, nextVNode, optimized) => {
+		nextVNode.component = instance;
+		const prevProps = instance.vnode.props;
+		instance.vnode = nextVNode;
+		instance.next = null;
+		updateProps(instance, nextVNode.props, prevProps, optimized);
+		updateSlots(instance, nextVNode.children, optimized);
+		pauseTracking();
+		flushPreFlushCbs(instance);
+		resetTracking();
+	};
+	const patchChildren = (n1, n2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized = false) => {
+		const c1 = n1 && n1.children;
+		const prevShapeFlag = n1 ? n1.shapeFlag : 0;
+		const c2 = n2.children;
+		const { patchFlag, shapeFlag } = n2;
+		if (patchFlag > 0) {
+			if (patchFlag & 128) {
+				patchKeyedChildren(c1, c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+				return;
+			} else if (patchFlag & 256) {
+				patchUnkeyedChildren(c1, c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+				return;
+			}
+		}
+		if (shapeFlag & 8) {
+			if (prevShapeFlag & 16) unmountChildren(c1, parentComponent, parentSuspense);
+			if (c2 !== c1) hostSetElementText(container, c2);
+		} else if (prevShapeFlag & 16) if (shapeFlag & 16) patchKeyedChildren(c1, c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+		else unmountChildren(c1, parentComponent, parentSuspense, true);
+		else {
+			if (prevShapeFlag & 8) hostSetElementText(container, "");
+			if (shapeFlag & 16) mountChildren(c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+		}
+	};
+	const patchUnkeyedChildren = (c1, c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		c1 = c1 || EMPTY_ARR;
+		c2 = c2 || EMPTY_ARR;
+		const oldLength = c1.length;
+		const newLength = c2.length;
+		const commonLength = Math.min(oldLength, newLength);
+		let i;
+		for (i = 0; i < commonLength; i++) {
+			const nextChild = c2[i] = optimized ? cloneIfMounted(c2[i]) : normalizeVNode(c2[i]);
+			patch(c1[i], nextChild, container, null, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+		}
+		if (oldLength > newLength) unmountChildren(c1, parentComponent, parentSuspense, true, false, commonLength);
+		else mountChildren(c2, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized, commonLength);
+	};
+	const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized) => {
+		let i = 0;
+		const l2 = c2.length;
+		let e1 = c1.length - 1;
+		let e2 = l2 - 1;
+		while (i <= e1 && i <= e2) {
+			const n1 = c1[i];
+			const n2 = c2[i] = optimized ? cloneIfMounted(c2[i]) : normalizeVNode(c2[i]);
+			if (isSameVNodeType(n1, n2)) patch(n1, n2, container, null, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			else break;
+			i++;
+		}
+		while (i <= e1 && i <= e2) {
+			const n1 = c1[e1];
+			const n2 = c2[e2] = optimized ? cloneIfMounted(c2[e2]) : normalizeVNode(c2[e2]);
+			if (isSameVNodeType(n1, n2)) patch(n1, n2, container, null, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+			else break;
+			e1--;
+			e2--;
+		}
+		if (i > e1) {
+			if (i <= e2) {
+				const nextPos = e2 + 1;
+				const anchor = nextPos < l2 ? c2[nextPos].el : parentAnchor;
+				while (i <= e2) {
+					patch(null, c2[i] = optimized ? cloneIfMounted(c2[i]) : normalizeVNode(c2[i]), container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+					i++;
+				}
+			}
+		} else if (i > e2) while (i <= e1) {
+			unmount(c1[i], parentComponent, parentSuspense, true);
+			i++;
+		}
+		else {
+			const s1 = i;
+			const s2 = i;
+			const keyToNewIndexMap = /* @__PURE__ */ new Map();
+			for (i = s2; i <= e2; i++) {
+				const nextChild = c2[i] = optimized ? cloneIfMounted(c2[i]) : normalizeVNode(c2[i]);
+				if (nextChild.key != null) keyToNewIndexMap.set(nextChild.key, i);
+			}
+			let j;
+			let patched = 0;
+			const toBePatched = e2 - s2 + 1;
+			let moved = false;
+			let maxNewIndexSoFar = 0;
+			const newIndexToOldIndexMap = new Array(toBePatched);
+			for (i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0;
+			for (i = s1; i <= e1; i++) {
+				const prevChild = c1[i];
+				if (patched >= toBePatched) {
+					unmount(prevChild, parentComponent, parentSuspense, true);
+					continue;
+				}
+				let newIndex;
+				if (prevChild.key != null) newIndex = keyToNewIndexMap.get(prevChild.key);
+				else for (j = s2; j <= e2; j++) if (newIndexToOldIndexMap[j - s2] === 0 && isSameVNodeType(prevChild, c2[j])) {
+					newIndex = j;
+					break;
+				}
+				if (newIndex === void 0) unmount(prevChild, parentComponent, parentSuspense, true);
+				else {
+					newIndexToOldIndexMap[newIndex - s2] = i + 1;
+					if (newIndex >= maxNewIndexSoFar) maxNewIndexSoFar = newIndex;
+					else moved = true;
+					patch(prevChild, c2[newIndex], container, null, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+					patched++;
+				}
+			}
+			const increasingNewIndexSequence = moved ? getSequence(newIndexToOldIndexMap) : EMPTY_ARR;
+			j = increasingNewIndexSequence.length - 1;
+			for (i = toBePatched - 1; i >= 0; i--) {
+				const nextIndex = s2 + i;
+				const nextChild = c2[nextIndex];
+				const anchorVNode = c2[nextIndex + 1];
+				const anchor = nextIndex + 1 < l2 ? anchorVNode.el || resolveAsyncComponentPlaceholder(anchorVNode) : parentAnchor;
+				if (newIndexToOldIndexMap[i] === 0) patch(null, nextChild, container, anchor, parentComponent, parentSuspense, namespace, slotScopeIds, optimized);
+				else if (moved) if (j < 0 || i !== increasingNewIndexSequence[j]) move(nextChild, container, anchor, 2);
+				else j--;
+			}
+		}
+	};
+	const move = (vnode, container, anchor, moveType, parentSuspense = null) => {
+		const { el, type, transition, children, shapeFlag } = vnode;
+		if (shapeFlag & 6) {
+			move(vnode.component.subTree, container, anchor, moveType);
+			return;
+		}
+		if (shapeFlag & 128) {
+			vnode.suspense.move(container, anchor, moveType);
+			return;
+		}
+		if (shapeFlag & 64) {
+			type.move(vnode, container, anchor, internals);
+			return;
+		}
+		if (type === Fragment$1) {
+			hostInsert(el, container, anchor);
+			for (let i = 0; i < children.length; i++) move(children[i], container, anchor, moveType);
+			hostInsert(vnode.anchor, container, anchor);
+			return;
+		}
+		if (type === Static) {
+			moveStaticNode(vnode, container, anchor);
+			return;
+		}
+		if (moveType !== 2 && shapeFlag & 1 && transition) if (moveType === 0) {
+			transition.beforeEnter(el);
+			hostInsert(el, container, anchor);
+			queuePostRenderEffect(() => transition.enter(el), parentSuspense);
+		} else {
+			const { leave, delayLeave, afterLeave } = transition;
+			const remove2 = () => {
+				if (vnode.ctx.isUnmounted) hostRemove(el);
+				else hostInsert(el, container, anchor);
+			};
+			const performLeave = () => {
+				if (el._isLeaving) el[leaveCbKey](true);
+				leave(el, () => {
+					remove2();
+					afterLeave && afterLeave();
+				});
+			};
+			if (delayLeave) delayLeave(el, remove2, performLeave);
+			else performLeave();
+		}
+		else hostInsert(el, container, anchor);
+	};
+	const unmount = (vnode, parentComponent, parentSuspense, doRemove = false, optimized = false) => {
+		const { type, props, ref, children, dynamicChildren, shapeFlag, patchFlag, dirs, cacheIndex, memo } = vnode;
+		if (patchFlag === -2) optimized = false;
+		if (ref != null) {
+			pauseTracking();
+			setRef(ref, null, parentSuspense, vnode, true);
+			resetTracking();
+		}
+		if (cacheIndex != null) parentComponent.renderCache[cacheIndex] = void 0;
+		if (shapeFlag & 256) {
+			parentComponent.ctx.deactivate(vnode);
+			return;
+		}
+		const shouldInvokeDirs = shapeFlag & 1 && dirs;
+		const shouldInvokeVnodeHook = !isAsyncWrapper(vnode);
+		let vnodeHook;
+		if (shouldInvokeVnodeHook && (vnodeHook = props && props.onVnodeBeforeUnmount)) invokeVNodeHook(vnodeHook, parentComponent, vnode);
+		if (shapeFlag & 6) unmountComponent(vnode.component, parentSuspense, doRemove);
+		else {
+			if (shapeFlag & 128) {
+				vnode.suspense.unmount(parentSuspense, doRemove);
+				return;
+			}
+			if (shouldInvokeDirs) invokeDirectiveHook(vnode, null, parentComponent, "beforeUnmount");
+			if (shapeFlag & 64) vnode.type.remove(vnode, parentComponent, parentSuspense, internals, doRemove);
+			else if (dynamicChildren && !dynamicChildren.hasOnce && (type !== Fragment$1 || patchFlag > 0 && patchFlag & 64)) unmountChildren(dynamicChildren, parentComponent, parentSuspense, false, true);
+			else if (type === Fragment$1 && patchFlag & 384 || !optimized && shapeFlag & 16) unmountChildren(children, parentComponent, parentSuspense);
+			if (doRemove) remove(vnode);
+		}
+		const shouldInvalidateMemo = memo != null && cacheIndex == null;
+		if (shouldInvokeVnodeHook && (vnodeHook = props && props.onVnodeUnmounted) || shouldInvokeDirs || shouldInvalidateMemo) queuePostRenderEffect(() => {
+			vnodeHook && invokeVNodeHook(vnodeHook, parentComponent, vnode);
+			shouldInvokeDirs && invokeDirectiveHook(vnode, null, parentComponent, "unmounted");
+			if (shouldInvalidateMemo) vnode.el = null;
+		}, parentSuspense);
+	};
+	const remove = (vnode) => {
+		const { type, el, anchor, transition } = vnode;
+		if (type === Fragment$1) {
+			removeFragment(el, anchor);
+			return;
+		}
+		if (type === Static) {
+			removeStaticNode(vnode);
+			return;
+		}
+		const performRemove = () => {
+			hostRemove(el);
+			if (transition && !transition.persisted && transition.afterLeave) transition.afterLeave();
+		};
+		if (vnode.shapeFlag & 1 && transition && !transition.persisted) {
+			const { leave, delayLeave } = transition;
+			const performLeave = () => leave(el, performRemove);
+			if (delayLeave) delayLeave(vnode.el, performRemove, performLeave);
+			else performLeave();
+		} else performRemove();
+	};
+	const removeFragment = (cur, end) => {
+		let next;
+		while (cur !== end) {
+			next = hostNextSibling(cur);
+			hostRemove(cur);
+			cur = next;
+		}
+		hostRemove(end);
+	};
+	const unmountComponent = (instance, parentSuspense, doRemove) => {
+		const { bum, scope, job, subTree, um, m, a } = instance;
+		invalidateMount(m);
+		invalidateMount(a);
+		if (bum) invokeArrayFns(bum);
+		scope.stop();
+		if (job) {
+			job.flags |= 8;
+			unmount(subTree, instance, parentSuspense, doRemove);
+		}
+		if (um) queuePostRenderEffect(um, parentSuspense);
+		queuePostRenderEffect(() => {
+			instance.isUnmounted = true;
+		}, parentSuspense);
+	};
+	const unmountChildren = (children, parentComponent, parentSuspense, doRemove = false, optimized = false, start = 0) => {
+		for (let i = start; i < children.length; i++) unmount(children[i], parentComponent, parentSuspense, doRemove, optimized);
+	};
+	const getNextHostNode = (vnode) => {
+		if (vnode.shapeFlag & 6) return getNextHostNode(vnode.component.subTree);
+		if (vnode.shapeFlag & 128) return vnode.suspense.next();
+		const el = hostNextSibling(vnode.anchor || vnode.el);
+		const teleportEnd = el && el[TeleportEndKey];
+		return teleportEnd ? hostNextSibling(teleportEnd) : el;
+	};
+	let isFlushing = false;
+	const render = (vnode, container, namespace) => {
+		let instance;
+		if (vnode == null) {
+			if (container._vnode) {
+				unmount(container._vnode, null, null, true);
+				instance = container._vnode.component;
+			}
+		} else patch(container._vnode || null, vnode, container, null, null, null, namespace);
+		container._vnode = vnode;
+		if (!isFlushing) {
+			isFlushing = true;
+			flushPreFlushCbs(instance);
+			flushPostFlushCbs();
+			isFlushing = false;
+		}
+	};
+	const internals = {
+		p: patch,
+		um: unmount,
+		m: move,
+		r: remove,
+		mt: mountComponent,
+		mc: mountChildren,
+		pc: patchChildren,
+		pbc: patchBlockChildren,
+		n: getNextHostNode,
+		o: options
+	};
+	let hydrate;
+	let hydrateNode;
+	if (createHydrationFns) [hydrate, hydrateNode] = createHydrationFns(internals);
+	return {
+		render,
+		hydrate,
+		createApp: createAppAPI(render, hydrate)
+	};
+}
+function resolveChildrenNamespace({ type, props }, currentNamespace) {
+	return currentNamespace === "svg" && type === "foreignObject" || currentNamespace === "mathml" && type === "annotation-xml" && props && props.encoding && props.encoding.includes("html") ? void 0 : currentNamespace;
+}
+function toggleRecurse({ effect, job }, allowed) {
+	if (allowed) {
+		effect.flags |= 32;
+		job.flags |= 4;
+	} else {
+		effect.flags &= -33;
+		job.flags &= -5;
+	}
+}
+function needTransition(parentSuspense, transition) {
+	return (!parentSuspense || parentSuspense && !parentSuspense.pendingBranch) && transition && !transition.persisted;
+}
+function traverseStaticChildren(n1, n2, shallow = false) {
+	const ch1 = n1.children;
+	const ch2 = n2.children;
+	if (isArray(ch1) && isArray(ch2)) for (let i = 0; i < ch1.length; i++) {
+		const c1 = ch1[i];
+		let c2 = ch2[i];
+		if (c2.shapeFlag & 1 && !c2.dynamicChildren) {
+			if (c2.patchFlag <= 0 || c2.patchFlag === 32) {
+				c2 = ch2[i] = cloneIfMounted(ch2[i]);
+				c2.el = c1.el;
+			}
+			if (!shallow && c2.patchFlag !== -2) traverseStaticChildren(c1, c2);
+		}
+		if (c2.type === Text$1) {
+			if (c2.patchFlag === -1) c2 = ch2[i] = cloneIfMounted(c2);
+			c2.el = c1.el;
+		}
+		if (c2.type === Comment && !c2.el) c2.el = c1.el;
+	}
+}
+function getSequence(arr) {
+	const p = arr.slice();
+	const result = [0];
+	let i, j, u, v, c;
+	const len = arr.length;
+	for (i = 0; i < len; i++) {
+		const arrI = arr[i];
+		if (arrI !== 0) {
+			j = result[result.length - 1];
+			if (arr[j] < arrI) {
+				p[i] = j;
+				result.push(i);
+				continue;
+			}
+			u = 0;
+			v = result.length - 1;
+			while (u < v) {
+				c = u + v >> 1;
+				if (arr[result[c]] < arrI) u = c + 1;
+				else v = c;
+			}
+			if (arrI < arr[result[u]]) {
+				if (u > 0) p[i] = result[u - 1];
+				result[u] = i;
+			}
+		}
+	}
+	u = result.length;
+	v = result[u - 1];
+	while (u-- > 0) {
+		result[u] = v;
+		v = p[v];
+	}
+	return result;
+}
+function locateNonHydratedAsyncRoot(instance) {
+	const subComponent = instance.subTree.component;
+	if (subComponent) if (subComponent.asyncDep && !subComponent.asyncResolved) return subComponent;
+	else return locateNonHydratedAsyncRoot(subComponent);
+}
+function invalidateMount(hooks) {
+	if (hooks) for (let i = 0; i < hooks.length; i++) hooks[i].flags |= 8;
+}
+function resolveAsyncComponentPlaceholder(anchorVnode) {
+	if (anchorVnode.placeholder) return anchorVnode.placeholder;
+	const instance = anchorVnode.component;
+	if (instance) return resolveAsyncComponentPlaceholder(instance.subTree);
+	return null;
+}
+var isSuspense = (type) => type.__isSuspense;
+function queueEffectWithSuspense(fn, suspense) {
+	if (suspense && suspense.pendingBranch) if (isArray(fn)) suspense.effects.push(...fn);
+	else suspense.effects.push(fn);
+	else queuePostFlushCb(fn);
+}
+var Fragment$1 = /* @__PURE__ */ Symbol.for("v-fgt");
+var Text$1 = /* @__PURE__ */ Symbol.for("v-txt");
+var Comment = /* @__PURE__ */ Symbol.for("v-cmt");
+var Static = /* @__PURE__ */ Symbol.for("v-stc");
+var blockStack = [];
+var currentBlock = null;
+function openBlock(disableTracking = false) {
+	blockStack.push(currentBlock = disableTracking ? null : []);
+}
+function closeBlock() {
+	blockStack.pop();
+	currentBlock = blockStack[blockStack.length - 1] || null;
+}
+var isBlockTreeEnabled = 1;
+function setBlockTracking(value, inVOnce = false) {
+	isBlockTreeEnabled += value;
+	if (value < 0 && currentBlock && inVOnce) currentBlock.hasOnce = true;
+}
+function setupBlock(vnode) {
+	vnode.dynamicChildren = isBlockTreeEnabled > 0 ? currentBlock || EMPTY_ARR : null;
+	closeBlock();
+	if (isBlockTreeEnabled > 0 && currentBlock) currentBlock.push(vnode);
+	return vnode;
+}
+function createElementBlock(type, props, children, patchFlag, dynamicProps, shapeFlag) {
+	return setupBlock(createBaseVNode(type, props, children, patchFlag, dynamicProps, shapeFlag, true));
+}
+function createBlock(type, props, children, patchFlag, dynamicProps) {
+	return setupBlock(createVNode(type, props, children, patchFlag, dynamicProps, true));
+}
+function isVNode(value) {
+	return value ? value.__v_isVNode === true : false;
+}
+function isSameVNodeType(n1, n2) {
+	return n1.type === n2.type && n1.key === n2.key;
+}
+var normalizeKey = ({ key }) => key != null ? key : null;
+var normalizeRef = ({ ref, ref_key, ref_for }) => {
+	if (typeof ref === "number") ref = "" + ref;
+	return ref != null ? isString(ref) || /* @__PURE__ */ isRef(ref) || isFunction(ref) ? {
+		i: currentRenderingInstance,
+		r: ref,
+		k: ref_key,
+		f: !!ref_for
+	} : ref : null;
+};
+function createBaseVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, shapeFlag = type === Fragment$1 ? 0 : 1, isBlockNode = false, needFullChildrenNormalization = false) {
+	const vnode = {
+		__v_isVNode: true,
+		__v_skip: true,
+		type,
+		props,
+		key: props && normalizeKey(props),
+		ref: props && normalizeRef(props),
+		scopeId: currentScopeId,
+		slotScopeIds: null,
+		children,
+		component: null,
+		suspense: null,
+		ssContent: null,
+		ssFallback: null,
+		dirs: null,
+		transition: null,
+		el: null,
+		anchor: null,
+		target: null,
+		targetStart: null,
+		targetAnchor: null,
+		staticCount: 0,
+		shapeFlag,
+		patchFlag,
+		dynamicProps,
+		dynamicChildren: null,
+		appContext: null,
+		ctx: currentRenderingInstance
+	};
+	if (needFullChildrenNormalization) {
+		normalizeChildren(vnode, children);
+		if (shapeFlag & 128) type.normalize(vnode);
+	} else if (children) vnode.shapeFlag |= isString(children) ? 8 : 16;
+	if (isBlockTreeEnabled > 0 && !isBlockNode && currentBlock && (vnode.patchFlag > 0 || shapeFlag & 6) && vnode.patchFlag !== 32) currentBlock.push(vnode);
+	return vnode;
+}
+var createVNode = _createVNode;
+function _createVNode(type, props = null, children = null, patchFlag = 0, dynamicProps = null, isBlockNode = false) {
+	if (!type || type === NULL_DYNAMIC_COMPONENT) type = Comment;
+	if (isVNode(type)) {
+		const cloned = cloneVNode(type, props, true);
+		if (children) normalizeChildren(cloned, children);
+		if (isBlockTreeEnabled > 0 && !isBlockNode && currentBlock) if (cloned.shapeFlag & 6) currentBlock[currentBlock.indexOf(type)] = cloned;
+		else currentBlock.push(cloned);
+		cloned.patchFlag = -2;
+		return cloned;
+	}
+	if (isClassComponent(type)) type = type.__vccOpts;
+	if (props) {
+		props = guardReactiveProps(props);
+		let { class: klass, style } = props;
+		if (klass && !isString(klass)) props.class = normalizeClass(klass);
+		if (isObject(style)) {
+			if (/* @__PURE__ */ isProxy(style) && !isArray(style)) style = extend$1({}, style);
+			props.style = normalizeStyle(style);
+		}
+	}
+	const shapeFlag = isString(type) ? 1 : isSuspense(type) ? 128 : isTeleport(type) ? 64 : isObject(type) ? 4 : isFunction(type) ? 2 : 0;
+	return createBaseVNode(type, props, children, patchFlag, dynamicProps, shapeFlag, isBlockNode, true);
+}
+function guardReactiveProps(props) {
+	if (!props) return null;
+	return /* @__PURE__ */ isProxy(props) || isInternalObject(props) ? extend$1({}, props) : props;
+}
+function cloneVNode(vnode, extraProps, mergeRef = false, cloneTransition = false) {
+	const { props, ref, patchFlag, children, transition } = vnode;
+	const mergedProps = extraProps ? mergeProps(props || {}, extraProps) : props;
+	const cloned = {
+		__v_isVNode: true,
+		__v_skip: true,
+		type: vnode.type,
+		props: mergedProps,
+		key: mergedProps && normalizeKey(mergedProps),
+		ref: extraProps && extraProps.ref ? mergeRef && ref ? isArray(ref) ? ref.concat(normalizeRef(extraProps)) : [ref, normalizeRef(extraProps)] : normalizeRef(extraProps) : ref,
+		scopeId: vnode.scopeId,
+		slotScopeIds: vnode.slotScopeIds,
+		children,
+		target: vnode.target,
+		targetStart: vnode.targetStart,
+		targetAnchor: vnode.targetAnchor,
+		staticCount: vnode.staticCount,
+		shapeFlag: vnode.shapeFlag,
+		patchFlag: extraProps && vnode.type !== Fragment$1 ? patchFlag === -1 ? 16 : patchFlag | 16 : patchFlag,
+		dynamicProps: vnode.dynamicProps,
+		dynamicChildren: vnode.dynamicChildren,
+		appContext: vnode.appContext,
+		dirs: vnode.dirs,
+		transition,
+		component: vnode.component,
+		suspense: vnode.suspense,
+		ssContent: vnode.ssContent && cloneVNode(vnode.ssContent),
+		ssFallback: vnode.ssFallback && cloneVNode(vnode.ssFallback),
+		placeholder: vnode.placeholder,
+		el: vnode.el,
+		anchor: vnode.anchor,
+		ctx: vnode.ctx,
+		ce: vnode.ce
+	};
+	if (transition && cloneTransition) setTransitionHooks(cloned, transition.clone(cloned));
+	return cloned;
+}
+function createTextVNode(text = " ", flag = 0) {
+	return createVNode(Text$1, null, text, flag);
+}
+function createStaticVNode(content, numberOfNodes) {
+	const vnode = createVNode(Static, null, content);
+	vnode.staticCount = numberOfNodes;
+	return vnode;
+}
+function createCommentVNode(text = "", asBlock = false) {
+	return asBlock ? (openBlock(), createBlock(Comment, null, text)) : createVNode(Comment, null, text);
+}
+function normalizeVNode(child) {
+	if (child == null || typeof child === "boolean") return createVNode(Comment);
+	else if (isArray(child)) return createVNode(Fragment$1, null, child.slice());
+	else if (isVNode(child)) return cloneIfMounted(child);
+	else return createVNode(Text$1, null, String(child));
+}
+function cloneIfMounted(child) {
+	return child.el === null && child.patchFlag !== -1 || child.memo ? child : cloneVNode(child);
+}
+function normalizeChildren(vnode, children) {
+	let type = 0;
+	const { shapeFlag } = vnode;
+	if (children == null) children = null;
+	else if (isArray(children)) type = 16;
+	else if (typeof children === "object") if (shapeFlag & 65) {
+		const slot = children.default;
+		if (slot) {
+			slot._c && (slot._d = false);
+			normalizeChildren(vnode, slot());
+			slot._c && (slot._d = true);
+		}
+		return;
+	} else {
+		type = 32;
+		const slotFlag = children._;
+		if (!slotFlag && !isInternalObject(children)) children._ctx = currentRenderingInstance;
+		else if (slotFlag === 3 && currentRenderingInstance) if (currentRenderingInstance.slots._ === 1) children._ = 1;
+		else {
+			children._ = 2;
+			vnode.patchFlag |= 1024;
+		}
+	}
+	else if (isFunction(children)) {
+		children = {
+			default: children,
+			_ctx: currentRenderingInstance
+		};
+		type = 32;
+	} else {
+		children = String(children);
+		if (shapeFlag & 64) {
+			type = 16;
+			children = [createTextVNode(children)];
+		} else type = 8;
+	}
+	vnode.children = children;
+	vnode.shapeFlag |= type;
+}
+function mergeProps(...args) {
+	const ret = {};
+	for (let i = 0; i < args.length; i++) {
+		const toMerge = args[i];
+		for (const key in toMerge) if (key === "class") {
+			if (ret.class !== toMerge.class) ret.class = normalizeClass([ret.class, toMerge.class]);
+		} else if (key === "style") ret.style = normalizeStyle([ret.style, toMerge.style]);
+		else if (isOn(key)) {
+			const existing = ret[key];
+			const incoming = toMerge[key];
+			if (incoming && existing !== incoming && !(isArray(existing) && existing.includes(incoming))) ret[key] = existing ? [].concat(existing, incoming) : incoming;
+			else if (incoming == null && existing == null && !isModelListener(key)) ret[key] = incoming;
+		} else if (key !== "") ret[key] = toMerge[key];
+	}
+	return ret;
+}
+function invokeVNodeHook(hook, instance, vnode, prevVNode = null) {
+	callWithAsyncErrorHandling(hook, instance, 7, [vnode, prevVNode]);
+}
+var emptyAppContext = createAppContext();
+var uid = 0;
+function createComponentInstance(vnode, parent, suspense) {
+	const type = vnode.type;
+	const appContext = (parent ? parent.appContext : vnode.appContext) || emptyAppContext;
+	const instance = {
+		uid: uid++,
+		vnode,
+		type,
+		parent,
+		appContext,
+		root: null,
+		next: null,
+		subTree: null,
+		effect: null,
+		update: null,
+		job: null,
+		scope: new EffectScope(true),
+		render: null,
+		proxy: null,
+		exposed: null,
+		exposeProxy: null,
+		withProxy: null,
+		provides: parent ? parent.provides : Object.create(appContext.provides),
+		ids: parent ? parent.ids : [
+			"",
+			0,
+			0
+		],
+		accessCache: null,
+		renderCache: [],
+		components: null,
+		directives: null,
+		propsOptions: normalizePropsOptions(type, appContext),
+		emitsOptions: normalizeEmitsOptions(type, appContext),
+		emit: null,
+		emitted: null,
+		propsDefaults: EMPTY_OBJ,
+		inheritAttrs: type.inheritAttrs,
+		ctx: EMPTY_OBJ,
+		data: EMPTY_OBJ,
+		props: EMPTY_OBJ,
+		attrs: EMPTY_OBJ,
+		slots: EMPTY_OBJ,
+		refs: EMPTY_OBJ,
+		setupState: EMPTY_OBJ,
+		setupContext: null,
+		suspense,
+		suspenseId: suspense ? suspense.pendingId : 0,
+		asyncDep: null,
+		asyncResolved: false,
+		isMounted: false,
+		isUnmounted: false,
+		isDeactivated: false,
+		bc: null,
+		c: null,
+		bm: null,
+		m: null,
+		bu: null,
+		u: null,
+		um: null,
+		bum: null,
+		da: null,
+		a: null,
+		rtg: null,
+		rtc: null,
+		ec: null,
+		sp: null
+	};
+	instance.ctx = { _: instance };
+	instance.root = parent ? parent.root : instance;
+	instance.emit = emit.bind(null, instance);
+	if (vnode.ce) vnode.ce(instance);
+	return instance;
+}
+var currentInstance = null;
+var getCurrentInstance = () => currentInstance || currentRenderingInstance;
+var internalSetCurrentInstance;
+var setInSSRSetupState;
+{
+	const g = getGlobalThis();
+	const registerGlobalSetter = (key, setter) => {
+		let setters;
+		if (!(setters = g[key])) setters = g[key] = [];
+		setters.push(setter);
+		return (v) => {
+			if (setters.length > 1) setters.forEach((set) => set(v));
+			else setters[0](v);
+		};
+	};
+	internalSetCurrentInstance = registerGlobalSetter(`__VUE_INSTANCE_SETTERS__`, (v) => currentInstance = v);
+	setInSSRSetupState = registerGlobalSetter(`__VUE_SSR_SETTERS__`, (v) => isInSSRComponentSetup = v);
+}
+var setCurrentInstance = (instance) => {
+	const prev = currentInstance;
+	internalSetCurrentInstance(instance);
+	instance.scope.on();
+	return () => {
+		instance.scope.off();
+		internalSetCurrentInstance(prev);
+	};
+};
+var unsetCurrentInstance = () => {
+	currentInstance && currentInstance.scope.off();
+	internalSetCurrentInstance(null);
+};
+function isStatefulComponent(instance) {
+	return instance.vnode.shapeFlag & 4;
+}
+var isInSSRComponentSetup = false;
+function setupComponent(instance, isSSR = false, optimized = false) {
+	isSSR && setInSSRSetupState(isSSR);
+	const { props, children } = instance.vnode;
+	const isStateful = isStatefulComponent(instance);
+	initProps(instance, props, isStateful, isSSR);
+	initSlots(instance, children, optimized || isSSR);
+	const setupResult = isStateful ? setupStatefulComponent(instance, isSSR) : void 0;
+	isSSR && setInSSRSetupState(false);
+	return setupResult;
+}
+function setupStatefulComponent(instance, isSSR) {
+	const Component = instance.type;
+	instance.accessCache = /* @__PURE__ */ Object.create(null);
+	instance.proxy = new Proxy(instance.ctx, PublicInstanceProxyHandlers);
+	const { setup } = Component;
+	if (setup) {
+		pauseTracking();
+		const setupContext = instance.setupContext = setup.length > 1 ? createSetupContext(instance) : null;
+		const reset = setCurrentInstance(instance);
+		const setupResult = callWithErrorHandling(setup, instance, 0, [instance.props, setupContext]);
+		const isAsyncSetup = isPromise(setupResult);
+		resetTracking();
+		reset();
+		if ((isAsyncSetup || instance.sp) && !isAsyncWrapper(instance)) markAsyncBoundary(instance);
+		if (isAsyncSetup) {
+			setupResult.then(unsetCurrentInstance, unsetCurrentInstance);
+			if (isSSR) return setupResult.then((resolvedResult) => {
+				handleSetupResult(instance, resolvedResult, isSSR);
+			}).catch((e) => {
+				handleError(e, instance, 0);
+			});
+			else instance.asyncDep = setupResult;
+		} else handleSetupResult(instance, setupResult, isSSR);
+	} else finishComponentSetup(instance, isSSR);
+}
+function handleSetupResult(instance, setupResult, isSSR) {
+	if (isFunction(setupResult)) if (instance.type.__ssrInlineRender) instance.ssrRender = setupResult;
+	else instance.render = setupResult;
+	else if (isObject(setupResult)) instance.setupState = proxyRefs(setupResult);
+	finishComponentSetup(instance, isSSR);
+}
+var compile;
+var installWithProxy;
+function finishComponentSetup(instance, isSSR, skipOptions) {
+	const Component = instance.type;
+	if (!instance.render) {
+		if (!isSSR && compile && !Component.render) {
+			const template = Component.template || resolveMergedOptions(instance).template;
+			if (template) {
+				const { isCustomElement, compilerOptions } = instance.appContext.config;
+				const { delimiters, compilerOptions: componentCompilerOptions } = Component;
+				Component.render = compile(template, extend$1(extend$1({
+					isCustomElement,
+					delimiters
+				}, compilerOptions), componentCompilerOptions));
+			}
+		}
+		instance.render = Component.render || NOOP;
+		if (installWithProxy) installWithProxy(instance);
+	}
+	{
+		const reset = setCurrentInstance(instance);
+		pauseTracking();
+		try {
+			applyOptions(instance);
+		} finally {
+			resetTracking();
+			reset();
+		}
+	}
+}
+var attrsProxyHandlers = { get(target, key) {
+	track(target, "get", "");
+	return target[key];
+} };
+function createSetupContext(instance) {
+	const expose = (exposed) => {
+		instance.exposed = exposed || {};
+	};
+	return {
+		attrs: new Proxy(instance.attrs, attrsProxyHandlers),
+		slots: instance.slots,
+		emit: instance.emit,
+		expose
+	};
+}
+function getComponentPublicInstance(instance) {
+	if (instance.exposed) return instance.exposeProxy || (instance.exposeProxy = new Proxy(proxyRefs(markRaw(instance.exposed)), {
+		get(target, key) {
+			if (key in target) return target[key];
+			else if (key in publicPropertiesMap) return publicPropertiesMap[key](instance);
+		},
+		has(target, key) {
+			return key in target || key in publicPropertiesMap;
+		}
+	}));
+	else return instance.proxy;
+}
+function isClassComponent(value) {
+	return isFunction(value) && "__vccOpts" in value;
+}
+var computed = (getterOrOptions, debugOptions) => {
+	return /* @__PURE__ */ computed$1(getterOrOptions, debugOptions, isInSSRComponentSetup);
+};
+function h(type, propsOrChildren, children) {
+	try {
+		setBlockTracking(-1);
+		const l = arguments.length;
+		if (l === 2) if (isObject(propsOrChildren) && !isArray(propsOrChildren)) {
+			if (isVNode(propsOrChildren)) return createVNode(type, null, [propsOrChildren]);
+			return createVNode(type, propsOrChildren);
+		} else return createVNode(type, null, propsOrChildren);
+		else {
+			if (l > 3) children = Array.prototype.slice.call(arguments, 2);
+			else if (l === 3 && isVNode(children)) children = [children];
+			return createVNode(type, propsOrChildren, children);
+		}
+	} finally {
+		setBlockTracking(1);
+	}
+}
+var version$1 = "3.5.31";
+//#endregion
+//#region node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
+/**
+* @vue/runtime-dom v3.5.31
+* (c) 2018-present Yuxi (Evan) You and Vue contributors
+* @license MIT
+**/
+var policy = void 0;
+var tt = typeof window !== "undefined" && window.trustedTypes;
+if (tt) try {
+	policy = /* @__PURE__ */ tt.createPolicy("vue", { createHTML: (val) => val });
+} catch (e) {}
+var unsafeToTrustedHTML = policy ? (val) => policy.createHTML(val) : (val) => val;
+var svgNS = "http://www.w3.org/2000/svg";
+var mathmlNS = "http://www.w3.org/1998/Math/MathML";
+var doc = typeof document !== "undefined" ? document : null;
+var templateContainer = doc && /* @__PURE__ */ doc.createElement("template");
+var nodeOps = {
+	insert: (child, parent, anchor) => {
+		parent.insertBefore(child, anchor || null);
+	},
+	remove: (child) => {
+		const parent = child.parentNode;
+		if (parent) parent.removeChild(child);
+	},
+	createElement: (tag, namespace, is, props) => {
+		const el = namespace === "svg" ? doc.createElementNS(svgNS, tag) : namespace === "mathml" ? doc.createElementNS(mathmlNS, tag) : is ? doc.createElement(tag, { is }) : doc.createElement(tag);
+		if (tag === "select" && props && props.multiple != null) el.setAttribute("multiple", props.multiple);
+		return el;
+	},
+	createText: (text) => doc.createTextNode(text),
+	createComment: (text) => doc.createComment(text),
+	setText: (node, text) => {
+		node.nodeValue = text;
+	},
+	setElementText: (el, text) => {
+		el.textContent = text;
+	},
+	parentNode: (node) => node.parentNode,
+	nextSibling: (node) => node.nextSibling,
+	querySelector: (selector) => doc.querySelector(selector),
+	setScopeId(el, id) {
+		el.setAttribute(id, "");
+	},
+	insertStaticContent(content, parent, anchor, namespace, start, end) {
+		const before = anchor ? anchor.previousSibling : parent.lastChild;
+		if (start && (start === end || start.nextSibling)) while (true) {
+			parent.insertBefore(start.cloneNode(true), anchor);
+			if (start === end || !(start = start.nextSibling)) break;
+		}
+		else {
+			templateContainer.innerHTML = unsafeToTrustedHTML(namespace === "svg" ? `<svg>${content}</svg>` : namespace === "mathml" ? `<math>${content}</math>` : content);
+			const template = templateContainer.content;
+			if (namespace === "svg" || namespace === "mathml") {
+				const wrapper = template.firstChild;
+				while (wrapper.firstChild) template.appendChild(wrapper.firstChild);
+				template.removeChild(wrapper);
+			}
+			parent.insertBefore(template, anchor);
+		}
+		return [before ? before.nextSibling : parent.firstChild, anchor ? anchor.previousSibling : parent.lastChild];
+	}
+};
+var TRANSITION = "transition";
+var ANIMATION = "animation";
+var vtcKey = /* @__PURE__ */ Symbol("_vtc");
+var DOMTransitionPropsValidators = {
+	name: String,
+	type: String,
+	css: {
+		type: Boolean,
+		default: true
+	},
+	duration: [
+		String,
+		Number,
+		Object
+	],
+	enterFromClass: String,
+	enterActiveClass: String,
+	enterToClass: String,
+	appearFromClass: String,
+	appearActiveClass: String,
+	appearToClass: String,
+	leaveFromClass: String,
+	leaveActiveClass: String,
+	leaveToClass: String
+};
+var TransitionPropsValidators = /* @__PURE__ */ extend$1({}, BaseTransitionPropsValidators, DOMTransitionPropsValidators);
+var decorate$1 = (t) => {
+	t.displayName = "Transition";
+	t.props = TransitionPropsValidators;
+	return t;
+};
+var Transition = /* @__PURE__ */ decorate$1((props, { slots }) => h(BaseTransition, resolveTransitionProps(props), slots));
+var callHook = (hook, args = []) => {
+	if (isArray(hook)) hook.forEach((h2) => h2(...args));
+	else if (hook) hook(...args);
+};
+var hasExplicitCallback = (hook) => {
+	return hook ? isArray(hook) ? hook.some((h2) => h2.length > 1) : hook.length > 1 : false;
+};
+function resolveTransitionProps(rawProps) {
+	const baseProps = {};
+	for (const key in rawProps) if (!(key in DOMTransitionPropsValidators)) baseProps[key] = rawProps[key];
+	if (rawProps.css === false) return baseProps;
+	const { name = "v", type, duration, enterFromClass = `${name}-enter-from`, enterActiveClass = `${name}-enter-active`, enterToClass = `${name}-enter-to`, appearFromClass = enterFromClass, appearActiveClass = enterActiveClass, appearToClass = enterToClass, leaveFromClass = `${name}-leave-from`, leaveActiveClass = `${name}-leave-active`, leaveToClass = `${name}-leave-to` } = rawProps;
+	const durations = normalizeDuration(duration);
+	const enterDuration = durations && durations[0];
+	const leaveDuration = durations && durations[1];
+	const { onBeforeEnter, onEnter, onEnterCancelled, onLeave, onLeaveCancelled, onBeforeAppear = onBeforeEnter, onAppear = onEnter, onAppearCancelled = onEnterCancelled } = baseProps;
+	const finishEnter = (el, isAppear, done, isCancelled) => {
+		el._enterCancelled = isCancelled;
+		removeTransitionClass(el, isAppear ? appearToClass : enterToClass);
+		removeTransitionClass(el, isAppear ? appearActiveClass : enterActiveClass);
+		done && done();
+	};
+	const finishLeave = (el, done) => {
+		el._isLeaving = false;
+		removeTransitionClass(el, leaveFromClass);
+		removeTransitionClass(el, leaveToClass);
+		removeTransitionClass(el, leaveActiveClass);
+		done && done();
+	};
+	const makeEnterHook = (isAppear) => {
+		return (el, done) => {
+			const hook = isAppear ? onAppear : onEnter;
+			const resolve = () => finishEnter(el, isAppear, done);
+			callHook(hook, [el, resolve]);
+			nextFrame(() => {
+				removeTransitionClass(el, isAppear ? appearFromClass : enterFromClass);
+				addTransitionClass(el, isAppear ? appearToClass : enterToClass);
+				if (!hasExplicitCallback(hook)) whenTransitionEnds(el, type, enterDuration, resolve);
+			});
+		};
+	};
+	return extend$1(baseProps, {
+		onBeforeEnter(el) {
+			callHook(onBeforeEnter, [el]);
+			addTransitionClass(el, enterFromClass);
+			addTransitionClass(el, enterActiveClass);
+		},
+		onBeforeAppear(el) {
+			callHook(onBeforeAppear, [el]);
+			addTransitionClass(el, appearFromClass);
+			addTransitionClass(el, appearActiveClass);
+		},
+		onEnter: makeEnterHook(false),
+		onAppear: makeEnterHook(true),
+		onLeave(el, done) {
+			el._isLeaving = true;
+			const resolve = () => finishLeave(el, done);
+			addTransitionClass(el, leaveFromClass);
+			if (!el._enterCancelled) {
+				forceReflow(el);
+				addTransitionClass(el, leaveActiveClass);
+			} else {
+				addTransitionClass(el, leaveActiveClass);
+				forceReflow(el);
+			}
+			nextFrame(() => {
+				if (!el._isLeaving) return;
+				removeTransitionClass(el, leaveFromClass);
+				addTransitionClass(el, leaveToClass);
+				if (!hasExplicitCallback(onLeave)) whenTransitionEnds(el, type, leaveDuration, resolve);
+			});
+			callHook(onLeave, [el, resolve]);
+		},
+		onEnterCancelled(el) {
+			finishEnter(el, false, void 0, true);
+			callHook(onEnterCancelled, [el]);
+		},
+		onAppearCancelled(el) {
+			finishEnter(el, true, void 0, true);
+			callHook(onAppearCancelled, [el]);
+		},
+		onLeaveCancelled(el) {
+			finishLeave(el);
+			callHook(onLeaveCancelled, [el]);
+		}
+	});
+}
+function normalizeDuration(duration) {
+	if (duration == null) return null;
+	else if (isObject(duration)) return [NumberOf(duration.enter), NumberOf(duration.leave)];
+	else {
+		const n = NumberOf(duration);
+		return [n, n];
+	}
+}
+function NumberOf(val) {
+	return toNumber(val);
+}
+function addTransitionClass(el, cls) {
+	cls.split(/\s+/).forEach((c) => c && el.classList.add(c));
+	(el[vtcKey] || (el[vtcKey] = /* @__PURE__ */ new Set())).add(cls);
+}
+function removeTransitionClass(el, cls) {
+	cls.split(/\s+/).forEach((c) => c && el.classList.remove(c));
+	const _vtc = el[vtcKey];
+	if (_vtc) {
+		_vtc.delete(cls);
+		if (!_vtc.size) el[vtcKey] = void 0;
+	}
+}
+function nextFrame(cb) {
+	requestAnimationFrame(() => {
+		requestAnimationFrame(cb);
+	});
+}
+var endId = 0;
+function whenTransitionEnds(el, expectedType, explicitTimeout, resolve) {
+	const id = el._endId = ++endId;
+	const resolveIfNotStale = () => {
+		if (id === el._endId) resolve();
+	};
+	if (explicitTimeout != null) return setTimeout(resolveIfNotStale, explicitTimeout);
+	const { type, timeout, propCount } = getTransitionInfo(el, expectedType);
+	if (!type) return resolve();
+	const endEvent = type + "end";
+	let ended = 0;
+	const end = () => {
+		el.removeEventListener(endEvent, onEnd);
+		resolveIfNotStale();
+	};
+	const onEnd = (e) => {
+		if (e.target === el && ++ended >= propCount) end();
+	};
+	setTimeout(() => {
+		if (ended < propCount) end();
+	}, timeout + 1);
+	el.addEventListener(endEvent, onEnd);
+}
+function getTransitionInfo(el, expectedType) {
+	const styles = window.getComputedStyle(el);
+	const getStyleProperties = (key) => (styles[key] || "").split(", ");
+	const transitionDelays = getStyleProperties(`${TRANSITION}Delay`);
+	const transitionDurations = getStyleProperties(`${TRANSITION}Duration`);
+	const transitionTimeout = getTimeout(transitionDelays, transitionDurations);
+	const animationDelays = getStyleProperties(`${ANIMATION}Delay`);
+	const animationDurations = getStyleProperties(`${ANIMATION}Duration`);
+	const animationTimeout = getTimeout(animationDelays, animationDurations);
+	let type = null;
+	let timeout = 0;
+	let propCount = 0;
+	if (expectedType === TRANSITION) {
+		if (transitionTimeout > 0) {
+			type = TRANSITION;
+			timeout = transitionTimeout;
+			propCount = transitionDurations.length;
+		}
+	} else if (expectedType === ANIMATION) {
+		if (animationTimeout > 0) {
+			type = ANIMATION;
+			timeout = animationTimeout;
+			propCount = animationDurations.length;
+		}
+	} else {
+		timeout = Math.max(transitionTimeout, animationTimeout);
+		type = timeout > 0 ? transitionTimeout > animationTimeout ? TRANSITION : ANIMATION : null;
+		propCount = type ? type === TRANSITION ? transitionDurations.length : animationDurations.length : 0;
+	}
+	const hasTransform = type === TRANSITION && /\b(?:transform|all)(?:,|$)/.test(getStyleProperties(`${TRANSITION}Property`).toString());
+	return {
+		type,
+		timeout,
+		propCount,
+		hasTransform
+	};
+}
+function getTimeout(delays, durations) {
+	while (delays.length < durations.length) delays = delays.concat(delays);
+	return Math.max(...durations.map((d, i) => toMs(d) + toMs(delays[i])));
+}
+function toMs(s) {
+	if (s === "auto") return 0;
+	return Number(s.slice(0, -1).replace(",", ".")) * 1e3;
+}
+function forceReflow(el) {
+	return (el ? el.ownerDocument : document).body.offsetHeight;
+}
+function patchClass(el, value, isSVG) {
+	const transitionClasses = el[vtcKey];
+	if (transitionClasses) value = (value ? [value, ...transitionClasses] : [...transitionClasses]).join(" ");
+	if (value == null) el.removeAttribute("class");
+	else if (isSVG) el.setAttribute("class", value);
+	else el.className = value;
+}
+var vShowOriginalDisplay = /* @__PURE__ */ Symbol("_vod");
+var vShowHidden = /* @__PURE__ */ Symbol("_vsh");
+var vShow = {
+	name: "show",
+	beforeMount(el, { value }, { transition }) {
+		el[vShowOriginalDisplay] = el.style.display === "none" ? "" : el.style.display;
+		if (transition && value) transition.beforeEnter(el);
+		else setDisplay(el, value);
+	},
+	mounted(el, { value }, { transition }) {
+		if (transition && value) transition.enter(el);
+	},
+	updated(el, { value, oldValue }, { transition }) {
+		if (!value === !oldValue) return;
+		if (transition) if (value) {
+			transition.beforeEnter(el);
+			setDisplay(el, true);
+			transition.enter(el);
+		} else transition.leave(el, () => {
+			setDisplay(el, false);
+		});
+		else setDisplay(el, value);
+	},
+	beforeUnmount(el, { value }) {
+		setDisplay(el, value);
+	}
+};
+function setDisplay(el, value) {
+	el.style.display = value ? el[vShowOriginalDisplay] : "none";
+	el[vShowHidden] = !value;
+}
+var CSS_VAR_TEXT = /* @__PURE__ */ Symbol("");
+var displayRE = /(?:^|;)\s*display\s*:/;
+function patchStyle(el, prev, next) {
+	const style = el.style;
+	const isCssString = isString(next);
+	let hasControlledDisplay = false;
+	if (next && !isCssString) {
+		if (prev) if (!isString(prev)) {
+			for (const key in prev) if (next[key] == null) setStyle$1(style, key, "");
+		} else for (const prevStyle of prev.split(";")) {
+			const key = prevStyle.slice(0, prevStyle.indexOf(":")).trim();
+			if (next[key] == null) setStyle$1(style, key, "");
+		}
+		for (const key in next) {
+			if (key === "display") hasControlledDisplay = true;
+			setStyle$1(style, key, next[key]);
+		}
+	} else if (isCssString) {
+		if (prev !== next) {
+			const cssVarText = style[CSS_VAR_TEXT];
+			if (cssVarText) next += ";" + cssVarText;
+			style.cssText = next;
+			hasControlledDisplay = displayRE.test(next);
+		}
+	} else if (prev) el.removeAttribute("style");
+	if (vShowOriginalDisplay in el) {
+		el[vShowOriginalDisplay] = hasControlledDisplay ? style.display : "";
+		if (el[vShowHidden]) style.display = "none";
+	}
+}
+var importantRE = /\s*!important$/;
+function setStyle$1(style, name, val) {
+	if (isArray(val)) val.forEach((v) => setStyle$1(style, name, v));
+	else {
+		if (val == null) val = "";
+		if (name.startsWith("--")) style.setProperty(name, val);
+		else {
+			const prefixed = autoPrefix(style, name);
+			if (importantRE.test(val)) style.setProperty(hyphenate(prefixed), val.replace(importantRE, ""), "important");
+			else style[prefixed] = val;
+		}
+	}
+}
+var prefixes = [
+	"Webkit",
+	"Moz",
+	"ms"
+];
+var prefixCache = {};
+function autoPrefix(style, rawName) {
+	const cached = prefixCache[rawName];
+	if (cached) return cached;
+	let name = camelize(rawName);
+	if (name !== "filter" && name in style) return prefixCache[rawName] = name;
+	name = capitalize$1(name);
+	for (let i = 0; i < prefixes.length; i++) {
+		const prefixed = prefixes[i] + name;
+		if (prefixed in style) return prefixCache[rawName] = prefixed;
+	}
+	return rawName;
+}
+var xlinkNS = "http://www.w3.org/1999/xlink";
+function patchAttr(el, key, value, isSVG, instance, isBoolean = isSpecialBooleanAttr(key)) {
+	if (isSVG && key.startsWith("xlink:")) if (value == null) el.removeAttributeNS(xlinkNS, key.slice(6, key.length));
+	else el.setAttributeNS(xlinkNS, key, value);
+	else if (value == null || isBoolean && !includeBooleanAttr(value)) el.removeAttribute(key);
+	else el.setAttribute(key, isBoolean ? "" : isSymbol(value) ? String(value) : value);
+}
+function patchDOMProp(el, key, value, parentComponent, attrName) {
+	if (key === "innerHTML" || key === "textContent") {
+		if (value != null) el[key] = key === "innerHTML" ? unsafeToTrustedHTML(value) : value;
+		return;
+	}
+	const tag = el.tagName;
+	if (key === "value" && tag !== "PROGRESS" && !tag.includes("-")) {
+		const oldValue = tag === "OPTION" ? el.getAttribute("value") || "" : el.value;
+		const newValue = value == null ? el.type === "checkbox" ? "on" : "" : String(value);
+		if (oldValue !== newValue || !("_value" in el)) el.value = newValue;
+		if (value == null) el.removeAttribute(key);
+		el._value = value;
+		return;
+	}
+	let needRemove = false;
+	if (value === "" || value == null) {
+		const type = typeof el[key];
+		if (type === "boolean") value = includeBooleanAttr(value);
+		else if (value == null && type === "string") {
+			value = "";
+			needRemove = true;
+		} else if (type === "number") {
+			value = 0;
+			needRemove = true;
+		}
+	}
+	try {
+		el[key] = value;
+	} catch (e) {}
+	needRemove && el.removeAttribute(attrName || key);
+}
+function addEventListener(el, event, handler, options) {
+	el.addEventListener(event, handler, options);
+}
+function removeEventListener(el, event, handler, options) {
+	el.removeEventListener(event, handler, options);
+}
+var veiKey = /* @__PURE__ */ Symbol("_vei");
+function patchEvent(el, rawName, prevValue, nextValue, instance = null) {
+	const invokers = el[veiKey] || (el[veiKey] = {});
+	const existingInvoker = invokers[rawName];
+	if (nextValue && existingInvoker) existingInvoker.value = nextValue;
+	else {
+		const [name, options] = parseName(rawName);
+		if (nextValue) addEventListener(el, name, invokers[rawName] = createInvoker(nextValue, instance), options);
+		else if (existingInvoker) {
+			removeEventListener(el, name, existingInvoker, options);
+			invokers[rawName] = void 0;
+		}
+	}
+}
+var optionsModifierRE = /(?:Once|Passive|Capture)$/;
+function parseName(name) {
+	let options;
+	if (optionsModifierRE.test(name)) {
+		options = {};
+		let m;
+		while (m = name.match(optionsModifierRE)) {
+			name = name.slice(0, name.length - m[0].length);
+			options[m[0].toLowerCase()] = true;
+		}
+	}
+	return [name[2] === ":" ? name.slice(3) : hyphenate(name.slice(2)), options];
+}
+var cachedNow = 0;
+var p = /* @__PURE__ */ Promise.resolve();
+var getNow = () => cachedNow || (p.then(() => cachedNow = 0), cachedNow = Date.now());
+function createInvoker(initialValue, instance) {
+	const invoker = (e) => {
+		if (!e._vts) e._vts = Date.now();
+		else if (e._vts <= invoker.attached) return;
+		callWithAsyncErrorHandling(patchStopImmediatePropagation(e, invoker.value), instance, 5, [e]);
+	};
+	invoker.value = initialValue;
+	invoker.attached = getNow();
+	return invoker;
+}
+function patchStopImmediatePropagation(e, value) {
+	if (isArray(value)) {
+		const originalStop = e.stopImmediatePropagation;
+		e.stopImmediatePropagation = () => {
+			originalStop.call(e);
+			e._stopped = true;
+		};
+		return value.map((fn) => (e2) => !e2._stopped && fn && fn(e2));
+	} else return value;
+}
+var isNativeOn = (key) => key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110 && key.charCodeAt(2) > 96 && key.charCodeAt(2) < 123;
+var patchProp = (el, key, prevValue, nextValue, namespace, parentComponent) => {
+	const isSVG = namespace === "svg";
+	if (key === "class") patchClass(el, nextValue, isSVG);
+	else if (key === "style") patchStyle(el, prevValue, nextValue);
+	else if (isOn(key)) {
+		if (!isModelListener(key)) patchEvent(el, key, prevValue, nextValue, parentComponent);
+	} else if (key[0] === "." ? (key = key.slice(1), true) : key[0] === "^" ? (key = key.slice(1), false) : shouldSetAsProp(el, key, nextValue, isSVG)) {
+		patchDOMProp(el, key, nextValue);
+		if (!el.tagName.includes("-") && (key === "value" || key === "checked" || key === "selected")) patchAttr(el, key, nextValue, isSVG, parentComponent, key !== "value");
+	} else if (el._isVueCE && (shouldSetAsPropForVueCE(el, key) || el._def.__asyncLoader && (/[A-Z]/.test(key) || !isString(nextValue)))) patchDOMProp(el, camelize(key), nextValue, parentComponent, key);
+	else {
+		if (key === "true-value") el._trueValue = nextValue;
+		else if (key === "false-value") el._falseValue = nextValue;
+		patchAttr(el, key, nextValue, isSVG);
+	}
+};
+function shouldSetAsProp(el, key, value, isSVG) {
+	if (isSVG) {
+		if (key === "innerHTML" || key === "textContent") return true;
+		if (key in el && isNativeOn(key) && isFunction(value)) return true;
+		return false;
+	}
+	if (key === "spellcheck" || key === "draggable" || key === "translate" || key === "autocorrect") return false;
+	if (key === "sandbox" && el.tagName === "IFRAME") return false;
+	if (key === "form") return false;
+	if (key === "list" && el.tagName === "INPUT") return false;
+	if (key === "type" && el.tagName === "TEXTAREA") return false;
+	if (key === "width" || key === "height") {
+		const tag = el.tagName;
+		if (tag === "IMG" || tag === "VIDEO" || tag === "CANVAS" || tag === "SOURCE") return false;
+	}
+	if (isNativeOn(key) && isString(value)) return false;
+	return key in el;
+}
+function shouldSetAsPropForVueCE(el, key) {
+	const props = el._def.props;
+	if (!props) return false;
+	const camelKey = camelize(key);
+	return Array.isArray(props) ? props.some((prop) => camelize(prop) === camelKey) : Object.keys(props).some((prop) => camelize(prop) === camelKey);
+}
+var positionMap = /* @__PURE__ */ new WeakMap();
+var newPositionMap = /* @__PURE__ */ new WeakMap();
+var moveCbKey = /* @__PURE__ */ Symbol("_moveCb");
+var enterCbKey = /* @__PURE__ */ Symbol("_enterCb");
+var decorate = (t) => {
+	delete t.props.mode;
+	return t;
+};
+var TransitionGroup = /* @__PURE__ */ decorate({
+	name: "TransitionGroup",
+	props: /* @__PURE__ */ extend$1({}, TransitionPropsValidators, {
+		tag: String,
+		moveClass: String
+	}),
+	setup(props, { slots }) {
+		const instance = getCurrentInstance();
+		const state = useTransitionState();
+		let prevChildren;
+		let children;
+		onUpdated(() => {
+			if (!prevChildren.length) return;
+			const moveClass = props.moveClass || `${props.name || "v"}-move`;
+			if (!hasCSSTransform(prevChildren[0].el, instance.vnode.el, moveClass)) {
+				prevChildren = [];
+				return;
+			}
+			prevChildren.forEach(callPendingCbs);
+			prevChildren.forEach(recordPosition);
+			const movedChildren = prevChildren.filter(applyTranslation);
+			forceReflow(instance.vnode.el);
+			movedChildren.forEach((c) => {
+				const el = c.el;
+				const style = el.style;
+				addTransitionClass(el, moveClass);
+				style.transform = style.webkitTransform = style.transitionDuration = "";
+				const cb = el[moveCbKey] = (e) => {
+					if (e && e.target !== el) return;
+					if (!e || e.propertyName.endsWith("transform")) {
+						el.removeEventListener("transitionend", cb);
+						el[moveCbKey] = null;
+						removeTransitionClass(el, moveClass);
+					}
+				};
+				el.addEventListener("transitionend", cb);
+			});
+			prevChildren = [];
+		});
+		return () => {
+			const rawProps = /* @__PURE__ */ toRaw(props);
+			const cssTransitionProps = resolveTransitionProps(rawProps);
+			let tag = rawProps.tag || Fragment$1;
+			prevChildren = [];
+			if (children) for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				if (child.el && child.el instanceof Element) {
+					prevChildren.push(child);
+					setTransitionHooks(child, resolveTransitionHooks(child, cssTransitionProps, state, instance));
+					positionMap.set(child, getPosition(child.el));
+				}
+			}
+			children = slots.default ? getTransitionRawChildren(slots.default()) : [];
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				if (child.key != null) setTransitionHooks(child, resolveTransitionHooks(child, cssTransitionProps, state, instance));
+			}
+			return createVNode(tag, null, children);
+		};
+	}
+});
+function callPendingCbs(c) {
+	const el = c.el;
+	if (el[moveCbKey]) el[moveCbKey]();
+	if (el[enterCbKey]) el[enterCbKey]();
+}
+function recordPosition(c) {
+	newPositionMap.set(c, getPosition(c.el));
+}
+function applyTranslation(c) {
+	const oldPos = positionMap.get(c);
+	const newPos = newPositionMap.get(c);
+	const dx = oldPos.left - newPos.left;
+	const dy = oldPos.top - newPos.top;
+	if (dx || dy) {
+		const el = c.el;
+		const s = el.style;
+		const rect = el.getBoundingClientRect();
+		let scaleX = 1;
+		let scaleY = 1;
+		if (el.offsetWidth) scaleX = rect.width / el.offsetWidth;
+		if (el.offsetHeight) scaleY = rect.height / el.offsetHeight;
+		if (!Number.isFinite(scaleX) || scaleX === 0) scaleX = 1;
+		if (!Number.isFinite(scaleY) || scaleY === 0) scaleY = 1;
+		if (Math.abs(scaleX - 1) < .01) scaleX = 1;
+		if (Math.abs(scaleY - 1) < .01) scaleY = 1;
+		s.transform = s.webkitTransform = `translate(${dx / scaleX}px,${dy / scaleY}px)`;
+		s.transitionDuration = "0s";
+		return c;
+	}
+}
+function getPosition(el) {
+	const rect = el.getBoundingClientRect();
+	return {
+		left: rect.left,
+		top: rect.top
+	};
+}
+function hasCSSTransform(el, root, moveClass) {
+	const clone = el.cloneNode();
+	const _vtc = el[vtcKey];
+	if (_vtc) _vtc.forEach((cls) => {
+		cls.split(/\s+/).forEach((c) => c && clone.classList.remove(c));
+	});
+	moveClass.split(/\s+/).forEach((c) => c && clone.classList.add(c));
+	clone.style.display = "none";
+	const container = root.nodeType === 1 ? root : root.parentNode;
+	container.appendChild(clone);
+	const { hasTransform } = getTransitionInfo(clone);
+	container.removeChild(clone);
+	return hasTransform;
+}
+var getModelAssigner = (vnode) => {
+	const fn = vnode.props["onUpdate:modelValue"] || false;
+	return isArray(fn) ? (value) => invokeArrayFns(fn, value) : fn;
+};
+function onCompositionStart(e) {
+	e.target.composing = true;
+}
+function onCompositionEnd(e) {
+	const target = e.target;
+	if (target.composing) {
+		target.composing = false;
+		target.dispatchEvent(new Event("input"));
+	}
+}
+var assignKey = /* @__PURE__ */ Symbol("_assign");
+function castValue(value, trim, number) {
+	if (trim) value = value.trim();
+	if (number) value = looseToNumber(value);
+	return value;
+}
+var vModelText = {
+	created(el, { modifiers: { lazy, trim, number } }, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+		const castToNumber = number || vnode.props && vnode.props.type === "number";
+		addEventListener(el, lazy ? "change" : "input", (e) => {
+			if (e.target.composing) return;
+			el[assignKey](castValue(el.value, trim, castToNumber));
+		});
+		if (trim || castToNumber) addEventListener(el, "change", () => {
+			el.value = castValue(el.value, trim, castToNumber);
+		});
+		if (!lazy) {
+			addEventListener(el, "compositionstart", onCompositionStart);
+			addEventListener(el, "compositionend", onCompositionEnd);
+			addEventListener(el, "change", onCompositionEnd);
+		}
+	},
+	mounted(el, { value }) {
+		el.value = value == null ? "" : value;
+	},
+	beforeUpdate(el, { value, oldValue, modifiers: { lazy, trim, number } }, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+		if (el.composing) return;
+		const elValue = (number || el.type === "number") && !/^0\d/.test(el.value) ? looseToNumber(el.value) : el.value;
+		const newValue = value == null ? "" : value;
+		if (elValue === newValue) return;
+		const rootNode = el.getRootNode();
+		if ((rootNode instanceof Document || rootNode instanceof ShadowRoot) && rootNode.activeElement === el && el.type !== "range") {
+			if (lazy && value === oldValue) return;
+			if (trim && el.value.trim() === newValue) return;
+		}
+		el.value = newValue;
+	}
+};
+var vModelCheckbox = {
+	deep: true,
+	created(el, _, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+		addEventListener(el, "change", () => {
+			const modelValue = el._modelValue;
+			const elementValue = getValue(el);
+			const checked = el.checked;
+			const assign = el[assignKey];
+			if (isArray(modelValue)) {
+				const index = looseIndexOf(modelValue, elementValue);
+				const found = index !== -1;
+				if (checked && !found) assign(modelValue.concat(elementValue));
+				else if (!checked && found) {
+					const filtered = [...modelValue];
+					filtered.splice(index, 1);
+					assign(filtered);
+				}
+			} else if (isSet(modelValue)) {
+				const cloned = new Set(modelValue);
+				if (checked) cloned.add(elementValue);
+				else cloned.delete(elementValue);
+				assign(cloned);
+			} else assign(getCheckboxValue(el, checked));
+		});
+	},
+	mounted: setChecked,
+	beforeUpdate(el, binding, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+		setChecked(el, binding, vnode);
+	}
+};
+function setChecked(el, { value, oldValue }, vnode) {
+	el._modelValue = value;
+	let checked;
+	if (isArray(value)) checked = looseIndexOf(value, vnode.props.value) > -1;
+	else if (isSet(value)) checked = value.has(vnode.props.value);
+	else {
+		if (value === oldValue) return;
+		checked = looseEqual(value, getCheckboxValue(el, true));
+	}
+	if (el.checked !== checked) el.checked = checked;
+}
+var vModelRadio = {
+	created(el, { value }, vnode) {
+		el.checked = looseEqual(value, vnode.props.value);
+		el[assignKey] = getModelAssigner(vnode);
+		addEventListener(el, "change", () => {
+			el[assignKey](getValue(el));
+		});
+	},
+	beforeUpdate(el, { value, oldValue }, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+		if (value !== oldValue) el.checked = looseEqual(value, vnode.props.value);
+	}
+};
+var vModelSelect = {
+	deep: true,
+	created(el, { value, modifiers: { number } }, vnode) {
+		const isSetModel = isSet(value);
+		addEventListener(el, "change", () => {
+			const selectedVal = Array.prototype.filter.call(el.options, (o) => o.selected).map((o) => number ? looseToNumber(getValue(o)) : getValue(o));
+			el[assignKey](el.multiple ? isSetModel ? new Set(selectedVal) : selectedVal : selectedVal[0]);
+			el._assigning = true;
+			nextTick$1(() => {
+				el._assigning = false;
+			});
+		});
+		el[assignKey] = getModelAssigner(vnode);
+	},
+	mounted(el, { value }) {
+		setSelected(el, value);
+	},
+	beforeUpdate(el, _binding, vnode) {
+		el[assignKey] = getModelAssigner(vnode);
+	},
+	updated(el, { value }) {
+		if (!el._assigning) setSelected(el, value);
+	}
+};
+function setSelected(el, value) {
+	const isMultiple = el.multiple;
+	const isArrayValue = isArray(value);
+	if (isMultiple && !isArrayValue && !isSet(value)) return;
+	for (let i = 0, l = el.options.length; i < l; i++) {
+		const option = el.options[i];
+		const optionValue = getValue(option);
+		if (isMultiple) if (isArrayValue) {
+			const optionType = typeof optionValue;
+			if (optionType === "string" || optionType === "number") option.selected = value.some((v) => String(v) === String(optionValue));
+			else option.selected = looseIndexOf(value, optionValue) > -1;
+		} else option.selected = value.has(optionValue);
+		else if (looseEqual(getValue(option), value)) {
+			if (el.selectedIndex !== i) el.selectedIndex = i;
+			return;
+		}
+	}
+	if (!isMultiple && el.selectedIndex !== -1) el.selectedIndex = -1;
+}
+function getValue(el) {
+	return "_value" in el ? el._value : el.value;
+}
+function getCheckboxValue(el, checked) {
+	const key = checked ? "_trueValue" : "_falseValue";
+	return key in el ? el[key] : checked;
+}
+var systemModifiers = [
+	"ctrl",
+	"shift",
+	"alt",
+	"meta"
+];
+var modifierGuards = {
+	stop: (e) => e.stopPropagation(),
+	prevent: (e) => e.preventDefault(),
+	self: (e) => e.target !== e.currentTarget,
+	ctrl: (e) => !e.ctrlKey,
+	shift: (e) => !e.shiftKey,
+	alt: (e) => !e.altKey,
+	meta: (e) => !e.metaKey,
+	left: (e) => "button" in e && e.button !== 0,
+	middle: (e) => "button" in e && e.button !== 1,
+	right: (e) => "button" in e && e.button !== 2,
+	exact: (e, modifiers) => systemModifiers.some((m) => e[`${m}Key`] && !modifiers.includes(m))
+};
+var withModifiers = (fn, modifiers) => {
+	if (!fn) return fn;
+	const cache = fn._withMods || (fn._withMods = {});
+	const cacheKey = modifiers.join(".");
+	return cache[cacheKey] || (cache[cacheKey] = ((event, ...args) => {
+		for (let i = 0; i < modifiers.length; i++) {
+			const guard = modifierGuards[modifiers[i]];
+			if (guard && guard(event, modifiers)) return;
+		}
+		return fn(event, ...args);
+	}));
+};
+var keyNames = {
+	esc: "escape",
+	space: " ",
+	up: "arrow-up",
+	left: "arrow-left",
+	right: "arrow-right",
+	down: "arrow-down",
+	delete: "backspace"
+};
+var withKeys = (fn, modifiers) => {
+	const cache = fn._withKeys || (fn._withKeys = {});
+	const cacheKey = modifiers.join(".");
+	return cache[cacheKey] || (cache[cacheKey] = ((event) => {
+		if (!("key" in event)) return;
+		const eventKey = hyphenate(event.key);
+		if (modifiers.some((k) => k === eventKey || keyNames[k] === eventKey)) return fn(event);
+	}));
+};
+var rendererOptions = /* @__PURE__ */ extend$1({ patchProp }, nodeOps);
+var renderer;
+function ensureRenderer() {
+	return renderer || (renderer = createRenderer(rendererOptions));
+}
+var createApp = ((...args) => {
+	const app = ensureRenderer().createApp(...args);
+	const { mount } = app;
+	app.mount = (containerOrSelector) => {
+		const container = normalizeContainer(containerOrSelector);
+		if (!container) return;
+		const component = app._component;
+		if (!isFunction(component) && !component.render && !component.template) component.template = container.innerHTML;
+		if (container.nodeType === 1) container.textContent = "";
+		const proxy = mount(container, false, resolveRootNamespace(container));
+		if (container instanceof Element) {
+			container.removeAttribute("v-cloak");
+			container.setAttribute("data-v-app", "");
+		}
+		return proxy;
+	};
+	return app;
+});
+function resolveRootNamespace(container) {
+	if (container instanceof SVGElement) return "svg";
+	if (typeof MathMLElement === "function" && container instanceof MathMLElement) return "mathml";
+}
+function normalizeContainer(container) {
+	if (isString(container)) return document.querySelector(container);
+	return container;
+}
+//#endregion
+//#region \0plugin-vue:export-helper
+var _plugin_vue_export_helper_default = (sfc, props) => {
+	const target = sfc.__vccOpts || sfc;
+	for (const [key, val] of props) target[key] = val;
+	return target;
+};
+//#endregion
+//#region src/components/AppModal.vue
+var _hoisted_1$10 = ["aria-labelledby"];
+var _hoisted_2$10 = { class: "modal-header" };
+var _hoisted_3$10 = ["id"];
+var _hoisted_4$10 = ["aria-label"];
+var _hoisted_5$10 = { class: "modal-body" };
+var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "AppModal",
+	props: {
+		modelValue: {
+			type: Boolean,
+			required: true
+		},
+		title: {
+			type: String,
+			default: ""
+		},
+		icon: {
+			type: String,
+			default: ""
+		},
+		fullScreen: {
+			type: Boolean,
+			default: false
+		},
+		size: {
+			type: String,
+			default: "medium",
+			validator: (value) => [
+				"small",
+				"medium",
+				"large",
+				"full"
+			].includes(value)
+		}
+	},
+	emits: ["update:modelValue"],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const titleId = computed(() => {
+			return `modal-title-${props.title.replace(/\s+/g, "-").toLowerCase()}-${Date.now()}`;
+		});
+		const emit = __emit;
+		const close = () => {
+			emit("update:modelValue", false);
+		};
+		let previousFocusElement = null;
+		watch(() => props.modelValue, (isOpen) => {
+			if (isOpen) {
+				previousFocusElement = document.activeElement;
+				nextTick$1(() => {
+					const closeBtn = document.querySelector(".modal .close-btn");
+					if (closeBtn) closeBtn.focus();
+				});
+			} else if (previousFocusElement && previousFocusElement.focus) previousFocusElement.focus();
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", {
+				class: normalizeClass(["modal-overlay", {
+					active: __props.modelValue,
+					"full-screen": __props.fullScreen,
+					"size-small": __props.size === "small",
+					"size-medium": __props.size === "medium",
+					"size-large": __props.size === "large"
+				}]),
+				role: "presentation"
+			}, [createBaseVNode("div", {
+				class: normalizeClass(["modal add-image-modal", { "full-screen-modal": __props.fullScreen }]),
+				role: "dialog",
+				"aria-modal": "true",
+				"aria-labelledby": titleId.value,
+				tabindex: "-1"
+			}, [createBaseVNode("div", _hoisted_2$10, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
+				key: 0,
+				class: normalizeClass(__props.icon),
+				"aria-hidden": "true"
+			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$10), createBaseVNode("button", {
+				class: "close-btn",
+				onClick: close,
+				"aria-label": `关闭${__props.title ? " " + __props.title : ""}对话框`,
+				title: "关闭"
+			}, [..._cache[0] || (_cache[0] = [createBaseVNode("i", {
+				class: "fa-solid fa-xmark",
+				"aria-hidden": "true"
+			}, null, -1)])], 8, _hoisted_4$10)]), createBaseVNode("div", _hoisted_5$10, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 10, _hoisted_1$10)], 2);
+		};
+	}
+}, [["__scopeId", "data-v-3eb87205"]]);
+//#endregion
+//#region src/components/SliderInput.vue
+var _hoisted_1$9 = { class: "slider-input" };
+var _hoisted_2$9 = [
+	"min",
+	"max",
+	"step",
+	"value"
+];
+var _hoisted_3$9 = { class: "slider-header" };
+var _hoisted_4$9 = { class: "form-label" };
+var _hoisted_5$9 = ["value"];
+var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "SliderInput",
+	props: {
+		modelValue: {
+			type: Number,
+			required: true
+		},
+		label: {
+			type: String,
+			default: ""
+		},
+		unit: {
+			type: String,
+			default: ""
+		},
+		min: {
+			type: Number,
+			default: 0
+		},
+		max: {
+			type: Number,
+			default: 100
+		},
+		step: {
+			type: Number,
+			default: 1
+		}
+	},
+	emits: ["update:modelValue"],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const onInput = (e) => {
+			emit("update:modelValue", Number(e.target.value));
+		};
+		const pct = computed(() => {
+			return ((props.modelValue - props.min) / (props.max - props.min) * 100).toFixed(1) + "%";
+		});
+		const onTextChange = (e) => {
+			let val = Number(e.target.value);
+			if (isNaN(val)) return;
+			val = Math.max(props.min, Math.min(props.max, val));
+			emit("update:modelValue", val);
+		};
+		const onTextFocus = (e) => {
+			const input = e.target;
+			const onWheel = (event) => {
+				event.preventDefault();
+				let val = Number(input.value);
+				if (isNaN(val)) return;
+				val += event.deltaY < 0 ? 1 : -1;
+				val = Math.max(props.min, Math.min(props.max, val));
+				emit("update:modelValue", val);
+			};
+			input.addEventListener("wheel", onWheel);
+			const onBlur = () => {
+				input.removeEventListener("wheel", onWheel);
+				input.removeEventListener("blur", onBlur);
+			};
+			input.addEventListener("blur", onBlur);
+			const onKeyDown = (event) => {
+				let val = Number(input.value);
+				if (isNaN(val)) return;
+				if (event.key === "ArrowUp") val += 1;
+				else if (event.key === "ArrowDown") val -= 1;
+				val = Math.max(props.min, Math.min(props.max, val));
+				emit("update:modelValue", val);
+			};
+			input.addEventListener("keydown", onKeyDown);
+			const onBlurKey = () => {
+				input.removeEventListener("keydown", onKeyDown);
+				input.removeEventListener("blur", onBlurKey);
+			};
+		};
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$9, [createBaseVNode("input", {
+				type: "range",
+				min: __props.min,
+				max: __props.max,
+				step: __props.step,
+				value: __props.modelValue,
+				style: normalizeStyle({ "--pct": pct.value }),
+				onInput,
+				class: "slider"
+			}, null, 44, _hoisted_2$9), createBaseVNode("div", _hoisted_3$9, [
+				createBaseVNode("span", _hoisted_4$9, toDisplayString(__props.label), 1),
+				createBaseVNode("input", {
+					class: "form-input",
+					type: "text",
+					value: __props.modelValue,
+					onInput: onTextChange,
+					onFocus: onTextFocus
+				}, null, 40, _hoisted_5$9),
+				createTextVNode(toDisplayString(__props.unit), 1)
+			])]);
+		};
+	}
+}, [["__scopeId", "data-v-952349e6"]]);
+//#endregion
+//#region src/composables/useToast.js
+var toasts = /* @__PURE__ */ ref([]);
+var idCounter = 0;
+/**
+* 显示一条 Toast 通知
+* @param {string} message - 提示文字
+* @param {'info'|'success'|'error'} type - 类型
+* @param {number} duration - 显示时长（毫秒）
+*/
+var showToast$1 = (message, type = "info", duration = 2500) => {
+	const id = ++idCounter;
+	toasts.value.push({
+		id,
+		message,
+		type,
+		leaving: false
+	});
+	setTimeout(() => {
+		const toast = toasts.value.find((t) => t.id === id);
+		if (toast) toast.leaving = true;
+		setTimeout(() => {
+			toasts.value = toasts.value.filter((t) => t.id !== id);
+		}, 300);
+	}, duration);
+};
+/**
+* useToast —— 在组件里调用这个函数来使用 Toast 功能
+*
+* 用法：
+*   const { toasts, showToast } = useToast()
+*   showToast('保存成功', 'success')
+*/
+function useToast() {
+	return {
+		toasts,
+		showToast: showToast$1
+	};
+}
+//#endregion
+//#region src/composables/useUndoRedo.js
+/**
+* 撤销/重做组合式函数
+* 支持任意状态的撤销和重做操作
+*/
+function useUndoRedo(maxHistory = 20) {
+	const history = /* @__PURE__ */ ref([]);
+	const currentIndex = /* @__PURE__ */ ref(-1);
+	/**
+	* 添加新状态到历史
+	* @param {*} state - 要保存的状态
+	*/
+	const pushState = (state) => {
+		if (currentIndex.value < history.value.length - 1) history.value = history.value.slice(0, currentIndex.value + 1);
+		history.value.push(JSON.parse(JSON.stringify(state)));
+		if (history.value.length > maxHistory) history.value.shift();
+		else currentIndex.value++;
+	};
+	/**
+	* 撤销
+	* @returns {*} 撤销后的状态，如果没有可撤销的返回 null
+	*/
+	const undo = () => {
+		if (currentIndex.value > 0) {
+			currentIndex.value--;
+			return JSON.parse(JSON.stringify(history.value[currentIndex.value]));
+		}
+		return null;
+	};
+	/**
+	* 重做
+	* @returns {*} 重做后的状态，如果没有可重做的返回 null
+	*/
+	const redo = () => {
+		if (currentIndex.value < history.value.length - 1) {
+			currentIndex.value++;
+			return JSON.parse(JSON.stringify(history.value[currentIndex.value]));
+		}
+		return null;
+	};
+	/**
+	* 是否可以撤销
+	*/
+	const canUndo = () => currentIndex.value > 0;
+	/**
+	* 是否可以重做
+	*/
+	const canRedo = () => currentIndex.value < history.value.length - 1;
+	/**
+	* 清空历史
+	*/
+	const clearHistory = () => {
+		history.value = [];
+		currentIndex.value = -1;
+	};
+	return {
+		history,
+		currentIndex,
+		pushState,
+		undo,
+		redo,
+		canUndo,
+		canRedo,
+		clearHistory
+	};
+}
+//#endregion
+//#region src/views/VideoSubtitle.vue
+var _hoisted_1$8 = { class: "app-layout" };
+var _hoisted_2$8 = { class: "app-left" };
+var _hoisted_3$8 = { class: "upload-text" };
+var _hoisted_4$8 = ["src"];
+var _hoisted_5$8 = {
+	key: 1,
+	class: "video-info-bar"
+};
+var _hoisted_6$8 = {
+	key: 2,
+	class: "toolbar"
+};
+var _hoisted_7$8 = { class: "cover-btn-container" };
+var _hoisted_8$7 = {
+	key: 0,
+	class: "cover-options"
+};
+var _hoisted_9$7 = ["disabled"];
+var _hoisted_10$7 = { class: "fa-solid fa-play" };
+var _hoisted_11$7 = { class: "fa-solid fa-pause" };
+var _hoisted_12$7 = ["disabled"];
+var _hoisted_13$6 = { class: "app-middle" };
+var _hoisted_14$6 = { class: "settings-panel" };
+var _hoisted_15$6 = { class: "setting-item" };
+var _hoisted_16$6 = { class: "setting-item" };
+var _hoisted_17$6 = { class: "setting-item" };
+var _hoisted_18$6 = { class: "seg-control" };
+var _hoisted_19$6 = ["onClick"];
+var _hoisted_20$6 = { class: "setting-item" };
+var _hoisted_21$6 = { class: "form-label" };
+var _hoisted_22$5 = {
+	key: 0,
+	class: "form-hint"
+};
+var _hoisted_23$5 = { class: "seg-control" };
+var _hoisted_24$5 = ["disabled", "onClick"];
+var _hoisted_25$5 = {
+	class: "time-wrapper",
+	ref: "timeWrapperRef"
+};
+var _hoisted_26$5 = ["onClick"];
+var _hoisted_27$5 = { class: "time-item-text" };
+var _hoisted_28$5 = ["onClick"];
+var _hoisted_29$5 = { class: "action-row" };
+var _hoisted_30$5 = ["disabled"];
+var _hoisted_31$5 = ["disabled"];
+var _hoisted_32$5 = ["disabled"];
+var _hoisted_33$5 = ["disabled"];
+var _hoisted_34$5 = {
+	key: 0,
+	class: "progress-container"
+};
+var _hoisted_35$4 = { class: "progress-header" };
+var _hoisted_36$3 = { class: "progress-text" };
+var _hoisted_37$3 = { class: "progress-percent" };
+var _hoisted_38$2 = { class: "progress-bar" };
+var _hoisted_39$1 = { class: "progress-footer" };
+var _hoisted_40$1 = {
+	key: 0,
+	class: "progress-time"
+};
+var _hoisted_41$1 = {
+	key: 1,
+	class: "progress-time"
+};
+var _hoisted_42$1 = {
+	key: 0,
+	class: "app-right"
+};
+var _hoisted_43$1 = { class: "result-section" };
+var _hoisted_44$1 = { class: "result-header" };
+var _hoisted_45 = { class: "result-canvas-container" };
+var _hoisted_46 = { class: "result-actions" };
+var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "VideoSubtitle",
+	setup(__props) {
+		const { showToast } = useToast();
+		const { pushState: pushHistory, undo, redo, canUndo, canRedo } = useUndoRedo(20);
+		const handleUndo = () => {
+			const previousState = undo();
+			if (previousState && previousState.timePoints) {
+				timePoints.value = previousState.timePoints;
+				showToast("已撤销", "success");
+			}
+		};
+		const handleRedo = () => {
+			const nextState = redo();
+			if (nextState && nextState.timePoints) {
+				timePoints.value = nextState.timePoints;
+				showToast("已重做", "success");
+			}
+		};
+		const fileInput = /* @__PURE__ */ ref(null);
+		const videoEl = /* @__PURE__ */ ref(null);
+		const overlayCanvas = /* @__PURE__ */ ref(null);
+		const videoWrapper = /* @__PURE__ */ ref(null);
+		const resultCanvasEl = /* @__PURE__ */ ref(null);
+		const videoUrl = /* @__PURE__ */ ref(null);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const videoInfo = /* @__PURE__ */ ref(null);
+		const videoNativeW = /* @__PURE__ */ ref(0);
+		const videoNativeH = /* @__PURE__ */ ref(0);
+		const isPlaying = /* @__PURE__ */ ref(false);
+		const topCutRatio = /* @__PURE__ */ ref(.75);
+		const bottomCutRatio = /* @__PURE__ */ ref(.81);
+		const coverTimeSec = /* @__PURE__ */ ref(null);
+		const showCoverTip = /* @__PURE__ */ ref(false);
+		const showCoverOptions = /* @__PURE__ */ ref(false);
+		const customCoverImage = /* @__PURE__ */ ref(null);
+		const coverFileInput = /* @__PURE__ */ ref(null);
+		const timePoints = /* @__PURE__ */ ref([]);
+		const activeTimeIndex = /* @__PURE__ */ ref(-1);
+		const fps = /* @__PURE__ */ ref(30);
+		watch(timePoints, (newVal) => {
+			pushHistory({ timePoints: JSON.parse(JSON.stringify(newVal)) });
+		}, { deep: true });
+		const progressInfo = /* @__PURE__ */ ref({
+			current: 0,
+			total: 0,
+			percent: 0,
+			startTime: null,
+			estimatedTime: 0
+		});
+		const format = /* @__PURE__ */ ref("png");
+		const compression = /* @__PURE__ */ ref(1);
+		const compressionOptions = [
+			{
+				label: "不压缩",
+				value: 1
+			},
+			{
+				label: "2x 压缩",
+				value: .5
+			},
+			{
+				label: "4x 压缩",
+				value: .25
+			},
+			{
+				label: "8x 压缩",
+				value: .125
+			}
+		];
+		const resultCanvas = /* @__PURE__ */ ref(null);
+		const resultWidth = /* @__PURE__ */ ref(0);
+		const resultHeight = /* @__PURE__ */ ref(0);
+		const extractedCount = /* @__PURE__ */ ref(0);
+		const isExtracting = /* @__PURE__ */ ref(false);
+		const statusMsg = /* @__PURE__ */ ref("就绪 · 上传视频后通过滑块调整裁剪线");
+		const statusType = /* @__PURE__ */ ref("");
+		const setStatus = (msg, type = "") => {
+			statusMsg.value = msg;
+			statusType.value = type;
+		};
+		/**
+		* 更新进度信息
+		* @param {number} current - 当前处理的帧数
+		* @param {number} total - 总帧数
+		*/
+		const updateProgress = (current, total) => {
+			progressInfo.value.current = current;
+			progressInfo.value.total = total;
+			progressInfo.value.percent = Math.floor(current / total * 100);
+			if (progressInfo.value.startTime && current > 0) {
+				const avgTimePerFrame = (Date.now() - progressInfo.value.startTime) / 1e3 / current;
+				const remaining = (total - current) * avgTimePerFrame;
+				progressInfo.value.estimatedTime = Math.ceil(remaining);
+			}
+		};
+		/**
+		* 重置进度信息
+		*/
+		const resetProgress = () => {
+			progressInfo.value = {
+				current: 0,
+				total: 0,
+				percent: 0,
+				startTime: null,
+				estimatedTime: 0
+			};
+		};
+		/**
+		* 格式化剩余时间
+		*/
+		const formatRemainingTime = (seconds) => {
+			if (seconds < 60) return `约 ${seconds} 秒`;
+			return `约 ${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`;
+		};
+		const formatTime = (seconds) => {
+			if (seconds === null || seconds === void 0) return "--";
+			const h = Math.floor(seconds / 3600);
+			const m = Math.floor(seconds % 3600 / 60);
+			const s = Math.floor(seconds % 60);
+			const ms = Math.floor(seconds % 1 * 1e3);
+			return String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0") + "." + String(ms).padStart(3, "0");
+		};
+		const formatBytes = (bytes) => {
+			if (!bytes) return "-";
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / 1048576).toFixed(1) + " MB";
+		};
+		const onFileChange = (e) => {
+			const file = e.target.files[0];
+			if (file) loadVideo(file);
+			e.target.value = "";
+		};
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const file = e.dataTransfer.files[0];
+			if (file && file.type.startsWith("video/")) loadVideo(file);
+		};
+		const loadVideo = (file) => {
+			if (!file.type.startsWith("video/")) {
+				showToast("请选择有效的视频文件（支持 MP4、WebM、MOV 等格式）", "error");
+				return;
+			}
+			if (file.size > 2 * 1024 * 1024 * 1024) {
+				showToast("视频文件过大，请选择小于 2GB 的文件", "error");
+				return;
+			}
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			videoUrl.value = URL.createObjectURL(file);
+			videoInfo.value = {
+				name: file.name,
+				width: "加载中...",
+				height: "",
+				size: formatBytes(file.size)
+			};
+			topCutRatio.value = .75;
+			bottomCutRatio.value = .81;
+			coverTimeSec.value = null;
+			showCoverTip.value = false;
+			showCoverOptions.value = false;
+			customCoverImage.value = null;
+			timePoints.value = [];
+			resultCanvas.value = null;
+			setStatus("视频加载中...", "processing");
+		};
+		const removeVideo = () => {
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			videoUrl.value = null;
+			videoInfo.value = null;
+			resultCanvas.value = null;
+			topCutRatio.value = .75;
+			bottomCutRatio.value = .81;
+			coverTimeSec.value = null;
+			showCoverTip.value = false;
+			showCoverOptions.value = false;
+			customCoverImage.value = null;
+			timePoints.value = [];
+			setStatus("就绪 · 上传视频后通过滑块调整裁剪线");
+			showToast("视频已移除", "success");
+		};
+		const onVideoError = (e) => {
+			console.error("视频加载错误:", e);
+			const errorMsg = {
+				1: "视频加载被中止，请重试",
+				2: "网络错误，请检查网络连接后重新上传",
+				3: "视频解码失败，您的浏览器可能不支持此格式，请转换为 MP4 后重试",
+				4: "视频文件损坏或格式不受支持，请尝试其他文件"
+			}[videoEl.value?.error?.code || 4] || "视频加载失败，请检查文件是否完整";
+			showToast(errorMsg, "error");
+			setStatus(`错误：${errorMsg}`, "error");
+			if (videoUrl.value) {
+				URL.revokeObjectURL(videoUrl.value);
+				videoUrl.value = null;
+			}
+			videoInfo.value = null;
+		};
+		const onVideoLoaded = async () => {
+			const video = videoEl.value;
+			if (!video) return;
+			video.muted = true;
+			videoNativeW.value = video.videoWidth;
+			videoNativeH.value = video.videoHeight;
+			fps.value = 30;
+			videoInfo.value = {
+				...videoInfo.value,
+				width: video.videoWidth,
+				height: video.videoHeight
+			};
+			video.addEventListener("keydown", onVideoKeyDown);
+			setStatus("视频就绪 · " + video.videoWidth + "×" + video.videoHeight + " · 时长 " + formatTime(video.duration));
+			await nextTick$1();
+			resizeOverlayCanvas();
+			showToast("视频加载成功", "success");
+		};
+		const onVideoKeyDown = (e) => {
+			if (e.code === "Space" || e.code === "Enter") {
+				e.preventDefault();
+				e.stopPropagation();
+				onKeydown(e);
+			}
+		};
+		const resizeOverlayCanvas = () => {
+			const video = videoEl.value;
+			const canvas = overlayCanvas.value;
+			if (!video || !canvas) return;
+			const rect = video.getBoundingClientRect();
+			const contentH = Math.max(0, rect.height - 44);
+			canvas.width = Math.round(rect.width);
+			canvas.height = Math.round(contentH);
+			canvas.style.width = rect.width + "px";
+			canvas.style.height = contentH + "px";
+			drawOverlay();
+		};
+		/**
+		* 计算 video 元素内，视频画面实际渲染的区域（排除黑边）
+		* 返回相对于 video 元素左上角的坐标（像素）
+		*/
+		const getVideoRenderRect = () => {
+			const video = videoEl.value;
+			if (!video) return null;
+			const containerW = video.clientWidth;
+			const containerH = video.clientHeight;
+			const videoRatio = video.videoWidth / video.videoHeight;
+			const containerRatio = containerW / containerH;
+			let renderW, renderH, offsetX, offsetY;
+			if (videoRatio > containerRatio) {
+				renderW = containerW;
+				renderH = containerW / videoRatio;
+				offsetX = 0;
+				offsetY = (containerH - renderH) / 2;
+			} else {
+				renderH = containerH;
+				renderW = containerH * videoRatio;
+				offsetX = (containerW - renderW) / 2;
+				offsetY = 0;
+			}
+			return {
+				offsetX,
+				offsetY,
+				renderW,
+				renderH
+			};
+		};
+		const drawOverlay = () => {
+			const canvas = overlayCanvas.value;
+			if (!canvas) return;
+			const ctx = canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			const renderRect = getVideoRenderRect();
+			if (!renderRect) return;
+			const topY = Math.round(renderRect.offsetY + topCutRatio.value * renderRect.renderH);
+			const bottomY = Math.round(renderRect.offsetY + bottomCutRatio.value * renderRect.renderH);
+			ctx.fillStyle = "rgba(251, 146, 60, 0.08)";
+			ctx.fillRect(0, 0, canvas.width, topY);
+			ctx.fillStyle = "rgba(251, 146, 60, 0.6)";
+			ctx.font = "bold 11px system-ui";
+			ctx.fillText("封面帧区域", 8, Math.max(16, topY / 2));
+			ctx.fillStyle = "rgba(0, 224, 158, 0.08)";
+			ctx.fillRect(0, topY, canvas.width, bottomY - topY);
+			ctx.save();
+			ctx.strokeStyle = "#ef4444";
+			ctx.lineWidth = 2;
+			ctx.setLineDash([12, 8]);
+			ctx.beginPath();
+			ctx.moveTo(0, topY);
+			ctx.lineTo(canvas.width, topY);
+			ctx.stroke();
+			ctx.setLineDash([]);
+			ctx.fillStyle = "#ef4444";
+			ctx.font = "bold 12px system-ui";
+			ctx.fillText("▲ 上边界 " + Math.round(topCutRatio.value * 100) + "%", 8, topY - 6);
+			ctx.restore();
+			ctx.save();
+			ctx.strokeStyle = "#3b82f6";
+			ctx.lineWidth = 2;
+			ctx.setLineDash([12, 8]);
+			ctx.beginPath();
+			ctx.moveTo(0, bottomY);
+			ctx.lineTo(canvas.width, bottomY);
+			ctx.stroke();
+			ctx.setLineDash([]);
+			ctx.fillStyle = "#3b82f6";
+			ctx.font = "bold 12px system-ui";
+			ctx.fillText("▼ 下边界 " + Math.round(bottomCutRatio.value * 100) + "%", 8, bottomY + 18);
+			ctx.restore();
+		};
+		watch([topCutRatio, bottomCutRatio], () => {
+			drawOverlay();
+		});
+		const toggleCoverOptions = () => {
+			showCoverOptions.value = !showCoverOptions.value;
+		};
+		const setCoverFrameFromVideo = () => {
+			const video = videoEl.value;
+			if (!video) return;
+			coverTimeSec.value = video.currentTime;
+			customCoverImage.value = null;
+			showCoverOptions.value = false;
+			showToast("封面帧已设为 " + formatTime(video.currentTime), "success");
+		};
+		const onCoverFileChange = (e) => {
+			const file = e.target.files[0];
+			if (file) {
+				const img = new Image();
+				img.onload = () => {
+					customCoverImage.value = img;
+					coverTimeSec.value = null;
+					showCoverOptions.value = false;
+					showToast("自定义封面已设置", "success");
+				};
+				img.src = URL.createObjectURL(file);
+			}
+			e.target.value = "";
+		};
+		const clearCoverFrame = () => {
+			coverTimeSec.value = null;
+			customCoverImage.value = null;
+			showCoverOptions.value = false;
+		};
+		const togglePlayPause = () => {
+			const video = videoEl.value;
+			console.log(video);
+			if (!video) return;
+			if (video.paused) {
+				video.play();
+				isPlaying.value = true;
+			} else {
+				video.pause();
+				isPlaying.value = false;
+			}
+		};
+		const markCurrentTime = () => {
+			const video = videoEl.value;
+			if (!video) return;
+			const timeSec = video.currentTime;
+			const frameIdx = Math.round(timeSec * fps.value);
+			timePoints.value.push({
+				timeSec,
+				frameIdx
+			});
+			setStatus("已标记 " + timePoints.value.length + " 个时间点");
+		};
+		const clearMarks = () => {
+			timePoints.value = [];
+			activeTimeIndex.value = -1;
+		};
+		const removeTimePoint = (timePoint) => {
+			const index = timePoints.value.indexOf(timePoint);
+			if (index !== -1) {
+				timePoints.value.splice(index, 1);
+				if (activeTimeIndex.value === index) activeTimeIndex.value = -1;
+				else if (activeTimeIndex.value > index) activeTimeIndex.value--;
+				setStatus("已删除 " + timePoint.timeSec + " 的时间点");
+			}
+		};
+		const goToTime = (timeSec) => {
+			const video = videoEl.value;
+			if (!video) return;
+			const index = timePoints.value.findIndex((p) => p.timeSec === timeSec);
+			if (activeTimeIndex.value !== index) activeTimeIndex.value = index;
+			else activeTimeIndex.value = -1;
+			video.currentTime = timeSec;
+			setStatus("跳转到 " + formatTime(timeSec));
+		};
+		const onKeydown = (e) => {
+			const tag = document.activeElement ? document.activeElement.tagName : "";
+			if (tag === "TEXTAREA") return;
+			if (tag === "INPUT") return;
+			if (!videoUrl.value) return;
+			const video = videoEl.value;
+			if (!video) return;
+			if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+				e.preventDefault();
+				handleUndo();
+				return;
+			}
+			if ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "z" && e.shiftKey)) {
+				e.preventDefault();
+				handleRedo();
+				return;
+			}
+			if (e.code === "Space") {
+				e.preventDefault();
+				e.stopPropagation();
+				if (video.paused) video.play();
+				else video.pause();
+			}
+			if (e.code === "Enter") {
+				e.preventDefault();
+				e.stopPropagation();
+				markCurrentTime();
+			}
+		};
+		const captureFrame = (video, timeSec, cropArea) => {
+			return new Promise((resolve, reject) => {
+				const timeout = setTimeout(function() {
+					video.removeEventListener("seeked", onSeeked);
+					reject(/* @__PURE__ */ new Error("Seek 超时 @ " + formatTime(timeSec)));
+				}, 8e3);
+				function onSeeked() {
+					clearTimeout(timeout);
+					video.removeEventListener("seeked", onSeeked);
+					try {
+						const w = cropArea.x2 - cropArea.x1;
+						const h = cropArea.y2 - cropArea.y1;
+						if (w <= 0 || h <= 0) throw new Error(`无效的裁剪区域: ${w}x${h}`);
+						if (cropArea.x1 < 0 || cropArea.y1 < 0 || cropArea.x2 > video.videoWidth || cropArea.y2 > video.videoHeight) throw new Error("裁剪区域超出视频边界");
+						const c = document.createElement("canvas");
+						c.width = w;
+						c.height = h;
+						console.log(`捕获帧 @ ${formatTime(timeSec)}，裁剪区域: (${cropArea.x1}, ${cropArea.y1}) - (${cropArea.x2}, ${cropArea.y2})`);
+						c.getContext("2d").drawImage(video, cropArea.x1, cropArea.y1, w, h, 0, 0, w, h);
+						resolve(c);
+					} catch (err) {
+						reject(err);
+					}
+				}
+				video.addEventListener("seeked", onSeeked);
+				video.currentTime = timeSec;
+			});
+		};
+		/**
+		* 检查当前内存使用情况
+		* @returns {Object|null} 内存信息或 null（如果浏览器不支持）
+		*/
+		const checkMemoryUsage = () => {
+			if (performance.memory) {
+				const usedMB = performance.memory.usedJSHeapSize / 1024 / 1024;
+				const totalMB = performance.memory.jsHeapSizeLimit / 1024 / 1024;
+				const percent = usedMB / totalMB * 100;
+				return {
+					used: usedMB.toFixed(1),
+					total: totalMB.toFixed(1),
+					percent: percent.toFixed(1)
+				};
+			}
+			return null;
+		};
+		/**
+		* 释放 Canvas 内存
+		* @param {HTMLCanvasElement} canvas 
+		*/
+		const releaseCanvas = (canvas) => {
+			if (!canvas) return;
+			const ctx = canvas.getContext("2d");
+			if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+			canvas.width = 0;
+			canvas.height = 0;
+		};
+		const extractAndStitch = async () => {
+			const video = videoEl.value;
+			if (!video || !videoUrl.value) return;
+			if (topCutRatio.value >= bottomCutRatio.value) {
+				showToast("裁剪区域无效：红线必须在蓝线上方", "error");
+				setStatus("裁剪区域无效：红线必须在蓝线上方", "error");
+				return;
+			}
+			const maxFrames = 200;
+			const estimatedFrames = timePoints.value.length > 0 ? timePoints.value.length : Math.ceil(video.duration);
+			if (estimatedFrames > maxFrames) {
+				const memInfo = checkMemoryUsage();
+				showToast(`帧数过多（${estimatedFrames} 帧），建议减少到 ${maxFrames} 帧以内${memInfo ? ` (当前内存: ${memInfo.used}MB / ${memInfo.total}MB)` : ""}`, "warning");
+				setStatus(`警告：预计提取 ${estimatedFrames} 帧，可能影响性能`, "warning");
+				if (memInfo && parseFloat(memInfo.percent) > 50) {
+					if (!confirm(`内存使用率已达 ${memInfo.percent}%，处理 ${estimatedFrames} 帧可能导致浏览器崩溃。\n\n是否继续？`)) {
+						isExtracting.value = false;
+						return;
+					}
+				}
+			}
+			isExtracting.value = true;
+			resultCanvas.value = null;
+			resetProgress();
+			progressInfo.value.startTime = Date.now();
+			setStatus("提取中...", "processing");
+			try {
+				const rect = video.getBoundingClientRect();
+				const controlBarH = 44;
+				const visualVideoH = rect.height;
+				const effectiveVisualH = visualVideoH - controlBarH;
+				if (effectiveVisualH <= 0 || visualVideoH <= 0) throw new Error("视频显示尺寸异常，无法计算裁剪区域");
+				effectiveVisualH / visualVideoH * videoNativeH.value;
+				if (!getVideoRenderRect()) throw new Error("无法计算视频渲染区域");
+				const nativeTopY = Math.round(topCutRatio.value * videoNativeH.value);
+				const nativeBottomY = Math.round(bottomCutRatio.value * videoNativeH.value);
+				var subtitlePoints = [];
+				if (timePoints.value.length > 0) subtitlePoints = timePoints.value.map(function(p) {
+					return p.timeSec;
+				});
+				else {
+					var duration = video.duration;
+					if (!duration || !isFinite(duration)) throw new Error("无法获取视频时长");
+					for (var t = 0; t <= duration; t += 1) subtitlePoints.push(Math.min(t, duration - .001));
+				}
+				var coverTime;
+				if (coverTimeSec.value !== null) coverTime = coverTimeSec.value;
+				else coverTime = subtitlePoints.length > 0 ? subtitlePoints[0] : 0;
+				var coverCrop = {
+					x1: 0,
+					y1: 0,
+					x2: videoNativeW.value,
+					y2: Math.round(nativeTopY)
+				};
+				var subCrop = {
+					x1: 0,
+					y1: Math.round(nativeTopY),
+					x2: videoNativeW.value,
+					y2: Math.round(nativeBottomY)
+				};
+				const allFrames = [];
+				if (customCoverImage.value) {
+					setStatus("处理自定义封面...", "processing");
+					const canvas = document.createElement("canvas");
+					canvas.width = videoNativeW.value;
+					canvas.height = Math.round(nativeTopY);
+					const ctx = canvas.getContext("2d");
+					const scale = videoNativeW.value / customCoverImage.value.width;
+					const scaledHeight = customCoverImage.value.height * scale;
+					ctx.drawImage(customCoverImage.value, 0, 0, videoNativeW.value, Math.min(scaledHeight, canvas.height));
+					allFrames.push(canvas);
+				} else if (coverCrop.y2 > coverCrop.y1) {
+					setStatus("提取封面帧...", "processing");
+					const coverFrame = await captureFrame(video, coverTime, coverCrop);
+					allFrames.push(coverFrame);
+				}
+				const CHUNK_SIZE = 10;
+				const subtitleFrames = [];
+				for (let i = 0; i < subtitlePoints.length; i++) {
+					updateProgress(i + 1, subtitlePoints.length);
+					const frame = await captureFrame(video, subtitlePoints[i], subCrop);
+					subtitleFrames.push(frame);
+					if ((i + 1) % CHUNK_SIZE === 0 || i === subtitlePoints.length - 1) {
+						const memInfo = checkMemoryUsage();
+						if (memInfo && parseFloat(memInfo.percent) > 70) {
+							console.warn(`内存使用率较高: ${memInfo.used}MB / ${memInfo.total}MB (${memInfo.percent}%)`);
+							showToast(`内存使用率较高 (${memInfo.percent}%)，建议减少提取帧数`, "warning");
+						}
+						if (i < subtitlePoints.length - 1) console.log(`已处理 ${i + 1} 帧，继续处理...`);
+					}
+				}
+				if (subtitleFrames.length === 0) throw new Error("没有成功提取到任何字幕帧");
+				allFrames.push(...subtitleFrames);
+				setStatus("拼接中...", "processing");
+				let maxW = 0;
+				for (let j = 0; j < allFrames.length; j++) if (allFrames[j].width > maxW) maxW = allFrames[j].width;
+				let totalH = 0;
+				for (let k = 0; k < allFrames.length; k++) totalH += allFrames[k].height;
+				const result = document.createElement("canvas");
+				result.width = maxW;
+				result.height = totalH;
+				const ctx = result.getContext("2d");
+				let y = 0;
+				for (let m = 0; m < allFrames.length; m++) {
+					const offsetX = Math.floor((maxW - allFrames[m].width) / 2);
+					ctx.drawImage(allFrames[m], offsetX, y);
+					y += allFrames[m].height;
+					if (m > 0) releaseCanvas(allFrames[m]);
+				}
+				resultCanvas.value = result;
+				resultWidth.value = result.width;
+				resultHeight.value = result.height;
+				extractedCount.value = subtitleFrames.length;
+				await nextTick$1();
+				if (resultCanvasEl.value) {
+					resultCanvasEl.value.width = result.width;
+					resultCanvasEl.value.height = result.height;
+					resultCanvasEl.value.getContext("2d").drawImage(result, 0, 0);
+					resultCanvasEl.value.scrollIntoView({
+						behavior: "smooth",
+						block: "nearest"
+					});
+				}
+				const coverCount = allFrames.length - subtitleFrames.length;
+				setStatus("完成！" + (coverCount > 0 ? "封面帧 " + coverCount + " 张 + " : "") + "字幕帧 " + subtitleFrames.length + " 张 · " + result.width + "×" + result.height + " px", "success");
+				showToast("提取完成，共 " + allFrames.length + " 帧", "success");
+				const finalMem = checkMemoryUsage();
+				if (finalMem) console.log(`处理完成，当前内存使用: ${finalMem.used}MB / ${finalMem.total}MB (${finalMem.percent}%)`);
+			} catch (err) {
+				console.error("提取失败:", err);
+				const errorMsg = err.message || "未知错误";
+				setStatus("提取失败：" + errorMsg, "error");
+				showToast("字幕提取失败：" + errorMsg + "，请检查视频文件后重试", "error");
+			} finally {
+				isExtracting.value = false;
+				setTimeout(() => {
+					resetProgress();
+				}, 1e3);
+			}
+		};
+		const saveResult = () => {
+			if (!resultCanvas.value) return;
+			var mime = {
+				png: "image/png",
+				jpeg: "image/jpeg",
+				webp: "image/webp"
+			}[format.value] || "image/png";
+			var ext = {
+				png: "png",
+				jpeg: "jpg",
+				webp: "webp"
+			}[format.value] || "png";
+			var quality = format.value === "png" ? void 0 : compression.value;
+			resultCanvas.value.toBlob(function(blob) {
+				if (!blob) {
+					showToast("保存失败", "error");
+					return;
+				}
+				var url = URL.createObjectURL(blob);
+				var a = document.createElement("a");
+				a.href = url;
+				a.download = "subtitles_" + Date.now() + "." + ext;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				showToast("已保存 " + format.value.toUpperCase() + "，" + (blob.size / 1024).toFixed(0) + " KB", "success");
+			}, mime, quality);
+		};
+		var resizeObserver = null;
+		watch(videoEl, function(el) {
+			if (resizeObserver) {
+				resizeObserver.disconnect();
+				resizeObserver = null;
+			}
+			if (!el) return;
+			resizeObserver = new ResizeObserver(function() {
+				resizeOverlayCanvas();
+			});
+			resizeObserver.observe(el);
+		});
+		onMounted(function() {
+			document.addEventListener("keydown", onKeydown);
+		});
+		onUnmounted(function() {
+			document.removeEventListener("keydown", onKeydown);
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			if (resizeObserver) resizeObserver.disconnect();
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$8, [
+				createBaseVNode("div", _hoisted_2$8, [
+					createBaseVNode("div", {
+						class: normalizeClass(["upload-zone", {
+							"drag-over": isDragOver.value,
+							"has-video": videoUrl.value
+						}]),
+						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
+						onDragover: _cache[1] || (_cache[1] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [
+						_cache[8] || (_cache[8] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
+						createBaseVNode("p", _hoisted_3$8, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						_cache[9] || (_cache[9] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
+						createBaseVNode("input", {
+							ref_key: "fileInput",
+							ref: fileInput,
+							type: "file",
+							accept: "video/*",
+							class: "hidden-input",
+							onChange: onFileChange
+						}, null, 544)
+					], 34),
+					videoUrl.value ? (openBlock(), createElementBlock("div", {
+						key: 0,
+						class: "video-wrapper",
+						ref_key: "videoWrapper",
+						ref: videoWrapper
+					}, [
+						createBaseVNode("button", {
+							class: "video-close-btn",
+							onClick: withModifiers(removeVideo, ["stop"]),
+							title: "移除当前视频"
+						}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])]),
+						createBaseVNode("video", {
+							ref_key: "videoEl",
+							ref: videoEl,
+							src: videoUrl.value,
+							controls: "",
+							muted: "",
+							class: "video-player",
+							onLoadedmetadata: onVideoLoaded,
+							onError: onVideoError
+						}, null, 40, _hoisted_4$8),
+						createBaseVNode("canvas", {
+							ref_key: "overlayCanvas",
+							ref: overlayCanvas,
+							class: "overlay-canvas"
+						}, null, 512)
+					], 512)) : createCommentVNode("", true),
+					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$8, [
+						createBaseVNode("span", null, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
+						createBaseVNode("span", null, [_cache[12] || (_cache[12] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.width) + " × " + toDisplayString(videoInfo.value.height), 1)]),
+						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
+					])) : createCommentVNode("", true),
+					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$8, [
+						createBaseVNode("div", _hoisted_7$8, [createBaseVNode("button", {
+							class: normalizeClass(["btn cover-btn", { "cover-active": coverTimeSec.value !== null || customCoverImage.value !== null }]),
+							onClick: toggleCoverOptions,
+							onMouseenter: _cache[3] || (_cache[3] = ($event) => showCoverTip.value = true),
+							onMouseleave: _cache[4] || (_cache[4] = ($event) => showCoverTip.value = false),
+							title: "设置封面"
+						}, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "自动封面"), 1)], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$7, [
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: setCoverFrameFromVideo
+							}, [..._cache[15] || (_cache[15] = [createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1), createTextVNode(" 当前封面", -1)])]),
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: _cache[5] || (_cache[5] = ($event) => coverFileInput.value.click())
+							}, [..._cache[16] || (_cache[16] = [createBaseVNode("i", { class: "fa-solid fa-map-marker" }, null, -1), createTextVNode(" 本地封面", -1)])]),
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: clearCoverFrame
+							}, [..._cache[17] || (_cache[17] = [createBaseVNode("i", { class: "fa-solid fa-check-square" }, null, -1), createTextVNode(" 自动封面 ", -1)])]),
+							createBaseVNode("input", {
+								ref_key: "coverFileInput",
+								ref: coverFileInput,
+								type: "file",
+								accept: "image/*",
+								onChange: onCoverFileChange,
+								class: "hidden-input"
+							}, null, 544)
+						])) : createCommentVNode("", true)]),
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !videoUrl.value,
+							onClick: togglePlayPause
+						}, [
+							withDirectives(createBaseVNode("i", _hoisted_10$7, null, 512), [[vShow, !isPlaying.value]]),
+							withDirectives(createBaseVNode("i", _hoisted_11$7, null, 512), [[vShow, isPlaying.value]]),
+							createTextVNode(" " + toDisplayString(isPlaying.value ? "暂停" : "播放"), 1)
+						], 8, _hoisted_9$7),
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !videoUrl.value,
+							onClick: markCurrentTime
+						}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-circle-dot" }, null, -1), createTextVNode(" 标记当前帧 ", -1)])], 8, _hoisted_12$7)
+					])) : createCommentVNode("", true)
+				]),
+				createBaseVNode("div", _hoisted_13$6, [createBaseVNode("div", _hoisted_14$6, [
+					_cache[30] || (_cache[30] = createBaseVNode("div", { class: "panel-title" }, [
+						createBaseVNode("i", { class: "fa-solid fa-sliders" }),
+						createTextVNode(" 拼接设置 "),
+						createBaseVNode("span", { class: "panel-hint" }, "输入框支持滚轮和键盘上下键调整")
+					], -1)),
+					createBaseVNode("div", _hoisted_15$6, [_cache[19] || (_cache[19] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-red" }), createTextVNode(" 红线位置（字幕上边界） ")], -1)), createVNode(SliderInput_default, {
+						"model-value": Math.round(topCutRatio.value * 100),
+						label: "",
+						unit: "%",
+						min: 0,
+						max: 100,
+						"onUpdate:modelValue": _cache[6] || (_cache[6] = (val) => topCutRatio.value = val / 100),
+						step: "1"
+					}, null, 8, ["model-value"])]),
+					createBaseVNode("div", _hoisted_16$6, [_cache[20] || (_cache[20] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-blue" }), createTextVNode(" 蓝线位置（字幕下边界） ")], -1)), createVNode(SliderInput_default, {
+						"model-value": Math.round(bottomCutRatio.value * 100),
+						label: "",
+						unit: "%",
+						min: 2,
+						max: 100,
+						"onUpdate:modelValue": _cache[7] || (_cache[7] = (val) => bottomCutRatio.value = val / 100),
+						step: "1"
+					}, null, 8, ["model-value"])]),
+					createBaseVNode("div", _hoisted_17$6, [_cache[21] || (_cache[21] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_18$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+						"png",
+						"jpeg",
+						"webp"
+					], (fmt) => {
+						return createBaseVNode("button", {
+							key: fmt,
+							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
+							onClick: ($event) => format.value = fmt
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_19$6);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_20$6, [createBaseVNode("label", _hoisted_21$6, [_cache[22] || (_cache[22] = createBaseVNode("label", {
+						class: "form-label",
+						style: { "display": "inline-block" }
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_22$5, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_23$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
+							disabled: format.value === "png",
+							onClick: ($event) => compression.value = opt.value
+						}, toDisplayString(opt.label), 11, _hoisted_24$5);
+					}), 64))])]),
+					_cache[31] || (_cache[31] = createBaseVNode("div", { class: "panel-title" }, [
+						createBaseVNode("i", { class: "fa-solid fa-clock" }),
+						createTextVNode(" 时间标记 "),
+						createBaseVNode("span", { class: "panel-hint" }, "Enter 添加帧 · Space 播放/暂停")
+					], -1)),
+					createBaseVNode("div", _hoisted_25$5, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(timePoints.value, (time, index) => {
+						return openBlock(), createElementBlock("div", {
+							class: normalizeClass(["time-item", { active: activeTimeIndex.value === index }]),
+							key: index,
+							onClick: ($event) => goToTime(time.timeSec)
+						}, [createBaseVNode("span", _hoisted_27$5, toDisplayString(formatTime(time.timeSec)), 1), createBaseVNode("button", {
+							class: "time-item-btn",
+							onClick: withModifiers(($event) => removeTimePoint(time), ["stop"])
+						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_28$5)], 10, _hoisted_26$5);
+					}), 128))], 512),
+					createBaseVNode("div", _hoisted_29$5, [
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !unref(canUndo)(),
+							onClick: handleUndo,
+							title: "撤销 (Ctrl+Z)",
+							style: {
+								"flex": "0 0 auto",
+								"padding": "0.6rem 0.8rem",
+								"width": "20%"
+							}
+						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_30$5),
+						createBaseVNode("button", {
+							class: "btn",
+							disabled: !unref(canRedo)(),
+							onClick: handleRedo,
+							title: "重做 (Ctrl+Y)",
+							style: {
+								"flex": "0 0 auto",
+								"padding": "0.6rem 0.8rem",
+								"width": "20%"
+							}
+						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_31$5),
+						createBaseVNode("button", {
+							class: "btn btn-danger",
+							disabled: timePoints.value.length === 0,
+							onClick: clearMarks,
+							style: { "width": "50%" }
+						}, [..._cache[26] || (_cache[26] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 清空标记 ", -1)])], 8, _hoisted_32$5),
+						createBaseVNode("button", {
+							class: "btn btn-primary btn-block",
+							disabled: !videoUrl.value || isExtracting.value,
+							onClick: extractAndStitch
+						}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_33$5)
+					]),
+					isExtracting.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_34$5, [
+						createBaseVNode("div", _hoisted_35$4, [createBaseVNode("span", _hoisted_36$3, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_37$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+						createBaseVNode("div", _hoisted_38$2, [createBaseVNode("div", {
+							class: "progress-fill",
+							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
+						}, null, 4)]),
+						createBaseVNode("div", _hoisted_39$1, [progressInfo.value.estimatedTime > 0 ? (openBlock(), createElementBlock("span", _hoisted_40$1, [_cache[28] || (_cache[28] = createBaseVNode("i", { class: "fa-regular fa-clock" }, null, -1)), createTextVNode(" 剩余时间：" + toDisplayString(formatRemainingTime(progressInfo.value.estimatedTime)), 1)])) : (openBlock(), createElementBlock("span", _hoisted_41$1, [..._cache[29] || (_cache[29] = [createBaseVNode("i", { class: "fa-solid fa-spinner fa-spin" }, null, -1), createTextVNode(" 正在初始化... ", -1)])]))])
+					])) : createCommentVNode("", true)
+				])]),
+				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_42$1, [createBaseVNode("div", _hoisted_43$1, [
+					createBaseVNode("div", _hoisted_44$1, [_cache[32] || (_cache[32] = createBaseVNode("i", {
+						class: "fa-solid fa-check-circle",
+						style: { "color": "var(--accent)" }
+					}, null, -1)), createTextVNode(" 提取完成 · " + toDisplayString(resultWidth.value) + " × " + toDisplayString(resultHeight.value) + " px · 共 " + toDisplayString(extractedCount.value) + " 帧 ", 1)]),
+					createBaseVNode("div", _hoisted_45, [createBaseVNode("canvas", {
+						ref_key: "resultCanvasEl",
+						ref: resultCanvasEl,
+						class: "result-canvas"
+					}, null, 512)]),
+					createBaseVNode("div", _hoisted_46, [createBaseVNode("button", {
+						class: "btn btn-primary",
+						onClick: saveResult
+					}, [_cache[33] || (_cache[33] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
+				])])) : createCommentVNode("", true)
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-2acf98ed"]]);
+//#endregion
+//#region src/views/ImageSubtitle.vue
+var _hoisted_1$7 = { class: "app-layout" };
+var _hoisted_2$7 = { class: "app-left" };
+var _hoisted_3$7 = { class: "upload-text" };
+var _hoisted_4$7 = {
+	key: 0,
+	class: "upload-hint"
+};
+var _hoisted_5$7 = { class: "canvas-container" };
+var _hoisted_6$7 = {
+	key: 0,
+	class: "nav-bar"
+};
+var _hoisted_7$7 = { class: "nav-info" };
+var _hoisted_8$6 = { class: "cover-btn-container" };
+var _hoisted_9$6 = ["disabled"];
+var _hoisted_10$6 = {
+	key: 0,
+	class: "cover-options"
+};
+var _hoisted_11$6 = ["disabled"];
+var _hoisted_12$6 = ["disabled"];
+var _hoisted_13$5 = ["disabled"];
+var _hoisted_14$5 = ["disabled"];
+var _hoisted_15$5 = ["disabled"];
+var _hoisted_16$5 = {
+	key: 1,
+	class: "info-bar"
+};
+var _hoisted_17$5 = { class: "nav-filename" };
+var _hoisted_18$5 = { class: "app-middle" };
+var _hoisted_19$5 = { class: "settings-panel" };
+var _hoisted_20$5 = { class: "setting-item" };
+var _hoisted_21$5 = { class: "setting-item" };
+var _hoisted_22$4 = { class: "setting-item" };
+var _hoisted_23$4 = { class: "seg-control" };
+var _hoisted_24$4 = ["onClick"];
+var _hoisted_25$4 = { class: "setting-item" };
+var _hoisted_26$4 = { class: "form-label" };
+var _hoisted_27$4 = {
+	key: 0,
+	class: "form-hint"
+};
+var _hoisted_28$4 = { class: "seg-control" };
+var _hoisted_29$4 = ["disabled", "onClick"];
+var _hoisted_30$4 = { class: "action-row" };
+var _hoisted_31$4 = ["disabled"];
+var _hoisted_32$4 = {
+	key: 0,
+	class: "app-right result-section"
+};
+var _hoisted_33$4 = { class: "result-header" };
+var _hoisted_34$4 = { class: "result-canvas-container" };
+var _hoisted_35$3 = { class: "result-actions" };
+var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageSubtitle",
+	setup(__props) {
+		const { showToast } = useToast();
+		const fileInput = /* @__PURE__ */ ref(null);
+		const canvas = /* @__PURE__ */ ref(null);
+		const resultCanvasEl = /* @__PURE__ */ ref(null);
+		const images = /* @__PURE__ */ ref([]);
+		const currentIndex = /* @__PURE__ */ ref(0);
+		const coverMode = /* @__PURE__ */ ref("auto");
+		const coverImageIndex = /* @__PURE__ */ ref(null);
+		const showCoverOptions = /* @__PURE__ */ ref(false);
+		const customCoverImage = /* @__PURE__ */ ref(null);
+		const coverFileInput = /* @__PURE__ */ ref(null);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const topCutRatio = /* @__PURE__ */ ref(.75);
+		const bottomCutRatio = /* @__PURE__ */ ref(.92);
+		const dragging = /* @__PURE__ */ ref(null);
+		const spacing = /* @__PURE__ */ ref(0);
+		const format = /* @__PURE__ */ ref("png");
+		const compressionOptions = [
+			{
+				label: "不压缩",
+				value: 1
+			},
+			{
+				label: "2x 压缩",
+				value: .5
+			},
+			{
+				label: "4x 压缩",
+				value: .25
+			},
+			{
+				label: "8x 压缩",
+				value: .125
+			}
+		];
+		const compression = /* @__PURE__ */ ref(1);
+		const resultCanvas = /* @__PURE__ */ ref(null);
+		const resultWidth = /* @__PURE__ */ ref(0);
+		const resultHeight = /* @__PURE__ */ ref(0);
+		const isGenerating = /* @__PURE__ */ ref(false);
+		const statusMsg = /* @__PURE__ */ ref("");
+		const statusType = /* @__PURE__ */ ref("");
+		const setStatus = (msg, type = "") => {
+			statusMsg.value = msg;
+			statusType.value = type;
+		};
+		const formatBytes = (bytes) => {
+			if (!bytes) return "-";
+			if (bytes < 1024) return bytes + " B";
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / 1048576).toFixed(1) + " MB";
+		};
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith("image/"));
+			if (files.length > 0) addFiles(files);
+		};
+		const onFileChange = async (e) => {
+			const files = Array.from(e.target.files);
+			if (files.length > 0) await addFiles(files);
+			e.target.value = "";
+		};
+		const addFiles = async (files) => {
+			const newItems = await Promise.all(files.map((file) => new Promise((resolve) => {
+				const url = URL.createObjectURL(file);
+				const img = new Image();
+				img.onload = () => resolve({
+					id: Date.now() + Math.random(),
+					name: file.name,
+					size: file.size,
+					width: img.naturalWidth,
+					height: img.naturalHeight,
+					url,
+					img
+				});
+				img.src = url;
+			})));
+			images.value.push(...newItems);
+			if (images.value.length === newItems.length) currentIndex.value = 0;
+			setStatus(`已加载 ${images.value.length} 张图片`, "success");
+			showToast(`已添加 ${newItems.length} 张图片`, "success");
+			await nextTick$1();
+			drawCanvas();
+		};
+		const clearAll = () => {
+			images.value.forEach((item) => URL.revokeObjectURL(item.url));
+			images.value = [];
+			currentIndex.value = 0;
+			resultCanvas.value = null;
+			clearCoverFrame();
+			setStatus("已清空所有图片");
+			clearCanvas();
+		};
+		const goPrev = () => {
+			if (images.value.length === 0) return;
+			currentIndex.value = (currentIndex.value - 1 + images.value.length) % images.value.length;
+		};
+		const goNext = () => {
+			if (images.value.length === 0) return;
+			currentIndex.value = (currentIndex.value + 1) % images.value.length;
+		};
+		const toggleCoverOptions = () => {
+			showCoverOptions.value = !showCoverOptions.value;
+		};
+		const setCoverFromCurrentImage = () => {
+			if (images.value.length === 0) return;
+			coverMode.value = "current";
+			coverImageIndex.value = currentIndex.value;
+			customCoverImage.value = null;
+			showCoverOptions.value = false;
+			showToast("已将当前图片设为封面", "success");
+		};
+		const onCoverFileChange = (e) => {
+			const file = e.target.files[0];
+			if (!file) return;
+			const img = new Image();
+			img.onload = () => {
+				customCoverImage.value = img;
+				coverMode.value = "custom";
+				coverImageIndex.value = null;
+				showCoverOptions.value = false;
+				showToast("自定义封面已设置", "success");
+			};
+			img.src = URL.createObjectURL(file);
+			e.target.value = "";
+		};
+		const clearCoverFrame = () => {
+			coverMode.value = "auto";
+			coverImageIndex.value = null;
+			customCoverImage.value = null;
+			showCoverOptions.value = false;
+			showToast("已恢复自动封面", "success");
+		};
+		const deleteCurrentImage = () => {
+			const index = currentIndex.value;
+			images.value.splice(index, 1);
+			if (coverMode.value === "current" && coverImageIndex.value !== null) {
+				if (coverImageIndex.value === index) clearCoverFrame();
+				else if (coverImageIndex.value > index) coverImageIndex.value--;
+			}
+			if (images.value.length === 0) currentIndex.value = 0;
+			else if (index >= images.value.length) currentIndex.value = images.value.length - 1;
+			setStatus(`已删除第 ${index + 1} 张图片`);
+			showToast(`已删除第 ${index + 1} 张图片`, "success");
+		};
+		const clearImages = () => {
+			clearAll();
+			if (images.value.length > 0) showToast("已清空所有图片", "success");
+		};
+		/**
+		* 核心绘制函数：把当前图片 + 两条裁剪线画到 Canvas 上
+		* 每次切换图片、移动裁剪线、修改设置都会调用
+		*/
+		const drawCanvas = () => {
+			const cvs = canvas.value;
+			if (!cvs || images.value.length === 0) return;
+			const item = images.value[currentIndex.value];
+			if (!item) return;
+			const img = item.img;
+			const displayW = img.naturalWidth;
+			const displayH = img.naturalHeight;
+			cvs.width = displayW;
+			cvs.height = displayH;
+			const ctx = cvs.getContext("2d");
+			ctx.drawImage(img, 0, 0, displayW, displayH);
+			const topY = Math.round(topCutRatio.value * displayH);
+			const bottomY = Math.round(bottomCutRatio.value * displayH);
+			ctx.fillStyle = "rgba(0,0,0,0.35)";
+			ctx.fillRect(0, 0, displayW, topY);
+			ctx.save();
+			ctx.strokeStyle = "#ef4444";
+			ctx.lineWidth = Math.max(2, displayH * .003);
+			ctx.setLineDash([12, 8]);
+			ctx.beginPath();
+			ctx.moveTo(0, topY);
+			ctx.lineTo(displayW, topY);
+			ctx.stroke();
+			ctx.fillStyle = "#ef4444";
+			ctx.font = `bold ${Math.max(12, displayH * .018)}px system-ui`;
+			ctx.fillText("▲ 上边界" + Math.round(topCutRatio.value * 100) + "%", 8, topY - 6);
+			ctx.restore();
+			ctx.save();
+			ctx.strokeStyle = "#3b82f6";
+			ctx.lineWidth = Math.max(2, displayH * .003);
+			ctx.setLineDash([12, 8]);
+			ctx.beginPath();
+			ctx.moveTo(0, bottomY);
+			ctx.lineTo(displayW, bottomY);
+			ctx.stroke();
+			ctx.fillStyle = "#3b82f6";
+			ctx.font = `bold ${Math.max(12, displayH * .018)}px system-ui`;
+			ctx.fillText("▼ 下边界" + Math.round(bottomCutRatio.value * 100) + "%", 8, bottomY + Math.max(16, displayH * .022));
+			ctx.restore();
+		};
+		/** 清空 Canvas */
+		const clearCanvas = () => {
+			const cvs = canvas.value;
+			if (!cvs) return;
+			cvs.getContext("2d").clearRect(0, 0, cvs.width, cvs.height);
+			cvs.width = 0;
+			cvs.height = 0;
+		};
+		/**
+		* 把鼠标/触摸事件的客户端坐标转为 Canvas 内的比例值
+		* 因为 Canvas 的 CSS 显示尺寸可能和 width/height 属性不同
+		* 必须用 getBoundingClientRect 换算
+		*/
+		const getCanvasRatio = (clientY) => {
+			const rect = canvas.value.getBoundingClientRect();
+			return (clientY - rect.top) / rect.height;
+		};
+		/**
+		* 鼠标按下：判断点击的是哪条线
+		* 判断规则：点击位置到某条线的距离 < 阈值（5%）
+		*/
+		const onMouseDown = (e) => {
+			if (images.value.length === 0) return;
+			const ratio = getCanvasRatio(e.clientY);
+			if (Math.abs(ratio - topCutRatio.value) < .05) dragging.value = "top";
+			else if (Math.abs(ratio - bottomCutRatio.value) < .05) dragging.value = "bottom";
+		};
+		/**
+		* 鼠标移动：更新被拖拽的线的位置
+		*/
+		const onMouseMove = (e) => {
+			if (!dragging.value || images.value.length === 0) return;
+			const ratio = Math.min(.98, Math.max(.02, getCanvasRatio(e.clientY)));
+			if (dragging.value === "top") {
+				if (ratio < bottomCutRatio.value - .02) topCutRatio.value = ratio;
+			} else if (ratio > topCutRatio.value + .02) bottomCutRatio.value = ratio;
+		};
+		/** 鼠标释放：停止拖拽 */
+		const onMouseUp = () => {
+			dragging.value = null;
+		};
+		const onTouchStart = (e) => {
+			if (e.touches.length === 1) onMouseDown({ clientY: e.touches[0].clientY });
+		};
+		const onTouchMove = (e) => {
+			if (e.touches.length === 1) onMouseMove({ clientY: e.touches[0].clientY });
+		};
+		watch([
+			currentIndex,
+			topCutRatio,
+			bottomCutRatio
+		], () => {
+			nextTick$1(drawCanvas);
+		});
+		watch(images, () => {
+			nextTick$1(drawCanvas);
+		}, { deep: true });
+		/**
+		* 从图片中裁剪指定区域，返回 Canvas
+		*/
+		const cropImage = (img, y, height) => {
+			const cvs = document.createElement("canvas");
+			cvs.width = img.naturalWidth;
+			cvs.height = height;
+			cvs.getContext("2d").drawImage(img, 0, y, img.naturalWidth, height, 0, 0, img.naturalWidth, height);
+			return cvs;
+		};
+		/**
+		* 垂直拼接多个 Canvas
+		*/
+		const stitchVertically = (canvases, gap, bgColor) => {
+			const maxW = Math.max(...canvases.map((c) => c.width));
+			const totalH = canvases.reduce((sum, c) => sum + c.height, 0) + gap * (canvases.length - 1);
+			const result = document.createElement("canvas");
+			result.width = maxW;
+			result.height = totalH;
+			const ctx = result.getContext("2d");
+			ctx.fillStyle = bgColor;
+			ctx.fillRect(0, 0, maxW, totalH);
+			let y = 0;
+			canvases.forEach((c, i) => {
+				const offsetX = Math.floor((maxW - c.width) / 2);
+				ctx.drawImage(c, offsetX, y);
+				y += c.height;
+				if (i < canvases.length - 1) y += gap;
+			});
+			return result;
+		};
+		const generate = async () => {
+			if (images.value.length === 0) return;
+			isGenerating.value = true;
+			setStatus("生成中...", "processing");
+			try {
+				const croppedList = [];
+				if (coverMode.value === "custom" && customCoverImage.value) {
+					setStatus("处理自定义封面...", "processing");
+					const item = images.value[0];
+					const canvas = document.createElement("canvas");
+					canvas.width = item.width;
+					canvas.height = Math.round(item.height * topCutRatio.value);
+					const ctx = canvas.getContext("2d");
+					const scale = item.width / customCoverImage.value.naturalWidth;
+					const scaledHeight = customCoverImage.value.naturalHeight * scale;
+					ctx.drawImage(customCoverImage.value, 0, 0, item.width, Math.min(scaledHeight, canvas.height));
+					croppedList.push(canvas);
+				} else if (coverMode.value === "current" && coverImageIndex.value !== null && images.value[coverImageIndex.value]) {
+					const item = images.value[coverImageIndex.value];
+					const cropH = Math.round(item.height * topCutRatio.value);
+					if (cropH > 0) croppedList.push(cropImage(item.img, 0, cropH));
+				}
+				if (coverMode.value === "auto") for (let i = 0; i < images.value.length; i++) {
+					const { img, height } = images.value[i];
+					if (i === 0) {
+						const cropH = Math.round(height * bottomCutRatio.value);
+						croppedList.push(cropImage(img, 0, cropH));
+					} else {
+						const cropY = Math.round(height * topCutRatio.value);
+						const cropH = Math.round(height * bottomCutRatio.value) - cropY;
+						if (cropH <= 0) continue;
+						croppedList.push(cropImage(img, cropY, cropH));
+					}
+				}
+				else for (let i = 0; i < images.value.length; i++) {
+					const { img, height } = images.value[i];
+					const cropY = Math.round(height * topCutRatio.value);
+					const cropH = Math.round(height * bottomCutRatio.value) - cropY;
+					if (cropH <= 0) continue;
+					croppedList.push(cropImage(img, cropY, cropH));
+				}
+				const result = stitchVertically(croppedList, spacing.value, "#ffffff");
+				resultCanvas.value = result;
+				resultWidth.value = result.width;
+				resultHeight.value = result.height;
+				await nextTick$1();
+				if (resultCanvasEl.value) {
+					resultCanvasEl.value.width = result.width;
+					resultCanvasEl.value.height = result.height;
+					resultCanvasEl.value.getContext("2d").drawImage(result, 0, 0);
+					resultCanvasEl.value.scrollIntoView({
+						behavior: "smooth",
+						block: "nearest"
+					});
+				}
+				setStatus(`拼接完成！${result.width} × ${result.height} px`, "success");
+				showToast("字幕拼接完成", "success");
+			} catch (err) {
+				console.error(err);
+				const errorMsg = err.message || "未知错误";
+				setStatus("生成失败：" + errorMsg, "error");
+				showToast("字幕拼接失败：" + errorMsg + "，请检查图片后重试", "error");
+			} finally {
+				isGenerating.value = false;
+			}
+		};
+		const saveResult = (fmt) => {
+			if (!resultCanvas.value) return;
+			let mimeType = "image/png";
+			let fileExt = "png";
+			if (fmt === "jpeg") {
+				mimeType = "image/jpeg";
+				fileExt = "jpg";
+			} else if (fmt === "webp") {
+				mimeType = "image/webp";
+				fileExt = "webp";
+			}
+			let exportCanvas = resultCanvas.value;
+			if (compression.value > 1) {
+				const scale = 1 / compression.value;
+				const compressedCanvas = document.createElement("canvas");
+				compressedCanvas.width = Math.round(resultCanvas.value.width * scale);
+				compressedCanvas.height = Math.round(resultCanvas.value.height * scale);
+				compressedCanvas.getContext("2d").drawImage(resultCanvas.value, 0, 0, compressedCanvas.width, compressedCanvas.height);
+				exportCanvas = compressedCanvas;
+			}
+			exportCanvas.toBlob((blob) => {
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `subtitles_${Date.now()}.${fileExt}`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}, mimeType, compression.value);
+		};
+		onUnmounted(() => {
+			images.value.forEach((item) => URL.revokeObjectURL(item.url));
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$7, [
+				createBaseVNode("div", _hoisted_2$7, [
+					createBaseVNode("div", {
+						class: normalizeClass(["upload-zone", {
+							"drag-over": isDragOver.value,
+							"has-images": images.value.length > 0
+						}]),
+						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
+						onDragover: _cache[1] || (_cache[1] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [
+						_cache[7] || (_cache[7] = createBaseVNode("i", { class: "fa-solid fa-image upload-icon" }, null, -1)),
+						createBaseVNode("p", _hoisted_3$7, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
+						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$7, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
+						createBaseVNode("input", {
+							ref_key: "fileInput",
+							ref: fileInput,
+							type: "file",
+							accept: "image/*",
+							multiple: "",
+							class: "hidden-input",
+							onChange: onFileChange
+						}, null, 544)
+					], 34),
+					createBaseVNode("div", _hoisted_5$7, [withDirectives(createBaseVNode("canvas", {
+						ref_key: "canvas",
+						ref: canvas,
+						class: "preview-canvas",
+						onMousedown: onMouseDown,
+						onMousemove: onMouseMove,
+						onMouseup: onMouseUp,
+						onMouseleave: onMouseUp,
+						onTouchstart: withModifiers(onTouchStart, ["prevent"]),
+						onTouchmove: withModifiers(onTouchMove, ["prevent"]),
+						onTouchend: onMouseUp
+					}, null, 544), [[vShow, images.value.length > 0]])]),
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_6$7, [
+						createBaseVNode("button", {
+							class: "btn",
+							onClick: goPrev
+						}, [..._cache[8] || (_cache[8] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])]),
+						createBaseVNode("span", _hoisted_7$7, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(images.value.length), 1),
+						createBaseVNode("button", {
+							class: "btn",
+							onClick: goNext
+						}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])]),
+						createBaseVNode("div", _hoisted_8$6, [createBaseVNode("button", {
+							class: normalizeClass(["btn cover-btn", { "cover-active": coverMode.value !== "auto" || customCoverImage.value !== null }]),
+							onClick: toggleCoverOptions,
+							disabled: images.value.length == 0,
+							title: "设置封面"
+						}, [_cache[10] || (_cache[10] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverMode.value === "current" ? "当前封面" : "封面设置"), 1)], 10, _hoisted_9$6), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_10$6, [
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: setCoverFromCurrentImage,
+								disabled: images.value.length == 0
+							}, "当前封面", 8, _hoisted_11$6),
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: _cache[3] || (_cache[3] = ($event) => coverFileInput.value.click()),
+								disabled: images.value.length == 0
+							}, "本地封面", 8, _hoisted_12$6),
+							createBaseVNode("button", {
+								class: "btn",
+								onClick: clearCoverFrame,
+								disabled: images.value.length == 0
+							}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 自动封面 ", -1)])], 8, _hoisted_13$5),
+							createBaseVNode("input", {
+								ref_key: "coverFileInput",
+								ref: coverFileInput,
+								type: "file",
+								accept: "image/*",
+								onChange: onCoverFileChange,
+								class: "hidden-input"
+							}, null, 544)
+						])) : createCommentVNode("", true)]),
+						createBaseVNode("button", {
+							class: "btn btn-danger",
+							onClick: deleteCurrentImage,
+							disabled: images.value.length == 0
+						}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_14$5),
+						createBaseVNode("button", {
+							class: "btn btn-primary",
+							onClick: clearImages,
+							disabled: images.value.length == 0
+						}, [..._cache[13] || (_cache[13] = [createBaseVNode("i", { class: "fa-solid fa-trash-alt" }, null, -1), createTextVNode(" 清空 ", -1)])], 8, _hoisted_15$5)
+					])) : createCommentVNode("", true),
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_16$5, [
+						createBaseVNode("span", _hoisted_17$5, toDisplayString(images.value[currentIndex.value]?.name), 1),
+						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(images.value[currentIndex.value]?.width) + " × " + toDisplayString(images.value[currentIndex.value]?.height), 1)]),
+						createBaseVNode("span", null, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(images.value[currentIndex.value]?.size)), 1)])
+					])) : createCommentVNode("", true)
+				]),
+				createBaseVNode("div", _hoisted_18$5, [createBaseVNode("div", _hoisted_19$5, [
+					_cache[20] || (_cache[20] = createBaseVNode("div", { class: "panel-title" }, [
+						createBaseVNode("i", { class: "fa-solid fa-sliders" }),
+						createTextVNode(" 拼接设置 "),
+						createBaseVNode("span", { class: "panel-hint" }, "输入框支持滚轮和键盘上下键调整")
+					], -1)),
+					createBaseVNode("div", _hoisted_20$5, [_cache[16] || (_cache[16] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", {
+						class: "line-dot",
+						style: {
+							"background": "#ef4444",
+							"display": "inline-block"
+						}
+					}), createTextVNode(" 红线位置（字幕上边界） ")], -1)), createVNode(SliderInput_default, {
+						"model-value": Math.round(topCutRatio.value * 100),
+						label: "",
+						unit: "%",
+						min: 0,
+						max: 98,
+						"onUpdate:modelValue": _cache[4] || (_cache[4] = (val) => topCutRatio.value = val / 100)
+					}, null, 8, ["model-value"])]),
+					createBaseVNode("div", _hoisted_21$5, [_cache[17] || (_cache[17] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", {
+						class: "line-dot",
+						style: {
+							"background": "#3b82f6",
+							"display": "inline-block"
+						}
+					}), createTextVNode(" 蓝线位置（字幕下边界） ")], -1)), createVNode(SliderInput_default, {
+						"model-value": Math.round(bottomCutRatio.value * 100),
+						label: "",
+						unit: "%",
+						min: 2,
+						max: 100,
+						"onUpdate:modelValue": _cache[5] || (_cache[5] = (val) => bottomCutRatio.value = val / 100)
+					}, null, 8, ["model-value"])]),
+					createBaseVNode("div", _hoisted_22$4, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_23$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+						"png",
+						"jpeg",
+						"webp"
+					], (fmt) => {
+						return createBaseVNode("button", {
+							key: fmt,
+							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
+							onClick: ($event) => format.value = fmt
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_24$4);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_25$4, [createBaseVNode("label", _hoisted_26$4, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+						class: "form-label",
+						style: { "display": "inline" }
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_27$4, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_28$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
+							disabled: format.value === "png",
+							onClick: ($event) => compression.value = opt.value
+						}, toDisplayString(opt.label), 11, _hoisted_29$4);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_30$4, [createBaseVNode("button", {
+						class: "btn btn-primary btn-block",
+						disabled: images.value.length === 0 || isGenerating.value,
+						onClick: generate
+					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? "生成中..." : "生成长拼接图"), 1)], 8, _hoisted_31$4)])
+				])]),
+				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_32$4, [
+					createBaseVNode("div", _hoisted_33$4, [_cache[21] || (_cache[21] = createBaseVNode("i", {
+						class: "fa-solid fa-check-circle",
+						style: { "color": "var(--accent)" }
+					}, null, -1)), createTextVNode(" 拼接完成 · " + toDisplayString(resultWidth.value) + " × " + toDisplayString(resultHeight.value) + " px ", 1)]),
+					createBaseVNode("div", _hoisted_34$4, [createBaseVNode("canvas", {
+						ref_key: "resultCanvasEl",
+						ref: resultCanvasEl,
+						class: "result-canvas"
+					}, null, 512)]),
+					createBaseVNode("div", _hoisted_35$3, [createBaseVNode("button", {
+						class: "btn btn-primary",
+						onClick: _cache[6] || (_cache[6] = ($event) => saveResult(format.value))
+					}, [_cache[22] || (_cache[22] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
+				])) : createCommentVNode("", true)
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-0414f43e"]]);
+//#endregion
+//#region src/views/ImageStitch.vue
+var _hoisted_1$6 = { class: "app-layout" };
+var _hoisted_2$6 = { class: "app-left" };
+var _hoisted_3$6 = { key: 0 };
+var _hoisted_4$6 = { class: "form-label" };
+var _hoisted_5$6 = { class: "image-list" };
+var _hoisted_6$6 = ["onDragstart", "onDragover"];
+var _hoisted_7$6 = ["src", "alt"];
+var _hoisted_8$5 = { class: "item-index" };
+var _hoisted_9$5 = ["onClick"];
+var _hoisted_10$5 = ["onClick"];
+var _hoisted_11$5 = { class: "app-middle" };
+var _hoisted_12$5 = { class: "settings-panel" };
+var _hoisted_13$4 = { class: "setting-item" };
+var _hoisted_14$4 = { class: "seg-control" };
+var _hoisted_15$4 = ["onClick"];
+var _hoisted_16$4 = {
+	key: 0,
+	class: "setting-item"
+};
+var _hoisted_17$4 = { class: "seg-control" };
+var _hoisted_18$4 = ["onClick"];
+var _hoisted_19$4 = { class: "setting-item" };
+var _hoisted_20$4 = { class: "setting-item" };
+var _hoisted_21$4 = { class: "setting-item" };
+var _hoisted_22$3 = { class: "color-swatches" };
+var _hoisted_23$3 = ["title", "onClick"];
+var _hoisted_24$3 = {
+	key: 0,
+	class: "fa-solid fa-ban",
+	style: {
+		"font-size": "0.7rem",
+		"color": "var(--muted)"
+	}
+};
+var _hoisted_25$3 = ["title"];
+var _hoisted_26$3 = { class: "setting-item" };
+var _hoisted_27$3 = { class: "seg-control" };
+var _hoisted_28$3 = ["onClick"];
+var _hoisted_29$3 = { class: "setting-item" };
+var _hoisted_30$3 = { class: "form-label" };
+var _hoisted_31$3 = {
+	key: 0,
+	class: "form-hint"
+};
+var _hoisted_32$3 = { class: "seg-control" };
+var _hoisted_33$3 = ["disabled", "onClick"];
+var _hoisted_34$3 = { class: "app-right" };
+var _hoisted_35$2 = { class: "preview-area" };
+var _hoisted_36$2 = {
+	key: 0,
+	class: "preview-info"
+};
+var _hoisted_37$2 = {
+	key: 1,
+	class: "empty-state"
+};
+var _hoisted_38$1 = ["disabled"];
+var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageStitch",
+	setup(__props) {
+		const { showToast } = useToast();
+		const fileInput = /* @__PURE__ */ ref(null);
+		const previewCanvas = /* @__PURE__ */ ref(null);
+		const canvasContainer = /* @__PURE__ */ ref(null);
+		const previewInfo = /* @__PURE__ */ ref("");
+		const zoomScale = /* @__PURE__ */ ref(1);
+		const panX = /* @__PURE__ */ ref(0);
+		const panY = /* @__PURE__ */ ref(0);
+		const isPanning = /* @__PURE__ */ ref(false);
+		let panStartX = 0;
+		let panStartY = 0;
+		let panStartPanX = 0;
+		let panStartPanY = 0;
+		const images = /* @__PURE__ */ ref([]);
+		const dragIndex = /* @__PURE__ */ ref(-1);
+		const dragTargetIndex = /* @__PURE__ */ ref(-1);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const layout = /* @__PURE__ */ ref("horizontal");
+		const gridCols = /* @__PURE__ */ ref(2);
+		const gap = /* @__PURE__ */ ref(8);
+		const radius = /* @__PURE__ */ ref(0);
+		const bgColor = /* @__PURE__ */ ref("#ffffff");
+		const scale = /* @__PURE__ */ ref(1);
+		const layoutOptions = [
+			{
+				value: "horizontal",
+				label: "水平",
+				icon: "fa-solid fa-arrows-left-right"
+			},
+			{
+				value: "vertical",
+				label: "垂直",
+				icon: "fa-solid fa-arrows-up-down"
+			},
+			{
+				value: "grid",
+				label: "网格",
+				icon: "fa-solid fa-border-all"
+			}
+		];
+		const customBgColor = /* @__PURE__ */ ref("#a78bfa");
+		const bgColors = [
+			{
+				value: "#ffffff",
+				label: "白色"
+			},
+			{
+				value: "#000000",
+				label: "黑色"
+			},
+			{
+				value: "#1a1d27",
+				label: "深色"
+			},
+			{
+				value: "#f8fafc",
+				label: "亮灰"
+			},
+			{
+				value: "#e0f2fe",
+				label: "天蓝"
+			},
+			{
+				value: "#fef3c7",
+				label: "米黄"
+			},
+			{
+				value: "transparent",
+				label: "透明"
+			},
+			{
+				value: "picker",
+				label: "调色盘",
+				isPicker: true
+			}
+		];
+		const applyCustomBgColor = () => {
+			bgColor.value = customBgColor.value;
+		};
+		const format = /* @__PURE__ */ ref("png");
+		const compressionOptions = [
+			{
+				label: "不压缩",
+				value: 1
+			},
+			{
+				label: "2x 压缩",
+				value: .5
+			},
+			{
+				label: "4x 压缩",
+				value: .25
+			},
+			{
+				label: "8x 压缩",
+				value: .125
+			}
+		];
+		const compression = /* @__PURE__ */ ref(1);
+		watch([
+			images,
+			layout,
+			gridCols,
+			gap,
+			radius,
+			bgColor,
+			scale
+		], () => {
+			nextTick$1(updatePreview);
+		}, { deep: true });
+		/** 用户通过 input 选择文件 */
+		const onFileChange = (e) => {
+			addFiles(Array.from(e.target.files));
+			e.target.value = "";
+		};
+		/** 拖拽文件到上传区 */
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+			if (files.length) addFiles(files);
+		};
+		/** 粘贴图片（Ctrl+V） */
+		const onPaste = (e) => {
+			const files = [...e.clipboardData?.items || []].filter((item) => item.type.startsWith("image/")).map((item) => item.getAsFile()).filter(Boolean);
+			if (files.length) addFiles(files);
+		};
+		/**
+		* 核心：把 File 数组转为我们需要的图片对象
+		* 使用 Promise.all 并发加载所有图片，提升速度
+		*/
+		const addFiles = async (files) => {
+			const existingKeys = new Set(images.value.map((i) => `${i.name}|${i.size}`));
+			const uniqueFiles = [];
+			for (const file of files) {
+				const key = `${file.name}|${file.size}`;
+				if (existingKeys.has(key)) continue;
+				existingKeys.add(key);
+				uniqueFiles.push(file);
+			}
+			const newItems = await Promise.all(uniqueFiles.map((file) => new Promise((resolve) => {
+				const url = URL.createObjectURL(file);
+				const img = new Image();
+				img.onload = () => resolve({
+					id: Date.now() + Math.random(),
+					name: file.name,
+					size: file.size,
+					url,
+					img,
+					rotation: 0
+				});
+				img.src = url;
+			})));
+			images.value.push(...newItems);
+			showToast(`已添加 ${newItems.length} 张图片`, "success");
+		};
+		/** 删除指定图片 */
+		const removeImage = (index) => {
+			URL.revokeObjectURL(images.value[index].url);
+			images.value.splice(index, 1);
+		};
+		/** 旋转指定图片 90° */
+		const rotateImage = (index) => {
+			images.value[index].rotation = (images.value[index].rotation + 90) % 360;
+		};
+		/** 清空全部 */
+		const clearAll = () => {
+			images.value.forEach((item) => URL.revokeObjectURL(item.url));
+			images.value = [];
+			previewInfo.value = "";
+		};
+		const onDragStart = (index) => {
+			dragIndex.value = index;
+		};
+		const onDragOver = (index) => {
+			dragTargetIndex.value = index;
+		};
+		const onDragEnd = () => {
+			if (dragIndex.value !== -1 && dragTargetIndex.value !== -1 && dragIndex.value !== dragTargetIndex.value) {
+				const arr = [...images.value];
+				const item = arr.splice(dragIndex.value, 1)[0];
+				arr.splice(dragTargetIndex.value, 0, item);
+				images.value = arr;
+			}
+			dragIndex.value = -1;
+			dragTargetIndex.value = -1;
+		};
+		/**
+		* 获取图片旋转后的显示尺寸
+		* 旋转 90°/270° 时，宽高互换
+		*/
+		const getRotatedSize = (img, rotation) => {
+			const r = (rotation % 360 + 360) % 360;
+			return r === 90 || r === 270 ? {
+				width: img.naturalHeight,
+				height: img.naturalWidth
+			} : {
+				width: img.naturalWidth,
+				height: img.naturalHeight
+			};
+		};
+		/**
+		* 圆角矩形路径（用于 Canvas clip）
+		*/
+		const roundRect = (ctx, x, y, w, h, r) => {
+			r = Math.min(r, w / 2, h / 2);
+			ctx.beginPath();
+			ctx.moveTo(x + r, y);
+			ctx.lineTo(x + w - r, y);
+			ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+			ctx.lineTo(x + w, y + h - r);
+			ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+			ctx.lineTo(x + r, y + h);
+			ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+			ctx.lineTo(x, y + r);
+			ctx.quadraticCurveTo(x, y, x + r, y);
+			ctx.closePath();
+		};
+		/**
+		* 主拼接函数：根据当前所有设置，生成一个 Canvas
+		* @param {number} renderScale - 渲染缩放比（预览用小值，导出用 scale.value）
+		* @returns {HTMLCanvasElement|null}
+		*/
+		const stitchImages = (renderScale) => {
+			const imgs = images.value;
+			if (imgs.length < 2) return null;
+			const gapPx = gap.value;
+			const radiusPx = radius.value;
+			const layoutMode = layout.value;
+			const sizes = imgs.map((item) => getRotatedSize(item.img, item.rotation));
+			let canvasW, canvasH, positions;
+			if (layoutMode === "horizontal") {
+				const avgH = Math.round(sizes.reduce((sum, s) => sum + s.height, 0) / sizes.length);
+				const scaledWidths = sizes.map((s) => Math.round(s.width * (avgH / s.height)));
+				canvasW = scaledWidths.reduce((sum, w) => sum + w, 0) + gapPx * (imgs.length - 1);
+				canvasH = avgH;
+				positions = scaledWidths.map((w, i) => {
+					return {
+						x: scaledWidths.slice(0, i).reduce((sum, sw) => sum + sw, 0) + gapPx * i,
+						y: 0,
+						w,
+						h: avgH
+					};
+				});
+			} else if (layoutMode === "vertical") {
+				const avgW = Math.round(sizes.reduce((sum, s) => sum + s.width, 0) / sizes.length);
+				const scaledHeights = sizes.map((s) => Math.round(s.height * (avgW / s.width)));
+				canvasW = avgW;
+				canvasH = scaledHeights.reduce((sum, h) => sum + h, 0) + gapPx * (imgs.length - 1);
+				positions = scaledHeights.map((h, i) => {
+					return {
+						x: 0,
+						y: scaledHeights.slice(0, i).reduce((sum, sh) => sum + sh, 0) + gapPx * i,
+						w: avgW,
+						h
+					};
+				});
+			} else {
+				const cols = gridCols.value;
+				const rows = Math.ceil(imgs.length / cols);
+				const totalGapW = gapPx * (cols - 1);
+				const totalGapH = gapPx * (rows - 1);
+				const avgW = Math.round(sizes.reduce((sum, s) => sum + s.width, 0) / sizes.length);
+				const avgH = Math.round(sizes.reduce((sum, s) => sum + s.height, 0) / sizes.length);
+				const cellW = avgW;
+				const cellH = avgH;
+				canvasW = cellW * cols + totalGapW;
+				canvasH = cellH * rows + totalGapH;
+				positions = sizes.map((s, i) => {
+					const c = i % cols;
+					const r = Math.floor(i / cols);
+					const bx = c * (cellW + gapPx);
+					const by = r * (cellH + gapPx);
+					const fitScale = Math.min(cellW / s.width, cellH / s.height);
+					const dw = Math.round(s.width * fitScale);
+					const dh = Math.round(s.height * fitScale);
+					const ox = Math.round((cellW - dw) / 2);
+					const oy = Math.round((cellH - dh) / 2);
+					return {
+						x: bx + ox,
+						y: by + oy,
+						w: dw,
+						h: dh,
+						cellX: bx,
+						cellY: by,
+						cellW,
+						cellH
+					};
+				});
+			}
+			const canvas = document.createElement("canvas");
+			canvas.width = Math.ceil(canvasW * renderScale);
+			canvas.height = Math.ceil(canvasH * renderScale);
+			const ctx = canvas.getContext("2d");
+			if (bgColor.value !== "transparent") {
+				ctx.fillStyle = bgColor.value;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+			}
+			positions.forEach((pos, i) => {
+				const { img, rotation } = imgs[i];
+				const sx = pos.x * renderScale;
+				const sy = pos.y * renderScale;
+				const sw = pos.w * renderScale;
+				const sh = pos.h * renderScale;
+				ctx.save();
+				if (layoutMode === "grid" && pos.cellW !== void 0) {
+					const clipX = pos.cellX * renderScale;
+					const clipY = pos.cellY * renderScale;
+					const clipW = pos.cellW * renderScale;
+					const clipH = pos.cellH * renderScale;
+					if (radiusPx > 0) roundRect(ctx, clipX, clipY, clipW, clipH, radiusPx * renderScale);
+					else {
+						ctx.beginPath();
+						ctx.rect(clipX, clipY, clipW, clipH);
+					}
+					ctx.clip();
+				} else if (radiusPx > 0) {
+					roundRect(ctx, sx, sy, sw, sh, radiusPx * renderScale);
+					ctx.clip();
+				}
+				ctx.translate(sx + sw / 2, sy + sh / 2);
+				ctx.rotate(rotation * Math.PI / 180);
+				ctx.drawImage(img, -sw / 2, -sh / 2, sw, sh);
+				ctx.restore();
+			});
+			return canvas;
+		};
+		const onCanvasWheel = (e) => {
+			const delta = e.deltaY > 0 ? .9 : 1.1;
+			zoomScale.value = Math.min(10, Math.max(.1, zoomScale.value * delta));
+		};
+		const onCanvasMouseDown = (e) => {
+			isPanning.value = true;
+			panStartX = e.clientX;
+			panStartY = e.clientY;
+			panStartPanX = panX.value;
+			panStartPanY = panY.value;
+		};
+		const onCanvasMouseMove = (e) => {
+			if (!isPanning.value) return;
+			panX.value = panStartPanX + (e.clientX - panStartX);
+			panY.value = panStartPanY + (e.clientY - panStartY);
+		};
+		const onCanvasMouseUp = () => {
+			isPanning.value = false;
+		};
+		/** 更新预览 Canvas */
+		const updatePreview = () => {
+			if (images.value.length < 2) {
+				previewInfo.value = "";
+				return;
+			}
+			const result = stitchImages(.5);
+			if (!result || !previewCanvas.value) return;
+			const canvas = previewCanvas.value;
+			canvas.width = result.width;
+			canvas.height = result.height;
+			canvas.getContext("2d").drawImage(result, 0, 0);
+			zoomScale.value = 1;
+			panX.value = 0;
+			panY.value = 0;
+			previewInfo.value = `${Math.ceil(result.width / .5 * scale.value)} × ${Math.ceil(result.height / .5 * scale.value)} px`;
+		};
+		/** 导出图片 */
+		const exportImage = () => {
+			if (images.value.length < 2) return;
+			const fmt = format.value;
+			let mimeType = "image/png";
+			let fileExt = "png";
+			if (fmt === "jpeg") {
+				mimeType = "image/jpeg";
+				fileExt = "jpg";
+			} else if (fmt === "webp") {
+				mimeType = "image/webp";
+				fileExt = "webp";
+			}
+			const result = stitchImages(scale.value);
+			if (!result) return;
+			result.toBlob((blob) => {
+				if (!blob) {
+					showToast("图片导出失败，请重试", "error");
+					return;
+				}
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `stitch_${Date.now()}.${fileExt}`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				showToast(`导出成功，${(blob.size / 1024 / 1024).toFixed(2)} MB`, "success");
+			}, mimeType, compression.value);
+		};
+		onMounted(() => {
+			document.addEventListener("paste", onPaste);
+		});
+		onUnmounted(() => {
+			document.removeEventListener("paste", onPaste);
+			images.value.forEach((item) => URL.revokeObjectURL(item.url));
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$6, [
+				createBaseVNode("div", _hoisted_2$6, [
+					createBaseVNode("div", {
+						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
+						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
+						onDragover: _cache[1] || (_cache[1] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [
+						_cache[6] || (_cache[6] = createBaseVNode("i", { class: "fa-solid fa-cloud-arrow-up" }, null, -1)),
+						_cache[7] || (_cache[7] = createBaseVNode("p", { class: "upload-text" }, "点击或拖拽图片到此处", -1)),
+						_cache[8] || (_cache[8] = createBaseVNode("p", { class: "upload-hint" }, "支持 JPG / PNG / WebP · 可多选 · 可粘贴", -1)),
+						createBaseVNode("input", {
+							ref_key: "fileInput",
+							ref: fileInput,
+							type: "file",
+							accept: "image/*",
+							multiple: "",
+							style: { "display": "none" },
+							onChange: onFileChange
+						}, null, 544)
+					], 34),
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$6, [createBaseVNode("span", _hoisted_4$6, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(images.value, (item, index) => {
+						return openBlock(), createElementBlock("div", {
+							key: item.id,
+							class: normalizeClass(["image-item", {
+								dragging: dragIndex.value === index,
+								"drag-target": dragTargetIndex.value === index
+							}]),
+							draggable: "true",
+							onDragstart: ($event) => onDragStart(index),
+							onDragover: withModifiers(($event) => onDragOver(index), ["prevent"]),
+							onDragend: onDragEnd
+						}, [
+							createBaseVNode("img", {
+								src: item.url,
+								alt: item.name
+							}, null, 8, _hoisted_7$6),
+							createBaseVNode("span", _hoisted_8$5, toDisplayString(index + 1), 1),
+							createBaseVNode("button", {
+								class: "item-rotate",
+								onClick: withModifiers(($event) => rotateImage(index), ["stop"]),
+								title: "旋转90°"
+							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])], 8, _hoisted_9$5),
+							createBaseVNode("button", {
+								class: "item-delete",
+								onClick: withModifiers(($event) => removeImage(index), ["stop"]),
+								title: "删除"
+							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$5)
+						], 42, _hoisted_6$6);
+					}), 128))])])) : createCommentVNode("", true),
+					images.value.length > 0 ? (openBlock(), createElementBlock("button", {
+						key: 1,
+						class: "btn btn-danger btn-sm",
+						onClick: clearAll
+					}, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1)), createTextVNode(" 清空全部 (" + toDisplayString(images.value.length) + ") ", 1)])) : createCommentVNode("", true)
+				]),
+				createBaseVNode("div", _hoisted_11$5, [createBaseVNode("div", _hoisted_12$5, [
+					createBaseVNode("div", _hoisted_13$4, [_cache[12] || (_cache[12] = createBaseVNode("span", { class: "form-label" }, "布局方式", -1)), createBaseVNode("div", _hoisted_14$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(layoutOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: layout.value === opt.value }]),
+							onClick: ($event) => layout.value = opt.value
+						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_15$4);
+					}), 64))])]),
+					layout.value === "grid" ? (openBlock(), createElementBlock("div", _hoisted_16$4, [_cache[13] || (_cache[13] = createBaseVNode("span", { class: "form-label" }, "网格列数", -1)), createBaseVNode("div", _hoisted_17$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+						2,
+						3,
+						4,
+						5
+					], (n) => {
+						return createBaseVNode("button", {
+							key: n,
+							class: normalizeClass(["seg-btn", { active: gridCols.value === n }]),
+							onClick: ($event) => gridCols.value = n
+						}, toDisplayString(n), 11, _hoisted_18$4);
+					}), 64))])])) : createCommentVNode("", true),
+					createBaseVNode("div", _hoisted_19$4, [_cache[14] || (_cache[14] = createBaseVNode("span", { class: "form-label" }, "间距滑块", -1)), createVNode(SliderInput_default, {
+						modelValue: gap.value,
+						"onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => gap.value = $event),
+						label: "",
+						unit: "px",
+						min: 0,
+						max: 100
+					}, null, 8, ["modelValue"])]),
+					createBaseVNode("div", _hoisted_20$4, [_cache[15] || (_cache[15] = createBaseVNode("span", { class: "form-label" }, "圆角滑块", -1)), createVNode(SliderInput_default, {
+						modelValue: radius.value,
+						"onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => radius.value = $event),
+						label: "",
+						unit: "px",
+						min: 0,
+						max: 80
+					}, null, 8, ["modelValue"])]),
+					createBaseVNode("div", _hoisted_21$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "form-label" }, "背景色", -1)), createBaseVNode("div", _hoisted_22$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(bgColors, (color) => {
+						return openBlock(), createElementBlock(Fragment$1, { key: color.value }, [!color.isPicker ? (openBlock(), createElementBlock("button", {
+							key: 0,
+							class: normalizeClass(["color-swatch", { active: bgColor.value === color.value }]),
+							style: normalizeStyle(color.value === "transparent" ? {
+								background: "transparent",
+								border: "1px dashed var(--border)"
+							} : { background: color.value }),
+							title: color.label,
+							onClick: ($event) => bgColor.value = color.value
+						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_24$3)) : createCommentVNode("", true)], 14, _hoisted_23$3)) : (openBlock(), createElementBlock("label", {
+							key: 1,
+							class: normalizeClass(["color-swatch", { active: bgColor.value === customBgColor.value }]),
+							style: normalizeStyle({
+								background: customBgColor.value,
+								border: "1px solid var(--border)"
+							}),
+							title: color.label
+						}, [_cache[16] || (_cache[16] = createBaseVNode("i", {
+							class: "fa-solid fa-palette",
+							style: {
+								"font-size": "0.85rem",
+								"color": "rgba(255,255,255,0.85)"
+							}
+						}, null, -1)), withDirectives(createBaseVNode("input", {
+							type: "color",
+							class: "palette-input",
+							"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => customBgColor.value = $event),
+							onInput: applyCustomBgColor
+						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_25$3))], 64);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_26$3, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_27$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+						"png",
+						"jpeg",
+						"webp"
+					], (fmt) => {
+						return createBaseVNode("button", {
+							key: fmt,
+							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
+							onClick: ($event) => format.value = fmt
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_28$3);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_29$3, [createBaseVNode("label", _hoisted_30$3, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+						class: "form-label",
+						style: { "display": "inline" }
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_31$3, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_32$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
+							disabled: format.value === "png",
+							onClick: ($event) => compression.value = opt.value
+						}, toDisplayString(opt.label), 11, _hoisted_33$3);
+					}), 64))])])
+				])]),
+				createBaseVNode("div", _hoisted_34$3, [createBaseVNode("div", _hoisted_35$2, [
+					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_36$2, [_cache[20] || (_cache[20] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" 预览 · 输出尺寸 " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
+					images.value.length < 2 ? (openBlock(), createElementBlock("div", _hoisted_37$2, [..._cache[21] || (_cache[21] = [createBaseVNode("span", { class: "empty-icon" }, "🖼️", -1), createBaseVNode("span", null, "添加至少 2 张图片后预览", -1)])])) : createCommentVNode("", true),
+					createBaseVNode("div", {
+						class: "result-canvas-container",
+						ref_key: "canvasContainer",
+						ref: canvasContainer,
+						onWheel: withModifiers(onCanvasWheel, ["prevent"]),
+						onMousedown: onCanvasMouseDown,
+						onMousemove: onCanvasMouseMove,
+						onMouseup: onCanvasMouseUp,
+						onMouseleave: onCanvasMouseUp,
+						style: normalizeStyle({ cursor: isPanning.value ? "grabbing" : "grab" })
+					}, [createBaseVNode("div", {
+						class: "canvas-transform-wrapper",
+						style: normalizeStyle({
+							transform: `translate(${panX.value}px, ${panY.value}px) scale(${zoomScale.value})`,
+							transformOrigin: "center center"
+						})
+					}, [withDirectives(createBaseVNode("canvas", {
+						ref_key: "previewCanvas",
+						ref: previewCanvas,
+						class: "preview-canvas"
+					}, null, 512), [[vShow, images.value.length >= 2]])], 4)], 36),
+					createBaseVNode("button", {
+						class: "btn btn-primary btn-block",
+						disabled: images.value.length < 2,
+						onClick: exportImage
+					}, [_cache[22] || (_cache[22] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" " + toDisplayString(images.value.length < 2 ? "至少需要 2 张图片" : "导出" + format.value.toUpperCase() + "拼接图"), 1)], 8, _hoisted_38$1)
+				])])
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-c52b704b"]]);
+//#endregion
+//#region \0vite/preload-helper.js
+var scriptRel = "modulepreload";
+var assetsURL = function(dep) {
+	return "/subtitle_extractor/" + dep;
+};
+var seen = {};
+var __vitePreload = function preload(baseModule, deps, importerUrl) {
+	let promise = Promise.resolve();
+	if (deps && deps.length > 0) {
+		const links = document.getElementsByTagName("link");
+		const cspNonceMeta = document.querySelector("meta[property=csp-nonce]");
+		const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
+		function allSettled(promises) {
+			return Promise.all(promises.map((p) => Promise.resolve(p).then((value) => ({
+				status: "fulfilled",
+				value
+			}), (reason) => ({
+				status: "rejected",
+				reason
+			}))));
+		}
+		promise = allSettled(deps.map((dep) => {
+			dep = assetsURL(dep, importerUrl);
+			if (dep in seen) return;
+			seen[dep] = true;
+			const isCss = dep.endsWith(".css");
+			const cssSelector = isCss ? "[rel=\"stylesheet\"]" : "";
+			if (!!importerUrl) for (let i = links.length - 1; i >= 0; i--) {
+				const link = links[i];
+				if (link.href === dep && (!isCss || link.rel === "stylesheet")) return;
+			}
+			else if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) return;
+			const link = document.createElement("link");
+			link.rel = isCss ? "stylesheet" : scriptRel;
+			if (!isCss) link.as = "script";
+			link.crossOrigin = "";
+			link.href = dep;
+			if (cspNonce) link.setAttribute("nonce", cspNonce);
+			document.head.appendChild(link);
+			if (isCss) return new Promise((res, rej) => {
+				link.addEventListener("load", res);
+				link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+			});
+		}));
+	}
+	function handlePreloadError(err) {
+		const e = new Event("vite:preloadError", { cancelable: true });
+		e.payload = err;
+		window.dispatchEvent(e);
+		if (!e.defaultPrevented) throw err;
+	}
+	return promise.then((res) => {
+		for (const item of res || []) {
+			if (item.status !== "rejected") continue;
+			handlePreloadError(item.reason);
+		}
+		return baseModule().catch(handlePreloadError);
+	});
+};
+//#endregion
+//#region src/views/ImageSegmentation.vue
+var _hoisted_1$5 = { class: "app-layout" };
+var _hoisted_2$5 = { class: "app-left" };
+var _hoisted_3$5 = {
+	key: 0,
+	class: "source-preview-wrap"
+};
+var _hoisted_4$5 = { class: "source-preview" };
+var _hoisted_5$5 = ["src", "alt"];
+var _hoisted_6$5 = {
+	key: 1,
+	class: "nav-bar"
+};
+var _hoisted_7$5 = ["disabled"];
+var _hoisted_8$4 = {
+	key: 2,
+	class: "info-bar"
+};
+var _hoisted_9$4 = { class: "nav-filename" };
+var _hoisted_10$4 = { class: "app-middle" };
+var _hoisted_11$4 = { class: "settings-panel" };
+var _hoisted_12$4 = { class: "setting-item" };
+var _hoisted_13$3 = { class: "seg-control" };
+var _hoisted_14$3 = ["onClick"];
+var _hoisted_15$3 = { class: "picker-header" };
+var _hoisted_16$3 = { class: "picker-hint" };
+var _hoisted_17$3 = { class: "picker-grid" };
+var _hoisted_18$3 = ["onMouseenter", "onClick"];
+var _hoisted_19$3 = { class: "setting-item" };
+var _hoisted_20$3 = { class: "setting-item" };
+var _hoisted_21$3 = { class: "color-swatches" };
+var _hoisted_22$2 = ["title", "onClick"];
+var _hoisted_23$2 = {
+	key: 0,
+	class: "fa-solid fa-ban",
+	style: {
+		"font-size": "0.7rem",
+		"color": "var(--muted)"
+	}
+};
+var _hoisted_24$2 = ["title"];
+var _hoisted_25$2 = { class: "setting-item" };
+var _hoisted_26$2 = { class: "seg-control" };
+var _hoisted_27$2 = ["onClick"];
+var _hoisted_28$2 = { class: "setting-item" };
+var _hoisted_29$2 = { class: "form-label" };
+var _hoisted_30$2 = {
+	key: 0,
+	class: "form-hint"
+};
+var _hoisted_31$2 = { class: "seg-control" };
+var _hoisted_32$2 = ["disabled", "onClick"];
+var _hoisted_33$2 = { class: "app-right" };
+var _hoisted_34$2 = { class: "preview-area" };
+var _hoisted_35$1 = {
+	key: 0,
+	class: "preview-info"
+};
+var _hoisted_36$1 = {
+	key: 1,
+	class: "empty-state"
+};
+var _hoisted_37$1 = ["disabled"];
+var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageSegmentation",
+	setup(__props) {
+		const { showToast } = useToast();
+		const fileInput = /* @__PURE__ */ ref(null);
+		const customBtnRef = /* @__PURE__ */ ref(null);
+		const cellCanvases = /* @__PURE__ */ ref([]);
+		const sourceImage = /* @__PURE__ */ ref(null);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const cutMode = /* @__PURE__ */ ref("3x3");
+		const cutCols = /* @__PURE__ */ ref(3);
+		const cutRows = /* @__PURE__ */ ref(3);
+		const showCustomPicker = /* @__PURE__ */ ref(false);
+		const hoverCol = /* @__PURE__ */ ref(0);
+		const hoverRow = /* @__PURE__ */ ref(0);
+		const pickerStyle = /* @__PURE__ */ ref({});
+		const radius = /* @__PURE__ */ ref(0);
+		const bgColor = /* @__PURE__ */ ref("#000000");
+		const customBgColor = /* @__PURE__ */ ref("#a78bfa");
+		const format = /* @__PURE__ */ ref("jpeg");
+		const compression = /* @__PURE__ */ ref(1);
+		const compressionOptions = [
+			{
+				label: "不压缩",
+				value: 1
+			},
+			{
+				label: "2x 压缩",
+				value: .5
+			},
+			{
+				label: "4x 压缩",
+				value: .25
+			},
+			{
+				label: "8x 压缩",
+				value: .125
+			}
+		];
+		const bgColors = [
+			{
+				value: "#000000",
+				label: "黑色"
+			},
+			{
+				value: "#ffffff",
+				label: "白色"
+			},
+			{
+				value: "#1a1d27",
+				label: "深色"
+			},
+			{
+				value: "#f8fafc",
+				label: "亮灰"
+			},
+			{
+				value: "#e0f2fe",
+				label: "天蓝"
+			},
+			{
+				value: "#fef3c7",
+				label: "米黄"
+			},
+			{
+				value: "transparent",
+				label: "透明"
+			},
+			{
+				value: "picker",
+				label: "调色盘",
+				isPicker: true
+			}
+		];
+		const presetOptions = [{
+			value: "2x2",
+			label: "2×2",
+			icon: "fa-solid fa-border-all"
+		}, {
+			value: "3x3",
+			label: "3×3",
+			icon: "fa-solid fa-border-all"
+		}];
+		const formatBytes = (bytes) => {
+			if (!bytes) return "-";
+			if (bytes < 1024) return bytes + " B";
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / 1048576).toFixed(1) + " MB";
+		};
+		const previewInfo = computed(() => {
+			if (!sourceImage.value) return "";
+			const { naturalWidth: w, naturalHeight: h } = sourceImage.value.img;
+			return `每格约 ${Math.floor(w / cutCols.value)} × ${Math.floor(h / cutRows.value)} px · 共 ${cutCols.value * cutRows.value} 张`;
+		});
+		const previewCells = computed(() => Array.from({ length: cutCols.value * cutRows.value }));
+		const selectPreset = (value) => {
+			cutMode.value = value;
+			if (value === "2x2") {
+				cutCols.value = 2;
+				cutRows.value = 2;
+			}
+			if (value === "3x3") {
+				cutCols.value = 3;
+				cutRows.value = 3;
+			}
+			showCustomPicker.value = false;
+		};
+		const openCustomPicker = () => {
+			if (customBtnRef.value) {
+				const rect = customBtnRef.value.getBoundingClientRect();
+				pickerStyle.value = {
+					top: rect.bottom + window.scrollY + 8 + "px",
+					left: rect.left + window.scrollX + "px"
+				};
+			}
+			hoverCol.value = cutMode.value === "custom" ? cutCols.value : 0;
+			hoverRow.value = cutMode.value === "custom" ? cutRows.value : 0;
+			showCustomPicker.value = true;
+		};
+		const confirmCustom = (col, row) => {
+			cutMode.value = "custom";
+			cutCols.value = col;
+			cutRows.value = row;
+			showCustomPicker.value = false;
+		};
+		const applyCustomBgColor = () => {
+			bgColor.value = customBgColor.value;
+		};
+		const onFileChange = (e) => {
+			const file = e.target.files[0];
+			if (file) loadFile(file);
+			e.target.value = "";
+		};
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
+			if (file) loadFile(file);
+		};
+		const onPaste = (e) => {
+			const item = [...e.clipboardData?.items || []].find((i) => i.type.startsWith("image/"));
+			if (item) loadFile(item.getAsFile());
+		};
+		const loadFile = (file) => {
+			if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url);
+			const url = URL.createObjectURL(file);
+			const img = new Image();
+			img.onload = () => {
+				sourceImage.value = {
+					id: Date.now(),
+					size: file.size,
+					name: file.name,
+					url,
+					img
+				};
+				showToast("图片已加载", "success");
+			};
+			img.src = url;
+		};
+		const clearSource = () => {
+			if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url);
+			sourceImage.value = null;
+		};
+		const roundRect = (ctx, x, y, w, h, r) => {
+			r = Math.min(r, w / 2, h / 2);
+			ctx.beginPath();
+			ctx.moveTo(x + r, y);
+			ctx.lineTo(x + w - r, y);
+			ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+			ctx.lineTo(x + w, y + h - r);
+			ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+			ctx.lineTo(x + r, y + h);
+			ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+			ctx.lineTo(x, y + r);
+			ctx.quadraticCurveTo(x, y, x + r, y);
+			ctx.closePath();
+		};
+		/**
+		* 从源图中裁出第 (col, row) 格（0-indexed），返回 HTMLCanvasElement
+		* @param {number} col       - 列索引（0-indexed）
+		* @param {number} row       - 行索引（0-indexed）
+		* @param {number} outScale  - 输出缩放（预览=1，导出可调）
+		*/
+		const sliceCell = (col, row, outScale = 1) => {
+			const { img } = sourceImage.value;
+			const srcW = img.naturalWidth;
+			const srcH = img.naturalHeight;
+			const cellSrcW = srcW / cutCols.value;
+			const cellSrcH = srcH / cutRows.value;
+			const sx = col * cellSrcW;
+			const sy = row * cellSrcH;
+			const outW = Math.round(cellSrcW * outScale);
+			const outH = Math.round(cellSrcH * outScale);
+			const canvas = document.createElement("canvas");
+			canvas.width = outW;
+			canvas.height = outH;
+			const ctx = canvas.getContext("2d");
+			if (bgColor.value !== "transparent") {
+				ctx.fillStyle = bgColor.value;
+				ctx.fillRect(0, 0, outW, outH);
+			}
+			if (radius.value > 0) {
+				roundRect(ctx, 0, 0, outW, outH, radius.value * outScale);
+				ctx.clip();
+			}
+			ctx.drawImage(img, sx, sy, cellSrcW, cellSrcH, 0, 0, outW, outH);
+			return canvas;
+		};
+		const updatePreview = async () => {
+			if (!sourceImage.value) return;
+			await nextTick$1();
+			const canvases = cellCanvases.value;
+			if (!canvases || canvases.length === 0) return;
+			const total = cutCols.value * cutRows.value;
+			for (let i = 0; i < total; i++) {
+				const cell = sliceCell(i % cutCols.value, Math.floor(i / cutCols.value), 1);
+				const canvas = Array.isArray(canvases) ? canvases[i] : canvases;
+				if (!canvas) continue;
+				canvas.width = cell.width;
+				canvas.height = cell.height;
+				canvas.getContext("2d").drawImage(cell, 0, 0);
+			}
+		};
+		const exportZip = async () => {
+			if (!sourceImage.value) return;
+			const fmt = format.value;
+			let mimeType = "image/png";
+			let fileExt = "png";
+			if (fmt === "jpeg") {
+				mimeType = "image/jpeg";
+				fileExt = "jpg";
+			} else if (fmt === "webp") {
+				mimeType = "image/webp";
+				fileExt = "webp";
+			}
+			const quality = fmt === "png" ? void 0 : compression.value;
+			const total = cutCols.value * cutRows.value;
+			showToast("正在生成切片…", "info");
+			try {
+				const JSZip = (await __vitePreload(async () => {
+					const { default: __vite_default__ } = await import("./jszip.min-DEtHb9NL.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					return { default: __vite_default__ };
+				}, [])).default;
+				const zip = new JSZip();
+				const blobPromises = Array.from({ length: total }, (_, i) => {
+					const cell = sliceCell(i % cutCols.value, Math.floor(i / cutCols.value), 1);
+					return new Promise((resolve) => {
+						cell.toBlob((blob) => resolve({
+							idx: i + 1,
+							blob
+						}), mimeType, quality);
+					});
+				});
+				(await Promise.all(blobPromises)).forEach(({ idx, blob }) => {
+					zip.file(`${String(idx).padStart(2, "0")}.${fileExt}`, blob);
+				});
+				const zipBlob = await zip.generateAsync({ type: "blob" });
+				const url = URL.createObjectURL(zipBlob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `seg_${cutCols.value}x${cutRows.value}_${Date.now()}.zip`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				showToast(`导出成功，共 ${total} 张，${(zipBlob.size / 1024 / 1024).toFixed(2)} MB`, "success");
+			} catch (err) {
+				console.error(err);
+				showToast("切片导出失败：" + (err.message || "未知错误") + "，请重试", "error");
+			}
+		};
+		watch([
+			sourceImage,
+			cutCols,
+			cutRows,
+			radius,
+			bgColor
+		], () => nextTick$1(updatePreview), { deep: true });
+		onMounted(() => document.addEventListener("paste", onPaste));
+		onUnmounted(() => {
+			document.removeEventListener("paste", onPaste);
+			if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url);
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$5, [
+				createBaseVNode("div", _hoisted_2$5, [
+					createBaseVNode("div", {
+						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
+						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
+						onDragover: _cache[1] || (_cache[1] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [
+						_cache[8] || (_cache[8] = createBaseVNode("i", { class: "fa-solid fa-cloud-arrow-up" }, null, -1)),
+						_cache[9] || (_cache[9] = createBaseVNode("p", { class: "upload-text" }, "点击或拖拽图片到此处", -1)),
+						_cache[10] || (_cache[10] = createBaseVNode("p", { class: "upload-hint" }, "支持 JPG / PNG / WebP · 可粘贴", -1)),
+						createBaseVNode("input", {
+							ref_key: "fileInput",
+							ref: fileInput,
+							type: "file",
+							accept: "image/*",
+							style: { "display": "none" },
+							onChange: onFileChange
+						}, null, 544)
+					], 34),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$5, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$5, [createBaseVNode("img", {
+						src: sourceImage.value.url,
+						alt: sourceImage.value.name,
+						class: "source-thumb"
+					}, null, 8, _hoisted_5$5)])])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_6$5, [createBaseVNode("button", {
+						class: "btn btn-danger",
+						onClick: clearSource,
+						disabled: !sourceImage.value
+					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7$5)])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$4, [
+						createBaseVNode("span", _hoisted_9$4, toDisplayString(sourceImage.value.name), 1),
+						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(sourceImage.value.img.naturalWidth) + " × " + toDisplayString(sourceImage.value.img.naturalHeight) + " px", 1)]),
+						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(sourceImage.value.size)), 1)])
+					])) : createCommentVNode("", true)
+				]),
+				createBaseVNode("div", _hoisted_10$4, [createBaseVNode("div", _hoisted_11$4, [
+					createBaseVNode("div", _hoisted_12$4, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "form-label" }, "切割方式", -1)), createBaseVNode("div", _hoisted_13$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(presetOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: cutMode.value === opt.value }]),
+							onClick: ($event) => selectPreset(opt.value)
+						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_14$3);
+					}), 64)), createBaseVNode("button", {
+						class: normalizeClass(["seg-btn", { active: cutMode.value === "custom" }]),
+						onClick: openCustomPicker,
+						ref_key: "customBtnRef",
+						ref: customBtnRef
+					}, [..._cache[15] || (_cache[15] = [createBaseVNode("i", { class: "fa-solid fa-table-cells" }, null, -1), createTextVNode(" 自定义 ", -1)])], 2)])]),
+					(openBlock(), createBlock(Teleport, { to: "body" }, [showCustomPicker.value ? (openBlock(), createElementBlock("div", {
+						key: 0,
+						class: "picker-overlay",
+						onClick: _cache[5] || (_cache[5] = withModifiers(($event) => showCustomPicker.value = false, ["self"]))
+					}, [createBaseVNode("div", {
+						class: "picker-popup",
+						style: normalizeStyle(pickerStyle.value)
+					}, [createBaseVNode("div", _hoisted_15$3, [createBaseVNode("span", _hoisted_16$3, [hoverCol.value > 0 && hoverRow.value > 0 ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
+						_cache[17] || (_cache[17] = createTextVNode(" 选择 ", -1)),
+						createBaseVNode("strong", null, toDisplayString(hoverCol.value) + " × " + toDisplayString(hoverRow.value), 1),
+						createTextVNode("（" + toDisplayString(hoverCol.value * hoverRow.value) + " 格） ", 1)
+					], 64)) : (openBlock(), createElementBlock(Fragment$1, { key: 1 }, [createTextVNode("移到格子选择切割方案")], 64))]), createBaseVNode("button", {
+						class: "picker-close",
+						onClick: _cache[3] || (_cache[3] = ($event) => showCustomPicker.value = false)
+					}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_17$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(10, (row) => {
+						return createBaseVNode("div", {
+							key: row,
+							class: "picker-row"
+						}, [(openBlock(), createElementBlock(Fragment$1, null, renderList(10, (col) => {
+							return createBaseVNode("div", {
+								key: col,
+								class: normalizeClass(["picker-cell", { highlighted: col <= hoverCol.value && row <= hoverRow.value }]),
+								onMouseenter: ($event) => {
+									hoverCol.value = col;
+									hoverRow.value = row;
+								},
+								onMouseleave: _cache[4] || (_cache[4] = ($event) => {
+									hoverCol.value = 0;
+									hoverRow.value = 0;
+								}),
+								onClick: ($event) => confirmCustom(col, row)
+							}, null, 42, _hoisted_18$3);
+						}), 64))]);
+					}), 64))])], 4)])) : createCommentVNode("", true)])),
+					createBaseVNode("div", _hoisted_19$3, [_cache[19] || (_cache[19] = createBaseVNode("span", { class: "form-label" }, "圆角", -1)), createVNode(SliderInput_default, {
+						modelValue: radius.value,
+						"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => radius.value = $event),
+						label: "",
+						unit: "px",
+						min: 0,
+						max: 80
+					}, null, 8, ["modelValue"])]),
+					createBaseVNode("div", _hoisted_20$3, [_cache[21] || (_cache[21] = createBaseVNode("span", { class: "form-label" }, "背景色", -1)), createBaseVNode("div", _hoisted_21$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(bgColors, (color) => {
+						return openBlock(), createElementBlock(Fragment$1, { key: color.value }, [!color.isPicker ? (openBlock(), createElementBlock("button", {
+							key: 0,
+							class: normalizeClass(["color-swatch", { active: bgColor.value === color.value }]),
+							style: normalizeStyle(color.value === "transparent" ? {
+								background: "transparent",
+								border: "1px dashed var(--border)"
+							} : { background: color.value }),
+							title: color.label,
+							onClick: ($event) => bgColor.value = color.value
+						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_23$2)) : createCommentVNode("", true)], 14, _hoisted_22$2)) : (openBlock(), createElementBlock("label", {
+							key: 1,
+							class: normalizeClass(["color-swatch", { active: bgColor.value === customBgColor.value }]),
+							style: normalizeStyle({
+								background: customBgColor.value,
+								border: "1px solid var(--border)"
+							}),
+							title: color.label
+						}, [_cache[20] || (_cache[20] = createBaseVNode("i", {
+							class: "fa-solid fa-palette",
+							style: {
+								"font-size": "0.85rem",
+								"color": "rgba(255,255,255,0.85)"
+							}
+						}, null, -1)), withDirectives(createBaseVNode("input", {
+							type: "color",
+							class: "palette-input",
+							"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => customBgColor.value = $event),
+							onInput: applyCustomBgColor
+						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_24$2))], 64);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_25$2, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_26$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+						"png",
+						"jpeg",
+						"webp"
+					], (fmt) => {
+						return createBaseVNode("button", {
+							key: fmt,
+							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
+							onClick: ($event) => format.value = fmt
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_27$2);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_28$2, [createBaseVNode("label", _hoisted_29$2, [_cache[23] || (_cache[23] = createTextVNode(" 图片压缩 ", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_30$2, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_31$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+						return createBaseVNode("button", {
+							key: opt.value,
+							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
+							disabled: format.value === "png",
+							onClick: ($event) => compression.value = opt.value
+						}, toDisplayString(opt.label), 11, _hoisted_32$2);
+					}), 64))])])
+				])]),
+				createBaseVNode("div", _hoisted_33$2, [createBaseVNode("div", _hoisted_34$2, [
+					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_35$1, [_cache[24] || (_cache[24] = createBaseVNode("i", { class: "fa-solid fa-scissors" }, null, -1)), createTextVNode(" " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
+					!sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_36$1, [..._cache[25] || (_cache[25] = [createBaseVNode("span", { class: "empty-icon" }, "✂️", -1), createBaseVNode("span", null, "上传图片后预览切割效果", -1)])])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", {
+						key: 2,
+						class: "grid-preview",
+						style: normalizeStyle({
+							gridTemplateColumns: `repeat(${cutCols.value}, 1fr)`,
+							gap: "2px",
+							background: bgColor.value === "transparent" ? "transparent" : bgColor.value,
+							aspectRatio: `${sourceImage.value.img.naturalWidth} / ${sourceImage.value.img.naturalHeight}`
+						})
+					}, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(previewCells.value, (_, idx) => {
+						return openBlock(), createElementBlock("div", {
+							key: idx,
+							class: "grid-cell",
+							style: normalizeStyle({ borderRadius: radius.value + "px" })
+						}, [createBaseVNode("canvas", {
+							ref_for: true,
+							ref_key: "cellCanvases",
+							ref: cellCanvases,
+							class: "cell-canvas"
+						}, null, 512)], 4);
+					}), 128))], 4)) : createCommentVNode("", true),
+					createBaseVNode("button", {
+						class: "btn btn-primary btn-block",
+						disabled: !sourceImage.value,
+						onClick: exportZip,
+						style: { "margin-top": "auto" }
+					}, [_cache[26] || (_cache[26] = createBaseVNode("i", { class: "fa-solid fa-file-zipper" }, null, -1)), createTextVNode(" " + toDisplayString(sourceImage.value ? `导出 ZIP（${cutCols.value} * ${cutRows.value} 张 ${format.value.toUpperCase()}）` : "请先上传图片"), 1)], 8, _hoisted_37$1)
+				])])
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-6b854ad7"]]);
+//#endregion
+//#region src/views/VideoToGif.vue?vue&type=style&index=0&scoped=c08f40d2&lang.css
+var import_gif = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
+	(function(f) {
+		if (typeof exports === "object" && typeof module !== "undefined") module.exports = f();
+		else if (typeof define === "function" && define.amd) define([], f);
+		else {
+			var g;
+			if (typeof window !== "undefined") g = window;
+			else if (typeof global !== "undefined") g = global;
+			else if (typeof self !== "undefined") g = self;
+			else g = this;
+			g.GIF = f();
+		}
+	})(function() {
+		return function e(t, n, r) {
+			function s(o, u) {
+				if (!n[o]) {
+					if (!t[o]) {
+						var a = typeof __require == "function" && __require;
+						if (!u && a) return a(o, !0);
+						if (i) return i(o, !0);
+						var f = /* @__PURE__ */ new Error("Cannot find module '" + o + "'");
+						throw f.code = "MODULE_NOT_FOUND", f;
+					}
+					var l = n[o] = { exports: {} };
+					t[o][0].call(l.exports, function(e) {
+						var n = t[o][1][e];
+						return s(n ? n : e);
+					}, l, l.exports, e, t, n, r);
+				}
+				return n[o].exports;
+			}
+			var i = typeof __require == "function" && __require;
+			for (var o = 0; o < r.length; o++) s(r[o]);
+			return s;
+		}({
+			1: [function(require, module$2, exports$1) {
+				function EventEmitter() {
+					this._events = this._events || {};
+					this._maxListeners = this._maxListeners || void 0;
+				}
+				module$2.exports = EventEmitter;
+				EventEmitter.EventEmitter = EventEmitter;
+				EventEmitter.prototype._events = void 0;
+				EventEmitter.prototype._maxListeners = void 0;
+				EventEmitter.defaultMaxListeners = 10;
+				EventEmitter.prototype.setMaxListeners = function(n) {
+					if (!isNumber(n) || n < 0 || isNaN(n)) throw TypeError("n must be a positive number");
+					this._maxListeners = n;
+					return this;
+				};
+				EventEmitter.prototype.emit = function(type) {
+					var er, handler, len, args, i, listeners;
+					if (!this._events) this._events = {};
+					if (type === "error") {
+						if (!this._events.error || isObject(this._events.error) && !this._events.error.length) {
+							er = arguments[1];
+							if (er instanceof Error) throw er;
+							else {
+								var err = /* @__PURE__ */ new Error("Uncaught, unspecified \"error\" event. (" + er + ")");
+								err.context = er;
+								throw err;
+							}
+						}
+					}
+					handler = this._events[type];
+					if (isUndefined(handler)) return false;
+					if (isFunction(handler)) switch (arguments.length) {
+						case 1:
+							handler.call(this);
+							break;
+						case 2:
+							handler.call(this, arguments[1]);
+							break;
+						case 3:
+							handler.call(this, arguments[1], arguments[2]);
+							break;
+						default:
+							args = Array.prototype.slice.call(arguments, 1);
+							handler.apply(this, args);
+					}
+					else if (isObject(handler)) {
+						args = Array.prototype.slice.call(arguments, 1);
+						listeners = handler.slice();
+						len = listeners.length;
+						for (i = 0; i < len; i++) listeners[i].apply(this, args);
+					}
+					return true;
+				};
+				EventEmitter.prototype.addListener = function(type, listener) {
+					var m;
+					if (!isFunction(listener)) throw TypeError("listener must be a function");
+					if (!this._events) this._events = {};
+					if (this._events.newListener) this.emit("newListener", type, isFunction(listener.listener) ? listener.listener : listener);
+					if (!this._events[type]) this._events[type] = listener;
+					else if (isObject(this._events[type])) this._events[type].push(listener);
+					else this._events[type] = [this._events[type], listener];
+					if (isObject(this._events[type]) && !this._events[type].warned) {
+						if (!isUndefined(this._maxListeners)) m = this._maxListeners;
+						else m = EventEmitter.defaultMaxListeners;
+						if (m && m > 0 && this._events[type].length > m) {
+							this._events[type].warned = true;
+							console.error("(node) warning: possible EventEmitter memory leak detected. %d listeners added. Use emitter.setMaxListeners() to increase limit.", this._events[type].length);
+							if (typeof console.trace === "function") console.trace();
+						}
+					}
+					return this;
+				};
+				EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+				EventEmitter.prototype.once = function(type, listener) {
+					if (!isFunction(listener)) throw TypeError("listener must be a function");
+					var fired = false;
+					function g() {
+						this.removeListener(type, g);
+						if (!fired) {
+							fired = true;
+							listener.apply(this, arguments);
+						}
+					}
+					g.listener = listener;
+					this.on(type, g);
+					return this;
+				};
+				EventEmitter.prototype.removeListener = function(type, listener) {
+					var list, position, length, i;
+					if (!isFunction(listener)) throw TypeError("listener must be a function");
+					if (!this._events || !this._events[type]) return this;
+					list = this._events[type];
+					length = list.length;
+					position = -1;
+					if (list === listener || isFunction(list.listener) && list.listener === listener) {
+						delete this._events[type];
+						if (this._events.removeListener) this.emit("removeListener", type, listener);
+					} else if (isObject(list)) {
+						for (i = length; i-- > 0;) if (list[i] === listener || list[i].listener && list[i].listener === listener) {
+							position = i;
+							break;
+						}
+						if (position < 0) return this;
+						if (list.length === 1) {
+							list.length = 0;
+							delete this._events[type];
+						} else list.splice(position, 1);
+						if (this._events.removeListener) this.emit("removeListener", type, listener);
+					}
+					return this;
+				};
+				EventEmitter.prototype.removeAllListeners = function(type) {
+					var key, listeners;
+					if (!this._events) return this;
+					if (!this._events.removeListener) {
+						if (arguments.length === 0) this._events = {};
+						else if (this._events[type]) delete this._events[type];
+						return this;
+					}
+					if (arguments.length === 0) {
+						for (key in this._events) {
+							if (key === "removeListener") continue;
+							this.removeAllListeners(key);
+						}
+						this.removeAllListeners("removeListener");
+						this._events = {};
+						return this;
+					}
+					listeners = this._events[type];
+					if (isFunction(listeners)) this.removeListener(type, listeners);
+					else if (listeners) while (listeners.length) this.removeListener(type, listeners[listeners.length - 1]);
+					delete this._events[type];
+					return this;
+				};
+				EventEmitter.prototype.listeners = function(type) {
+					var ret;
+					if (!this._events || !this._events[type]) ret = [];
+					else if (isFunction(this._events[type])) ret = [this._events[type]];
+					else ret = this._events[type].slice();
+					return ret;
+				};
+				EventEmitter.prototype.listenerCount = function(type) {
+					if (this._events) {
+						var evlistener = this._events[type];
+						if (isFunction(evlistener)) return 1;
+						else if (evlistener) return evlistener.length;
+					}
+					return 0;
+				};
+				EventEmitter.listenerCount = function(emitter, type) {
+					return emitter.listenerCount(type);
+				};
+				function isFunction(arg) {
+					return typeof arg === "function";
+				}
+				function isNumber(arg) {
+					return typeof arg === "number";
+				}
+				function isObject(arg) {
+					return typeof arg === "object" && arg !== null;
+				}
+				function isUndefined(arg) {
+					return arg === void 0;
+				}
+			}, {}],
+			2: [function(require, module$3, exports$2) {
+				var UA, browser, mode, platform, ua = navigator.userAgent.toLowerCase();
+				platform = navigator.platform.toLowerCase();
+				UA = ua.match(/(opera|ie|firefox|chrome|version)[\s\/:]([\w\d\.]+)?.*?(safari|version[\s\/:]([\w\d\.]+)|$)/) || [
+					null,
+					"unknown",
+					0
+				];
+				mode = UA[1] === "ie" && document.documentMode;
+				browser = {
+					name: UA[1] === "version" ? UA[3] : UA[1],
+					version: mode || parseFloat(UA[1] === "opera" && UA[4] ? UA[4] : UA[2]),
+					platform: { name: ua.match(/ip(?:ad|od|hone)/) ? "ios" : (ua.match(/(?:webos|android)/) || platform.match(/mac|win|linux/) || ["other"])[0] }
+				};
+				browser[browser.name] = true;
+				browser[browser.name + parseInt(browser.version, 10)] = true;
+				browser.platform[browser.platform.name] = true;
+				module$3.exports = browser;
+			}, {}],
+			3: [function(require, module$4, exports$3) {
+				var EventEmitter, GIF, browser, extend = function(child, parent) {
+					for (var key in parent) if (hasProp.call(parent, key)) child[key] = parent[key];
+					function ctor() {
+						this.constructor = child;
+					}
+					ctor.prototype = parent.prototype;
+					child.prototype = new ctor();
+					child.__super__ = parent.prototype;
+					return child;
+				}, hasProp = {}.hasOwnProperty, indexOf = [].indexOf || function(item) {
+					for (var i = 0, l = this.length; i < l; i++) if (i in this && this[i] === item) return i;
+					return -1;
+				}, slice = [].slice;
+				EventEmitter = require("events").EventEmitter;
+				browser = require("./browser.coffee");
+				GIF = function(superClass) {
+					var defaults, frameDefaults;
+					extend(GIF, superClass);
+					defaults = {
+						workerScript: "gif.worker.js",
+						workers: 2,
+						repeat: 0,
+						background: "#fff",
+						quality: 10,
+						width: null,
+						height: null,
+						transparent: null,
+						debug: false,
+						dither: false
+					};
+					frameDefaults = {
+						delay: 500,
+						copy: false
+					};
+					function GIF(options) {
+						var base, key, value;
+						this.running = false;
+						this.options = {};
+						this.frames = [];
+						this.freeWorkers = [];
+						this.activeWorkers = [];
+						this.setOptions(options);
+						for (key in defaults) {
+							value = defaults[key];
+							if ((base = this.options)[key] == null) base[key] = value;
+						}
+					}
+					GIF.prototype.setOption = function(key, value) {
+						this.options[key] = value;
+						if (this._canvas != null && (key === "width" || key === "height")) return this._canvas[key] = value;
+					};
+					GIF.prototype.setOptions = function(options) {
+						var key, results = [], value;
+						for (key in options) {
+							if (!hasProp.call(options, key)) continue;
+							value = options[key];
+							results.push(this.setOption(key, value));
+						}
+						return results;
+					};
+					GIF.prototype.addFrame = function(image, options) {
+						var frame, key;
+						if (options == null) options = {};
+						frame = {};
+						frame.transparent = this.options.transparent;
+						for (key in frameDefaults) frame[key] = options[key] || frameDefaults[key];
+						if (this.options.width == null) this.setOption("width", image.width);
+						if (this.options.height == null) this.setOption("height", image.height);
+						if (typeof ImageData !== "undefined" && ImageData !== null && image instanceof ImageData) frame.data = image.data;
+						else if (typeof CanvasRenderingContext2D !== "undefined" && CanvasRenderingContext2D !== null && image instanceof CanvasRenderingContext2D || typeof WebGLRenderingContext !== "undefined" && WebGLRenderingContext !== null && image instanceof WebGLRenderingContext) if (options.copy) frame.data = this.getContextData(image);
+						else frame.context = image;
+						else if (image.childNodes != null) if (options.copy) frame.data = this.getImageData(image);
+						else frame.image = image;
+						else throw new Error("Invalid image");
+						return this.frames.push(frame);
+					};
+					GIF.prototype.render = function() {
+						var j, numWorkers, ref;
+						if (this.running) throw new Error("Already running");
+						if (this.options.width == null || this.options.height == null) throw new Error("Width and height must be set prior to rendering");
+						this.running = true;
+						this.nextFrame = 0;
+						this.finishedFrames = 0;
+						this.imageParts = function() {
+							var j, ref, results = [];
+							for (j = 0, ref = this.frames.length; 0 <= ref ? j < ref : j > ref; 0 <= ref ? ++j : --j) results.push(null);
+							return results;
+						}.call(this);
+						numWorkers = this.spawnWorkers();
+						if (this.options.globalPalette === true) this.renderNextFrame();
+						else for (j = 0, ref = numWorkers; 0 <= ref ? j < ref : j > ref; 0 <= ref ? ++j : --j) this.renderNextFrame();
+						this.emit("start");
+						return this.emit("progress", 0);
+					};
+					GIF.prototype.abort = function() {
+						var worker;
+						while (true) {
+							worker = this.activeWorkers.shift();
+							if (worker == null) break;
+							this.log("killing active worker");
+							worker.terminate();
+						}
+						this.running = false;
+						return this.emit("abort");
+					};
+					GIF.prototype.spawnWorkers = function() {
+						var numWorkers = Math.min(this.options.workers, this.frames.length), ref, results;
+						(function() {
+							results = [];
+							for (var j = ref = this.freeWorkers.length; ref <= numWorkers ? j < numWorkers : j > numWorkers; ref <= numWorkers ? j++ : j--) results.push(j);
+							return results;
+						}).apply(this).forEach(function(_this) {
+							return function(i) {
+								var worker;
+								_this.log("spawning worker " + i);
+								worker = new Worker(_this.options.workerScript);
+								worker.onmessage = function(event) {
+									_this.activeWorkers.splice(_this.activeWorkers.indexOf(worker), 1);
+									_this.freeWorkers.push(worker);
+									return _this.frameFinished(event.data);
+								};
+								return _this.freeWorkers.push(worker);
+							};
+						}(this));
+						return numWorkers;
+					};
+					GIF.prototype.frameFinished = function(frame) {
+						var j, ref;
+						this.log("frame " + frame.index + " finished - " + this.activeWorkers.length + " active");
+						this.finishedFrames++;
+						this.emit("progress", this.finishedFrames / this.frames.length);
+						this.imageParts[frame.index] = frame;
+						if (this.options.globalPalette === true) {
+							this.options.globalPalette = frame.globalPalette;
+							this.log("global palette analyzed");
+							if (this.frames.length > 2) for (j = 1, ref = this.freeWorkers.length; 1 <= ref ? j < ref : j > ref; 1 <= ref ? ++j : --j) this.renderNextFrame();
+						}
+						if (indexOf.call(this.imageParts, null) >= 0) return this.renderNextFrame();
+						else return this.finishRendering();
+					};
+					GIF.prototype.finishRendering = function() {
+						var data, frame, i, image, j, k, l, len = 0, len1, len2, len3, offset, page, ref = this.imageParts, ref1, ref2;
+						for (j = 0, len1 = ref.length; j < len1; j++) {
+							frame = ref[j];
+							len += (frame.data.length - 1) * frame.pageSize + frame.cursor;
+						}
+						len += frame.pageSize - frame.cursor;
+						this.log("rendering finished - filesize " + Math.round(len / 1e3) + "kb");
+						data = new Uint8Array(len);
+						offset = 0;
+						ref1 = this.imageParts;
+						for (k = 0, len2 = ref1.length; k < len2; k++) {
+							frame = ref1[k];
+							ref2 = frame.data;
+							for (i = l = 0, len3 = ref2.length; l < len3; i = ++l) {
+								page = ref2[i];
+								data.set(page, offset);
+								if (i === frame.data.length - 1) offset += frame.cursor;
+								else offset += frame.pageSize;
+							}
+						}
+						image = new Blob([data], { type: "image/gif" });
+						return this.emit("finished", image, data);
+					};
+					GIF.prototype.renderNextFrame = function() {
+						var frame, task, worker;
+						if (this.freeWorkers.length === 0) throw new Error("No free workers");
+						if (this.nextFrame >= this.frames.length) return;
+						frame = this.frames[this.nextFrame++];
+						worker = this.freeWorkers.shift();
+						task = this.getTask(frame);
+						this.log("starting frame " + (task.index + 1) + " of " + this.frames.length);
+						this.activeWorkers.push(worker);
+						return worker.postMessage(task);
+					};
+					GIF.prototype.getContextData = function(ctx) {
+						return ctx.getImageData(0, 0, this.options.width, this.options.height).data;
+					};
+					GIF.prototype.getImageData = function(image) {
+						var ctx;
+						if (this._canvas == null) {
+							this._canvas = document.createElement("canvas");
+							this._canvas.width = this.options.width;
+							this._canvas.height = this.options.height;
+						}
+						ctx = this._canvas.getContext("2d");
+						ctx.setFill = this.options.background;
+						ctx.fillRect(0, 0, this.options.width, this.options.height);
+						ctx.drawImage(image, 0, 0);
+						return this.getContextData(ctx);
+					};
+					GIF.prototype.getTask = function(frame) {
+						var index = this.frames.indexOf(frame), task = {
+							index,
+							last: index === this.frames.length - 1,
+							delay: frame.delay,
+							transparent: frame.transparent,
+							width: this.options.width,
+							height: this.options.height,
+							quality: this.options.quality,
+							dither: this.options.dither,
+							globalPalette: this.options.globalPalette,
+							repeat: this.options.repeat,
+							canTransfer: browser.name === "chrome"
+						};
+						if (frame.data != null) task.data = frame.data;
+						else if (frame.context != null) task.data = this.getContextData(frame.context);
+						else if (frame.image != null) task.data = this.getImageData(frame.image);
+						else throw new Error("Invalid frame");
+						return task;
+					};
+					GIF.prototype.log = function() {
+						var args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
+						if (!this.options.debug) return;
+						return console.log.apply(console, args);
+					};
+					return GIF;
+				}(EventEmitter);
+				module$4.exports = GIF;
+			}, {
+				"./browser.coffee": 2,
+				events: 1
+			}]
+		}, {}, [3])(3);
+	});
+})))());
+//#endregion
+//#region src/views/VideoToGif.vue
+var _hoisted_1$4 = { class: "gif-converter" };
+var _hoisted_2$4 = { class: "converter-left" };
+var _hoisted_3$4 = { class: "upload-text" };
+var _hoisted_4$4 = ["src"];
+var _hoisted_5$4 = {
+	key: 1,
+	class: "video-info-bar"
+};
+var _hoisted_6$4 = {
+	key: 2,
+	class: "timeline-container"
+};
+var _hoisted_7$4 = { class: "timeline-header" };
+var _hoisted_8$3 = { class: "timeline-time" };
+var _hoisted_9$3 = { class: "handle-label" };
+var _hoisted_10$3 = { class: "handle-label" };
+var _hoisted_11$3 = { class: "timeline-actions" };
+var _hoisted_12$3 = ["disabled"];
+var _hoisted_13$2 = { class: "fa-solid fa-play" };
+var _hoisted_14$2 = { class: "fa-solid fa-pause" };
+var _hoisted_15$2 = ["disabled"];
+var _hoisted_16$2 = { class: "fa-solid fa-play" };
+var _hoisted_17$2 = { class: "fa-solid fa-pause" };
+var _hoisted_18$2 = { class: "converter-middle" };
+var _hoisted_19$2 = { class: "settings-panel" };
+var _hoisted_20$2 = { class: "preset-buttons" };
+var _hoisted_21$2 = { class: "setting-item" };
+var _hoisted_22$1 = { class: "seg-control" };
+var _hoisted_23$1 = ["onClick"];
+var _hoisted_24$1 = { class: "setting-item" };
+var _hoisted_25$1 = { class: "setting-item" };
+var _hoisted_26$1 = { class: "setting-item" };
+var _hoisted_27$1 = { class: "form-label" };
+var _hoisted_28$1 = { class: "action-row" };
+var _hoisted_29$1 = ["disabled"];
+var _hoisted_30$1 = ["disabled"];
+var _hoisted_31$1 = { class: "btn-content" };
+var _hoisted_32$1 = {
+	key: 0,
+	class: "progress-container"
+};
+var _hoisted_33$1 = { class: "progress-header" };
+var _hoisted_34$1 = { class: "progress-text" };
+var _hoisted_35 = { class: "progress-percent" };
+var _hoisted_36 = { class: "progress-bar" };
+var _hoisted_37 = { class: "progress-footer" };
+var _hoisted_38 = {
+	key: 0,
+	class: "progress-time"
+};
+var _hoisted_39 = {
+	key: 1,
+	class: "progress-time"
+};
+var _hoisted_40 = {
+	key: 0,
+	class: "converter-right"
+};
+var _hoisted_41 = { class: "result-section" };
+var _hoisted_42 = { class: "result-header" };
+var _hoisted_43 = { class: "gif-preview-container" };
+var _hoisted_44 = ["src"];
+var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "VideoToGif",
+	setup(__props) {
+		const { showToast } = useToast();
+		const fileInput = /* @__PURE__ */ ref(null);
+		const videoEl = /* @__PURE__ */ ref(null);
+		const videoWrapper = /* @__PURE__ */ ref(null);
+		const timelineTrack = /* @__PURE__ */ ref(null);
+		const videoUrl = /* @__PURE__ */ ref(null);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const videoInfo = /* @__PURE__ */ ref(null);
+		const currentTime = /* @__PURE__ */ ref(0);
+		const isPlaying = /* @__PURE__ */ ref(false);
+		const isPlayingSegment = /* @__PURE__ */ ref(false);
+		const trimStart = /* @__PURE__ */ ref(0);
+		const trimEnd = /* @__PURE__ */ ref(0);
+		const isDragging = /* @__PURE__ */ ref(false);
+		const dragHandle = /* @__PURE__ */ ref(null);
+		const fps = /* @__PURE__ */ ref(15);
+		const quality = /* @__PURE__ */ ref(10);
+		const loop = /* @__PURE__ */ ref(true);
+		const colors = /* @__PURE__ */ ref(256);
+		const dither = /* @__PURE__ */ ref("FloydSteinberg-serpentine");
+		const compressionLevel = /* @__PURE__ */ ref(10);
+		const currentPreset = /* @__PURE__ */ ref("balanced");
+		const colorOptions = [
+			{
+				label: "64色",
+				value: 64
+			},
+			{
+				label: "128色",
+				value: 128
+			},
+			{
+				label: "256色",
+				value: 256
+			}
+		];
+		const isGenerating = /* @__PURE__ */ ref(false);
+		const isCancelled = /* @__PURE__ */ ref(false);
+		const statusMsg = /* @__PURE__ */ ref("就绪");
+		const gifBlob = /* @__PURE__ */ ref(null);
+		const gifPreviewUrl = /* @__PURE__ */ ref(null);
+		const gifInfo = /* @__PURE__ */ ref({
+			width: 0,
+			height: 0
+		});
+		const currentGifInstance = /* @__PURE__ */ ref(null);
+		const progressInfo = /* @__PURE__ */ ref({
+			current: 0,
+			total: 0,
+			percent: 0,
+			startTime: null,
+			estimatedTime: 0
+		});
+		const formatTime = (seconds) => {
+			if (seconds === null || seconds === void 0 || isNaN(seconds)) return "00:00.000";
+			const m = Math.floor(seconds / 60);
+			const s = Math.floor(seconds % 60);
+			const ms = Math.floor(seconds % 1 * 1e3);
+			return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0") + "." + String(ms).padStart(3, "0");
+		};
+		const formatBytes = (bytes) => {
+			if (!bytes) return "-";
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / 1048576).toFixed(1) + " MB";
+		};
+		const formatRemainingTime = (seconds) => {
+			if (seconds < 60) return `约 ${seconds} 秒`;
+			return `约 ${Math.floor(seconds / 60)} 分 ${seconds % 60} 秒`;
+		};
+		const canGenerate = computed(() => {
+			return videoUrl.value && trimEnd.value > trimStart.value && !isGenerating.value;
+		});
+		const selectionStyle = computed(() => {
+			if (!videoInfo.value || !videoInfo.value.duration) return {};
+			const duration = videoInfo.value.duration;
+			const startPercent = trimStart.value / duration * 100;
+			const endPercent = trimEnd.value / duration * 100;
+			return {
+				left: startPercent + "%",
+				width: endPercent - startPercent + "%"
+			};
+		});
+		const handleStartStyle = computed(() => {
+			if (!videoInfo.value || !videoInfo.value.duration) return { left: "0%" };
+			const duration = videoInfo.value.duration;
+			return { left: trimStart.value / duration * 100 + "%" };
+		});
+		const handleEndStyle = computed(() => {
+			if (!videoInfo.value || !videoInfo.value.duration) return { left: "100%" };
+			const duration = videoInfo.value.duration;
+			return { left: trimEnd.value / duration * 100 + "%" };
+		});
+		const playheadStyle = computed(() => {
+			if (!videoInfo.value || !videoInfo.value.duration) return { left: "0%" };
+			const duration = videoInfo.value.duration;
+			return { left: (duration > 0 ? currentTime.value / duration * 100 : 0) + "%" };
+		});
+		const applyPreset = (preset) => {
+			currentPreset.value = preset;
+			switch (preset) {
+				case "small":
+					fps.value = 10;
+					quality.value = 20;
+					colors.value = 128;
+					break;
+				case "balanced":
+					fps.value = 15;
+					quality.value = 10;
+					colors.value = 256;
+					break;
+				case "quality":
+					fps.value = 20;
+					quality.value = 5;
+					colors.value = 256;
+					break;
+			}
+			showToast(`已应用预设: ${preset === "small" ? "小文件" : preset === "balanced" ? "平衡" : "高质量"}`, "success");
+		};
+		const onFileChange = (e) => {
+			const file = e.target.files[0];
+			if (file) loadVideo(file);
+			e.target.value = "";
+		};
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const file = e.dataTransfer.files[0];
+			if (file && file.type.startsWith("video/")) loadVideo(file);
+		};
+		const loadVideo = (file) => {
+			if (!file.type.startsWith("video/")) {
+				showToast("请选择有效的视频文件", "error");
+				return;
+			}
+			if (file.size > 2 * 1024 * 1024 * 1024) {
+				showToast("视频文件过大，请选择小于 2GB 的文件", "error");
+				return;
+			}
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			videoUrl.value = URL.createObjectURL(file);
+			videoInfo.value = {
+				name: file.name,
+				duration: 0,
+				size: formatBytes(file.size)
+			};
+			gifBlob.value = null;
+			if (gifPreviewUrl.value) {
+				URL.revokeObjectURL(gifPreviewUrl.value);
+				gifPreviewUrl.value = null;
+			}
+			statusMsg.value = "视频加载中...";
+		};
+		const removeVideo = () => {
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			videoUrl.value = null;
+			videoInfo.value = null;
+			trimStart.value = 0;
+			trimEnd.value = 0;
+			currentTime.value = 0;
+			gifBlob.value = null;
+			if (gifPreviewUrl.value) {
+				URL.revokeObjectURL(gifPreviewUrl.value);
+				gifPreviewUrl.value = null;
+			}
+			statusMsg.value = "就绪";
+			showToast("视频已移除", "success");
+		};
+		const onVideoError = (e) => {
+			console.error("视频加载错误:", e);
+			showToast("视频加载失败，请检查文件格式", "error");
+			if (videoUrl.value) {
+				URL.revokeObjectURL(videoUrl.value);
+				videoUrl.value = null;
+			}
+			videoInfo.value = null;
+		};
+		const onVideoLoaded = () => {
+			const video = videoEl.value;
+			if (!video) return;
+			video.muted = true;
+			videoInfo.value.duration = video.duration;
+			trimStart.value = 0;
+			trimEnd.value = video.duration;
+			statusMsg.value = "视频就绪";
+			showToast("视频加载成功", "success");
+		};
+		const onTimeUpdate = () => {
+			const video = videoEl.value;
+			if (video) {
+				currentTime.value = video.currentTime;
+				isPlaying.value = !video.paused;
+			}
+		};
+		const togglePlayPause = () => {
+			const video = videoEl.value;
+			if (!video) return;
+			if (video.paused) {
+				video.play();
+				isPlaying.value = true;
+			} else {
+				video.pause();
+				isPlaying.value = false;
+			}
+		};
+		const getTimeFromEvent = (e) => {
+			if (!timelineTrack.value || !videoInfo.value) return null;
+			const rect = timelineTrack.value.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			return Math.max(0, Math.min(1, x / rect.width)) * videoInfo.value.duration;
+		};
+		const onTimelineMouseDown = (e) => {
+			if (!videoInfo.value) return;
+			const time = getTimeFromEvent(e);
+			if (time === null) return;
+			if (Math.abs(time - trimStart.value) < Math.abs(time - trimEnd.value)) {
+				dragHandle.value = "start";
+				trimStart.value = Math.min(time, trimEnd.value - .1);
+			} else {
+				dragHandle.value = "end";
+				trimEnd.value = Math.max(time, trimStart.value + .1);
+			}
+			isDragging.value = true;
+			updateVideoTime();
+		};
+		const onHandleMouseDown = (e, handle) => {
+			e.stopPropagation();
+			dragHandle.value = handle;
+			isDragging.value = true;
+		};
+		const onTimelineMouseMove = (e) => {
+			if (!isDragging.value || !videoInfo.value) return;
+			const time = getTimeFromEvent(e);
+			if (time === null) return;
+			if (dragHandle.value === "start") trimStart.value = Math.max(0, Math.min(time, trimEnd.value - .1));
+			else if (dragHandle.value === "end") trimEnd.value = Math.min(videoInfo.value.duration, Math.max(time, trimStart.value + .1));
+			updateVideoTime();
+		};
+		const onTimelineMouseUp = () => {
+			isDragging.value = false;
+			dragHandle.value = null;
+		};
+		const resetTrim = () => {
+			if (!videoInfo.value) return;
+			trimStart.value = 0;
+			trimEnd.value = videoInfo.value.duration;
+			showToast("时间范围已重置", "success");
+		};
+		const playSegment = async () => {
+			const video = videoEl.value;
+			if (!video || !videoInfo.value) return;
+			if (isPlayingSegment.value) {
+				video.pause();
+				isPlayingSegment.value = false;
+				return;
+			}
+			isPlayingSegment.value = true;
+			video.currentTime = trimStart.value;
+			await new Promise((resolve) => {
+				video.addEventListener("seeked", resolve, { once: true });
+			});
+			await video.play();
+			const checkProgress = () => {
+				if (video.currentTime >= trimEnd.value || video.ended) {
+					video.pause();
+					video.removeEventListener("timeupdate", checkProgress);
+					isPlayingSegment.value = false;
+				}
+			};
+			video.addEventListener("timeupdate", checkProgress);
+			const handlePause = () => {
+				isPlayingSegment.value = false;
+				video.removeEventListener("pause", handlePause);
+			};
+			video.addEventListener("pause", handlePause);
+		};
+		const updateVideoTime = () => {
+			const video = videoEl.value;
+			if (!video) return;
+			if (dragHandle.value === "start") video.currentTime = trimStart.value;
+			else if (dragHandle.value === "end") video.currentTime = trimEnd.value;
+		};
+		const updateProgress = (current, total) => {
+			progressInfo.value.current = current;
+			progressInfo.value.total = total;
+			progressInfo.value.percent = Math.floor(current / total * 100);
+			if (progressInfo.value.startTime && current > 0) {
+				const avgTimePerFrame = (Date.now() - progressInfo.value.startTime) / 1e3 / current;
+				const remaining = (total - current) * avgTimePerFrame;
+				progressInfo.value.estimatedTime = Math.ceil(remaining);
+			}
+		};
+		const resetProgress = () => {
+			progressInfo.value = {
+				current: 0,
+				total: 0,
+				percent: 0,
+				startTime: null,
+				estimatedTime: 0
+			};
+		};
+		const cancelGenerate = () => {
+			if (!isGenerating.value) return;
+			isCancelled.value = true;
+			if (currentGifInstance.value) {
+				try {
+					currentGifInstance.value.abort();
+				} catch (err) {
+					console.error("中止 GIF 生成失败:", err);
+				}
+				currentGifInstance.value = null;
+			}
+			isGenerating.value = false;
+			resetProgress();
+			showToast("已取消生成", "success");
+			statusMsg.value = "就绪";
+		};
+		const generateGif = async () => {
+			const video = videoEl.value;
+			if (!video || !canGenerate.value) return;
+			isGenerating.value = true;
+			isCancelled.value = false;
+			gifBlob.value = null;
+			if (gifPreviewUrl.value) {
+				URL.revokeObjectURL(gifPreviewUrl.value);
+				gifPreviewUrl.value = null;
+			}
+			resetProgress();
+			progressInfo.value.startTime = Date.now();
+			try {
+				const duration = trimEnd.value - trimStart.value;
+				const totalFrames = Math.floor(duration * fps.value);
+				if (totalFrames <= 0) throw new Error("时间范围无效");
+				if (totalFrames > 300) {
+					if (!confirm(`将生成 ${totalFrames} 帧，可能需要较长时间且占用较多内存。\n\n是否继续？`)) {
+						isGenerating.value = false;
+						return;
+					}
+				}
+				statusMsg.value = "准备中...";
+				const maxWidth = 640;
+				let gifWidth = video.videoWidth;
+				let gifHeight = video.videoHeight;
+				if (gifWidth > maxWidth) {
+					const ratio = maxWidth / gifWidth;
+					gifWidth = maxWidth;
+					gifHeight = Math.round(video.videoHeight * ratio);
+				}
+				const gif = new import_gif.default({
+					workers: 2,
+					quality: quality.value,
+					width: gifWidth,
+					height: gifHeight,
+					workerScript: "/subtitle_extractor/node_modules/gif.js/dist/gif.worker.js",
+					background: "#000000",
+					repeat: loop.value ? 0 : -1,
+					transparent: null,
+					dither: dither.value === "none" ? false : dither.value,
+					maxColors: colors.value
+				});
+				currentGifInstance.value = gif;
+				const canvas = document.createElement("canvas");
+				canvas.width = gifWidth;
+				canvas.height = gifHeight;
+				const ctx = canvas.getContext("2d");
+				for (let i = 0; i < totalFrames; i++) {
+					if (isCancelled.value) throw new Error("用户取消");
+					const frameTime = trimStart.value + i / fps.value;
+					await new Promise((resolve, reject) => {
+						const timeout = setTimeout(() => {
+							video.removeEventListener("seeked", onSeeked);
+							reject(/* @__PURE__ */ new Error("Seek 超时 @ " + formatTime(frameTime)));
+						}, 5e3);
+						function onSeeked() {
+							clearTimeout(timeout);
+							video.removeEventListener("seeked", onSeeked);
+							ctx.fillStyle = "#000000";
+							ctx.fillRect(0, 0, canvas.width, canvas.height);
+							ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+							gif.addFrame(ctx, {
+								copy: true,
+								delay: 1e3 / fps.value
+							});
+							resolve();
+						}
+						video.addEventListener("seeked", onSeeked);
+						video.currentTime = Math.min(frameTime, trimEnd.value - .001);
+					});
+					updateProgress(i + 1, totalFrames);
+					statusMsg.value = `处理中... ${i + 1}/${totalFrames}`;
+					await new Promise((resolve) => setTimeout(resolve, 0));
+				}
+				statusMsg.value = "渲染 GIF...";
+				gif.on("finished", (blob) => {
+					if (isCancelled.value) return;
+					gifBlob.value = blob;
+					gifPreviewUrl.value = URL.createObjectURL(blob);
+					gifInfo.value = {
+						width: gifWidth,
+						height: gifHeight
+					};
+					isGenerating.value = false;
+					isCancelled.value = false;
+					currentGifInstance.value = null;
+					resetProgress();
+					showToast("GIF 生成完成！", "success");
+					statusMsg.value = "完成";
+				});
+				gif.on("progress", (p) => {
+					statusMsg.value = `渲染中... ${Math.round(p * 100)}%`;
+				});
+				gif.on("abort", () => {
+					console.log("GIF 渲染被中止");
+					isGenerating.value = false;
+					isCancelled.value = false;
+					currentGifInstance.value = null;
+					resetProgress();
+				});
+				gif.render();
+			} catch (err) {
+				if (err.message === "用户取消") console.log("用户取消了 GIF 生成");
+				else {
+					console.error("GIF 生成失败:", err);
+					showToast("GIF 生成失败: " + err.message, "error");
+				}
+				isGenerating.value = false;
+				isCancelled.value = false;
+				currentGifInstance.value = null;
+				resetProgress();
+			}
+		};
+		const regenerateGif = () => {
+			gifBlob.value = null;
+			if (gifPreviewUrl.value) {
+				URL.revokeObjectURL(gifPreviewUrl.value);
+				gifPreviewUrl.value = null;
+			}
+			generateGif();
+		};
+		const downloadGif = () => {
+			if (!gifBlob.value) return;
+			const url = URL.createObjectURL(gifBlob.value);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `video_${Date.now()}.gif`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			showToast("GIF 已下载", "success");
+		};
+		onMounted(() => {
+			document.addEventListener("mouseup", onTimelineMouseUp);
+		});
+		onUnmounted(() => {
+			document.removeEventListener("mouseup", onTimelineMouseUp);
+			if (videoUrl.value) URL.revokeObjectURL(videoUrl.value);
+			if (gifPreviewUrl.value) URL.revokeObjectURL(gifPreviewUrl.value);
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$4, [
+				createBaseVNode("div", _hoisted_2$4, [
+					createBaseVNode("div", {
+						class: normalizeClass(["upload-zone", {
+							"drag-over": isDragOver.value,
+							"has-video": videoUrl.value
+						}]),
+						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
+						onDragover: _cache[1] || (_cache[1] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [
+						_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
+						createBaseVNode("p", _hoisted_3$4, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						_cache[12] || (_cache[12] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
+						createBaseVNode("input", {
+							ref_key: "fileInput",
+							ref: fileInput,
+							type: "file",
+							accept: "video/*",
+							class: "hidden-input",
+							onChange: onFileChange
+						}, null, 544)
+					], 34),
+					videoUrl.value ? (openBlock(), createElementBlock("div", {
+						key: 0,
+						class: "video-wrapper",
+						ref_key: "videoWrapper",
+						ref: videoWrapper
+					}, [createBaseVNode("button", {
+						class: "video-close-btn",
+						onClick: withModifiers(removeVideo, ["stop"]),
+						title: "移除当前视频"
+					}, [..._cache[13] || (_cache[13] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])]), createBaseVNode("video", {
+						ref_key: "videoEl",
+						ref: videoEl,
+						src: videoUrl.value,
+						controls: "",
+						muted: "",
+						class: "video-player",
+						onLoadedmetadata: onVideoLoaded,
+						onError: onVideoError,
+						onTimeupdate: onTimeUpdate
+					}, null, 40, _hoisted_4$4)], 512)) : createCommentVNode("", true),
+					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$4, [
+						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
+						createBaseVNode("span", null, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-clock" }, null, -1)), createTextVNode(" 时长: " + toDisplayString(formatTime(videoInfo.value.duration)), 1)]),
+						createBaseVNode("span", null, [_cache[16] || (_cache[16] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
+					])) : createCommentVNode("", true),
+					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$4, [
+						createBaseVNode("div", _hoisted_7$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "timeline-label" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 选择片段范围 ")], -1)), createBaseVNode("span", _hoisted_8$3, toDisplayString(formatTime(trimStart.value)) + " - " + toDisplayString(formatTime(trimEnd.value)) + " (" + toDisplayString(formatTime(trimEnd.value - trimStart.value)) + ")", 1)]),
+						createBaseVNode("div", {
+							class: "timeline-track",
+							ref_key: "timelineTrack",
+							ref: timelineTrack,
+							onMousedown: onTimelineMouseDown,
+							onMousemove: onTimelineMouseMove,
+							onMouseup: onTimelineMouseUp,
+							onMouseleave: onTimelineMouseUp
+						}, [
+							_cache[20] || (_cache[20] = createBaseVNode("div", { class: "timeline-bg" }, null, -1)),
+							createBaseVNode("div", {
+								class: "timeline-selection",
+								style: normalizeStyle(selectionStyle.value)
+							}, null, 4),
+							createBaseVNode("div", {
+								class: "timeline-handle timeline-handle-start",
+								style: normalizeStyle(handleStartStyle.value),
+								onMousedown: _cache[3] || (_cache[3] = withModifiers(($event) => onHandleMouseDown($event, "start"), ["stop"]))
+							}, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_9$3, toDisplayString(formatTime(trimStart.value)), 1)], 36),
+							createBaseVNode("div", {
+								class: "timeline-handle timeline-handle-end",
+								style: normalizeStyle(handleEndStyle.value),
+								onMousedown: _cache[4] || (_cache[4] = withModifiers(($event) => onHandleMouseDown($event, "end"), ["stop"]))
+							}, [_cache[19] || (_cache[19] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_10$3, toDisplayString(formatTime(trimEnd.value)), 1)], 36),
+							createBaseVNode("div", {
+								class: "timeline-playhead",
+								style: normalizeStyle(playheadStyle.value)
+							}, null, 4)
+						], 544),
+						createBaseVNode("div", _hoisted_11$3, [
+							createBaseVNode("button", {
+								class: "btn btn-sm",
+								onClick: togglePlayPause,
+								disabled: !videoUrl.value
+							}, [
+								withDirectives(createBaseVNode("i", _hoisted_13$2, null, 512), [[vShow, !isPlaying.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_14$2, null, 512), [[vShow, isPlaying.value]]),
+								createTextVNode(" " + toDisplayString(isPlaying.value ? "暂停" : "播放"), 1)
+							], 8, _hoisted_12$3),
+							createBaseVNode("button", {
+								class: "btn btn-sm",
+								onClick: playSegment,
+								disabled: !videoUrl.value
+							}, [
+								withDirectives(createBaseVNode("i", _hoisted_16$2, null, 512), [[vShow, !isPlayingSegment.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_17$2, null, 512), [[vShow, isPlayingSegment.value]]),
+								createTextVNode(" " + toDisplayString(isPlayingSegment.value ? "暂停片段" : "播放片段"), 1)
+							], 8, _hoisted_15$2),
+							createBaseVNode("button", {
+								class: "btn btn-sm",
+								onClick: resetTrim
+							}, [..._cache[21] || (_cache[21] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 重置 ", -1)])])
+						])
+					])) : createCommentVNode("", true)
+				]),
+				createBaseVNode("div", _hoisted_18$2, [createBaseVNode("div", _hoisted_19$2, [
+					_cache[34] || (_cache[34] = createBaseVNode("div", { class: "panel-title" }, [createBaseVNode("i", { class: "fa-solid fa-wand-magic-sparkles" }), createTextVNode(" 快速预设 ")], -1)),
+					createBaseVNode("div", _hoisted_20$2, [
+						createBaseVNode("button", {
+							class: normalizeClass(["preset-btn", { active: currentPreset.value === "small" }]),
+							onClick: _cache[5] || (_cache[5] = ($event) => applyPreset("small"))
+						}, [..._cache[22] || (_cache[22] = [
+							createBaseVNode("i", { class: "fa-solid fa-compress" }, null, -1),
+							createBaseVNode("span", null, "小文件", -1),
+							createBaseVNode("small", null, "10fps · 320px", -1)
+						])], 2),
+						createBaseVNode("button", {
+							class: normalizeClass(["preset-btn", { active: currentPreset.value === "balanced" }]),
+							onClick: _cache[6] || (_cache[6] = ($event) => applyPreset("balanced"))
+						}, [..._cache[23] || (_cache[23] = [
+							createBaseVNode("i", { class: "fa-solid fa-scale-balanced" }, null, -1),
+							createBaseVNode("span", null, "平衡", -1),
+							createBaseVNode("small", null, "15fps · 480px", -1)
+						])], 2),
+						createBaseVNode("button", {
+							class: normalizeClass(["preset-btn", { active: currentPreset.value === "quality" }]),
+							onClick: _cache[7] || (_cache[7] = ($event) => applyPreset("quality"))
+						}, [..._cache[24] || (_cache[24] = [
+							createBaseVNode("i", { class: "fa-solid fa-gem" }, null, -1),
+							createBaseVNode("span", null, "高质量", -1),
+							createBaseVNode("small", null, "20fps · 640px", -1)
+						])], 2)
+					]),
+					_cache[35] || (_cache[35] = createBaseVNode("div", { class: "panel-title" }, [createBaseVNode("i", { class: "fa-solid fa-gear" }), createTextVNode(" GIF 设置 ")], -1)),
+					createBaseVNode("div", _hoisted_21$2, [_cache[25] || (_cache[25] = createBaseVNode("label", { class: "form-label" }, "颜色数", -1)), createBaseVNode("div", _hoisted_22$1, [(openBlock(), createElementBlock(Fragment$1, null, renderList(colorOptions, (c) => {
+						return createBaseVNode("button", {
+							key: c.value,
+							class: normalizeClass(["seg-btn", { active: colors.value === c.value }]),
+							onClick: ($event) => colors.value = c.value
+						}, toDisplayString(c.label), 11, _hoisted_23$1);
+					}), 64))])]),
+					createBaseVNode("div", _hoisted_24$1, [_cache[27] || (_cache[27] = createBaseVNode("label", { class: "form-label" }, "抖动算法", -1)), withDirectives(createBaseVNode("select", {
+						"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => dither.value = $event),
+						class: "form-select"
+					}, [..._cache[26] || (_cache[26] = [createStaticVNode("<option value=\"none\" data-v-c08f40d2>无抖动</option><option value=\"FloydSteinberg-serpentine\" data-v-c08f40d2>Floyd-Steinberg</option><option value=\"FalseFloydSteinberg\" data-v-c08f40d2>False Floyd-Steinberg</option><option value=\"Stucki\" data-v-c08f40d2>Stucki</option><option value=\"Atkinson\" data-v-c08f40d2>Atkinson</option>", 5)])], 512), [[vModelSelect, dither.value]])]),
+					createBaseVNode("div", _hoisted_25$1, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "form-label" }, "压缩级别", -1)), createVNode(SliderInput_default, {
+						"model-value": compressionLevel.value,
+						label: "",
+						unit: "",
+						min: 1,
+						max: 20,
+						"onUpdate:modelValue": _cache[9] || (_cache[9] = (val) => compressionLevel.value = val),
+						step: "1"
+					}, null, 8, ["model-value"])]),
+					createBaseVNode("div", _hoisted_26$1, [createBaseVNode("label", _hoisted_27$1, [withDirectives(createBaseVNode("input", {
+						type: "checkbox",
+						"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => loop.value = $event),
+						class: "checkbox-input"
+					}, null, 512), [[vModelCheckbox, loop.value]]), _cache[29] || (_cache[29] = createTextVNode(" 循环播放 ", -1))])]),
+					createBaseVNode("div", _hoisted_28$1, [createBaseVNode("button", {
+						class: "btn btn-danger",
+						disabled: !isGenerating.value,
+						onClick: cancelGenerate
+					}, [..._cache[30] || (_cache[30] = [createBaseVNode("i", { class: "fa-solid fa-stop" }, null, -1), createTextVNode(" 取消 ", -1)])], 8, _hoisted_29$1), createBaseVNode("button", {
+						class: normalizeClass(["btn btn-primary btn-block generate-btn", { generating: isGenerating.value }]),
+						disabled: !canGenerate.value && !isGenerating.value,
+						onClick: generateGif
+					}, [createBaseVNode("div", {
+						class: "btn-progress",
+						style: normalizeStyle({ width: progressInfo.value.percent + "%" })
+					}, null, 4), createBaseVNode("span", _hoisted_31$1, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-film"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? statusMsg.value : "生成 GIF"), 1)])], 10, _hoisted_30$1)]),
+					isGenerating.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_32$1, [
+						createBaseVNode("div", _hoisted_33$1, [createBaseVNode("span", _hoisted_34$1, [_cache[31] || (_cache[31] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_35, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+						createBaseVNode("div", _hoisted_36, [createBaseVNode("div", {
+							class: "progress-fill",
+							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
+						}, null, 4)]),
+						createBaseVNode("div", _hoisted_37, [progressInfo.value.estimatedTime > 0 ? (openBlock(), createElementBlock("span", _hoisted_38, [_cache[32] || (_cache[32] = createBaseVNode("i", { class: "fa-regular fa-clock" }, null, -1)), createTextVNode(" 剩余时间：" + toDisplayString(formatRemainingTime(progressInfo.value.estimatedTime)), 1)])) : (openBlock(), createElementBlock("span", _hoisted_39, [..._cache[33] || (_cache[33] = [createBaseVNode("i", { class: "fa-solid fa-spinner fa-spin" }, null, -1), createTextVNode(" 正在初始化... ", -1)])]))])
+					])) : createCommentVNode("", true)
+				])]),
+				gifBlob.value ? (openBlock(), createElementBlock("div", _hoisted_40, [createBaseVNode("div", _hoisted_41, [
+					createBaseVNode("div", _hoisted_42, [_cache[36] || (_cache[36] = createBaseVNode("i", {
+						class: "fa-solid fa-check-circle",
+						style: { "color": "var(--accent)" }
+					}, null, -1)), createTextVNode(" GIF 生成完成 · " + toDisplayString(gifInfo.value.width) + " × " + toDisplayString(gifInfo.value.height) + " · " + toDisplayString((gifBlob.value.size / 1024).toFixed(1)) + " KB ", 1)]),
+					createBaseVNode("div", _hoisted_43, [createBaseVNode("img", {
+						src: gifPreviewUrl.value,
+						class: "gif-preview",
+						alt: "GIF 预览"
+					}, null, 8, _hoisted_44)]),
+					createBaseVNode("div", { class: "result-actions" }, [createBaseVNode("button", {
+						class: "btn btn-primary",
+						onClick: downloadGif
+					}, [..._cache[37] || (_cache[37] = [createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1), createTextVNode(" 下载 GIF ", -1)])]), createBaseVNode("button", {
+						class: "btn",
+						onClick: regenerateGif
+					}, [..._cache[38] || (_cache[38] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1), createTextVNode(" 重新生成 ", -1)])])])
+				])])) : createCommentVNode("", true)
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-c08f40d2"]]);
+//#endregion
+//#region node_modules/simple-mind-map/src/constants/constant.js
+var CONSTANTS = {
+	CHANGE_THEME: "changeTheme",
+	CHANGE_LAYOUT: "changeLayout",
+	MODE: {
+		READONLY: "readonly",
+		EDIT: "edit"
+	},
+	LAYOUT: {
+		LOGICAL_STRUCTURE: "logicalStructure",
+		LOGICAL_STRUCTURE_LEFT: "logicalStructureLeft",
+		MIND_MAP: "mindMap",
+		ORGANIZATION_STRUCTURE: "organizationStructure",
+		CATALOG_ORGANIZATION: "catalogOrganization",
+		TIMELINE: "timeline",
+		TIMELINE2: "timeline2",
+		FISHBONE: "fishbone",
+		FISHBONE2: "fishbone2",
+		RIGHT_FISHBONE: "rightFishbone",
+		RIGHT_FISHBONE2: "rightFishbone2",
+		VERTICAL_TIMELINE: "verticalTimeline",
+		VERTICAL_TIMELINE2: "verticalTimeline2",
+		VERTICAL_TIMELINE3: "verticalTimeline3"
+	},
+	DIR: {
+		UP: "up",
+		LEFT: "left",
+		DOWN: "down",
+		RIGHT: "right"
+	},
+	KEY_DIR: {
+		LEFT: "Left",
+		UP: "Up",
+		RIGHT: "Right",
+		DOWN: "Down"
+	},
+	SHAPE: {
+		RECTANGLE: "rectangle",
+		DIAMOND: "diamond",
+		PARALLELOGRAM: "parallelogram",
+		ROUNDED_RECTANGLE: "roundedRectangle",
+		OCTAGONAL_RECTANGLE: "octagonalRectangle",
+		OUTER_TRIANGULAR_RECTANGLE: "outerTriangularRectangle",
+		INNER_TRIANGULAR_RECTANGLE: "innerTriangularRectangle",
+		ELLIPSE: "ellipse",
+		CIRCLE: "circle"
+	},
+	MOUSE_WHEEL_ACTION: {
+		ZOOM: "zoom",
+		MOVE: "move"
+	},
+	INIT_ROOT_NODE_POSITION: {
+		LEFT: "left",
+		TOP: "top",
+		RIGHT: "right",
+		BOTTOM: "bottom",
+		CENTER: "center"
+	},
+	LAYOUT_GROW_DIR: {
+		LEFT: "left",
+		TOP: "top",
+		RIGHT: "right",
+		BOTTOM: "bottom"
+	},
+	PASTE_TYPE: {
+		CLIP_BOARD: "clipBoard",
+		CANVAS: "canvas"
+	},
+	SCROLL_BAR_DIR: {
+		VERTICAL: "vertical",
+		HORIZONTAL: "horizontal"
+	},
+	CREATE_NEW_NODE_BEHAVIOR: {
+		DEFAULT: "default",
+		NOT_ACTIVE: "notActive",
+		ACTIVE_ONLY: "activeOnly"
+	},
+	TAG_PLACEMENT: {
+		RIGHT: "right",
+		BOTTOM: "bottom"
+	},
+	IMG_PLACEMENT: {
+		LEFT: "left",
+		TOP: "top",
+		RIGHT: "right",
+		BOTTOM: "bottom"
+	}
+};
+var initRootNodePositionMap = {
+	[CONSTANTS.INIT_ROOT_NODE_POSITION.LEFT]: 0,
+	[CONSTANTS.INIT_ROOT_NODE_POSITION.TOP]: 0,
+	[CONSTANTS.INIT_ROOT_NODE_POSITION.RIGHT]: 1,
+	[CONSTANTS.INIT_ROOT_NODE_POSITION.BOTTOM]: 1,
+	[CONSTANTS.INIT_ROOT_NODE_POSITION.CENTER]: .5
+};
+CONSTANTS.LAYOUT.LOGICAL_STRUCTURE, CONSTANTS.LAYOUT.LOGICAL_STRUCTURE_LEFT, CONSTANTS.LAYOUT.MIND_MAP, CONSTANTS.LAYOUT.ORGANIZATION_STRUCTURE, CONSTANTS.LAYOUT.CATALOG_ORGANIZATION, CONSTANTS.LAYOUT.TIMELINE, CONSTANTS.LAYOUT.TIMELINE2, CONSTANTS.LAYOUT.VERTICAL_TIMELINE, CONSTANTS.LAYOUT.VERTICAL_TIMELINE2, CONSTANTS.LAYOUT.VERTICAL_TIMELINE3, CONSTANTS.LAYOUT.FISHBONE, CONSTANTS.LAYOUT.FISHBONE2, CONSTANTS.LAYOUT.RIGHT_FISHBONE, CONSTANTS.LAYOUT.RIGHT_FISHBONE2;
+var layoutValueList = [
+	CONSTANTS.LAYOUT.LOGICAL_STRUCTURE,
+	CONSTANTS.LAYOUT.LOGICAL_STRUCTURE_LEFT,
+	CONSTANTS.LAYOUT.MIND_MAP,
+	CONSTANTS.LAYOUT.CATALOG_ORGANIZATION,
+	CONSTANTS.LAYOUT.ORGANIZATION_STRUCTURE,
+	CONSTANTS.LAYOUT.TIMELINE,
+	CONSTANTS.LAYOUT.TIMELINE2,
+	CONSTANTS.LAYOUT.VERTICAL_TIMELINE,
+	CONSTANTS.LAYOUT.VERTICAL_TIMELINE2,
+	CONSTANTS.LAYOUT.VERTICAL_TIMELINE3,
+	CONSTANTS.LAYOUT.FISHBONE,
+	CONSTANTS.LAYOUT.FISHBONE2,
+	CONSTANTS.LAYOUT.RIGHT_FISHBONE,
+	CONSTANTS.LAYOUT.RIGHT_FISHBONE2
+];
+var nodeDataNoStylePropList = [
+	"text",
+	"image",
+	"imageTitle",
+	"imageSize",
+	"icon",
+	"tag",
+	"hyperlink",
+	"hyperlinkTitle",
+	"note",
+	"expand",
+	"isActive",
+	"generalization",
+	"richText",
+	"resetRichText",
+	"uid",
+	"activeStyle",
+	"associativeLineTargets",
+	"associativeLineTargetControlOffsets",
+	"associativeLinePoint",
+	"associativeLineText",
+	"attachmentUrl",
+	"attachmentName",
+	"notation",
+	"outerFrame",
+	"number",
+	"range",
+	"customLeft",
+	"customTop",
+	"customTextWidth",
+	"checkbox",
+	"dir",
+	"needUpdate",
+	"imgMap",
+	"nodeLink"
+];
+var ERROR_TYPES = {
+	READ_CLIPBOARD_ERROR: "read_clipboard_error",
+	PARSE_PASTE_DATA_ERROR: "parse_paste_data_error",
+	CUSTOM_HANDLE_CLIPBOARD_TEXT_ERROR: "custom_handle_clipboard_text_error",
+	LOAD_CLIPBOARD_IMAGE_ERROR: "load_clipboard_image_error",
+	BEFORE_TEXT_EDIT_ERROR: "before_text_edit_error",
+	EXPORT_ERROR: "export_error",
+	EXPORT_LOAD_IMAGE_ERROR: "export_load_image_error",
+	DATA_CHANGE_DETAIL_EVENT_ERROR: "data_change_detail_event_error"
+};
+var cssContent = `
+  /* 鼠标hover和激活时渲染的矩形 */
+  .smm-hover-node{
+    display: none;
+    opacity: 0.6;
+    stroke-width: 1;
+  }
+
+  .smm-node:not(.smm-node-dragging):hover .smm-hover-node{
+    display: block;
+  }
+
+  .smm-node.active .smm-hover-node, .smm-node-highlight .smm-hover-node{
+    display: block;
+    opacity: 1;
+    stroke-width: 2;
+  }
+
+  .smm-text-node-wrap, .smm-expand-btn-text {
+    user-select: none;
+  }
+`;
+var noneRichTextNodeLineHeight = 1.2;
+var richTextSupportStyleList = [
+	"fontFamily",
+	"fontSize",
+	"fontWeight",
+	"fontStyle",
+	"textDecoration",
+	"color",
+	"textAlign"
+];
+//#endregion
+//#region node_modules/simple-mind-map/src/core/view/View.js
+var View = class {
+	constructor(opt = {}) {
+		this.opt = opt;
+		this.mindMap = this.opt.mindMap;
+		this.scale = 1;
+		this.sx = 0;
+		this.sy = 0;
+		this.x = 0;
+		this.y = 0;
+		this.firstDrag = true;
+		this.setTransformData(this.mindMap.opt.viewData);
+		this.bind();
+	}
+	bind() {
+		this.mindMap.keyCommand.addShortcut("Control+=", () => {
+			this.enlarge();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+-", () => {
+			this.narrow();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+i", () => {
+			this.fit();
+		});
+		this.mindMap.event.on("mousedown", (e) => {
+			const { isDisableDrag, mousedownEventPreventDefault } = this.mindMap.opt;
+			if (isDisableDrag) return;
+			if (mousedownEventPreventDefault) e.preventDefault();
+			this.sx = this.x;
+			this.sy = this.y;
+		});
+		this.mindMap.event.on("drag", (e, event) => {
+			if (e.ctrlKey || e.metaKey || this.mindMap.opt.isDisableDrag) return;
+			if (this.firstDrag) {
+				this.firstDrag = false;
+				if (this.mindMap.renderer.activeNodeList.length > 0) this.mindMap.execCommand("CLEAR_ACTIVE_NODE");
+			}
+			this.x = this.sx + event.mousemoveOffset.x;
+			this.y = this.sy + event.mousemoveOffset.y;
+			this.transform();
+		});
+		this.mindMap.event.on("mouseup", () => {
+			this.firstDrag = true;
+		});
+		this.mindMap.event.on("mousewheel", (e, dirs, event, isTouchPad) => {
+			const { customHandleMousewheel, mousewheelAction, mouseScaleCenterUseMousePosition, mousewheelMoveStep, mousewheelZoomActionReverse, disableMouseWheelZoom, translateRatio } = this.mindMap.opt;
+			if (customHandleMousewheel && typeof customHandleMousewheel === "function") return customHandleMousewheel(e);
+			if (mousewheelAction === CONSTANTS.MOUSE_WHEEL_ACTION.ZOOM || e.ctrlKey || e.metaKey) {
+				if (disableMouseWheelZoom) return;
+				const { x: clientX, y: clientY } = this.mindMap.toPos(e.clientX, e.clientY);
+				const cx = mouseScaleCenterUseMousePosition ? clientX : void 0;
+				const cy = mouseScaleCenterUseMousePosition ? clientY : void 0;
+				if (isTouchPad && (dirs.includes(CONSTANTS.DIR.LEFT) || dirs.includes(CONSTANTS.DIR.RIGHT))) dirs = dirs.filter((dir) => {
+					return ![CONSTANTS.DIR.LEFT, CONSTANTS.DIR.RIGHT].includes(dir);
+				});
+				switch (true) {
+					case dirs.includes(CONSTANTS.DIR.UP || CONSTANTS.DIR.LEFT):
+						mousewheelZoomActionReverse ? this.enlarge(cx, cy, isTouchPad) : this.narrow(cx, cy, isTouchPad);
+						break;
+					case dirs.includes(CONSTANTS.DIR.DOWN || CONSTANTS.DIR.RIGHT):
+						mousewheelZoomActionReverse ? this.narrow(cx, cy, isTouchPad) : this.enlarge(cx, cy, isTouchPad);
+						break;
+				}
+			} else {
+				let stepX = 0;
+				let stepY = 0;
+				if (isTouchPad) {
+					stepX = Math.abs(e.wheelDeltaX);
+					stepY = Math.abs(e.wheelDeltaY);
+				} else stepX = stepY = mousewheelMoveStep;
+				let mx = 0;
+				let my = 0;
+				if (dirs.includes(CONSTANTS.DIR.DOWN)) my = -stepY;
+				if (dirs.includes(CONSTANTS.DIR.UP)) my = stepY;
+				if (dirs.includes(CONSTANTS.DIR.LEFT)) mx = stepX;
+				if (dirs.includes(CONSTANTS.DIR.RIGHT)) mx = -stepX;
+				this.translateXY(mx * translateRatio, my * translateRatio);
+			}
+		});
+		this.mindMap.on("resize", () => {
+			if (!this.checkNeedMindMapInCanvas()) return;
+			this.transform();
+		});
+	}
+	getTransformData() {
+		return {
+			transform: this.mindMap.draw.transform(),
+			state: {
+				scale: this.scale,
+				x: this.x,
+				y: this.y,
+				sx: this.sx,
+				sy: this.sy
+			}
+		};
+	}
+	setTransformData(viewData) {
+		if (viewData) {
+			Object.keys(viewData.state).forEach((prop) => {
+				this[prop] = viewData.state[prop];
+			});
+			this.mindMap.draw.transform({ ...viewData.transform });
+			this.mindMap.emit("view_data_change", this.getTransformData());
+			this.emitEvent("scale");
+			this.emitEvent("translate");
+		}
+	}
+	translateXY(x, y) {
+		if (x === 0 && y === 0) return;
+		this.x += x;
+		this.y += y;
+		this.transform();
+		this.emitEvent("translate");
+	}
+	translateX(step) {
+		if (step === 0) return;
+		this.x += step;
+		this.transform();
+		this.emitEvent("translate");
+	}
+	translateXTo(x) {
+		this.x = x;
+		this.transform();
+		this.emitEvent("translate");
+	}
+	translateY(step) {
+		if (step === 0) return;
+		this.y += step;
+		this.transform();
+		this.emitEvent("translate");
+	}
+	translateYTo(y) {
+		this.y = y;
+		this.transform();
+		this.emitEvent("translate");
+	}
+	transform() {
+		try {
+			this.limitMindMapInCanvas();
+		} catch (error) {}
+		this.mindMap.draw.transform({
+			origin: [0, 0],
+			scale: this.scale,
+			translate: [this.x, this.y]
+		});
+		this.mindMap.emit("view_data_change", this.getTransformData());
+	}
+	reset() {
+		const scaleChange = this.scale !== 1;
+		const translateChange = this.x !== 0 || this.y !== 0;
+		this.scale = 1;
+		this.x = 0;
+		this.y = 0;
+		this.transform();
+		if (scaleChange) this.emitEvent("scale");
+		if (translateChange) this.emitEvent("translate");
+	}
+	narrow(cx, cy, isTouchPad) {
+		let { scaleRatio, minZoomRatio } = this.mindMap.opt;
+		scaleRatio = scaleRatio / (isTouchPad ? 5 : 1);
+		const scale = Math.max(this.scale - scaleRatio, minZoomRatio / 100);
+		this.scaleInCenter(scale, cx, cy);
+		this.transform();
+		this.emitEvent("scale");
+	}
+	enlarge(cx, cy, isTouchPad) {
+		let { scaleRatio, maxZoomRatio } = this.mindMap.opt;
+		scaleRatio = scaleRatio / (isTouchPad ? 5 : 1);
+		let scale = 0;
+		if (maxZoomRatio === -1) scale = this.scale + scaleRatio;
+		else scale = Math.min(this.scale + scaleRatio, maxZoomRatio / 100);
+		this.scaleInCenter(scale, cx, cy);
+		this.transform();
+		this.emitEvent("scale");
+	}
+	scaleInCenter(scale, cx, cy) {
+		if (cx === void 0 || cy === void 0) {
+			cx = this.mindMap.width / 2;
+			cy = this.mindMap.height / 2;
+		}
+		const ratio = 1 - scale / this.scale;
+		const dx = (cx - this.x) * ratio;
+		const dy = (cy - this.y) * ratio;
+		this.x += dx;
+		this.y += dy;
+		this.scale = scale;
+	}
+	setScale(scale, cx, cy) {
+		if (cx !== void 0 && cy !== void 0) this.scaleInCenter(scale, cx, cy);
+		else this.scale = scale;
+		this.transform();
+		this.emitEvent("scale");
+	}
+	fit(getRbox = () => {}, enlarge = false, fitPadding) {
+		fitPadding = fitPadding === void 0 ? this.mindMap.opt.fitPadding : fitPadding;
+		const draw = this.mindMap.draw;
+		const origTransform = draw.transform();
+		const rect = getRbox() || draw.rbox();
+		const drawWidth = rect.width / origTransform.scaleX;
+		const drawHeight = rect.height / origTransform.scaleY;
+		const drawRatio = drawWidth / drawHeight;
+		let { width: elWidth, height: elHeight } = this.mindMap.elRect;
+		elWidth = elWidth - fitPadding * 2;
+		elHeight = elHeight - fitPadding * 2;
+		const elRatio = elWidth / elHeight;
+		let newScale = 0;
+		let flag = "";
+		if (drawWidth <= elWidth && drawHeight <= elHeight && !enlarge) {
+			newScale = 1;
+			flag = 1;
+		} else {
+			let newWidth = 0;
+			if (drawRatio > elRatio) {
+				newWidth = elWidth;
+				elWidth / drawRatio;
+				flag = 2;
+			} else {
+				newWidth = elHeight * drawRatio;
+				flag = 3;
+			}
+			newScale = newWidth / drawWidth;
+		}
+		this.setScale(newScale);
+		const newRect = getRbox() || draw.rbox();
+		newRect.x -= this.mindMap.elRect.left;
+		newRect.y -= this.mindMap.elRect.top;
+		let newX = 0;
+		let newY = 0;
+		if (flag === 1) {
+			newX = -newRect.x + fitPadding + (elWidth - newRect.width) / 2;
+			newY = -newRect.y + fitPadding + (elHeight - newRect.height) / 2;
+		} else if (flag === 2) {
+			newX = -newRect.x + fitPadding;
+			newY = -newRect.y + fitPadding + (elHeight - newRect.height) / 2;
+		} else if (flag === 3) {
+			newX = -newRect.x + fitPadding + (elWidth - newRect.width) / 2;
+			newY = -newRect.y + fitPadding;
+		}
+		this.translateXY(newX, newY);
+	}
+	checkNeedMindMapInCanvas() {
+		if (this.mindMap.demonstrate && this.mindMap.demonstrate.isInDemonstrate) return false;
+		const { isLimitMindMapInCanvasWhenHasScrollbar, isLimitMindMapInCanvas } = this.mindMap.opt;
+		if (this.mindMap.scrollbar) return isLimitMindMapInCanvasWhenHasScrollbar;
+		else return isLimitMindMapInCanvas;
+	}
+	limitMindMapInCanvas() {
+		if (!this.checkNeedMindMapInCanvas()) return;
+		let { scale, left, top, right, bottom } = this.getPositionLimit();
+		const centerXChange = (this.mindMap.width - this.mindMap.initWidth) / 2 * scale;
+		const centerYChange = (this.mindMap.height - this.mindMap.initHeight) / 2 * scale;
+		const scaleRatio = this.scale / scale;
+		left *= scaleRatio;
+		right *= scaleRatio;
+		top *= scaleRatio;
+		bottom *= scaleRatio;
+		const centerX = this.mindMap.width / 2;
+		const centerY = this.mindMap.height / 2;
+		const scaleOffset = this.scale - 1;
+		left -= scaleOffset * centerX - centerXChange;
+		right -= scaleOffset * centerX - centerXChange;
+		top -= scaleOffset * centerY - centerYChange;
+		bottom -= scaleOffset * centerY - centerYChange;
+		if (this.x > left) this.x = left;
+		if (this.x < right) this.x = right;
+		if (this.y > top) this.y = top;
+		if (this.y < bottom) this.y = bottom;
+	}
+	getPositionLimit() {
+		const { scaleX, scaleY } = this.mindMap.draw.transform();
+		const drawRect = this.mindMap.draw.rbox();
+		const rootRect = this.mindMap.renderer.root.group.rbox();
+		const rootCenterOffset = this.mindMap.renderer.layout.getRootCenterOffset(rootRect.width, rootRect.height);
+		return {
+			scale: scaleX,
+			left: rootRect.x - drawRect.x - rootCenterOffset.x * scaleX,
+			right: rootRect.x - drawRect.x2 - rootCenterOffset.x * scaleX,
+			top: rootRect.y - drawRect.y - rootCenterOffset.y * scaleY,
+			bottom: rootRect.y - drawRect.y2 - rootCenterOffset.y * scaleY
+		};
+	}
+	emitEvent(type) {
+		switch (type) {
+			case "scale": this.mindMap.emit("scale", this.scale);
+			case "translate": this.mindMap.emit("translate", this.x, this.y);
+		}
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/event/Event.js
+var import_eventemitter3 = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var has = Object.prototype.hasOwnProperty, prefix = "~";
+	/**
+	* Constructor to create a storage for our `EE` objects.
+	* An `Events` instance is a plain object whose properties are event names.
+	*
+	* @constructor
+	* @private
+	*/
+	function Events() {}
+	if (Object.create) {
+		Events.prototype = Object.create(null);
+		if (!new Events().__proto__) prefix = false;
+	}
+	/**
+	* Representation of a single event listener.
+	*
+	* @param {Function} fn The listener function.
+	* @param {*} context The context to invoke the listener with.
+	* @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+	* @constructor
+	* @private
+	*/
+	function EE(fn, context, once) {
+		this.fn = fn;
+		this.context = context;
+		this.once = once || false;
+	}
+	/**
+	* Add a listener for a given event.
+	*
+	* @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+	* @param {(String|Symbol)} event The event name.
+	* @param {Function} fn The listener function.
+	* @param {*} context The context to invoke the listener with.
+	* @param {Boolean} once Specify if the listener is a one-time listener.
+	* @returns {EventEmitter}
+	* @private
+	*/
+	function addListener(emitter, event, fn, context, once) {
+		if (typeof fn !== "function") throw new TypeError("The listener must be a function");
+		var listener = new EE(fn, context || emitter, once), evt = prefix ? prefix + event : event;
+		if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+		else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+		else emitter._events[evt] = [emitter._events[evt], listener];
+		return emitter;
+	}
+	/**
+	* Clear event by name.
+	*
+	* @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+	* @param {(String|Symbol)} evt The Event name.
+	* @private
+	*/
+	function clearEvent(emitter, evt) {
+		if (--emitter._eventsCount === 0) emitter._events = new Events();
+		else delete emitter._events[evt];
+	}
+	/**
+	* Minimal `EventEmitter` interface that is molded against the Node.js
+	* `EventEmitter` interface.
+	*
+	* @constructor
+	* @public
+	*/
+	function EventEmitter() {
+		this._events = new Events();
+		this._eventsCount = 0;
+	}
+	/**
+	* Return an array listing the events for which the emitter has registered
+	* listeners.
+	*
+	* @returns {Array}
+	* @public
+	*/
+	EventEmitter.prototype.eventNames = function eventNames() {
+		var names = [], events, name;
+		if (this._eventsCount === 0) return names;
+		for (name in events = this._events) if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+		if (Object.getOwnPropertySymbols) return names.concat(Object.getOwnPropertySymbols(events));
+		return names;
+	};
+	/**
+	* Return the listeners registered for a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @returns {Array} The registered listeners.
+	* @public
+	*/
+	EventEmitter.prototype.listeners = function listeners(event) {
+		var evt = prefix ? prefix + event : event, handlers = this._events[evt];
+		if (!handlers) return [];
+		if (handlers.fn) return [handlers.fn];
+		for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) ee[i] = handlers[i].fn;
+		return ee;
+	};
+	/**
+	* Return the number of listeners listening to a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @returns {Number} The number of listeners.
+	* @public
+	*/
+	EventEmitter.prototype.listenerCount = function listenerCount(event) {
+		var evt = prefix ? prefix + event : event, listeners = this._events[evt];
+		if (!listeners) return 0;
+		if (listeners.fn) return 1;
+		return listeners.length;
+	};
+	/**
+	* Calls each of the listeners registered for a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @returns {Boolean} `true` if the event had listeners, else `false`.
+	* @public
+	*/
+	EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+		var evt = prefix ? prefix + event : event;
+		if (!this._events[evt]) return false;
+		var listeners = this._events[evt], len = arguments.length, args, i;
+		if (listeners.fn) {
+			if (listeners.once) this.removeListener(event, listeners.fn, void 0, true);
+			switch (len) {
+				case 1: return listeners.fn.call(listeners.context), true;
+				case 2: return listeners.fn.call(listeners.context, a1), true;
+				case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+				case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+				case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+				case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+			}
+			for (i = 1, args = new Array(len - 1); i < len; i++) args[i - 1] = arguments[i];
+			listeners.fn.apply(listeners.context, args);
+		} else {
+			var length = listeners.length, j;
+			for (i = 0; i < length; i++) {
+				if (listeners[i].once) this.removeListener(event, listeners[i].fn, void 0, true);
+				switch (len) {
+					case 1:
+						listeners[i].fn.call(listeners[i].context);
+						break;
+					case 2:
+						listeners[i].fn.call(listeners[i].context, a1);
+						break;
+					case 3:
+						listeners[i].fn.call(listeners[i].context, a1, a2);
+						break;
+					case 4:
+						listeners[i].fn.call(listeners[i].context, a1, a2, a3);
+						break;
+					default:
+						if (!args) for (j = 1, args = new Array(len - 1); j < len; j++) args[j - 1] = arguments[j];
+						listeners[i].fn.apply(listeners[i].context, args);
+				}
+			}
+		}
+		return true;
+	};
+	/**
+	* Add a listener for a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @param {Function} fn The listener function.
+	* @param {*} [context=this] The context to invoke the listener with.
+	* @returns {EventEmitter} `this`.
+	* @public
+	*/
+	EventEmitter.prototype.on = function on(event, fn, context) {
+		return addListener(this, event, fn, context, false);
+	};
+	/**
+	* Add a one-time listener for a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @param {Function} fn The listener function.
+	* @param {*} [context=this] The context to invoke the listener with.
+	* @returns {EventEmitter} `this`.
+	* @public
+	*/
+	EventEmitter.prototype.once = function once(event, fn, context) {
+		return addListener(this, event, fn, context, true);
+	};
+	/**
+	* Remove the listeners of a given event.
+	*
+	* @param {(String|Symbol)} event The event name.
+	* @param {Function} fn Only remove the listeners that match this function.
+	* @param {*} context Only remove the listeners that have this context.
+	* @param {Boolean} once Only remove one-time listeners.
+	* @returns {EventEmitter} `this`.
+	* @public
+	*/
+	EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+		var evt = prefix ? prefix + event : event;
+		if (!this._events[evt]) return this;
+		if (!fn) {
+			clearEvent(this, evt);
+			return this;
+		}
+		var listeners = this._events[evt];
+		if (listeners.fn) {
+			if (listeners.fn === fn && (!once || listeners.once) && (!context || listeners.context === context)) clearEvent(this, evt);
+		} else {
+			for (var i = 0, events = [], length = listeners.length; i < length; i++) if (listeners[i].fn !== fn || once && !listeners[i].once || context && listeners[i].context !== context) events.push(listeners[i]);
+			if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+			else clearEvent(this, evt);
+		}
+		return this;
+	};
+	/**
+	* Remove all listeners, or those of the specified event.
+	*
+	* @param {(String|Symbol)} [event] The event name.
+	* @returns {EventEmitter} `this`.
+	* @public
+	*/
+	EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+		var evt;
+		if (event) {
+			evt = prefix ? prefix + event : event;
+			if (this._events[evt]) clearEvent(this, evt);
+		} else {
+			this._events = new Events();
+			this._eventsCount = 0;
+		}
+		return this;
+	};
+	EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+	EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+	EventEmitter.prefixed = prefix;
+	EventEmitter.EventEmitter = EventEmitter;
+	if ("undefined" !== typeof module) module.exports = EventEmitter;
+})))());
+var Event$1 = class extends import_eventemitter3.default {
+	constructor(opt = {}) {
+		super();
+		this.opt = opt;
+		this.mindMap = opt.mindMap;
+		this.isLeftMousedown = false;
+		this.isRightMousedown = false;
+		this.isMiddleMousedown = false;
+		this.mousedownPos = {
+			x: 0,
+			y: 0
+		};
+		this.mousemovePos = {
+			x: 0,
+			y: 0
+		};
+		this.mousemoveOffset = {
+			x: 0,
+			y: 0
+		};
+		this.bindFn();
+		this.bind();
+	}
+	bindFn() {
+		this.onBodyMousedown = this.onBodyMousedown.bind(this);
+		this.onBodyClick = this.onBodyClick.bind(this);
+		this.onDrawClick = this.onDrawClick.bind(this);
+		this.onMousedown = this.onMousedown.bind(this);
+		this.onMousemove = this.onMousemove.bind(this);
+		this.onMouseup = this.onMouseup.bind(this);
+		this.onNodeMouseup = this.onNodeMouseup.bind(this);
+		this.onMousewheel = this.onMousewheel.bind(this);
+		this.onContextmenu = this.onContextmenu.bind(this);
+		this.onSvgMousedown = this.onSvgMousedown.bind(this);
+		this.onKeyup = this.onKeyup.bind(this);
+		this.onMouseenter = this.onMouseenter.bind(this);
+		this.onMouseleave = this.onMouseleave.bind(this);
+	}
+	bind() {
+		document.body.addEventListener("mousedown", this.onBodyMousedown);
+		document.body.addEventListener("click", this.onBodyClick);
+		this.mindMap.svg.on("click", this.onDrawClick);
+		this.mindMap.el.addEventListener("mousedown", this.onMousedown);
+		this.mindMap.svg.on("mousedown", this.onSvgMousedown);
+		window.addEventListener("mousemove", this.onMousemove);
+		window.addEventListener("mouseup", this.onMouseup);
+		this.on("node_mouseup", this.onNodeMouseup);
+		this.mindMap.el.addEventListener("wheel", this.onMousewheel);
+		this.mindMap.svg.on("contextmenu", this.onContextmenu);
+		this.mindMap.svg.on("mouseenter", this.onMouseenter);
+		this.mindMap.svg.on("mouseleave", this.onMouseleave);
+		window.addEventListener("keyup", this.onKeyup);
+	}
+	unbind() {
+		document.body.removeEventListener("mousedown", this.onBodyMousedown);
+		document.body.removeEventListener("click", this.onBodyClick);
+		this.mindMap.svg.off("click", this.onDrawClick);
+		this.mindMap.el.removeEventListener("mousedown", this.onMousedown);
+		window.removeEventListener("mousemove", this.onMousemove);
+		window.removeEventListener("mouseup", this.onMouseup);
+		this.off("node_mouseup", this.onNodeMouseup);
+		this.mindMap.el.removeEventListener("wheel", this.onMousewheel);
+		this.mindMap.svg.off("contextmenu", this.onContextmenu);
+		this.mindMap.svg.off("mouseenter", this.onMouseenter);
+		this.mindMap.svg.off("mouseleave", this.onMouseleave);
+		window.removeEventListener("keyup", this.onKeyup);
+	}
+	onDrawClick(e) {
+		this.emit("draw_click", e);
+	}
+	onBodyMousedown(e) {
+		this.emit("body_mousedown", e);
+	}
+	onBodyClick(e) {
+		this.emit("body_click", e);
+	}
+	onSvgMousedown(e) {
+		this.emit("svg_mousedown", e);
+	}
+	onMousedown(e) {
+		if (e.which === 1) this.isLeftMousedown = true;
+		else if (e.which === 3) this.isRightMousedown = true;
+		else if (e.which === 2) this.isMiddleMousedown = true;
+		this.mousedownPos.x = e.clientX;
+		this.mousedownPos.y = e.clientY;
+		this.emit("mousedown", e, this);
+	}
+	onMousemove(e) {
+		let { useLeftKeySelectionRightKeyDrag } = this.mindMap.opt;
+		this.mousemovePos.x = e.clientX;
+		this.mousemovePos.y = e.clientY;
+		this.mousemoveOffset.x = e.clientX - this.mousedownPos.x;
+		this.mousemoveOffset.y = e.clientY - this.mousedownPos.y;
+		this.emit("mousemove", e, this);
+		if (this.isMiddleMousedown || (useLeftKeySelectionRightKeyDrag ? this.isRightMousedown : this.isLeftMousedown)) {
+			e.preventDefault();
+			this.emit("drag", e, this);
+		}
+	}
+	onMouseup(e) {
+		this.onNodeMouseup();
+		this.emit("mouseup", e, this);
+	}
+	onNodeMouseup() {
+		this.isLeftMousedown = false;
+		this.isRightMousedown = false;
+		this.isMiddleMousedown = false;
+	}
+	onMousewheel(e) {
+		e.stopPropagation();
+		e.preventDefault();
+		const dirs = [];
+		if (e.deltaY < 0) dirs.push(CONSTANTS.DIR.UP);
+		if (e.deltaY > 0) dirs.push(CONSTANTS.DIR.DOWN);
+		if (e.deltaX < 0) dirs.push(CONSTANTS.DIR.LEFT);
+		if (e.deltaX > 0) dirs.push(CONSTANTS.DIR.RIGHT);
+		let isTouchPad = false;
+		const { customCheckIsTouchPad } = this.mindMap.opt;
+		if (typeof customCheckIsTouchPad === "function") isTouchPad = customCheckIsTouchPad(e);
+		else isTouchPad = Math.abs(e.deltaY) <= 10;
+		this.emit("mousewheel", e, dirs, this, isTouchPad);
+	}
+	onContextmenu(e) {
+		e.preventDefault();
+		if (e.ctrlKey) return;
+		this.emit("contextmenu", e);
+	}
+	onKeyup(e) {
+		this.emit("keyup", e);
+	}
+	onMouseenter(e) {
+		this.emit("svg_mouseenter", e);
+	}
+	onMouseleave(e) {
+		this.emit("svg_mouseleave", e);
+	}
+};
+//#endregion
+//#region node_modules/deepmerge/dist/cjs.js
+var require_cjs = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var isMergeableObject = function isMergeableObject(value) {
+		return isNonNullObject(value) && !isSpecial(value);
+	};
+	function isNonNullObject(value) {
+		return !!value && typeof value === "object";
+	}
+	function isSpecial(value) {
+		var stringValue = Object.prototype.toString.call(value);
+		return stringValue === "[object RegExp]" || stringValue === "[object Date]" || isReactElement(value);
+	}
+	var REACT_ELEMENT_TYPE = typeof Symbol === "function" && Symbol.for ? Symbol.for("react.element") : 60103;
+	function isReactElement(value) {
+		return value.$$typeof === REACT_ELEMENT_TYPE;
+	}
+	function emptyTarget(val) {
+		return Array.isArray(val) ? [] : {};
+	}
+	function cloneIfNecessary(value, optionsArgument) {
+		return optionsArgument && optionsArgument.clone === true && isMergeableObject(value) ? deepmerge(emptyTarget(value), value, optionsArgument) : value;
+	}
+	function defaultArrayMerge(target, source, optionsArgument) {
+		var destination = target.slice();
+		source.forEach(function(e, i) {
+			if (typeof destination[i] === "undefined") destination[i] = cloneIfNecessary(e, optionsArgument);
+			else if (isMergeableObject(e)) destination[i] = deepmerge(target[i], e, optionsArgument);
+			else if (target.indexOf(e) === -1) destination.push(cloneIfNecessary(e, optionsArgument));
+		});
+		return destination;
+	}
+	function mergeObject(target, source, optionsArgument) {
+		var destination = {};
+		if (isMergeableObject(target)) Object.keys(target).forEach(function(key) {
+			destination[key] = cloneIfNecessary(target[key], optionsArgument);
+		});
+		Object.keys(source).forEach(function(key) {
+			if (!isMergeableObject(source[key]) || !target[key]) destination[key] = cloneIfNecessary(source[key], optionsArgument);
+			else destination[key] = deepmerge(target[key], source[key], optionsArgument);
+		});
+		return destination;
+	}
+	function deepmerge(target, source, optionsArgument) {
+		var sourceIsArray = Array.isArray(source);
+		var targetIsArray = Array.isArray(target);
+		var options = optionsArgument || { arrayMerge: defaultArrayMerge };
+		if (!(sourceIsArray === targetIsArray)) return cloneIfNecessary(source, optionsArgument);
+		else if (sourceIsArray) return (options.arrayMerge || defaultArrayMerge)(target, source, optionsArgument);
+		else return mergeObject(target, source, optionsArgument);
+	}
+	deepmerge.all = function deepmergeAll(array, optionsArgument) {
+		if (!Array.isArray(array) || array.length < 2) throw new Error("first argument should be an array with at least two elements");
+		return array.reduce(function(prev, next) {
+			return deepmerge(prev, next, optionsArgument);
+		});
+	};
+	module.exports = deepmerge;
+}));
+//#endregion
+//#region node_modules/uuid/dist/esm-browser/rng.js
+var getRandomValues;
+var rnds8 = new Uint8Array(16);
+function rng() {
+	if (!getRandomValues) {
+		getRandomValues = typeof crypto !== "undefined" && crypto.getRandomValues && crypto.getRandomValues.bind(crypto);
+		if (!getRandomValues) throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");
+	}
+	return getRandomValues(rnds8);
+}
+//#endregion
+//#region node_modules/uuid/dist/esm-browser/stringify.js
+/**
+* Convert array of 16 byte values to UUID string format of the form:
+* XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+*/
+var byteToHex = [];
+for (let i = 0; i < 256; ++i) byteToHex.push((i + 256).toString(16).slice(1));
+function unsafeStringify(arr, offset = 0) {
+	return byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]];
+}
+var native_default = { randomUUID: typeof crypto !== "undefined" && crypto.randomUUID && crypto.randomUUID.bind(crypto) };
+//#endregion
+//#region node_modules/uuid/dist/esm-browser/v4.js
+function v4(options, buf, offset) {
+	if (native_default.randomUUID && !buf && !options) return native_default.randomUUID();
+	options = options || {};
+	const rnds = options.random || (options.rng || rng)();
+	rnds[6] = rnds[6] & 15 | 64;
+	rnds[8] = rnds[8] & 63 | 128;
+	if (buf) {
+		offset = offset || 0;
+		for (let i = 0; i < 16; ++i) buf[offset + i] = rnds[i];
+		return buf;
+	}
+	return unsafeStringify(rnds);
+}
+//#endregion
+//#region node_modules/simple-mind-map/src/utils/mersenneTwister.js
+var import_cjs = /* @__PURE__ */ __toESM(require_cjs());
+/**
+* @description 为了保证相同的内容每次生成的随机数都是一样的，我们可以使用一个伪随机数生成器（PRNG），并使用内容的哈希值作为种子。以下是一个使用Mersenne Twister算法的PRNG的实现：
+*
+* @param {*} seed
+*/
+function MersenneTwister(seed) {
+	this.N = 624;
+	this.M = 397;
+	this.MATRIX_A = 2567483615;
+	this.UPPER_MASK = 2147483648;
+	this.LOWER_MASK = 2147483647;
+	this.mt = new Array(this.N);
+	this.mti = this.N + 1;
+	this.init_genrand(seed);
+}
+MersenneTwister.prototype.init_genrand = function(s) {
+	this.mt[0] = s >>> 0;
+	for (this.mti = 1; this.mti < this.N; this.mti++) {
+		s = this.mt[this.mti - 1] ^ this.mt[this.mti - 1] >>> 30;
+		this.mt[this.mti] = (((s & 4294901760) >>> 16) * 1812433253 << 16) + (s & 65535) * 1812433253 + this.mti;
+		this.mt[this.mti] >>>= 0;
+	}
+};
+MersenneTwister.prototype.genrand_int32 = function() {
+	var y;
+	var mag01 = new Array(0, this.MATRIX_A);
+	if (this.mti >= this.N) {
+		var kk;
+		if (this.mti == this.N + 1) this.init_genrand(5489);
+		for (kk = 0; kk < this.N - this.M; kk++) {
+			y = this.mt[kk] & this.UPPER_MASK | this.mt[kk + 1] & this.LOWER_MASK;
+			this.mt[kk] = this.mt[kk + this.M] ^ y >>> 1 ^ mag01[y & 1];
+		}
+		for (; kk < this.N - 1; kk++) {
+			y = this.mt[kk] & this.UPPER_MASK | this.mt[kk + 1] & this.LOWER_MASK;
+			this.mt[kk] = this.mt[kk + (this.M - this.N)] ^ y >>> 1 ^ mag01[y & 1];
+		}
+		y = this.mt[this.N - 1] & this.UPPER_MASK | this.mt[0] & this.LOWER_MASK;
+		this.mt[this.N - 1] = this.mt[this.M - 1] ^ y >>> 1 ^ mag01[y & 1];
+		this.mti = 0;
+	}
+	y = this.mt[this.mti++];
+	y ^= y >>> 11;
+	y ^= y << 7 & 2636928640;
+	y ^= y << 15 & 4022730752;
+	y ^= y >>> 18;
+	return y >>> 0;
+};
+//#endregion
+//#region node_modules/@svgdotjs/svg.js/dist/svg.esm.js
+var methods$1 = {};
+var names = [];
+function registerMethods(name, m) {
+	if (Array.isArray(name)) {
+		for (const _name of name) registerMethods(_name, m);
+		return;
+	}
+	if (typeof name === "object") {
+		for (const _name in name) registerMethods(_name, name[_name]);
+		return;
+	}
+	addMethodNames(Object.getOwnPropertyNames(m));
+	methods$1[name] = Object.assign(methods$1[name] || {}, m);
+}
+function getMethodsFor(name) {
+	return methods$1[name] || {};
+}
+function getMethodNames() {
+	return [...new Set(names)];
+}
+function addMethodNames(_names) {
+	names.push(..._names);
+}
+function map$1(array, block) {
+	let i;
+	const il = array.length;
+	const result = [];
+	for (i = 0; i < il; i++) result.push(block(array[i]));
+	return result;
+}
+function filter(array, block) {
+	let i;
+	const il = array.length;
+	const result = [];
+	for (i = 0; i < il; i++) if (block(array[i])) result.push(array[i]);
+	return result;
+}
+function radians(d) {
+	return d % 360 * Math.PI / 180;
+}
+function camelCase(s) {
+	return s.toLowerCase().replace(/-(.)/g, function(m, g) {
+		return g.toUpperCase();
+	});
+}
+function unCamelCase(s) {
+	return s.replace(/([A-Z])/g, function(m, g) {
+		return "-" + g.toLowerCase();
+	});
+}
+function capitalize(s) {
+	return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function proportionalSize(element, width, height, box) {
+	if (width == null || height == null) {
+		box = box || element.bbox();
+		if (width == null) width = box.width / box.height * height;
+		else if (height == null) height = box.height / box.width * width;
+	}
+	return {
+		width,
+		height
+	};
+}
+/**
+* This function adds support for string origins.
+* It searches for an origin in o.origin o.ox and o.originX.
+* This way, origin: {x: 'center', y: 50} can be passed as well as ox: 'center', oy: 50
+**/
+function getOrigin(o, element) {
+	const origin = o.origin;
+	let ox = o.ox != null ? o.ox : o.originX != null ? o.originX : "center";
+	let oy = o.oy != null ? o.oy : o.originY != null ? o.originY : "center";
+	if (origin != null) [ox, oy] = Array.isArray(origin) ? origin : typeof origin === "object" ? [origin.x, origin.y] : [origin, origin];
+	const condX = typeof ox === "string";
+	const condY = typeof oy === "string";
+	if (condX || condY) {
+		const { height, width, x, y } = element.bbox();
+		if (condX) ox = ox.includes("left") ? x : ox.includes("right") ? x + width : x + width / 2;
+		if (condY) oy = oy.includes("top") ? y : oy.includes("bottom") ? y + height : y + height / 2;
+	}
+	return [ox, oy];
+}
+var svg = "http://www.w3.org/2000/svg";
+var html = "http://www.w3.org/1999/xhtml";
+var xmlns = "http://www.w3.org/2000/xmlns/";
+var xlink = "http://www.w3.org/1999/xlink";
+var svgjs = "http://svgjs.dev/svgjs";
+var globals = {
+	window: typeof window === "undefined" ? null : window,
+	document: typeof document === "undefined" ? null : document
+};
+var Base$1 = class {};
+var elements = {};
+var root = "___SYMBOL___ROOT___";
+function create(name, ns = svg) {
+	return globals.document.createElementNS(ns, name);
+}
+function makeInstance(element, isHTML = false) {
+	if (element instanceof Base$1) return element;
+	if (typeof element === "object") return adopter(element);
+	if (element == null) return new elements[root]();
+	if (typeof element === "string" && element.charAt(0) !== "<") return adopter(globals.document.querySelector(element));
+	const wrapper = isHTML ? globals.document.createElement("div") : create("svg");
+	wrapper.innerHTML = element;
+	element = adopter(wrapper.firstChild);
+	wrapper.removeChild(wrapper.firstChild);
+	return element;
+}
+function nodeOrNew(name, node) {
+	return node && node.ownerDocument && node instanceof node.ownerDocument.defaultView.Node ? node : create(name);
+}
+function adopt(node) {
+	if (!node) return null;
+	if (node.instance instanceof Base$1) return node.instance;
+	if (node.nodeName === "#document-fragment") return new elements.Fragment(node);
+	let className = capitalize(node.nodeName || "Dom");
+	if (className === "LinearGradient" || className === "RadialGradient") className = "Gradient";
+	else if (!elements[className]) className = "Dom";
+	return new elements[className](node);
+}
+var adopter = adopt;
+function register(element, name = element.name, asRoot = false) {
+	elements[name] = element;
+	if (asRoot) elements[root] = element;
+	addMethodNames(Object.getOwnPropertyNames(element.prototype));
+	return element;
+}
+function getClass(name) {
+	return elements[name];
+}
+var did = 1e3;
+function eid(name) {
+	return "Svgjs" + capitalize(name) + did++;
+}
+function assignNewId(node) {
+	for (let i = node.children.length - 1; i >= 0; i--) assignNewId(node.children[i]);
+	if (node.id) {
+		node.id = eid(node.nodeName);
+		return node;
+	}
+	return node;
+}
+function extend(modules, methods) {
+	let key, i;
+	modules = Array.isArray(modules) ? modules : [modules];
+	for (i = modules.length - 1; i >= 0; i--) for (key in methods) modules[i].prototype[key] = methods[key];
+}
+function wrapWithAttrCheck(fn) {
+	return function(...args) {
+		const o = args[args.length - 1];
+		if (o && o.constructor === Object && !(o instanceof Array)) return fn.apply(this, args.slice(0, -1)).attr(o);
+		else return fn.apply(this, args);
+	};
+}
+function siblings() {
+	return this.parent().children();
+}
+function position() {
+	return this.parent().index(this);
+}
+function next() {
+	return this.siblings()[this.position() + 1];
+}
+function prev() {
+	return this.siblings()[this.position() - 1];
+}
+function forward() {
+	const i = this.position();
+	this.parent().add(this.remove(), i + 1);
+	return this;
+}
+function backward() {
+	const i = this.position();
+	this.parent().add(this.remove(), i ? i - 1 : 0);
+	return this;
+}
+function front() {
+	this.parent().add(this.remove());
+	return this;
+}
+function back() {
+	this.parent().add(this.remove(), 0);
+	return this;
+}
+function before(element) {
+	element = makeInstance(element);
+	element.remove();
+	const i = this.position();
+	this.parent().add(element, i);
+	return this;
+}
+function after(element) {
+	element = makeInstance(element);
+	element.remove();
+	const i = this.position();
+	this.parent().add(element, i + 1);
+	return this;
+}
+function insertBefore(element) {
+	element = makeInstance(element);
+	element.before(this);
+	return this;
+}
+function insertAfter(element) {
+	element = makeInstance(element);
+	element.after(this);
+	return this;
+}
+registerMethods("Dom", {
+	siblings,
+	position,
+	next,
+	prev,
+	forward,
+	backward,
+	front,
+	back,
+	before,
+	after,
+	insertBefore,
+	insertAfter
+});
+var numberAndUnit = /^([+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?)([a-z%]*)$/i;
+var hex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i;
+var rgb = /rgb\((\d+),(\d+),(\d+)\)/;
+var reference = /(#[a-z_][a-z0-9\-_]*)/i;
+var transforms = /\)\s*,?\s*/;
+var whitespace = /\s/g;
+var isHex = /^#[a-f0-9]{3}$|^#[a-f0-9]{6}$/i;
+var isRgb = /^rgb\(/;
+var isBlank = /^(\s+)?$/;
+var isNumber = /^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
+var isImage = /\.(jpg|jpeg|png|gif|svg)(\?[^=]+.*)?/i;
+var delimiter = /[\s,]+/;
+var isPathLetter = /[MLHVCSQTAZ]/i;
+function classes() {
+	const attr = this.attr("class");
+	return attr == null ? [] : attr.trim().split(delimiter);
+}
+function hasClass(name) {
+	return this.classes().indexOf(name) !== -1;
+}
+function addClass(name) {
+	if (!this.hasClass(name)) {
+		const array = this.classes();
+		array.push(name);
+		this.attr("class", array.join(" "));
+	}
+	return this;
+}
+function removeClass(name) {
+	if (this.hasClass(name)) this.attr("class", this.classes().filter(function(c) {
+		return c !== name;
+	}).join(" "));
+	return this;
+}
+function toggleClass(name) {
+	return this.hasClass(name) ? this.removeClass(name) : this.addClass(name);
+}
+registerMethods("Dom", {
+	classes,
+	hasClass,
+	addClass,
+	removeClass,
+	toggleClass
+});
+function css(style, val) {
+	const ret = {};
+	if (arguments.length === 0) {
+		this.node.style.cssText.split(/\s*;\s*/).filter(function(el) {
+			return !!el.length;
+		}).forEach(function(el) {
+			const t = el.split(/\s*:\s*/);
+			ret[t[0]] = t[1];
+		});
+		return ret;
+	}
+	if (arguments.length < 2) {
+		if (Array.isArray(style)) {
+			for (const name of style) {
+				const cased = camelCase(name);
+				ret[name] = this.node.style[cased];
+			}
+			return ret;
+		}
+		if (typeof style === "string") return this.node.style[camelCase(style)];
+		if (typeof style === "object") for (const name in style) this.node.style[camelCase(name)] = style[name] == null || isBlank.test(style[name]) ? "" : style[name];
+	}
+	if (arguments.length === 2) this.node.style[camelCase(style)] = val == null || isBlank.test(val) ? "" : val;
+	return this;
+}
+function show() {
+	return this.css("display", "");
+}
+function hide() {
+	return this.css("display", "none");
+}
+function visible() {
+	return this.css("display") !== "none";
+}
+registerMethods("Dom", {
+	css,
+	show,
+	hide,
+	visible
+});
+function data(a, v, r) {
+	if (a == null) return this.data(map$1(filter(this.node.attributes, (el) => el.nodeName.indexOf("data-") === 0), (el) => el.nodeName.slice(5)));
+	else if (a instanceof Array) {
+		const data = {};
+		for (const key of a) data[key] = this.data(key);
+		return data;
+	} else if (typeof a === "object") for (v in a) this.data(v, a[v]);
+	else if (arguments.length < 2) try {
+		return JSON.parse(this.attr("data-" + a));
+	} catch (e) {
+		return this.attr("data-" + a);
+	}
+	else this.attr("data-" + a, v === null ? null : r === true || typeof v === "string" || typeof v === "number" ? v : JSON.stringify(v));
+	return this;
+}
+registerMethods("Dom", { data });
+function remember(k, v) {
+	if (typeof arguments[0] === "object") for (const key in k) this.remember(key, k[key]);
+	else if (arguments.length === 1) return this.memory()[k];
+	else this.memory()[k] = v;
+	return this;
+}
+function forget() {
+	if (arguments.length === 0) this._memory = {};
+	else for (let i = arguments.length - 1; i >= 0; i--) delete this.memory()[arguments[i]];
+	return this;
+}
+function memory() {
+	return this._memory = this._memory || {};
+}
+registerMethods("Dom", {
+	remember,
+	forget,
+	memory
+});
+function sixDigitHex(hex) {
+	return hex.length === 4 ? [
+		"#",
+		hex.substring(1, 2),
+		hex.substring(1, 2),
+		hex.substring(2, 3),
+		hex.substring(2, 3),
+		hex.substring(3, 4),
+		hex.substring(3, 4)
+	].join("") : hex;
+}
+function componentHex(component) {
+	const hex = Math.max(0, Math.min(255, Math.round(component))).toString(16);
+	return hex.length === 1 ? "0" + hex : hex;
+}
+function is(object, space) {
+	for (let i = space.length; i--;) if (object[space[i]] == null) return false;
+	return true;
+}
+function getParameters(a, b) {
+	const params = is(a, "rgb") ? {
+		_a: a.r,
+		_b: a.g,
+		_c: a.b,
+		_d: 0,
+		space: "rgb"
+	} : is(a, "xyz") ? {
+		_a: a.x,
+		_b: a.y,
+		_c: a.z,
+		_d: 0,
+		space: "xyz"
+	} : is(a, "hsl") ? {
+		_a: a.h,
+		_b: a.s,
+		_c: a.l,
+		_d: 0,
+		space: "hsl"
+	} : is(a, "lab") ? {
+		_a: a.l,
+		_b: a.a,
+		_c: a.b,
+		_d: 0,
+		space: "lab"
+	} : is(a, "lch") ? {
+		_a: a.l,
+		_b: a.c,
+		_c: a.h,
+		_d: 0,
+		space: "lch"
+	} : is(a, "cmyk") ? {
+		_a: a.c,
+		_b: a.m,
+		_c: a.y,
+		_d: a.k,
+		space: "cmyk"
+	} : {
+		_a: 0,
+		_b: 0,
+		_c: 0,
+		space: "rgb"
+	};
+	params.space = b || params.space;
+	return params;
+}
+function cieSpace(space) {
+	if (space === "lab" || space === "xyz" || space === "lch") return true;
+	else return false;
+}
+function hueToRgb(p, q, t) {
+	if (t < 0) t += 1;
+	if (t > 1) t -= 1;
+	if (t < 1 / 6) return p + (q - p) * 6 * t;
+	if (t < 1 / 2) return q;
+	if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+	return p;
+}
+var Color = class Color {
+	constructor(...inputs) {
+		this.init(...inputs);
+	}
+	static isColor(color) {
+		return color && (color instanceof Color || this.isRgb(color) || this.test(color));
+	}
+	static isRgb(color) {
+		return color && typeof color.r === "number" && typeof color.g === "number" && typeof color.b === "number";
+	}
+	static random(mode = "vibrant", t, u) {
+		const { random, round, sin, PI: pi } = Math;
+		if (mode === "vibrant") return new Color(24 * random() + 57, 38 * random() + 45, 360 * random(), "lch");
+		else if (mode === "sine") {
+			t = t == null ? random() : t;
+			return new Color(round(80 * sin(2 * pi * t / .5 + .01) + 150), round(50 * sin(2 * pi * t / .5 + 4.6) + 200), round(100 * sin(2 * pi * t / .5 + 2.3) + 150));
+		} else if (mode === "pastel") return new Color(8 * random() + 86, 17 * random() + 9, 360 * random(), "lch");
+		else if (mode === "dark") return new Color(10 + 10 * random(), 50 * random() + 86, 360 * random(), "lch");
+		else if (mode === "rgb") return new Color(255 * random(), 255 * random(), 255 * random());
+		else if (mode === "lab") return new Color(100 * random(), 256 * random() - 128, 256 * random() - 128, "lab");
+		else if (mode === "grey") {
+			const grey = 255 * random();
+			return new Color(grey, grey, grey);
+		} else throw new Error("Unsupported random color mode");
+	}
+	static test(color) {
+		return typeof color === "string" && (isHex.test(color) || isRgb.test(color));
+	}
+	cmyk() {
+		const { _a, _b, _c } = this.rgb();
+		const [r, g, b] = [
+			_a,
+			_b,
+			_c
+		].map((v) => v / 255);
+		const k = Math.min(1 - r, 1 - g, 1 - b);
+		if (k === 1) return new Color(0, 0, 0, 1, "cmyk");
+		return new Color((1 - r - k) / (1 - k), (1 - g - k) / (1 - k), (1 - b - k) / (1 - k), k, "cmyk");
+	}
+	hsl() {
+		const { _a, _b, _c } = this.rgb();
+		const [r, g, b] = [
+			_a,
+			_b,
+			_c
+		].map((v) => v / 255);
+		const max = Math.max(r, g, b);
+		const min = Math.min(r, g, b);
+		const l = (max + min) / 2;
+		const isGrey = max === min;
+		const delta = max - min;
+		const s = isGrey ? 0 : l > .5 ? delta / (2 - max - min) : delta / (max + min);
+		return new Color(360 * (isGrey ? 0 : max === r ? ((g - b) / delta + (g < b ? 6 : 0)) / 6 : max === g ? ((b - r) / delta + 2) / 6 : max === b ? ((r - g) / delta + 4) / 6 : 0), 100 * s, 100 * l, "hsl");
+	}
+	init(a = 0, b = 0, c = 0, d = 0, space = "rgb") {
+		a = !a ? 0 : a;
+		if (this.space) for (const component in this.space) delete this[this.space[component]];
+		if (typeof a === "number") {
+			space = typeof d === "string" ? d : space;
+			d = typeof d === "string" ? 0 : d;
+			Object.assign(this, {
+				_a: a,
+				_b: b,
+				_c: c,
+				_d: d,
+				space
+			});
+		} else if (a instanceof Array) {
+			this.space = b || (typeof a[3] === "string" ? a[3] : a[4]) || "rgb";
+			Object.assign(this, {
+				_a: a[0],
+				_b: a[1],
+				_c: a[2],
+				_d: a[3] || 0
+			});
+		} else if (a instanceof Object) {
+			const values = getParameters(a, b);
+			Object.assign(this, values);
+		} else if (typeof a === "string") if (isRgb.test(a)) {
+			const noWhitespace = a.replace(whitespace, "");
+			const [_a, _b, _c] = rgb.exec(noWhitespace).slice(1, 4).map((v) => parseInt(v));
+			Object.assign(this, {
+				_a,
+				_b,
+				_c,
+				_d: 0,
+				space: "rgb"
+			});
+		} else if (isHex.test(a)) {
+			const hexParse = (v) => parseInt(v, 16);
+			const [, _a, _b, _c] = hex.exec(sixDigitHex(a)).map(hexParse);
+			Object.assign(this, {
+				_a,
+				_b,
+				_c,
+				_d: 0,
+				space: "rgb"
+			});
+		} else throw Error("Unsupported string format, can't construct Color");
+		const { _a, _b, _c, _d } = this;
+		const components = this.space === "rgb" ? {
+			r: _a,
+			g: _b,
+			b: _c
+		} : this.space === "xyz" ? {
+			x: _a,
+			y: _b,
+			z: _c
+		} : this.space === "hsl" ? {
+			h: _a,
+			s: _b,
+			l: _c
+		} : this.space === "lab" ? {
+			l: _a,
+			a: _b,
+			b: _c
+		} : this.space === "lch" ? {
+			l: _a,
+			c: _b,
+			h: _c
+		} : this.space === "cmyk" ? {
+			c: _a,
+			m: _b,
+			y: _c,
+			k: _d
+		} : {};
+		Object.assign(this, components);
+	}
+	lab() {
+		const { x, y, z } = this.xyz();
+		return new Color(116 * y - 16, 500 * (x - y), 200 * (y - z), "lab");
+	}
+	lch() {
+		const { l, a, b } = this.lab();
+		const c = Math.sqrt(a ** 2 + b ** 2);
+		let h = 180 * Math.atan2(b, a) / Math.PI;
+		if (h < 0) {
+			h *= -1;
+			h = 360 - h;
+		}
+		return new Color(l, c, h, "lch");
+	}
+	rgb() {
+		if (this.space === "rgb") return this;
+		else if (cieSpace(this.space)) {
+			let { x, y, z } = this;
+			if (this.space === "lab" || this.space === "lch") {
+				let { l, a, b } = this;
+				if (this.space === "lch") {
+					const { c, h } = this;
+					const dToR = Math.PI / 180;
+					a = c * Math.cos(dToR * h);
+					b = c * Math.sin(dToR * h);
+				}
+				const yL = (l + 16) / 116;
+				const xL = a / 500 + yL;
+				const zL = yL - b / 200;
+				const ct = 16 / 116;
+				const mx = .008856;
+				const nm = 7.787;
+				x = .95047 * (xL ** 3 > mx ? xL ** 3 : (xL - ct) / nm);
+				y = 1 * (yL ** 3 > mx ? yL ** 3 : (yL - ct) / nm);
+				z = 1.08883 * (zL ** 3 > mx ? zL ** 3 : (zL - ct) / nm);
+			}
+			const rU = x * 3.2406 + y * -1.5372 + z * -.4986;
+			const gU = x * -.9689 + y * 1.8758 + z * .0415;
+			const bU = x * .0557 + y * -.204 + z * 1.057;
+			const pow = Math.pow;
+			const bd = .0031308;
+			const r = rU > bd ? 1.055 * pow(rU, 1 / 2.4) - .055 : 12.92 * rU;
+			const g = gU > bd ? 1.055 * pow(gU, 1 / 2.4) - .055 : 12.92 * gU;
+			const b = bU > bd ? 1.055 * pow(bU, 1 / 2.4) - .055 : 12.92 * bU;
+			return new Color(255 * r, 255 * g, 255 * b);
+		} else if (this.space === "hsl") {
+			let { h, s, l } = this;
+			h /= 360;
+			s /= 100;
+			l /= 100;
+			if (s === 0) {
+				l *= 255;
+				return new Color(l, l, l);
+			}
+			const q = l < .5 ? l * (1 + s) : l + s - l * s;
+			const p = 2 * l - q;
+			return new Color(255 * hueToRgb(p, q, h + 1 / 3), 255 * hueToRgb(p, q, h), 255 * hueToRgb(p, q, h - 1 / 3));
+		} else if (this.space === "cmyk") {
+			const { c, m, y, k } = this;
+			return new Color(255 * (1 - Math.min(1, c * (1 - k) + k)), 255 * (1 - Math.min(1, m * (1 - k) + k)), 255 * (1 - Math.min(1, y * (1 - k) + k)));
+		} else return this;
+	}
+	toArray() {
+		const { _a, _b, _c, _d, space } = this;
+		return [
+			_a,
+			_b,
+			_c,
+			_d,
+			space
+		];
+	}
+	toHex() {
+		const [r, g, b] = this._clamped().map(componentHex);
+		return `#${r}${g}${b}`;
+	}
+	toRgb() {
+		const [rV, gV, bV] = this._clamped();
+		return `rgb(${rV},${gV},${bV})`;
+	}
+	toString() {
+		return this.toHex();
+	}
+	xyz() {
+		const { _a: r255, _b: g255, _c: b255 } = this.rgb();
+		const [r, g, b] = [
+			r255,
+			g255,
+			b255
+		].map((v) => v / 255);
+		const rL = r > .04045 ? Math.pow((r + .055) / 1.055, 2.4) : r / 12.92;
+		const gL = g > .04045 ? Math.pow((g + .055) / 1.055, 2.4) : g / 12.92;
+		const bL = b > .04045 ? Math.pow((b + .055) / 1.055, 2.4) : b / 12.92;
+		const xU = (rL * .4124 + gL * .3576 + bL * .1805) / .95047;
+		const yU = (rL * .2126 + gL * .7152 + bL * .0722) / 1;
+		const zU = (rL * .0193 + gL * .1192 + bL * .9505) / 1.08883;
+		return new Color(xU > .008856 ? Math.pow(xU, 1 / 3) : 7.787 * xU + 16 / 116, yU > .008856 ? Math.pow(yU, 1 / 3) : 7.787 * yU + 16 / 116, zU > .008856 ? Math.pow(zU, 1 / 3) : 7.787 * zU + 16 / 116, "xyz");
+	}
+	_clamped() {
+		const { _a, _b, _c } = this.rgb();
+		const { max, min, round } = Math;
+		const format = (v) => max(0, min(round(v), 255));
+		return [
+			_a,
+			_b,
+			_c
+		].map(format);
+	}
+};
+var Point = class Point {
+	constructor(...args) {
+		this.init(...args);
+	}
+	clone() {
+		return new Point(this);
+	}
+	init(x, y) {
+		const base = {
+			x: 0,
+			y: 0
+		};
+		const source = Array.isArray(x) ? {
+			x: x[0],
+			y: x[1]
+		} : typeof x === "object" ? {
+			x: x.x,
+			y: x.y
+		} : {
+			x,
+			y
+		};
+		this.x = source.x == null ? base.x : source.x;
+		this.y = source.y == null ? base.y : source.y;
+		return this;
+	}
+	toArray() {
+		return [this.x, this.y];
+	}
+	transform(m) {
+		return this.clone().transformO(m);
+	}
+	transformO(m) {
+		if (!Matrix.isMatrixLike(m)) m = new Matrix(m);
+		const { x, y } = this;
+		this.x = m.a * x + m.c * y + m.e;
+		this.y = m.b * x + m.d * y + m.f;
+		return this;
+	}
+};
+function point(x, y) {
+	return new Point(x, y).transformO(this.screenCTM().inverseO());
+}
+function closeEnough(a, b, threshold) {
+	return Math.abs(b - a) < (threshold || 1e-6);
+}
+var Matrix = class Matrix {
+	constructor(...args) {
+		this.init(...args);
+	}
+	static formatTransforms(o) {
+		const flipBoth = o.flip === "both" || o.flip === true;
+		const flipX = o.flip && (flipBoth || o.flip === "x") ? -1 : 1;
+		const flipY = o.flip && (flipBoth || o.flip === "y") ? -1 : 1;
+		const skewX = o.skew && o.skew.length ? o.skew[0] : isFinite(o.skew) ? o.skew : isFinite(o.skewX) ? o.skewX : 0;
+		const skewY = o.skew && o.skew.length ? o.skew[1] : isFinite(o.skew) ? o.skew : isFinite(o.skewY) ? o.skewY : 0;
+		const scaleX = o.scale && o.scale.length ? o.scale[0] * flipX : isFinite(o.scale) ? o.scale * flipX : isFinite(o.scaleX) ? o.scaleX * flipX : flipX;
+		const scaleY = o.scale && o.scale.length ? o.scale[1] * flipY : isFinite(o.scale) ? o.scale * flipY : isFinite(o.scaleY) ? o.scaleY * flipY : flipY;
+		const shear = o.shear || 0;
+		const theta = o.rotate || o.theta || 0;
+		const origin = new Point(o.origin || o.around || o.ox || o.originX, o.oy || o.originY);
+		const ox = origin.x;
+		const oy = origin.y;
+		const position = new Point(o.position || o.px || o.positionX || NaN, o.py || o.positionY || NaN);
+		const px = position.x;
+		const py = position.y;
+		const translate = new Point(o.translate || o.tx || o.translateX, o.ty || o.translateY);
+		const tx = translate.x;
+		const ty = translate.y;
+		const relative = new Point(o.relative || o.rx || o.relativeX, o.ry || o.relativeY);
+		return {
+			scaleX,
+			scaleY,
+			skewX,
+			skewY,
+			shear,
+			theta,
+			rx: relative.x,
+			ry: relative.y,
+			tx,
+			ty,
+			ox,
+			oy,
+			px,
+			py
+		};
+	}
+	static fromArray(a) {
+		return {
+			a: a[0],
+			b: a[1],
+			c: a[2],
+			d: a[3],
+			e: a[4],
+			f: a[5]
+		};
+	}
+	static isMatrixLike(o) {
+		return o.a != null || o.b != null || o.c != null || o.d != null || o.e != null || o.f != null;
+	}
+	static matrixMultiply(l, r, o) {
+		const a = l.a * r.a + l.c * r.b;
+		const b = l.b * r.a + l.d * r.b;
+		const c = l.a * r.c + l.c * r.d;
+		const d = l.b * r.c + l.d * r.d;
+		const e = l.e + l.a * r.e + l.c * r.f;
+		const f = l.f + l.b * r.e + l.d * r.f;
+		o.a = a;
+		o.b = b;
+		o.c = c;
+		o.d = d;
+		o.e = e;
+		o.f = f;
+		return o;
+	}
+	around(cx, cy, matrix) {
+		return this.clone().aroundO(cx, cy, matrix);
+	}
+	aroundO(cx, cy, matrix) {
+		const dx = cx || 0;
+		const dy = cy || 0;
+		return this.translateO(-dx, -dy).lmultiplyO(matrix).translateO(dx, dy);
+	}
+	clone() {
+		return new Matrix(this);
+	}
+	decompose(cx = 0, cy = 0) {
+		const a = this.a;
+		const b = this.b;
+		const c = this.c;
+		const d = this.d;
+		const e = this.e;
+		const f = this.f;
+		const determinant = a * d - b * c;
+		const ccw = determinant > 0 ? 1 : -1;
+		const sx = ccw * Math.sqrt(a * a + b * b);
+		const thetaRad = Math.atan2(ccw * b, ccw * a);
+		const theta = 180 / Math.PI * thetaRad;
+		const ct = Math.cos(thetaRad);
+		const st = Math.sin(thetaRad);
+		const lam = (a * c + b * d) / determinant;
+		const sy = c * sx / (lam * a - b) || d * sx / (lam * b + a);
+		return {
+			scaleX: sx,
+			scaleY: sy,
+			shear: lam,
+			rotate: theta,
+			translateX: e - cx + cx * ct * sx + cy * (lam * ct * sx - st * sy),
+			translateY: f - cy + cx * st * sx + cy * (lam * st * sx + ct * sy),
+			originX: cx,
+			originY: cy,
+			a: this.a,
+			b: this.b,
+			c: this.c,
+			d: this.d,
+			e: this.e,
+			f: this.f
+		};
+	}
+	equals(other) {
+		if (other === this) return true;
+		const comp = new Matrix(other);
+		return closeEnough(this.a, comp.a) && closeEnough(this.b, comp.b) && closeEnough(this.c, comp.c) && closeEnough(this.d, comp.d) && closeEnough(this.e, comp.e) && closeEnough(this.f, comp.f);
+	}
+	flip(axis, around) {
+		return this.clone().flipO(axis, around);
+	}
+	flipO(axis, around) {
+		return axis === "x" ? this.scaleO(-1, 1, around, 0) : axis === "y" ? this.scaleO(1, -1, 0, around) : this.scaleO(-1, -1, axis, around || axis);
+	}
+	init(source) {
+		const base = Matrix.fromArray([
+			1,
+			0,
+			0,
+			1,
+			0,
+			0
+		]);
+		source = source instanceof Element$1 ? source.matrixify() : typeof source === "string" ? Matrix.fromArray(source.split(delimiter).map(parseFloat)) : Array.isArray(source) ? Matrix.fromArray(source) : typeof source === "object" && Matrix.isMatrixLike(source) ? source : typeof source === "object" ? new Matrix().transform(source) : arguments.length === 6 ? Matrix.fromArray([].slice.call(arguments)) : base;
+		this.a = source.a != null ? source.a : base.a;
+		this.b = source.b != null ? source.b : base.b;
+		this.c = source.c != null ? source.c : base.c;
+		this.d = source.d != null ? source.d : base.d;
+		this.e = source.e != null ? source.e : base.e;
+		this.f = source.f != null ? source.f : base.f;
+		return this;
+	}
+	inverse() {
+		return this.clone().inverseO();
+	}
+	inverseO() {
+		const a = this.a;
+		const b = this.b;
+		const c = this.c;
+		const d = this.d;
+		const e = this.e;
+		const f = this.f;
+		const det = a * d - b * c;
+		if (!det) throw new Error("Cannot invert " + this);
+		const na = d / det;
+		const nb = -b / det;
+		const nc = -c / det;
+		const nd = a / det;
+		const ne = -(na * e + nc * f);
+		const nf = -(nb * e + nd * f);
+		this.a = na;
+		this.b = nb;
+		this.c = nc;
+		this.d = nd;
+		this.e = ne;
+		this.f = nf;
+		return this;
+	}
+	lmultiply(matrix) {
+		return this.clone().lmultiplyO(matrix);
+	}
+	lmultiplyO(matrix) {
+		const r = this;
+		const l = matrix instanceof Matrix ? matrix : new Matrix(matrix);
+		return Matrix.matrixMultiply(l, r, this);
+	}
+	multiply(matrix) {
+		return this.clone().multiplyO(matrix);
+	}
+	multiplyO(matrix) {
+		const l = this;
+		const r = matrix instanceof Matrix ? matrix : new Matrix(matrix);
+		return Matrix.matrixMultiply(l, r, this);
+	}
+	rotate(r, cx, cy) {
+		return this.clone().rotateO(r, cx, cy);
+	}
+	rotateO(r, cx = 0, cy = 0) {
+		r = radians(r);
+		const cos = Math.cos(r);
+		const sin = Math.sin(r);
+		const { a, b, c, d, e, f } = this;
+		this.a = a * cos - b * sin;
+		this.b = b * cos + a * sin;
+		this.c = c * cos - d * sin;
+		this.d = d * cos + c * sin;
+		this.e = e * cos - f * sin + cy * sin - cx * cos + cx;
+		this.f = f * cos + e * sin - cx * sin - cy * cos + cy;
+		return this;
+	}
+	scale(x, y, cx, cy) {
+		return this.clone().scaleO(...arguments);
+	}
+	scaleO(x, y = x, cx = 0, cy = 0) {
+		if (arguments.length === 3) {
+			cy = cx;
+			cx = y;
+			y = x;
+		}
+		const { a, b, c, d, e, f } = this;
+		this.a = a * x;
+		this.b = b * y;
+		this.c = c * x;
+		this.d = d * y;
+		this.e = e * x - cx * x + cx;
+		this.f = f * y - cy * y + cy;
+		return this;
+	}
+	shear(a, cx, cy) {
+		return this.clone().shearO(a, cx, cy);
+	}
+	shearO(lx, cx = 0, cy = 0) {
+		const { a, b, c, d, e, f } = this;
+		this.a = a + b * lx;
+		this.c = c + d * lx;
+		this.e = e + f * lx - cy * lx;
+		return this;
+	}
+	skew(x, y, cx, cy) {
+		return this.clone().skewO(...arguments);
+	}
+	skewO(x, y = x, cx = 0, cy = 0) {
+		if (arguments.length === 3) {
+			cy = cx;
+			cx = y;
+			y = x;
+		}
+		x = radians(x);
+		y = radians(y);
+		const lx = Math.tan(x);
+		const ly = Math.tan(y);
+		const { a, b, c, d, e, f } = this;
+		this.a = a + b * lx;
+		this.b = b + a * ly;
+		this.c = c + d * lx;
+		this.d = d + c * ly;
+		this.e = e + f * lx - cy * lx;
+		this.f = f + e * ly - cx * ly;
+		return this;
+	}
+	skewX(x, cx, cy) {
+		return this.skew(x, 0, cx, cy);
+	}
+	skewY(y, cx, cy) {
+		return this.skew(0, y, cx, cy);
+	}
+	toArray() {
+		return [
+			this.a,
+			this.b,
+			this.c,
+			this.d,
+			this.e,
+			this.f
+		];
+	}
+	toString() {
+		return "matrix(" + this.a + "," + this.b + "," + this.c + "," + this.d + "," + this.e + "," + this.f + ")";
+	}
+	transform(o) {
+		if (Matrix.isMatrixLike(o)) return new Matrix(o).multiplyO(this);
+		const t = Matrix.formatTransforms(o);
+		const current = this;
+		const { x: ox, y: oy } = new Point(t.ox, t.oy).transform(current);
+		const transformer = new Matrix().translateO(t.rx, t.ry).lmultiplyO(current).translateO(-ox, -oy).scaleO(t.scaleX, t.scaleY).skewO(t.skewX, t.skewY).shearO(t.shear).rotateO(t.theta).translateO(ox, oy);
+		if (isFinite(t.px) || isFinite(t.py)) {
+			const origin = new Point(ox, oy).transform(transformer);
+			const dx = isFinite(t.px) ? t.px - origin.x : 0;
+			const dy = isFinite(t.py) ? t.py - origin.y : 0;
+			transformer.translateO(dx, dy);
+		}
+		transformer.translateO(t.tx, t.ty);
+		return transformer;
+	}
+	translate(x, y) {
+		return this.clone().translateO(x, y);
+	}
+	translateO(x, y) {
+		this.e += x || 0;
+		this.f += y || 0;
+		return this;
+	}
+	valueOf() {
+		return {
+			a: this.a,
+			b: this.b,
+			c: this.c,
+			d: this.d,
+			e: this.e,
+			f: this.f
+		};
+	}
+};
+function ctm() {
+	return new Matrix(this.node.getCTM());
+}
+function screenCTM() {
+	if (typeof this.isRoot === "function" && !this.isRoot()) {
+		const rect = this.rect(1, 1);
+		const m = rect.node.getScreenCTM();
+		rect.remove();
+		return new Matrix(m);
+	}
+	return new Matrix(this.node.getScreenCTM());
+}
+register(Matrix, "Matrix");
+function parser() {
+	if (!parser.nodes) {
+		const svg = makeInstance().size(2, 0);
+		svg.node.style.cssText = [
+			"opacity: 0",
+			"position: absolute",
+			"left: -100%",
+			"top: -100%",
+			"overflow: hidden"
+		].join(";");
+		svg.attr("focusable", "false");
+		svg.attr("aria-hidden", "true");
+		parser.nodes = {
+			svg,
+			path: svg.path().node
+		};
+	}
+	if (!parser.nodes.svg.node.parentNode) {
+		const b = globals.document.body || globals.document.documentElement;
+		parser.nodes.svg.addTo(b);
+	}
+	return parser.nodes;
+}
+function isNulledBox(box) {
+	return !box.width && !box.height && !box.x && !box.y;
+}
+function domContains(node) {
+	return node === globals.document || (globals.document.documentElement.contains || function(node) {
+		while (node.parentNode) node = node.parentNode;
+		return node === globals.document;
+	}).call(globals.document.documentElement, node);
+}
+var Box = class Box {
+	constructor(...args) {
+		this.init(...args);
+	}
+	addOffset() {
+		this.x += globals.window.pageXOffset;
+		this.y += globals.window.pageYOffset;
+		return new Box(this);
+	}
+	init(source) {
+		source = typeof source === "string" ? source.split(delimiter).map(parseFloat) : Array.isArray(source) ? source : typeof source === "object" ? [
+			source.left != null ? source.left : source.x,
+			source.top != null ? source.top : source.y,
+			source.width,
+			source.height
+		] : arguments.length === 4 ? [].slice.call(arguments) : [
+			0,
+			0,
+			0,
+			0
+		];
+		this.x = source[0] || 0;
+		this.y = source[1] || 0;
+		this.width = this.w = source[2] || 0;
+		this.height = this.h = source[3] || 0;
+		this.x2 = this.x + this.w;
+		this.y2 = this.y + this.h;
+		this.cx = this.x + this.w / 2;
+		this.cy = this.y + this.h / 2;
+		return this;
+	}
+	isNulled() {
+		return isNulledBox(this);
+	}
+	merge(box) {
+		const x = Math.min(this.x, box.x);
+		const y = Math.min(this.y, box.y);
+		return new Box(x, y, Math.max(this.x + this.width, box.x + box.width) - x, Math.max(this.y + this.height, box.y + box.height) - y);
+	}
+	toArray() {
+		return [
+			this.x,
+			this.y,
+			this.width,
+			this.height
+		];
+	}
+	toString() {
+		return this.x + " " + this.y + " " + this.width + " " + this.height;
+	}
+	transform(m) {
+		if (!(m instanceof Matrix)) m = new Matrix(m);
+		let xMin = Infinity;
+		let xMax = -Infinity;
+		let yMin = Infinity;
+		let yMax = -Infinity;
+		[
+			new Point(this.x, this.y),
+			new Point(this.x2, this.y),
+			new Point(this.x, this.y2),
+			new Point(this.x2, this.y2)
+		].forEach(function(p) {
+			p = p.transform(m);
+			xMin = Math.min(xMin, p.x);
+			xMax = Math.max(xMax, p.x);
+			yMin = Math.min(yMin, p.y);
+			yMax = Math.max(yMax, p.y);
+		});
+		return new Box(xMin, yMin, xMax - xMin, yMax - yMin);
+	}
+};
+function getBox(el, getBBoxFn, retry) {
+	let box;
+	try {
+		box = getBBoxFn(el.node);
+		if (isNulledBox(box) && !domContains(el.node)) throw new Error("Element not in the dom");
+	} catch (e) {
+		box = retry(el);
+	}
+	return box;
+}
+function bbox() {
+	const getBBox = (node) => node.getBBox();
+	const retry = (el) => {
+		try {
+			const clone = el.clone().addTo(parser().svg).show();
+			const box = clone.node.getBBox();
+			clone.remove();
+			return box;
+		} catch (e) {
+			throw new Error(`Getting bbox of element "${el.node.nodeName}" is not possible: ${e.toString()}`);
+		}
+	};
+	return new Box(getBox(this, getBBox, retry));
+}
+function rbox(el) {
+	const getRBox = (node) => node.getBoundingClientRect();
+	const retry = (el) => {
+		throw new Error(`Getting rbox of element "${el.node.nodeName}" is not possible`);
+	};
+	const rbox = new Box(getBox(this, getRBox, retry));
+	if (el) return rbox.transform(el.screenCTM().inverseO());
+	return rbox.addOffset();
+}
+function inside(x, y) {
+	const box = this.bbox();
+	return x > box.x && y > box.y && x < box.x + box.width && y < box.y + box.height;
+}
+registerMethods({ viewbox: {
+	viewbox(x, y, width, height) {
+		if (x == null) return new Box(this.attr("viewBox"));
+		return this.attr("viewBox", new Box(x, y, width, height));
+	},
+	zoom(level, point) {
+		let { width, height } = this.attr(["width", "height"]);
+		if (!width && !height || typeof width === "string" || typeof height === "string") {
+			width = this.node.clientWidth;
+			height = this.node.clientHeight;
+		}
+		if (!width || !height) throw new Error("Impossible to get absolute width and height. Please provide an absolute width and height attribute on the zooming element");
+		const v = this.viewbox();
+		const zoomX = width / v.width;
+		const zoomY = height / v.height;
+		const zoom = Math.min(zoomX, zoomY);
+		if (level == null) return zoom;
+		let zoomAmount = zoom / level;
+		if (zoomAmount === Infinity) zoomAmount = Number.MAX_SAFE_INTEGER / 100;
+		point = point || new Point(width / 2 / zoomX + v.x, height / 2 / zoomY + v.y);
+		const box = new Box(v).transform(new Matrix({
+			scale: zoomAmount,
+			origin: point
+		}));
+		return this.viewbox(box);
+	}
+} });
+register(Box, "Box");
+var List = class extends Array {
+	constructor(arr = [], ...args) {
+		super(arr, ...args);
+		if (typeof arr === "number") return this;
+		this.length = 0;
+		this.push(...arr);
+	}
+};
+extend([List], {
+	each(fnOrMethodName, ...args) {
+		if (typeof fnOrMethodName === "function") return this.map((el, i, arr) => {
+			return fnOrMethodName.call(el, el, i, arr);
+		});
+		else return this.map((el) => {
+			return el[fnOrMethodName](...args);
+		});
+	},
+	toArray() {
+		return Array.prototype.concat.apply([], this);
+	}
+});
+var reserved = [
+	"toArray",
+	"constructor",
+	"each"
+];
+List.extend = function(methods) {
+	methods = methods.reduce((obj, name) => {
+		if (reserved.includes(name)) return obj;
+		if (name[0] === "_") return obj;
+		obj[name] = function(...attrs) {
+			return this.each(name, ...attrs);
+		};
+		return obj;
+	}, {});
+	extend([List], methods);
+};
+function baseFind(query, parent) {
+	return new List(map$1((parent || globals.document).querySelectorAll(query), function(node) {
+		return adopt(node);
+	}));
+}
+function find(query) {
+	return baseFind(query, this.node);
+}
+function findOne(query) {
+	return adopt(this.node.querySelector(query));
+}
+var listenerId = 0;
+var windowEvents = {};
+function getEvents(instance) {
+	let n = instance.getEventHolder();
+	if (n === globals.window) n = windowEvents;
+	if (!n.events) n.events = {};
+	return n.events;
+}
+function getEventTarget(instance) {
+	return instance.getEventTarget();
+}
+function clearEvents(instance) {
+	let n = instance.getEventHolder();
+	if (n === globals.window) n = windowEvents;
+	if (n.events) n.events = {};
+}
+function on(node, events, listener, binding, options) {
+	const l = listener.bind(binding || node);
+	const instance = makeInstance(node);
+	const bag = getEvents(instance);
+	const n = getEventTarget(instance);
+	events = Array.isArray(events) ? events : events.split(delimiter);
+	if (!listener._svgjsListenerId) listener._svgjsListenerId = ++listenerId;
+	events.forEach(function(event) {
+		const ev = event.split(".")[0];
+		const ns = event.split(".")[1] || "*";
+		bag[ev] = bag[ev] || {};
+		bag[ev][ns] = bag[ev][ns] || {};
+		bag[ev][ns][listener._svgjsListenerId] = l;
+		n.addEventListener(ev, l, options || false);
+	});
+}
+function off(node, events, listener, options) {
+	const instance = makeInstance(node);
+	const bag = getEvents(instance);
+	const n = getEventTarget(instance);
+	if (typeof listener === "function") {
+		listener = listener._svgjsListenerId;
+		if (!listener) return;
+	}
+	events = Array.isArray(events) ? events : (events || "").split(delimiter);
+	events.forEach(function(event) {
+		const ev = event && event.split(".")[0];
+		const ns = event && event.split(".")[1];
+		let namespace, l;
+		if (listener) {
+			if (bag[ev] && bag[ev][ns || "*"]) {
+				n.removeEventListener(ev, bag[ev][ns || "*"][listener], options || false);
+				delete bag[ev][ns || "*"][listener];
+			}
+		} else if (ev && ns) {
+			if (bag[ev] && bag[ev][ns]) {
+				for (l in bag[ev][ns]) off(n, [ev, ns].join("."), l);
+				delete bag[ev][ns];
+			}
+		} else if (ns) {
+			for (event in bag) for (namespace in bag[event]) if (ns === namespace) off(n, [event, ns].join("."));
+		} else if (ev) {
+			if (bag[ev]) {
+				for (namespace in bag[ev]) off(n, [ev, namespace].join("."));
+				delete bag[ev];
+			}
+		} else {
+			for (event in bag) off(n, event);
+			clearEvents(instance);
+		}
+	});
+}
+function dispatch(node, event, data, options) {
+	const n = getEventTarget(node);
+	if (event instanceof globals.window.Event) n.dispatchEvent(event);
+	else {
+		event = new globals.window.CustomEvent(event, {
+			detail: data,
+			cancelable: true,
+			...options
+		});
+		n.dispatchEvent(event);
+	}
+	return event;
+}
+var EventTarget = class extends Base$1 {
+	addEventListener() {}
+	dispatch(event, data, options) {
+		return dispatch(this, event, data, options);
+	}
+	dispatchEvent(event) {
+		const bag = this.getEventHolder().events;
+		if (!bag) return true;
+		const events = bag[event.type];
+		for (const i in events) for (const j in events[i]) events[i][j](event);
+		return !event.defaultPrevented;
+	}
+	fire(event, data, options) {
+		this.dispatch(event, data, options);
+		return this;
+	}
+	getEventHolder() {
+		return this;
+	}
+	getEventTarget() {
+		return this;
+	}
+	off(event, listener, options) {
+		off(this, event, listener, options);
+		return this;
+	}
+	on(event, listener, binding, options) {
+		on(this, event, listener, binding, options);
+		return this;
+	}
+	removeEventListener() {}
+};
+register(EventTarget, "EventTarget");
+function noop() {}
+var timeline = {
+	duration: 400,
+	ease: ">",
+	delay: 0
+};
+var attrs = {
+	"fill-opacity": 1,
+	"stroke-opacity": 1,
+	"stroke-width": 0,
+	"stroke-linejoin": "miter",
+	"stroke-linecap": "butt",
+	fill: "#000000",
+	stroke: "#000000",
+	opacity: 1,
+	x: 0,
+	y: 0,
+	cx: 0,
+	cy: 0,
+	width: 0,
+	height: 0,
+	r: 0,
+	rx: 0,
+	ry: 0,
+	offset: 0,
+	"stop-opacity": 1,
+	"stop-color": "#000000",
+	"text-anchor": "start"
+};
+var SVGArray = class extends Array {
+	constructor(...args) {
+		super(...args);
+		this.init(...args);
+	}
+	clone() {
+		return new this.constructor(this);
+	}
+	init(arr) {
+		if (typeof arr === "number") return this;
+		this.length = 0;
+		this.push(...this.parse(arr));
+		return this;
+	}
+	parse(array = []) {
+		if (array instanceof Array) return array;
+		return array.trim().split(delimiter).map(parseFloat);
+	}
+	toArray() {
+		return Array.prototype.concat.apply([], this);
+	}
+	toSet() {
+		return new Set(this);
+	}
+	toString() {
+		return this.join(" ");
+	}
+	valueOf() {
+		const ret = [];
+		ret.push(...this);
+		return ret;
+	}
+};
+var SVGNumber = class SVGNumber {
+	constructor(...args) {
+		this.init(...args);
+	}
+	convert(unit) {
+		return new SVGNumber(this.value, unit);
+	}
+	divide(number) {
+		number = new SVGNumber(number);
+		return new SVGNumber(this / number, this.unit || number.unit);
+	}
+	init(value, unit) {
+		unit = Array.isArray(value) ? value[1] : unit;
+		value = Array.isArray(value) ? value[0] : value;
+		this.value = 0;
+		this.unit = unit || "";
+		if (typeof value === "number") this.value = isNaN(value) ? 0 : !isFinite(value) ? value < 0 ? -34e37 : 34e37 : value;
+		else if (typeof value === "string") {
+			unit = value.match(numberAndUnit);
+			if (unit) {
+				this.value = parseFloat(unit[1]);
+				if (unit[5] === "%") this.value /= 100;
+				else if (unit[5] === "s") this.value *= 1e3;
+				this.unit = unit[5];
+			}
+		} else if (value instanceof SVGNumber) {
+			this.value = value.valueOf();
+			this.unit = value.unit;
+		}
+		return this;
+	}
+	minus(number) {
+		number = new SVGNumber(number);
+		return new SVGNumber(this - number, this.unit || number.unit);
+	}
+	plus(number) {
+		number = new SVGNumber(number);
+		return new SVGNumber(this + number, this.unit || number.unit);
+	}
+	times(number) {
+		number = new SVGNumber(number);
+		return new SVGNumber(this * number, this.unit || number.unit);
+	}
+	toArray() {
+		return [this.value, this.unit];
+	}
+	toJSON() {
+		return this.toString();
+	}
+	toString() {
+		return (this.unit === "%" ? ~~(this.value * 1e8) / 1e6 : this.unit === "s" ? this.value / 1e3 : this.value) + this.unit;
+	}
+	valueOf() {
+		return this.value;
+	}
+};
+var hooks = [];
+function registerAttrHook(fn) {
+	hooks.push(fn);
+}
+function attr(attr, val, ns) {
+	if (attr == null) {
+		attr = {};
+		val = this.node.attributes;
+		for (const node of val) attr[node.nodeName] = isNumber.test(node.nodeValue) ? parseFloat(node.nodeValue) : node.nodeValue;
+		return attr;
+	} else if (attr instanceof Array) return attr.reduce((last, curr) => {
+		last[curr] = this.attr(curr);
+		return last;
+	}, {});
+	else if (typeof attr === "object" && attr.constructor === Object) for (val in attr) this.attr(val, attr[val]);
+	else if (val === null) this.node.removeAttribute(attr);
+	else if (val == null) {
+		val = this.node.getAttribute(attr);
+		return val == null ? attrs[attr] : isNumber.test(val) ? parseFloat(val) : val;
+	} else {
+		val = hooks.reduce((_val, hook) => {
+			return hook(attr, _val, this);
+		}, val);
+		if (typeof val === "number") val = new SVGNumber(val);
+		else if (Color.isColor(val)) val = new Color(val);
+		else if (val.constructor === Array) val = new SVGArray(val);
+		if (attr === "leading") {
+			if (this.leading) this.leading(val);
+		} else typeof ns === "string" ? this.node.setAttributeNS(ns, attr, val.toString()) : this.node.setAttribute(attr, val.toString());
+		if (this.rebuild && (attr === "font-size" || attr === "x")) this.rebuild();
+	}
+	return this;
+}
+var Dom = class Dom extends EventTarget {
+	constructor(node, attrs) {
+		super();
+		this.node = node;
+		this.type = node.nodeName;
+		if (attrs && node !== attrs) this.attr(attrs);
+	}
+	add(element, i) {
+		element = makeInstance(element);
+		if (element.removeNamespace && this.node instanceof globals.window.SVGElement) element.removeNamespace();
+		if (i == null) this.node.appendChild(element.node);
+		else if (element.node !== this.node.childNodes[i]) this.node.insertBefore(element.node, this.node.childNodes[i]);
+		return this;
+	}
+	addTo(parent, i) {
+		return makeInstance(parent).put(this, i);
+	}
+	children() {
+		return new List(map$1(this.node.children, function(node) {
+			return adopt(node);
+		}));
+	}
+	clear() {
+		while (this.node.hasChildNodes()) this.node.removeChild(this.node.lastChild);
+		return this;
+	}
+	clone(deep = true, assignNewIds = true) {
+		this.writeDataToDom();
+		let nodeClone = this.node.cloneNode(deep);
+		if (assignNewIds) nodeClone = assignNewId(nodeClone);
+		return new this.constructor(nodeClone);
+	}
+	each(block, deep) {
+		const children = this.children();
+		let i, il;
+		for (i = 0, il = children.length; i < il; i++) {
+			block.apply(children[i], [i, children]);
+			if (deep) children[i].each(block, deep);
+		}
+		return this;
+	}
+	element(nodeName, attrs) {
+		return this.put(new Dom(create(nodeName), attrs));
+	}
+	first() {
+		return adopt(this.node.firstChild);
+	}
+	get(i) {
+		return adopt(this.node.childNodes[i]);
+	}
+	getEventHolder() {
+		return this.node;
+	}
+	getEventTarget() {
+		return this.node;
+	}
+	has(element) {
+		return this.index(element) >= 0;
+	}
+	html(htmlOrFn, outerHTML) {
+		return this.xml(htmlOrFn, outerHTML, html);
+	}
+	id(id) {
+		if (typeof id === "undefined" && !this.node.id) this.node.id = eid(this.type);
+		return this.attr("id", id);
+	}
+	index(element) {
+		return [].slice.call(this.node.childNodes).indexOf(element.node);
+	}
+	last() {
+		return adopt(this.node.lastChild);
+	}
+	matches(selector) {
+		const el = this.node;
+		const matcher = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector || null;
+		return matcher && matcher.call(el, selector);
+	}
+	parent(type) {
+		let parent = this;
+		if (!parent.node.parentNode) return null;
+		parent = adopt(parent.node.parentNode);
+		if (!type) return parent;
+		do
+			if (typeof type === "string" ? parent.matches(type) : parent instanceof type) return parent;
+		while (parent = adopt(parent.node.parentNode));
+		return parent;
+	}
+	put(element, i) {
+		element = makeInstance(element);
+		this.add(element, i);
+		return element;
+	}
+	putIn(parent, i) {
+		return makeInstance(parent).add(this, i);
+	}
+	remove() {
+		if (this.parent()) this.parent().removeElement(this);
+		return this;
+	}
+	removeElement(element) {
+		this.node.removeChild(element.node);
+		return this;
+	}
+	replace(element) {
+		element = makeInstance(element);
+		if (this.node.parentNode) this.node.parentNode.replaceChild(element.node, this.node);
+		return element;
+	}
+	round(precision = 2, map = null) {
+		const factor = 10 ** precision;
+		const attrs = this.attr(map);
+		for (const i in attrs) if (typeof attrs[i] === "number") attrs[i] = Math.round(attrs[i] * factor) / factor;
+		this.attr(attrs);
+		return this;
+	}
+	svg(svgOrFn, outerSVG) {
+		return this.xml(svgOrFn, outerSVG, svg);
+	}
+	toString() {
+		return this.id();
+	}
+	words(text) {
+		this.node.textContent = text;
+		return this;
+	}
+	wrap(node) {
+		const parent = this.parent();
+		if (!parent) return this.addTo(node);
+		const position = parent.index(this);
+		return parent.put(node, position).put(this);
+	}
+	writeDataToDom() {
+		this.each(function() {
+			this.writeDataToDom();
+		});
+		return this;
+	}
+	xml(xmlOrFn, outerXML, ns) {
+		if (typeof xmlOrFn === "boolean") {
+			ns = outerXML;
+			outerXML = xmlOrFn;
+			xmlOrFn = null;
+		}
+		if (xmlOrFn == null || typeof xmlOrFn === "function") {
+			outerXML = outerXML == null ? true : outerXML;
+			this.writeDataToDom();
+			let current = this;
+			if (xmlOrFn != null) {
+				current = adopt(current.node.cloneNode(true));
+				if (outerXML) {
+					const result = xmlOrFn(current);
+					current = result || current;
+					if (result === false) return "";
+				}
+				current.each(function() {
+					const result = xmlOrFn(this);
+					const _this = result || this;
+					if (result === false) this.remove();
+					else if (result && this !== _this) this.replace(_this);
+				}, true);
+			}
+			return outerXML ? current.node.outerHTML : current.node.innerHTML;
+		}
+		outerXML = outerXML == null ? false : outerXML;
+		const well = create("wrapper", ns);
+		const fragment = globals.document.createDocumentFragment();
+		well.innerHTML = xmlOrFn;
+		for (let len = well.children.length; len--;) fragment.appendChild(well.firstElementChild);
+		const parent = this.parent();
+		return outerXML ? this.replace(fragment) && parent : this.add(fragment);
+	}
+};
+extend(Dom, {
+	attr,
+	find,
+	findOne
+});
+register(Dom, "Dom");
+var Element$1 = class extends Dom {
+	constructor(node, attrs) {
+		super(node, attrs);
+		this.dom = {};
+		this.node.instance = this;
+		if (node.hasAttribute("svgjs:data")) this.setData(JSON.parse(node.getAttribute("svgjs:data")) || {});
+	}
+	center(x, y) {
+		return this.cx(x).cy(y);
+	}
+	cx(x) {
+		return x == null ? this.x() + this.width() / 2 : this.x(x - this.width() / 2);
+	}
+	cy(y) {
+		return y == null ? this.y() + this.height() / 2 : this.y(y - this.height() / 2);
+	}
+	defs() {
+		const root = this.root();
+		return root && root.defs();
+	}
+	dmove(x, y) {
+		return this.dx(x).dy(y);
+	}
+	dx(x = 0) {
+		return this.x(new SVGNumber(x).plus(this.x()));
+	}
+	dy(y = 0) {
+		return this.y(new SVGNumber(y).plus(this.y()));
+	}
+	getEventHolder() {
+		return this;
+	}
+	height(height) {
+		return this.attr("height", height);
+	}
+	move(x, y) {
+		return this.x(x).y(y);
+	}
+	parents(until = this.root()) {
+		const isSelector = typeof until === "string";
+		if (!isSelector) until = makeInstance(until);
+		const parents = new List();
+		let parent = this;
+		while ((parent = parent.parent()) && parent.node !== globals.document && parent.nodeName !== "#document-fragment") {
+			parents.push(parent);
+			if (!isSelector && parent.node === until.node) break;
+			if (isSelector && parent.matches(until)) break;
+			if (parent.node === this.root().node) return null;
+		}
+		return parents;
+	}
+	reference(attr) {
+		attr = this.attr(attr);
+		if (!attr) return null;
+		const m = (attr + "").match(reference);
+		return m ? makeInstance(m[1]) : null;
+	}
+	root() {
+		const p = this.parent(getClass(root));
+		return p && p.root();
+	}
+	setData(o) {
+		this.dom = o;
+		return this;
+	}
+	size(width, height) {
+		const p = proportionalSize(this, width, height);
+		return this.width(new SVGNumber(p.width)).height(new SVGNumber(p.height));
+	}
+	width(width) {
+		return this.attr("width", width);
+	}
+	writeDataToDom() {
+		this.node.removeAttribute("svgjs:data");
+		if (Object.keys(this.dom).length) this.node.setAttribute("svgjs:data", JSON.stringify(this.dom));
+		return super.writeDataToDom();
+	}
+	x(x) {
+		return this.attr("x", x);
+	}
+	y(y) {
+		return this.attr("y", y);
+	}
+};
+extend(Element$1, {
+	bbox,
+	rbox,
+	inside,
+	point,
+	ctm,
+	screenCTM
+});
+register(Element$1, "Element");
+var sugar = {
+	stroke: [
+		"color",
+		"width",
+		"opacity",
+		"linecap",
+		"linejoin",
+		"miterlimit",
+		"dasharray",
+		"dashoffset"
+	],
+	fill: [
+		"color",
+		"opacity",
+		"rule"
+	],
+	prefix: function(t, a) {
+		return a === "color" ? t : t + "-" + a;
+	}
+};
+["fill", "stroke"].forEach(function(m) {
+	const extension = {};
+	let i;
+	extension[m] = function(o) {
+		if (typeof o === "undefined") return this.attr(m);
+		if (typeof o === "string" || o instanceof Color || Color.isRgb(o) || o instanceof Element$1) this.attr(m, o);
+		else for (i = sugar[m].length - 1; i >= 0; i--) if (o[sugar[m][i]] != null) this.attr(sugar.prefix(m, sugar[m][i]), o[sugar[m][i]]);
+		return this;
+	};
+	registerMethods(["Element", "Runner"], extension);
+});
+registerMethods(["Element", "Runner"], {
+	matrix: function(mat, b, c, d, e, f) {
+		if (mat == null) return new Matrix(this);
+		return this.attr("transform", new Matrix(mat, b, c, d, e, f));
+	},
+	rotate: function(angle, cx, cy) {
+		return this.transform({
+			rotate: angle,
+			ox: cx,
+			oy: cy
+		}, true);
+	},
+	skew: function(x, y, cx, cy) {
+		return arguments.length === 1 || arguments.length === 3 ? this.transform({
+			skew: x,
+			ox: y,
+			oy: cx
+		}, true) : this.transform({
+			skew: [x, y],
+			ox: cx,
+			oy: cy
+		}, true);
+	},
+	shear: function(lam, cx, cy) {
+		return this.transform({
+			shear: lam,
+			ox: cx,
+			oy: cy
+		}, true);
+	},
+	scale: function(x, y, cx, cy) {
+		return arguments.length === 1 || arguments.length === 3 ? this.transform({
+			scale: x,
+			ox: y,
+			oy: cx
+		}, true) : this.transform({
+			scale: [x, y],
+			ox: cx,
+			oy: cy
+		}, true);
+	},
+	translate: function(x, y) {
+		return this.transform({ translate: [x, y] }, true);
+	},
+	relative: function(x, y) {
+		return this.transform({ relative: [x, y] }, true);
+	},
+	flip: function(direction = "both", origin = "center") {
+		if ("xybothtrue".indexOf(direction) === -1) {
+			origin = direction;
+			direction = "both";
+		}
+		return this.transform({
+			flip: direction,
+			origin
+		}, true);
+	},
+	opacity: function(value) {
+		return this.attr("opacity", value);
+	}
+});
+registerMethods("radius", { radius: function(x, y = x) {
+	return (this._element || this).type === "radialGradient" ? this.attr("r", new SVGNumber(x)) : this.rx(x).ry(y);
+} });
+registerMethods("Path", {
+	length: function() {
+		return this.node.getTotalLength();
+	},
+	pointAt: function(length) {
+		return new Point(this.node.getPointAtLength(length));
+	}
+});
+registerMethods(["Element", "Runner"], { font: function(a, v) {
+	if (typeof a === "object") {
+		for (v in a) this.font(v, a[v]);
+		return this;
+	}
+	return a === "leading" ? this.leading(v) : a === "anchor" ? this.attr("text-anchor", v) : a === "size" || a === "family" || a === "weight" || a === "stretch" || a === "variant" || a === "style" ? this.attr("font-" + a, v) : this.attr(a, v);
+} });
+registerMethods("Element", [
+	"click",
+	"dblclick",
+	"mousedown",
+	"mouseup",
+	"mouseover",
+	"mouseout",
+	"mousemove",
+	"mouseenter",
+	"mouseleave",
+	"touchstart",
+	"touchmove",
+	"touchleave",
+	"touchend",
+	"touchcancel"
+].reduce(function(last, event) {
+	const fn = function(f) {
+		if (f === null) this.off(event);
+		else this.on(event, f);
+		return this;
+	};
+	last[event] = fn;
+	return last;
+}, {}));
+function untransform() {
+	return this.attr("transform", null);
+}
+function matrixify() {
+	return (this.attr("transform") || "").split(transforms).slice(0, -1).map(function(str) {
+		const kv = str.trim().split("(");
+		return [kv[0], kv[1].split(delimiter).map(function(str) {
+			return parseFloat(str);
+		})];
+	}).reverse().reduce(function(matrix, transform) {
+		if (transform[0] === "matrix") return matrix.lmultiply(Matrix.fromArray(transform[1]));
+		return matrix[transform[0]].apply(matrix, transform[1]);
+	}, new Matrix());
+}
+function toParent(parent, i) {
+	if (this === parent) return this;
+	const ctm = this.screenCTM();
+	const pCtm = parent.screenCTM().inverse();
+	this.addTo(parent, i).untransform().transform(pCtm.multiply(ctm));
+	return this;
+}
+function toRoot(i) {
+	return this.toParent(this.root(), i);
+}
+function transform(o, relative) {
+	if (o == null || typeof o === "string") {
+		const decomposed = new Matrix(this).decompose();
+		return o == null ? decomposed : decomposed[o];
+	}
+	if (!Matrix.isMatrixLike(o)) o = {
+		...o,
+		origin: getOrigin(o, this)
+	};
+	const result = new Matrix(relative === true ? this : relative || false).transform(o);
+	return this.attr("transform", result);
+}
+registerMethods("Element", {
+	untransform,
+	matrixify,
+	toParent,
+	toRoot,
+	transform
+});
+var Container = class Container extends Element$1 {
+	flatten(parent = this, index) {
+		this.each(function() {
+			if (this instanceof Container) return this.flatten().ungroup();
+		});
+		return this;
+	}
+	ungroup(parent = this.parent(), index = parent.index(this)) {
+		index = index === -1 ? parent.children().length : index;
+		this.each(function(i, children) {
+			return children[children.length - i - 1].toParent(parent, index);
+		});
+		return this.remove();
+	}
+};
+register(Container, "Container");
+var Defs = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("defs", node), attrs);
+	}
+	flatten() {
+		return this;
+	}
+	ungroup() {
+		return this;
+	}
+};
+register(Defs, "Defs");
+var Shape$1 = class extends Element$1 {};
+register(Shape$1, "Shape");
+function rx(rx) {
+	return this.attr("rx", rx);
+}
+function ry(ry) {
+	return this.attr("ry", ry);
+}
+function x$3(x) {
+	return x == null ? this.cx() - this.rx() : this.cx(x + this.rx());
+}
+function y$3(y) {
+	return y == null ? this.cy() - this.ry() : this.cy(y + this.ry());
+}
+function cx$1(x) {
+	return this.attr("cx", x);
+}
+function cy$1(y) {
+	return this.attr("cy", y);
+}
+function width$2(width) {
+	return width == null ? this.rx() * 2 : this.rx(new SVGNumber(width).divide(2));
+}
+function height$2(height) {
+	return height == null ? this.ry() * 2 : this.ry(new SVGNumber(height).divide(2));
+}
+var circled = {
+	__proto__: null,
+	rx,
+	ry,
+	x: x$3,
+	y: y$3,
+	cx: cx$1,
+	cy: cy$1,
+	width: width$2,
+	height: height$2
+};
+var Ellipse = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("ellipse", node), attrs);
+	}
+	size(width, height) {
+		const p = proportionalSize(this, width, height);
+		return this.rx(new SVGNumber(p.width).divide(2)).ry(new SVGNumber(p.height).divide(2));
+	}
+};
+extend(Ellipse, circled);
+registerMethods("Container", { ellipse: wrapWithAttrCheck(function(width = 0, height = width) {
+	return this.put(new Ellipse()).size(width, height).move(0, 0);
+}) });
+register(Ellipse, "Ellipse");
+var Fragment = class extends Dom {
+	constructor(node = globals.document.createDocumentFragment()) {
+		super(node);
+	}
+	xml(xmlOrFn, outerXML, ns) {
+		if (typeof xmlOrFn === "boolean") {
+			ns = outerXML;
+			outerXML = xmlOrFn;
+			xmlOrFn = null;
+		}
+		if (xmlOrFn == null || typeof xmlOrFn === "function") {
+			const wrapper = new Dom(create("wrapper", ns));
+			wrapper.add(this.node.cloneNode(true));
+			return wrapper.xml(false, ns);
+		}
+		return super.xml(xmlOrFn, false, ns);
+	}
+};
+register(Fragment, "Fragment");
+function from(x, y) {
+	return (this._element || this).type === "radialGradient" ? this.attr({
+		fx: new SVGNumber(x),
+		fy: new SVGNumber(y)
+	}) : this.attr({
+		x1: new SVGNumber(x),
+		y1: new SVGNumber(y)
+	});
+}
+function to(x, y) {
+	return (this._element || this).type === "radialGradient" ? this.attr({
+		cx: new SVGNumber(x),
+		cy: new SVGNumber(y)
+	}) : this.attr({
+		x2: new SVGNumber(x),
+		y2: new SVGNumber(y)
+	});
+}
+var gradiented = {
+	__proto__: null,
+	from,
+	to
+};
+var Gradient = class extends Container {
+	constructor(type, attrs) {
+		super(nodeOrNew(type + "Gradient", typeof type === "string" ? null : type), attrs);
+	}
+	attr(a, b, c) {
+		if (a === "transform") a = "gradientTransform";
+		return super.attr(a, b, c);
+	}
+	bbox() {
+		return new Box();
+	}
+	targets() {
+		return baseFind("svg [fill*=" + this.id() + "]");
+	}
+	toString() {
+		return this.url();
+	}
+	update(block) {
+		this.clear();
+		if (typeof block === "function") block.call(this, this);
+		return this;
+	}
+	url() {
+		return "url(#" + this.id() + ")";
+	}
+};
+extend(Gradient, gradiented);
+registerMethods({
+	Container: { gradient(...args) {
+		return this.defs().gradient(...args);
+	} },
+	Defs: { gradient: wrapWithAttrCheck(function(type, block) {
+		return this.put(new Gradient(type)).update(block);
+	}) }
+});
+register(Gradient, "Gradient");
+var Pattern = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("pattern", node), attrs);
+	}
+	attr(a, b, c) {
+		if (a === "transform") a = "patternTransform";
+		return super.attr(a, b, c);
+	}
+	bbox() {
+		return new Box();
+	}
+	targets() {
+		return baseFind("svg [fill*=" + this.id() + "]");
+	}
+	toString() {
+		return this.url();
+	}
+	update(block) {
+		this.clear();
+		if (typeof block === "function") block.call(this, this);
+		return this;
+	}
+	url() {
+		return "url(#" + this.id() + ")";
+	}
+};
+registerMethods({
+	Container: { pattern(...args) {
+		return this.defs().pattern(...args);
+	} },
+	Defs: { pattern: wrapWithAttrCheck(function(width, height, block) {
+		return this.put(new Pattern()).update(block).attr({
+			x: 0,
+			y: 0,
+			width,
+			height,
+			patternUnits: "userSpaceOnUse"
+		});
+	}) }
+});
+register(Pattern, "Pattern");
+var Image$1 = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("image", node), attrs);
+	}
+	load(url, callback) {
+		if (!url) return this;
+		const img = new globals.window.Image();
+		on(img, "load", function(e) {
+			const p = this.parent(Pattern);
+			if (this.width() === 0 && this.height() === 0) this.size(img.width, img.height);
+			if (p instanceof Pattern) {
+				if (p.width() === 0 && p.height() === 0) p.size(this.width(), this.height());
+			}
+			if (typeof callback === "function") callback.call(this, e);
+		}, this);
+		on(img, "load error", function() {
+			off(img);
+		});
+		return this.attr("href", img.src = url, xlink);
+	}
+};
+registerAttrHook(function(attr, val, _this) {
+	if (attr === "fill" || attr === "stroke") {
+		if (isImage.test(val)) val = _this.root().defs().image(val);
+	}
+	if (val instanceof Image$1) val = _this.root().defs().pattern(0, 0, (pattern) => {
+		pattern.add(val);
+	});
+	return val;
+});
+registerMethods({ Container: { image: wrapWithAttrCheck(function(source, callback) {
+	return this.put(new Image$1()).size(0, 0).load(source, callback);
+}) } });
+register(Image$1, "Image");
+var PointArray = class extends SVGArray {
+	bbox() {
+		let maxX = -Infinity;
+		let maxY = -Infinity;
+		let minX = Infinity;
+		let minY = Infinity;
+		this.forEach(function(el) {
+			maxX = Math.max(el[0], maxX);
+			maxY = Math.max(el[1], maxY);
+			minX = Math.min(el[0], minX);
+			minY = Math.min(el[1], minY);
+		});
+		return new Box(minX, minY, maxX - minX, maxY - minY);
+	}
+	move(x, y) {
+		const box = this.bbox();
+		x -= box.x;
+		y -= box.y;
+		if (!isNaN(x) && !isNaN(y)) for (let i = this.length - 1; i >= 0; i--) this[i] = [this[i][0] + x, this[i][1] + y];
+		return this;
+	}
+	parse(array = [0, 0]) {
+		const points = [];
+		if (array instanceof Array) array = Array.prototype.concat.apply([], array);
+		else array = array.trim().split(delimiter).map(parseFloat);
+		if (array.length % 2 !== 0) array.pop();
+		for (let i = 0, len = array.length; i < len; i = i + 2) points.push([array[i], array[i + 1]]);
+		return points;
+	}
+	size(width, height) {
+		let i;
+		const box = this.bbox();
+		for (i = this.length - 1; i >= 0; i--) {
+			if (box.width) this[i][0] = (this[i][0] - box.x) * width / box.width + box.x;
+			if (box.height) this[i][1] = (this[i][1] - box.y) * height / box.height + box.y;
+		}
+		return this;
+	}
+	toLine() {
+		return {
+			x1: this[0][0],
+			y1: this[0][1],
+			x2: this[1][0],
+			y2: this[1][1]
+		};
+	}
+	toString() {
+		const array = [];
+		for (let i = 0, il = this.length; i < il; i++) array.push(this[i].join(","));
+		return array.join(" ");
+	}
+	transform(m) {
+		return this.clone().transformO(m);
+	}
+	transformO(m) {
+		if (!Matrix.isMatrixLike(m)) m = new Matrix(m);
+		for (let i = this.length; i--;) {
+			const [x, y] = this[i];
+			this[i][0] = m.a * x + m.c * y + m.e;
+			this[i][1] = m.b * x + m.d * y + m.f;
+		}
+		return this;
+	}
+};
+var MorphArray = PointArray;
+function x$2(x) {
+	return x == null ? this.bbox().x : this.move(x, this.bbox().y);
+}
+function y$2(y) {
+	return y == null ? this.bbox().y : this.move(this.bbox().x, y);
+}
+function width$1(width) {
+	const b = this.bbox();
+	return width == null ? b.width : this.size(width, b.height);
+}
+function height$1(height) {
+	const b = this.bbox();
+	return height == null ? b.height : this.size(b.width, height);
+}
+var pointed = {
+	__proto__: null,
+	MorphArray,
+	x: x$2,
+	y: y$2,
+	width: width$1,
+	height: height$1
+};
+var Line = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("line", node), attrs);
+	}
+	array() {
+		return new PointArray([[this.attr("x1"), this.attr("y1")], [this.attr("x2"), this.attr("y2")]]);
+	}
+	move(x, y) {
+		return this.attr(this.array().move(x, y).toLine());
+	}
+	plot(x1, y1, x2, y2) {
+		if (x1 == null) return this.array();
+		else if (typeof y1 !== "undefined") x1 = {
+			x1,
+			y1,
+			x2,
+			y2
+		};
+		else x1 = new PointArray(x1).toLine();
+		return this.attr(x1);
+	}
+	size(width, height) {
+		const p = proportionalSize(this, width, height);
+		return this.attr(this.array().size(p.width, p.height).toLine());
+	}
+};
+extend(Line, pointed);
+registerMethods({ Container: { line: wrapWithAttrCheck(function(...args) {
+	return Line.prototype.plot.apply(this.put(new Line()), args[0] != null ? args : [
+		0,
+		0,
+		0,
+		0
+	]);
+}) } });
+register(Line, "Line");
+var Marker = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("marker", node), attrs);
+	}
+	height(height) {
+		return this.attr("markerHeight", height);
+	}
+	orient(orient) {
+		return this.attr("orient", orient);
+	}
+	ref(x, y) {
+		return this.attr("refX", x).attr("refY", y);
+	}
+	toString() {
+		return "url(#" + this.id() + ")";
+	}
+	update(block) {
+		this.clear();
+		if (typeof block === "function") block.call(this, this);
+		return this;
+	}
+	width(width) {
+		return this.attr("markerWidth", width);
+	}
+};
+registerMethods({
+	Container: { marker(...args) {
+		return this.defs().marker(...args);
+	} },
+	Defs: { marker: wrapWithAttrCheck(function(width, height, block) {
+		return this.put(new Marker()).size(width, height).ref(width / 2, height / 2).viewbox(0, 0, width, height).attr("orient", "auto").update(block);
+	}) },
+	marker: { marker(marker, width, height, block) {
+		let attr = ["marker"];
+		if (marker !== "all") attr.push(marker);
+		attr = attr.join("-");
+		marker = arguments[1] instanceof Marker ? arguments[1] : this.defs().marker(width, height, block);
+		return this.attr(attr, marker);
+	} }
+});
+register(Marker, "Marker");
+/***
+Base Class
+==========
+The base stepper class that will be
+***/
+function makeSetterGetter(k, f) {
+	return function(v) {
+		if (v == null) return this[k];
+		this[k] = v;
+		if (f) f.call(this);
+		return this;
+	};
+}
+var easing = {
+	"-": function(pos) {
+		return pos;
+	},
+	"<>": function(pos) {
+		return -Math.cos(pos * Math.PI) / 2 + .5;
+	},
+	">": function(pos) {
+		return Math.sin(pos * Math.PI / 2);
+	},
+	"<": function(pos) {
+		return -Math.cos(pos * Math.PI / 2) + 1;
+	},
+	bezier: function(x1, y1, x2, y2) {
+		return function(t) {
+			if (t < 0) if (x1 > 0) return y1 / x1 * t;
+			else if (x2 > 0) return y2 / x2 * t;
+			else return 0;
+			else if (t > 1) if (x2 < 1) return (1 - y2) / (1 - x2) * t + (y2 - x2) / (1 - x2);
+			else if (x1 < 1) return (1 - y1) / (1 - x1) * t + (y1 - x1) / (1 - x1);
+			else return 1;
+			else return 3 * t * (1 - t) ** 2 * y1 + 3 * t ** 2 * (1 - t) * y2 + t ** 3;
+		};
+	},
+	steps: function(steps, stepPosition = "end") {
+		stepPosition = stepPosition.split("-").reverse()[0];
+		let jumps = steps;
+		if (stepPosition === "none") --jumps;
+		else if (stepPosition === "both") ++jumps;
+		return (t, beforeFlag = false) => {
+			let step = Math.floor(t * steps);
+			const jumping = t * step % 1 === 0;
+			if (stepPosition === "start" || stepPosition === "both") ++step;
+			if (beforeFlag && jumping) --step;
+			if (t >= 0 && step < 0) step = 0;
+			if (t <= 1 && step > jumps) step = jumps;
+			return step / jumps;
+		};
+	}
+};
+var Stepper = class {
+	done() {
+		return false;
+	}
+};
+/***
+Easing Functions
+================
+***/
+var Ease = class extends Stepper {
+	constructor(fn = timeline.ease) {
+		super();
+		this.ease = easing[fn] || fn;
+	}
+	step(from, to, pos) {
+		if (typeof from !== "number") return pos < 1 ? from : to;
+		return from + (to - from) * this.ease(pos);
+	}
+};
+/***
+Controller Types
+================
+***/
+var Controller = class extends Stepper {
+	constructor(fn) {
+		super();
+		this.stepper = fn;
+	}
+	done(c) {
+		return c.done;
+	}
+	step(current, target, dt, c) {
+		return this.stepper(current, target, dt, c);
+	}
+};
+function recalculate() {
+	const duration = (this._duration || 500) / 1e3;
+	const overshoot = this._overshoot || 0;
+	const eps = 1e-10;
+	const pi = Math.PI;
+	const os = Math.log(overshoot / 100 + eps);
+	const zeta = -os / Math.sqrt(pi * pi + os * os);
+	const wn = 3.9 / (zeta * duration);
+	this.d = 2 * zeta * wn;
+	this.k = wn * wn;
+}
+var Spring = class extends Controller {
+	constructor(duration = 500, overshoot = 0) {
+		super();
+		this.duration(duration).overshoot(overshoot);
+	}
+	step(current, target, dt, c) {
+		if (typeof current === "string") return current;
+		c.done = dt === Infinity;
+		if (dt === Infinity) return target;
+		if (dt === 0) return current;
+		if (dt > 100) dt = 16;
+		dt /= 1e3;
+		const velocity = c.velocity || 0;
+		const acceleration = -this.d * velocity - this.k * (current - target);
+		const newPosition = current + velocity * dt + acceleration * dt * dt / 2;
+		c.velocity = velocity + acceleration * dt;
+		c.done = Math.abs(target - newPosition) + Math.abs(velocity) < .002;
+		return c.done ? target : newPosition;
+	}
+};
+extend(Spring, {
+	duration: makeSetterGetter("_duration", recalculate),
+	overshoot: makeSetterGetter("_overshoot", recalculate)
+});
+var PID = class extends Controller {
+	constructor(p = .1, i = .01, d = 0, windup = 1e3) {
+		super();
+		this.p(p).i(i).d(d).windup(windup);
+	}
+	step(current, target, dt, c) {
+		if (typeof current === "string") return current;
+		c.done = dt === Infinity;
+		if (dt === Infinity) return target;
+		if (dt === 0) return current;
+		const p = target - current;
+		let i = (c.integral || 0) + p * dt;
+		const d = (p - (c.error || 0)) / dt;
+		const windup = this._windup;
+		if (windup !== false) i = Math.max(-windup, Math.min(i, windup));
+		c.error = p;
+		c.integral = i;
+		c.done = Math.abs(p) < .001;
+		return c.done ? target : current + (this.P * p + this.I * i + this.D * d);
+	}
+};
+extend(PID, {
+	windup: makeSetterGetter("_windup"),
+	p: makeSetterGetter("P"),
+	i: makeSetterGetter("I"),
+	d: makeSetterGetter("D")
+});
+var segmentParameters = {
+	M: 2,
+	L: 2,
+	H: 1,
+	V: 1,
+	C: 6,
+	S: 4,
+	Q: 4,
+	T: 2,
+	A: 7,
+	Z: 0
+};
+var pathHandlers = {
+	M: function(c, p, p0) {
+		p.x = p0.x = c[0];
+		p.y = p0.y = c[1];
+		return [
+			"M",
+			p.x,
+			p.y
+		];
+	},
+	L: function(c, p) {
+		p.x = c[0];
+		p.y = c[1];
+		return [
+			"L",
+			c[0],
+			c[1]
+		];
+	},
+	H: function(c, p) {
+		p.x = c[0];
+		return ["H", c[0]];
+	},
+	V: function(c, p) {
+		p.y = c[0];
+		return ["V", c[0]];
+	},
+	C: function(c, p) {
+		p.x = c[4];
+		p.y = c[5];
+		return [
+			"C",
+			c[0],
+			c[1],
+			c[2],
+			c[3],
+			c[4],
+			c[5]
+		];
+	},
+	S: function(c, p) {
+		p.x = c[2];
+		p.y = c[3];
+		return [
+			"S",
+			c[0],
+			c[1],
+			c[2],
+			c[3]
+		];
+	},
+	Q: function(c, p) {
+		p.x = c[2];
+		p.y = c[3];
+		return [
+			"Q",
+			c[0],
+			c[1],
+			c[2],
+			c[3]
+		];
+	},
+	T: function(c, p) {
+		p.x = c[0];
+		p.y = c[1];
+		return [
+			"T",
+			c[0],
+			c[1]
+		];
+	},
+	Z: function(c, p, p0) {
+		p.x = p0.x;
+		p.y = p0.y;
+		return ["Z"];
+	},
+	A: function(c, p) {
+		p.x = c[5];
+		p.y = c[6];
+		return [
+			"A",
+			c[0],
+			c[1],
+			c[2],
+			c[3],
+			c[4],
+			c[5],
+			c[6]
+		];
+	}
+};
+var mlhvqtcsaz = "mlhvqtcsaz".split("");
+for (let i = 0, il = mlhvqtcsaz.length; i < il; ++i) pathHandlers[mlhvqtcsaz[i]] = function(i) {
+	return function(c, p, p0) {
+		if (i === "H") c[0] = c[0] + p.x;
+		else if (i === "V") c[0] = c[0] + p.y;
+		else if (i === "A") {
+			c[5] = c[5] + p.x;
+			c[6] = c[6] + p.y;
+		} else for (let j = 0, jl = c.length; j < jl; ++j) c[j] = c[j] + (j % 2 ? p.y : p.x);
+		return pathHandlers[i](c, p, p0);
+	};
+}(mlhvqtcsaz[i].toUpperCase());
+function makeAbsolut(parser) {
+	return pathHandlers[parser.segment[0]](parser.segment.slice(1), parser.p, parser.p0);
+}
+function segmentComplete(parser) {
+	return parser.segment.length && parser.segment.length - 1 === segmentParameters[parser.segment[0].toUpperCase()];
+}
+function startNewSegment(parser, token) {
+	parser.inNumber && finalizeNumber(parser, false);
+	const pathLetter = isPathLetter.test(token);
+	if (pathLetter) parser.segment = [token];
+	else {
+		const lastCommand = parser.lastCommand;
+		const small = lastCommand.toLowerCase();
+		parser.segment = [small === "m" ? lastCommand === small ? "l" : "L" : lastCommand];
+	}
+	parser.inSegment = true;
+	parser.lastCommand = parser.segment[0];
+	return pathLetter;
+}
+function finalizeNumber(parser, inNumber) {
+	if (!parser.inNumber) throw new Error("Parser Error");
+	parser.number && parser.segment.push(parseFloat(parser.number));
+	parser.inNumber = inNumber;
+	parser.number = "";
+	parser.pointSeen = false;
+	parser.hasExponent = false;
+	if (segmentComplete(parser)) finalizeSegment(parser);
+}
+function finalizeSegment(parser) {
+	parser.inSegment = false;
+	if (parser.absolute) parser.segment = makeAbsolut(parser);
+	parser.segments.push(parser.segment);
+}
+function isArcFlag(parser) {
+	if (!parser.segment.length) return false;
+	const isArc = parser.segment[0].toUpperCase() === "A";
+	const length = parser.segment.length;
+	return isArc && (length === 4 || length === 5);
+}
+function isExponential(parser) {
+	return parser.lastToken.toUpperCase() === "E";
+}
+function pathParser(d, toAbsolute = true) {
+	let index = 0;
+	let token = "";
+	const parser = {
+		segment: [],
+		inNumber: false,
+		number: "",
+		lastToken: "",
+		inSegment: false,
+		segments: [],
+		pointSeen: false,
+		hasExponent: false,
+		absolute: toAbsolute,
+		p0: new Point(),
+		p: new Point()
+	};
+	while (parser.lastToken = token, token = d.charAt(index++)) {
+		if (!parser.inSegment) {
+			if (startNewSegment(parser, token)) continue;
+		}
+		if (token === ".") {
+			if (parser.pointSeen || parser.hasExponent) {
+				finalizeNumber(parser, false);
+				--index;
+				continue;
+			}
+			parser.inNumber = true;
+			parser.pointSeen = true;
+			parser.number += token;
+			continue;
+		}
+		if (!isNaN(parseInt(token))) {
+			if (parser.number === "0" || isArcFlag(parser)) {
+				parser.inNumber = true;
+				parser.number = token;
+				finalizeNumber(parser, true);
+				continue;
+			}
+			parser.inNumber = true;
+			parser.number += token;
+			continue;
+		}
+		if (token === " " || token === ",") {
+			if (parser.inNumber) finalizeNumber(parser, false);
+			continue;
+		}
+		if (token === "-") {
+			if (parser.inNumber && !isExponential(parser)) {
+				finalizeNumber(parser, false);
+				--index;
+				continue;
+			}
+			parser.number += token;
+			parser.inNumber = true;
+			continue;
+		}
+		if (token.toUpperCase() === "E") {
+			parser.number += token;
+			parser.hasExponent = true;
+			continue;
+		}
+		if (isPathLetter.test(token)) {
+			if (parser.inNumber) finalizeNumber(parser, false);
+			else if (!segmentComplete(parser)) throw new Error("parser Error");
+			else finalizeSegment(parser);
+			--index;
+		}
+	}
+	if (parser.inNumber) finalizeNumber(parser, false);
+	if (parser.inSegment && segmentComplete(parser)) finalizeSegment(parser);
+	return parser.segments;
+}
+function arrayToString(a) {
+	let s = "";
+	for (let i = 0, il = a.length; i < il; i++) {
+		s += a[i][0];
+		if (a[i][1] != null) {
+			s += a[i][1];
+			if (a[i][2] != null) {
+				s += " ";
+				s += a[i][2];
+				if (a[i][3] != null) {
+					s += " ";
+					s += a[i][3];
+					s += " ";
+					s += a[i][4];
+					if (a[i][5] != null) {
+						s += " ";
+						s += a[i][5];
+						s += " ";
+						s += a[i][6];
+						if (a[i][7] != null) {
+							s += " ";
+							s += a[i][7];
+						}
+					}
+				}
+			}
+		}
+	}
+	return s + " ";
+}
+var PathArray = class extends SVGArray {
+	bbox() {
+		parser().path.setAttribute("d", this.toString());
+		return new Box(parser.nodes.path.getBBox());
+	}
+	move(x, y) {
+		const box = this.bbox();
+		x -= box.x;
+		y -= box.y;
+		if (!isNaN(x) && !isNaN(y)) for (let l, i = this.length - 1; i >= 0; i--) {
+			l = this[i][0];
+			if (l === "M" || l === "L" || l === "T") {
+				this[i][1] += x;
+				this[i][2] += y;
+			} else if (l === "H") this[i][1] += x;
+			else if (l === "V") this[i][1] += y;
+			else if (l === "C" || l === "S" || l === "Q") {
+				this[i][1] += x;
+				this[i][2] += y;
+				this[i][3] += x;
+				this[i][4] += y;
+				if (l === "C") {
+					this[i][5] += x;
+					this[i][6] += y;
+				}
+			} else if (l === "A") {
+				this[i][6] += x;
+				this[i][7] += y;
+			}
+		}
+		return this;
+	}
+	parse(d = "M0 0") {
+		if (Array.isArray(d)) d = Array.prototype.concat.apply([], d).toString();
+		return pathParser(d);
+	}
+	size(width, height) {
+		const box = this.bbox();
+		let i, l;
+		box.width = box.width === 0 ? 1 : box.width;
+		box.height = box.height === 0 ? 1 : box.height;
+		for (i = this.length - 1; i >= 0; i--) {
+			l = this[i][0];
+			if (l === "M" || l === "L" || l === "T") {
+				this[i][1] = (this[i][1] - box.x) * width / box.width + box.x;
+				this[i][2] = (this[i][2] - box.y) * height / box.height + box.y;
+			} else if (l === "H") this[i][1] = (this[i][1] - box.x) * width / box.width + box.x;
+			else if (l === "V") this[i][1] = (this[i][1] - box.y) * height / box.height + box.y;
+			else if (l === "C" || l === "S" || l === "Q") {
+				this[i][1] = (this[i][1] - box.x) * width / box.width + box.x;
+				this[i][2] = (this[i][2] - box.y) * height / box.height + box.y;
+				this[i][3] = (this[i][3] - box.x) * width / box.width + box.x;
+				this[i][4] = (this[i][4] - box.y) * height / box.height + box.y;
+				if (l === "C") {
+					this[i][5] = (this[i][5] - box.x) * width / box.width + box.x;
+					this[i][6] = (this[i][6] - box.y) * height / box.height + box.y;
+				}
+			} else if (l === "A") {
+				this[i][1] = this[i][1] * width / box.width;
+				this[i][2] = this[i][2] * height / box.height;
+				this[i][6] = (this[i][6] - box.x) * width / box.width + box.x;
+				this[i][7] = (this[i][7] - box.y) * height / box.height + box.y;
+			}
+		}
+		return this;
+	}
+	toString() {
+		return arrayToString(this);
+	}
+};
+var getClassForType = (value) => {
+	const type = typeof value;
+	if (type === "number") return SVGNumber;
+	else if (type === "string") if (Color.isColor(value)) return Color;
+	else if (delimiter.test(value)) return isPathLetter.test(value) ? PathArray : SVGArray;
+	else if (numberAndUnit.test(value)) return SVGNumber;
+	else return NonMorphable;
+	else if (morphableTypes.indexOf(value.constructor) > -1) return value.constructor;
+	else if (Array.isArray(value)) return SVGArray;
+	else if (type === "object") return ObjectBag;
+	else return NonMorphable;
+};
+var Morphable = class {
+	constructor(stepper) {
+		this._stepper = stepper || new Ease("-");
+		this._from = null;
+		this._to = null;
+		this._type = null;
+		this._context = null;
+		this._morphObj = null;
+	}
+	at(pos) {
+		return this._morphObj.morph(this._from, this._to, pos, this._stepper, this._context);
+	}
+	done() {
+		return this._context.map(this._stepper.done).reduce(function(last, curr) {
+			return last && curr;
+		}, true);
+	}
+	from(val) {
+		if (val == null) return this._from;
+		this._from = this._set(val);
+		return this;
+	}
+	stepper(stepper) {
+		if (stepper == null) return this._stepper;
+		this._stepper = stepper;
+		return this;
+	}
+	to(val) {
+		if (val == null) return this._to;
+		this._to = this._set(val);
+		return this;
+	}
+	type(type) {
+		if (type == null) return this._type;
+		this._type = type;
+		return this;
+	}
+	_set(value) {
+		if (!this._type) this.type(getClassForType(value));
+		let result = new this._type(value);
+		if (this._type === Color) result = this._to ? result[this._to[4]]() : this._from ? result[this._from[4]]() : result;
+		if (this._type === ObjectBag) result = this._to ? result.align(this._to) : this._from ? result.align(this._from) : result;
+		result = result.toConsumable();
+		this._morphObj = this._morphObj || new this._type();
+		this._context = this._context || Array.apply(null, Array(result.length)).map(Object).map(function(o) {
+			o.done = true;
+			return o;
+		});
+		return result;
+	}
+};
+var NonMorphable = class {
+	constructor(...args) {
+		this.init(...args);
+	}
+	init(val) {
+		val = Array.isArray(val) ? val[0] : val;
+		this.value = val;
+		return this;
+	}
+	toArray() {
+		return [this.value];
+	}
+	valueOf() {
+		return this.value;
+	}
+};
+var TransformBag = class TransformBag {
+	constructor(...args) {
+		this.init(...args);
+	}
+	init(obj) {
+		if (Array.isArray(obj)) obj = {
+			scaleX: obj[0],
+			scaleY: obj[1],
+			shear: obj[2],
+			rotate: obj[3],
+			translateX: obj[4],
+			translateY: obj[5],
+			originX: obj[6],
+			originY: obj[7]
+		};
+		Object.assign(this, TransformBag.defaults, obj);
+		return this;
+	}
+	toArray() {
+		const v = this;
+		return [
+			v.scaleX,
+			v.scaleY,
+			v.shear,
+			v.rotate,
+			v.translateX,
+			v.translateY,
+			v.originX,
+			v.originY
+		];
+	}
+};
+TransformBag.defaults = {
+	scaleX: 1,
+	scaleY: 1,
+	shear: 0,
+	rotate: 0,
+	translateX: 0,
+	translateY: 0,
+	originX: 0,
+	originY: 0
+};
+var sortByKey = (a, b) => {
+	return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0;
+};
+var ObjectBag = class {
+	constructor(...args) {
+		this.init(...args);
+	}
+	align(other) {
+		const values = this.values;
+		for (let i = 0, il = values.length; i < il; ++i) {
+			if (values[i + 1] === other[i + 1]) {
+				if (values[i + 1] === Color && other[i + 7] !== values[i + 7]) {
+					const space = other[i + 7];
+					const color = new Color(this.values.splice(i + 3, 5))[space]().toArray();
+					this.values.splice(i + 3, 0, ...color);
+				}
+				i += values[i + 2] + 2;
+				continue;
+			}
+			if (!other[i + 1]) return this;
+			const defaultObject = new other[i + 1]().toArray();
+			const toDelete = values[i + 2] + 3;
+			values.splice(i, toDelete, other[i], other[i + 1], other[i + 2], ...defaultObject);
+			i += values[i + 2] + 2;
+		}
+		return this;
+	}
+	init(objOrArr) {
+		this.values = [];
+		if (Array.isArray(objOrArr)) {
+			this.values = objOrArr.slice();
+			return;
+		}
+		objOrArr = objOrArr || {};
+		const entries = [];
+		for (const i in objOrArr) {
+			const Type = getClassForType(objOrArr[i]);
+			const val = new Type(objOrArr[i]).toArray();
+			entries.push([
+				i,
+				Type,
+				val.length,
+				...val
+			]);
+		}
+		entries.sort(sortByKey);
+		this.values = entries.reduce((last, curr) => last.concat(curr), []);
+		return this;
+	}
+	toArray() {
+		return this.values;
+	}
+	valueOf() {
+		const obj = {};
+		const arr = this.values;
+		while (arr.length) {
+			const key = arr.shift();
+			const Type = arr.shift();
+			const num = arr.shift();
+			obj[key] = new Type(arr.splice(0, num));
+		}
+		return obj;
+	}
+};
+var morphableTypes = [
+	NonMorphable,
+	TransformBag,
+	ObjectBag
+];
+function registerMorphableType(type = []) {
+	morphableTypes.push(...[].concat(type));
+}
+function makeMorphable() {
+	extend(morphableTypes, {
+		to(val) {
+			return new Morphable().type(this.constructor).from(this.toArray()).to(val);
+		},
+		fromArray(arr) {
+			this.init(arr);
+			return this;
+		},
+		toConsumable() {
+			return this.toArray();
+		},
+		morph(from, to, pos, stepper, context) {
+			const mapper = function(i, index) {
+				return stepper.step(i, to[index], pos, context[index], context);
+			};
+			return this.fromArray(from.map(mapper));
+		}
+	});
+}
+var Path = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("path", node), attrs);
+	}
+	array() {
+		return this._array || (this._array = new PathArray(this.attr("d")));
+	}
+	clear() {
+		delete this._array;
+		return this;
+	}
+	height(height) {
+		return height == null ? this.bbox().height : this.size(this.bbox().width, height);
+	}
+	move(x, y) {
+		return this.attr("d", this.array().move(x, y));
+	}
+	plot(d) {
+		return d == null ? this.array() : this.clear().attr("d", typeof d === "string" ? d : this._array = new PathArray(d));
+	}
+	size(width, height) {
+		const p = proportionalSize(this, width, height);
+		return this.attr("d", this.array().size(p.width, p.height));
+	}
+	width(width) {
+		return width == null ? this.bbox().width : this.size(width, this.bbox().height);
+	}
+	x(x) {
+		return x == null ? this.bbox().x : this.move(x, this.bbox().y);
+	}
+	y(y) {
+		return y == null ? this.bbox().y : this.move(this.bbox().x, y);
+	}
+};
+Path.prototype.MorphArray = PathArray;
+registerMethods({ Container: { path: wrapWithAttrCheck(function(d) {
+	return this.put(new Path()).plot(d || new PathArray());
+}) } });
+register(Path, "Path");
+function array() {
+	return this._array || (this._array = new PointArray(this.attr("points")));
+}
+function clear() {
+	delete this._array;
+	return this;
+}
+function move$2(x, y) {
+	return this.attr("points", this.array().move(x, y));
+}
+function plot(p) {
+	return p == null ? this.array() : this.clear().attr("points", typeof p === "string" ? p : this._array = new PointArray(p));
+}
+function size$1(width, height) {
+	const p = proportionalSize(this, width, height);
+	return this.attr("points", this.array().size(p.width, p.height));
+}
+var poly = {
+	__proto__: null,
+	array,
+	clear,
+	move: move$2,
+	plot,
+	size: size$1
+};
+var Polygon = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("polygon", node), attrs);
+	}
+};
+registerMethods({ Container: { polygon: wrapWithAttrCheck(function(p) {
+	return this.put(new Polygon()).plot(p || new PointArray());
+}) } });
+extend(Polygon, pointed);
+extend(Polygon, poly);
+register(Polygon, "Polygon");
+var Polyline = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("polyline", node), attrs);
+	}
+};
+registerMethods({ Container: { polyline: wrapWithAttrCheck(function(p) {
+	return this.put(new Polyline()).plot(p || new PointArray());
+}) } });
+extend(Polyline, pointed);
+extend(Polyline, poly);
+register(Polyline, "Polyline");
+var Rect = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("rect", node), attrs);
+	}
+};
+extend(Rect, {
+	rx,
+	ry
+});
+registerMethods({ Container: { rect: wrapWithAttrCheck(function(width, height) {
+	return this.put(new Rect()).size(width, height);
+}) } });
+register(Rect, "Rect");
+var Queue = class {
+	constructor() {
+		this._first = null;
+		this._last = null;
+	}
+	first() {
+		return this._first && this._first.value;
+	}
+	last() {
+		return this._last && this._last.value;
+	}
+	push(value) {
+		const item = typeof value.next !== "undefined" ? value : {
+			value,
+			next: null,
+			prev: null
+		};
+		if (this._last) {
+			item.prev = this._last;
+			this._last.next = item;
+			this._last = item;
+		} else {
+			this._last = item;
+			this._first = item;
+		}
+		return item;
+	}
+	remove(item) {
+		if (item.prev) item.prev.next = item.next;
+		if (item.next) item.next.prev = item.prev;
+		if (item === this._last) this._last = item.prev;
+		if (item === this._first) this._first = item.next;
+		item.prev = null;
+		item.next = null;
+	}
+	shift() {
+		const remove = this._first;
+		if (!remove) return null;
+		this._first = remove.next;
+		if (this._first) this._first.prev = null;
+		this._last = this._first ? this._last : null;
+		return remove.value;
+	}
+};
+var Animator = {
+	nextDraw: null,
+	frames: new Queue(),
+	timeouts: new Queue(),
+	immediates: new Queue(),
+	timer: () => globals.window.performance || globals.window.Date,
+	transforms: [],
+	frame(fn) {
+		const node = Animator.frames.push({ run: fn });
+		if (Animator.nextDraw === null) Animator.nextDraw = globals.window.requestAnimationFrame(Animator._draw);
+		return node;
+	},
+	timeout(fn, delay) {
+		delay = delay || 0;
+		const time = Animator.timer().now() + delay;
+		const node = Animator.timeouts.push({
+			run: fn,
+			time
+		});
+		if (Animator.nextDraw === null) Animator.nextDraw = globals.window.requestAnimationFrame(Animator._draw);
+		return node;
+	},
+	immediate(fn) {
+		const node = Animator.immediates.push(fn);
+		if (Animator.nextDraw === null) Animator.nextDraw = globals.window.requestAnimationFrame(Animator._draw);
+		return node;
+	},
+	cancelFrame(node) {
+		node != null && Animator.frames.remove(node);
+	},
+	clearTimeout(node) {
+		node != null && Animator.timeouts.remove(node);
+	},
+	cancelImmediate(node) {
+		node != null && Animator.immediates.remove(node);
+	},
+	_draw(now) {
+		let nextTimeout = null;
+		const lastTimeout = Animator.timeouts.last();
+		while (nextTimeout = Animator.timeouts.shift()) {
+			if (now >= nextTimeout.time) nextTimeout.run();
+			else Animator.timeouts.push(nextTimeout);
+			if (nextTimeout === lastTimeout) break;
+		}
+		let nextFrame = null;
+		const lastFrame = Animator.frames.last();
+		while (nextFrame !== lastFrame && (nextFrame = Animator.frames.shift())) nextFrame.run(now);
+		let nextImmediate = null;
+		while (nextImmediate = Animator.immediates.shift()) nextImmediate();
+		Animator.nextDraw = Animator.timeouts.first() || Animator.frames.first() ? globals.window.requestAnimationFrame(Animator._draw) : null;
+	}
+};
+var makeSchedule = function(runnerInfo) {
+	const start = runnerInfo.start;
+	const duration = runnerInfo.runner.duration();
+	return {
+		start,
+		duration,
+		end: start + duration,
+		runner: runnerInfo.runner
+	};
+};
+var defaultSource = function() {
+	const w = globals.window;
+	return (w.performance || w.Date).now();
+};
+var Timeline$1 = class extends EventTarget {
+	constructor(timeSource = defaultSource) {
+		super();
+		this._timeSource = timeSource;
+		this._startTime = 0;
+		this._speed = 1;
+		this._persist = 0;
+		this._nextFrame = null;
+		this._paused = true;
+		this._runners = [];
+		this._runnerIds = [];
+		this._lastRunnerId = -1;
+		this._time = 0;
+		this._lastSourceTime = 0;
+		this._lastStepTime = 0;
+		this._step = this._stepFn.bind(this, false);
+		this._stepImmediate = this._stepFn.bind(this, true);
+	}
+	active() {
+		return !!this._nextFrame;
+	}
+	finish() {
+		this.time(this.getEndTimeOfTimeline() + 1);
+		return this.pause();
+	}
+	getEndTime() {
+		const lastRunnerInfo = this.getLastRunnerInfo();
+		const lastDuration = lastRunnerInfo ? lastRunnerInfo.runner.duration() : 0;
+		return (lastRunnerInfo ? lastRunnerInfo.start : this._time) + lastDuration;
+	}
+	getEndTimeOfTimeline() {
+		const endTimes = this._runners.map((i) => i.start + i.runner.duration());
+		return Math.max(0, ...endTimes);
+	}
+	getLastRunnerInfo() {
+		return this.getRunnerInfoById(this._lastRunnerId);
+	}
+	getRunnerInfoById(id) {
+		return this._runners[this._runnerIds.indexOf(id)] || null;
+	}
+	pause() {
+		this._paused = true;
+		return this._continue();
+	}
+	persist(dtOrForever) {
+		if (dtOrForever == null) return this._persist;
+		this._persist = dtOrForever;
+		return this;
+	}
+	play() {
+		this._paused = false;
+		return this.updateTime()._continue();
+	}
+	reverse(yes) {
+		const currentSpeed = this.speed();
+		if (yes == null) return this.speed(-currentSpeed);
+		const positive = Math.abs(currentSpeed);
+		return this.speed(yes ? -positive : positive);
+	}
+	schedule(runner, delay, when) {
+		if (runner == null) return this._runners.map(makeSchedule);
+		let absoluteStartTime = 0;
+		const endTime = this.getEndTime();
+		delay = delay || 0;
+		if (when == null || when === "last" || when === "after") absoluteStartTime = endTime;
+		else if (when === "absolute" || when === "start") {
+			absoluteStartTime = delay;
+			delay = 0;
+		} else if (when === "now") absoluteStartTime = this._time;
+		else if (when === "relative") {
+			const runnerInfo = this.getRunnerInfoById(runner.id);
+			if (runnerInfo) {
+				absoluteStartTime = runnerInfo.start + delay;
+				delay = 0;
+			}
+		} else if (when === "with-last") {
+			const lastRunnerInfo = this.getLastRunnerInfo();
+			absoluteStartTime = lastRunnerInfo ? lastRunnerInfo.start : this._time;
+		} else throw new Error("Invalid value for the \"when\" parameter");
+		runner.unschedule();
+		runner.timeline(this);
+		const persist = runner.persist();
+		const runnerInfo = {
+			persist: persist === null ? this._persist : persist,
+			start: absoluteStartTime + delay,
+			runner
+		};
+		this._lastRunnerId = runner.id;
+		this._runners.push(runnerInfo);
+		this._runners.sort((a, b) => a.start - b.start);
+		this._runnerIds = this._runners.map((info) => info.runner.id);
+		this.updateTime()._continue();
+		return this;
+	}
+	seek(dt) {
+		return this.time(this._time + dt);
+	}
+	source(fn) {
+		if (fn == null) return this._timeSource;
+		this._timeSource = fn;
+		return this;
+	}
+	speed(speed) {
+		if (speed == null) return this._speed;
+		this._speed = speed;
+		return this;
+	}
+	stop() {
+		this.time(0);
+		return this.pause();
+	}
+	time(time) {
+		if (time == null) return this._time;
+		this._time = time;
+		return this._continue(true);
+	}
+	unschedule(runner) {
+		const index = this._runnerIds.indexOf(runner.id);
+		if (index < 0) return this;
+		this._runners.splice(index, 1);
+		this._runnerIds.splice(index, 1);
+		runner.timeline(null);
+		return this;
+	}
+	updateTime() {
+		if (!this.active()) this._lastSourceTime = this._timeSource();
+		return this;
+	}
+	_continue(immediateStep = false) {
+		Animator.cancelFrame(this._nextFrame);
+		this._nextFrame = null;
+		if (immediateStep) return this._stepImmediate();
+		if (this._paused) return this;
+		this._nextFrame = Animator.frame(this._step);
+		return this;
+	}
+	_stepFn(immediateStep = false) {
+		const time = this._timeSource();
+		let dtSource = time - this._lastSourceTime;
+		if (immediateStep) dtSource = 0;
+		const dtTime = this._speed * dtSource + (this._time - this._lastStepTime);
+		this._lastSourceTime = time;
+		if (!immediateStep) {
+			this._time += dtTime;
+			this._time = this._time < 0 ? 0 : this._time;
+		}
+		this._lastStepTime = this._time;
+		this.fire("time", this._time);
+		for (let k = this._runners.length; k--;) {
+			const runnerInfo = this._runners[k];
+			const runner = runnerInfo.runner;
+			if (this._time - runnerInfo.start <= 0) runner.reset();
+		}
+		let runnersLeft = false;
+		for (let i = 0, len = this._runners.length; i < len; i++) {
+			const runnerInfo = this._runners[i];
+			const runner = runnerInfo.runner;
+			let dt = dtTime;
+			const dtToStart = this._time - runnerInfo.start;
+			if (dtToStart <= 0) {
+				runnersLeft = true;
+				continue;
+			} else if (dtToStart < dt) dt = dtToStart;
+			if (!runner.active()) continue;
+			if (!runner.step(dt).done) runnersLeft = true;
+			else if (runnerInfo.persist !== true) {
+				if (runner.duration() - runner.time() + this._time + runnerInfo.persist < this._time) {
+					runner.unschedule();
+					--i;
+					--len;
+				}
+			}
+		}
+		if (runnersLeft && !(this._speed < 0 && this._time === 0) || this._runnerIds.length && this._speed < 0 && this._time > 0) this._continue();
+		else {
+			this.pause();
+			this.fire("finished");
+		}
+		return this;
+	}
+};
+registerMethods({ Element: { timeline: function(timeline) {
+	if (timeline == null) {
+		this._timeline = this._timeline || new Timeline$1();
+		return this._timeline;
+	} else {
+		this._timeline = timeline;
+		return this;
+	}
+} } });
+var Runner = class Runner extends EventTarget {
+	constructor(options) {
+		super();
+		this.id = Runner.id++;
+		options = options == null ? timeline.duration : options;
+		options = typeof options === "function" ? new Controller(options) : options;
+		this._element = null;
+		this._timeline = null;
+		this.done = false;
+		this._queue = [];
+		this._duration = typeof options === "number" && options;
+		this._isDeclarative = options instanceof Controller;
+		this._stepper = this._isDeclarative ? options : new Ease();
+		this._history = {};
+		this.enabled = true;
+		this._time = 0;
+		this._lastTime = 0;
+		this._reseted = true;
+		this.transforms = new Matrix();
+		this.transformId = 1;
+		this._haveReversed = false;
+		this._reverse = false;
+		this._loopsDone = 0;
+		this._swing = false;
+		this._wait = 0;
+		this._times = 1;
+		this._frameId = null;
+		this._persist = this._isDeclarative ? true : null;
+	}
+	static sanitise(duration, delay, when) {
+		let times = 1;
+		let swing = false;
+		let wait = 0;
+		duration = duration || timeline.duration;
+		delay = delay || timeline.delay;
+		when = when || "last";
+		if (typeof duration === "object" && !(duration instanceof Stepper)) {
+			delay = duration.delay || delay;
+			when = duration.when || when;
+			swing = duration.swing || swing;
+			times = duration.times || times;
+			wait = duration.wait || wait;
+			duration = duration.duration || timeline.duration;
+		}
+		return {
+			duration,
+			delay,
+			swing,
+			times,
+			wait,
+			when
+		};
+	}
+	active(enabled) {
+		if (enabled == null) return this.enabled;
+		this.enabled = enabled;
+		return this;
+	}
+	addTransform(transform, index) {
+		this.transforms.lmultiplyO(transform);
+		return this;
+	}
+	after(fn) {
+		return this.on("finished", fn);
+	}
+	animate(duration, delay, when) {
+		const o = Runner.sanitise(duration, delay, when);
+		const runner = new Runner(o.duration);
+		if (this._timeline) runner.timeline(this._timeline);
+		if (this._element) runner.element(this._element);
+		return runner.loop(o).schedule(o.delay, o.when);
+	}
+	clearTransform() {
+		this.transforms = new Matrix();
+		return this;
+	}
+	clearTransformsFromQueue() {
+		if (!this.done || !this._timeline || !this._timeline._runnerIds.includes(this.id)) this._queue = this._queue.filter((item) => {
+			return !item.isTransform;
+		});
+	}
+	delay(delay) {
+		return this.animate(0, delay);
+	}
+	duration() {
+		return this._times * (this._wait + this._duration) - this._wait;
+	}
+	during(fn) {
+		return this.queue(null, fn);
+	}
+	ease(fn) {
+		this._stepper = new Ease(fn);
+		return this;
+	}
+	element(element) {
+		if (element == null) return this._element;
+		this._element = element;
+		element._prepareRunner();
+		return this;
+	}
+	finish() {
+		return this.step(Infinity);
+	}
+	loop(times, swing, wait) {
+		if (typeof times === "object") {
+			swing = times.swing;
+			wait = times.wait;
+			times = times.times;
+		}
+		this._times = times || Infinity;
+		this._swing = swing || false;
+		this._wait = wait || 0;
+		if (this._times === true) this._times = Infinity;
+		return this;
+	}
+	loops(p) {
+		const loopDuration = this._duration + this._wait;
+		if (p == null) {
+			const loopsDone = Math.floor(this._time / loopDuration);
+			const position = (this._time - loopsDone * loopDuration) / this._duration;
+			return Math.min(loopsDone + position, this._times);
+		}
+		const whole = Math.floor(p);
+		const partial = p % 1;
+		const time = loopDuration * whole + this._duration * partial;
+		return this.time(time);
+	}
+	persist(dtOrForever) {
+		if (dtOrForever == null) return this._persist;
+		this._persist = dtOrForever;
+		return this;
+	}
+	position(p) {
+		const x = this._time;
+		const d = this._duration;
+		const w = this._wait;
+		const t = this._times;
+		const s = this._swing;
+		const r = this._reverse;
+		let position;
+		if (p == null) {
+			const f = function(x) {
+				const swinging = s * Math.floor(x % (2 * (w + d)) / (w + d));
+				const backwards = swinging && !r || !swinging && r;
+				const uncliped = Math.pow(-1, backwards) * (x % (w + d)) / d + backwards;
+				return Math.max(Math.min(uncliped, 1), 0);
+			};
+			const endTime = t * (w + d) - w;
+			position = x <= 0 ? Math.round(f(1e-5)) : x < endTime ? f(x) : Math.round(f(endTime - 1e-5));
+			return position;
+		}
+		const loopsDone = Math.floor(this.loops());
+		const swingForward = s && loopsDone % 2 === 0;
+		position = loopsDone + (swingForward && !r || r && swingForward ? p : 1 - p);
+		return this.loops(position);
+	}
+	progress(p) {
+		if (p == null) return Math.min(1, this._time / this.duration());
+		return this.time(p * this.duration());
+	}
+	queue(initFn, runFn, retargetFn, isTransform) {
+		this._queue.push({
+			initialiser: initFn || noop,
+			runner: runFn || noop,
+			retarget: retargetFn,
+			isTransform,
+			initialised: false,
+			finished: false
+		});
+		this.timeline() && this.timeline()._continue();
+		return this;
+	}
+	reset() {
+		if (this._reseted) return this;
+		this.time(0);
+		this._reseted = true;
+		return this;
+	}
+	reverse(reverse) {
+		this._reverse = reverse == null ? !this._reverse : reverse;
+		return this;
+	}
+	schedule(timeline, delay, when) {
+		if (!(timeline instanceof Timeline$1)) {
+			when = delay;
+			delay = timeline;
+			timeline = this.timeline();
+		}
+		if (!timeline) throw Error("Runner cannot be scheduled without timeline");
+		timeline.schedule(this, delay, when);
+		return this;
+	}
+	step(dt) {
+		if (!this.enabled) return this;
+		dt = dt == null ? 16 : dt;
+		this._time += dt;
+		const position = this.position();
+		const running = this._lastPosition !== position && this._time >= 0;
+		this._lastPosition = position;
+		const duration = this.duration();
+		const justStarted = this._lastTime <= 0 && this._time > 0;
+		const justFinished = this._lastTime < duration && this._time >= duration;
+		this._lastTime = this._time;
+		if (justStarted) this.fire("start", this);
+		const declarative = this._isDeclarative;
+		this.done = !declarative && !justFinished && this._time >= duration;
+		this._reseted = false;
+		let converged = false;
+		if (running || declarative) {
+			this._initialise(running);
+			this.transforms = new Matrix();
+			converged = this._run(declarative ? dt : position);
+			this.fire("step", this);
+		}
+		this.done = this.done || converged && declarative;
+		if (justFinished) this.fire("finished", this);
+		return this;
+	}
+	time(time) {
+		if (time == null) return this._time;
+		const dt = time - this._time;
+		this.step(dt);
+		return this;
+	}
+	timeline(timeline) {
+		if (typeof timeline === "undefined") return this._timeline;
+		this._timeline = timeline;
+		return this;
+	}
+	unschedule() {
+		const timeline = this.timeline();
+		timeline && timeline.unschedule(this);
+		return this;
+	}
+	_initialise(running) {
+		if (!running && !this._isDeclarative) return;
+		for (let i = 0, len = this._queue.length; i < len; ++i) {
+			const current = this._queue[i];
+			const needsIt = this._isDeclarative || !current.initialised && running;
+			running = !current.finished;
+			if (needsIt && running) {
+				current.initialiser.call(this);
+				current.initialised = true;
+			}
+		}
+	}
+	_rememberMorpher(method, morpher) {
+		this._history[method] = {
+			morpher,
+			caller: this._queue[this._queue.length - 1]
+		};
+		if (this._isDeclarative) {
+			const timeline = this.timeline();
+			timeline && timeline.play();
+		}
+	}
+	_run(positionOrDt) {
+		let allfinished = true;
+		for (let i = 0, len = this._queue.length; i < len; ++i) {
+			const current = this._queue[i];
+			const converged = current.runner.call(this, positionOrDt);
+			current.finished = current.finished || converged === true;
+			allfinished = allfinished && current.finished;
+		}
+		return allfinished;
+	}
+	_tryRetarget(method, target, extra) {
+		if (this._history[method]) {
+			if (!this._history[method].caller.initialised) {
+				const index = this._queue.indexOf(this._history[method].caller);
+				this._queue.splice(index, 1);
+				return false;
+			}
+			if (this._history[method].caller.retarget) this._history[method].caller.retarget.call(this, target, extra);
+			else this._history[method].morpher.to(target);
+			this._history[method].caller.finished = false;
+			const timeline = this.timeline();
+			timeline && timeline.play();
+			return true;
+		}
+		return false;
+	}
+};
+Runner.id = 0;
+var FakeRunner = class {
+	constructor(transforms = new Matrix(), id = -1, done = true) {
+		this.transforms = transforms;
+		this.id = id;
+		this.done = done;
+	}
+	clearTransformsFromQueue() {}
+};
+extend([Runner, FakeRunner], { mergeWith(runner) {
+	return new FakeRunner(runner.transforms.lmultiply(this.transforms), runner.id);
+} });
+var lmultiply = (last, curr) => last.lmultiplyO(curr);
+var getRunnerTransform = (runner) => runner.transforms;
+function mergeTransforms() {
+	const netTransform = this._transformationRunners.runners.map(getRunnerTransform).reduce(lmultiply, new Matrix());
+	this.transform(netTransform);
+	this._transformationRunners.merge();
+	if (this._transformationRunners.length() === 1) this._frameId = null;
+}
+var RunnerArray = class {
+	constructor() {
+		this.runners = [];
+		this.ids = [];
+	}
+	add(runner) {
+		if (this.runners.includes(runner)) return;
+		const id = runner.id + 1;
+		this.runners.push(runner);
+		this.ids.push(id);
+		return this;
+	}
+	clearBefore(id) {
+		const deleteCnt = this.ids.indexOf(id + 1) || 1;
+		this.ids.splice(0, deleteCnt, 0);
+		this.runners.splice(0, deleteCnt, new FakeRunner()).forEach((r) => r.clearTransformsFromQueue());
+		return this;
+	}
+	edit(id, newRunner) {
+		const index = this.ids.indexOf(id + 1);
+		this.ids.splice(index, 1, id + 1);
+		this.runners.splice(index, 1, newRunner);
+		return this;
+	}
+	getByID(id) {
+		return this.runners[this.ids.indexOf(id + 1)];
+	}
+	length() {
+		return this.ids.length;
+	}
+	merge() {
+		let lastRunner = null;
+		for (let i = 0; i < this.runners.length; ++i) {
+			const runner = this.runners[i];
+			if (lastRunner && runner.done && lastRunner.done && (!runner._timeline || !runner._timeline._runnerIds.includes(runner.id)) && (!lastRunner._timeline || !lastRunner._timeline._runnerIds.includes(lastRunner.id))) {
+				this.remove(runner.id);
+				const newRunner = runner.mergeWith(lastRunner);
+				this.edit(lastRunner.id, newRunner);
+				lastRunner = newRunner;
+				--i;
+			} else lastRunner = runner;
+		}
+		return this;
+	}
+	remove(id) {
+		const index = this.ids.indexOf(id + 1);
+		this.ids.splice(index, 1);
+		this.runners.splice(index, 1);
+		return this;
+	}
+};
+registerMethods({ Element: {
+	animate(duration, delay, when) {
+		const o = Runner.sanitise(duration, delay, when);
+		const timeline = this.timeline();
+		return new Runner(o.duration).loop(o).element(this).timeline(timeline.play()).schedule(o.delay, o.when);
+	},
+	delay(by, when) {
+		return this.animate(0, by, when);
+	},
+	_clearTransformRunnersBefore(currentRunner) {
+		this._transformationRunners.clearBefore(currentRunner.id);
+	},
+	_currentTransform(current) {
+		return this._transformationRunners.runners.filter((runner) => runner.id <= current.id).map(getRunnerTransform).reduce(lmultiply, new Matrix());
+	},
+	_addRunner(runner) {
+		this._transformationRunners.add(runner);
+		Animator.cancelImmediate(this._frameId);
+		this._frameId = Animator.immediate(mergeTransforms.bind(this));
+	},
+	_prepareRunner() {
+		if (this._frameId == null) this._transformationRunners = new RunnerArray().add(new FakeRunner(new Matrix(this)));
+	}
+} });
+var difference = (a, b) => a.filter((x) => !b.includes(x));
+extend(Runner, {
+	attr(a, v) {
+		return this.styleAttr("attr", a, v);
+	},
+	css(s, v) {
+		return this.styleAttr("css", s, v);
+	},
+	styleAttr(type, nameOrAttrs, val) {
+		if (typeof nameOrAttrs === "string") return this.styleAttr(type, { [nameOrAttrs]: val });
+		let attrs = nameOrAttrs;
+		if (this._tryRetarget(type, attrs)) return this;
+		let morpher = new Morphable(this._stepper).to(attrs);
+		let keys = Object.keys(attrs);
+		this.queue(function() {
+			morpher = morpher.from(this.element()[type](keys));
+		}, function(pos) {
+			this.element()[type](morpher.at(pos).valueOf());
+			return morpher.done();
+		}, function(newToAttrs) {
+			const newKeys = Object.keys(newToAttrs);
+			const differences = difference(newKeys, keys);
+			if (differences.length) {
+				const addedFromAttrs = this.element()[type](differences);
+				const oldFromAttrs = new ObjectBag(morpher.from()).valueOf();
+				Object.assign(oldFromAttrs, addedFromAttrs);
+				morpher.from(oldFromAttrs);
+			}
+			const oldToAttrs = new ObjectBag(morpher.to()).valueOf();
+			Object.assign(oldToAttrs, newToAttrs);
+			morpher.to(oldToAttrs);
+			keys = newKeys;
+			attrs = newToAttrs;
+		});
+		this._rememberMorpher(type, morpher);
+		return this;
+	},
+	zoom(level, point) {
+		if (this._tryRetarget("zoom", level, point)) return this;
+		let morpher = new Morphable(this._stepper).to(new SVGNumber(level));
+		this.queue(function() {
+			morpher = morpher.from(this.element().zoom());
+		}, function(pos) {
+			this.element().zoom(morpher.at(pos), point);
+			return morpher.done();
+		}, function(newLevel, newPoint) {
+			point = newPoint;
+			morpher.to(newLevel);
+		});
+		this._rememberMorpher("zoom", morpher);
+		return this;
+	},
+	transform(transforms, relative, affine) {
+		relative = transforms.relative || relative;
+		if (this._isDeclarative && !relative && this._tryRetarget("transform", transforms)) return this;
+		const isMatrix = Matrix.isMatrixLike(transforms);
+		affine = transforms.affine != null ? transforms.affine : affine != null ? affine : !isMatrix;
+		const morpher = new Morphable(this._stepper).type(affine ? TransformBag : Matrix);
+		let origin;
+		let element;
+		let current;
+		let currentAngle;
+		let startTransform;
+		function setup() {
+			element = element || this.element();
+			origin = origin || getOrigin(transforms, element);
+			startTransform = new Matrix(relative ? void 0 : element);
+			element._addRunner(this);
+			if (!relative) element._clearTransformRunnersBefore(this);
+		}
+		function run(pos) {
+			if (!relative) this.clearTransform();
+			const { x, y } = new Point(origin).transform(element._currentTransform(this));
+			let target = new Matrix({
+				...transforms,
+				origin: [x, y]
+			});
+			let start = this._isDeclarative && current ? current : startTransform;
+			if (affine) {
+				target = target.decompose(x, y);
+				start = start.decompose(x, y);
+				const rTarget = target.rotate;
+				const rCurrent = start.rotate;
+				const possibilities = [
+					rTarget - 360,
+					rTarget,
+					rTarget + 360
+				];
+				const distances = possibilities.map((a) => Math.abs(a - rCurrent));
+				const shortest = Math.min(...distances);
+				const index = distances.indexOf(shortest);
+				target.rotate = possibilities[index];
+			}
+			if (relative) {
+				if (!isMatrix) target.rotate = transforms.rotate || 0;
+				if (this._isDeclarative && currentAngle) start.rotate = currentAngle;
+			}
+			morpher.from(start);
+			morpher.to(target);
+			const affineParameters = morpher.at(pos);
+			currentAngle = affineParameters.rotate;
+			current = new Matrix(affineParameters);
+			this.addTransform(current);
+			element._addRunner(this);
+			return morpher.done();
+		}
+		function retarget(newTransforms) {
+			if ((newTransforms.origin || "center").toString() !== (transforms.origin || "center").toString()) origin = getOrigin(newTransforms, element);
+			transforms = {
+				...newTransforms,
+				origin
+			};
+		}
+		this.queue(setup, run, retarget, true);
+		this._isDeclarative && this._rememberMorpher("transform", morpher);
+		return this;
+	},
+	x(x, relative) {
+		return this._queueNumber("x", x);
+	},
+	y(y) {
+		return this._queueNumber("y", y);
+	},
+	dx(x = 0) {
+		return this._queueNumberDelta("x", x);
+	},
+	dy(y = 0) {
+		return this._queueNumberDelta("y", y);
+	},
+	dmove(x, y) {
+		return this.dx(x).dy(y);
+	},
+	_queueNumberDelta(method, to) {
+		to = new SVGNumber(to);
+		if (this._tryRetarget(method, to)) return this;
+		const morpher = new Morphable(this._stepper).to(to);
+		let from = null;
+		this.queue(function() {
+			from = this.element()[method]();
+			morpher.from(from);
+			morpher.to(from + to);
+		}, function(pos) {
+			this.element()[method](morpher.at(pos));
+			return morpher.done();
+		}, function(newTo) {
+			morpher.to(from + new SVGNumber(newTo));
+		});
+		this._rememberMorpher(method, morpher);
+		return this;
+	},
+	_queueObject(method, to) {
+		if (this._tryRetarget(method, to)) return this;
+		const morpher = new Morphable(this._stepper).to(to);
+		this.queue(function() {
+			morpher.from(this.element()[method]());
+		}, function(pos) {
+			this.element()[method](morpher.at(pos));
+			return morpher.done();
+		});
+		this._rememberMorpher(method, morpher);
+		return this;
+	},
+	_queueNumber(method, value) {
+		return this._queueObject(method, new SVGNumber(value));
+	},
+	cx(x) {
+		return this._queueNumber("cx", x);
+	},
+	cy(y) {
+		return this._queueNumber("cy", y);
+	},
+	move(x, y) {
+		return this.x(x).y(y);
+	},
+	center(x, y) {
+		return this.cx(x).cy(y);
+	},
+	size(width, height) {
+		let box;
+		if (!width || !height) box = this._element.bbox();
+		if (!width) width = box.width / box.height * height;
+		if (!height) height = box.height / box.width * width;
+		return this.width(width).height(height);
+	},
+	width(width) {
+		return this._queueNumber("width", width);
+	},
+	height(height) {
+		return this._queueNumber("height", height);
+	},
+	plot(a, b, c, d) {
+		if (arguments.length === 4) return this.plot([
+			a,
+			b,
+			c,
+			d
+		]);
+		if (this._tryRetarget("plot", a)) return this;
+		const morpher = new Morphable(this._stepper).type(this._element.MorphArray).to(a);
+		this.queue(function() {
+			morpher.from(this._element.array());
+		}, function(pos) {
+			this._element.plot(morpher.at(pos));
+			return morpher.done();
+		});
+		this._rememberMorpher("plot", morpher);
+		return this;
+	},
+	leading(value) {
+		return this._queueNumber("leading", value);
+	},
+	viewbox(x, y, width, height) {
+		return this._queueObject("viewbox", new Box(x, y, width, height));
+	},
+	update(o) {
+		if (typeof o !== "object") return this.update({
+			offset: arguments[0],
+			color: arguments[1],
+			opacity: arguments[2]
+		});
+		if (o.opacity != null) this.attr("stop-opacity", o.opacity);
+		if (o.color != null) this.attr("stop-color", o.color);
+		if (o.offset != null) this.attr("offset", o.offset);
+		return this;
+	}
+});
+extend(Runner, {
+	rx,
+	ry,
+	from,
+	to
+});
+register(Runner, "Runner");
+var Svg = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("svg", node), attrs);
+		this.namespace();
+	}
+	defs() {
+		if (!this.isRoot()) return this.root().defs();
+		return adopt(this.node.querySelector("defs")) || this.put(new Defs());
+	}
+	isRoot() {
+		return !this.node.parentNode || !(this.node.parentNode instanceof globals.window.SVGElement) && this.node.parentNode.nodeName !== "#document-fragment";
+	}
+	namespace() {
+		if (!this.isRoot()) return this.root().namespace();
+		return this.attr({
+			xmlns: svg,
+			version: "1.1"
+		}).attr("xmlns:xlink", xlink, xmlns).attr("xmlns:svgjs", svgjs, xmlns);
+	}
+	removeNamespace() {
+		return this.attr({
+			xmlns: null,
+			version: null
+		}).attr("xmlns:xlink", null, xmlns).attr("xmlns:svgjs", null, xmlns);
+	}
+	root() {
+		if (this.isRoot()) return this;
+		return super.root();
+	}
+};
+registerMethods({ Container: { nested: wrapWithAttrCheck(function() {
+	return this.put(new Svg());
+}) } });
+register(Svg, "Svg", true);
+var Symbol$1 = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("symbol", node), attrs);
+	}
+};
+registerMethods({ Container: { symbol: wrapWithAttrCheck(function() {
+	return this.put(new Symbol$1());
+}) } });
+register(Symbol$1, "Symbol");
+function plain(text) {
+	if (this._build === false) this.clear();
+	this.node.appendChild(globals.document.createTextNode(text));
+	return this;
+}
+function length() {
+	return this.node.getComputedTextLength();
+}
+function x$1(x, box = this.bbox()) {
+	if (x == null) return box.x;
+	return this.attr("x", this.attr("x") + x - box.x);
+}
+function y$1(y, box = this.bbox()) {
+	if (y == null) return box.y;
+	return this.attr("y", this.attr("y") + y - box.y);
+}
+function move$1(x, y, box = this.bbox()) {
+	return this.x(x, box).y(y, box);
+}
+function cx(x, box = this.bbox()) {
+	if (x == null) return box.cx;
+	return this.attr("x", this.attr("x") + x - box.cx);
+}
+function cy(y, box = this.bbox()) {
+	if (y == null) return box.cy;
+	return this.attr("y", this.attr("y") + y - box.cy);
+}
+function center(x, y, box = this.bbox()) {
+	return this.cx(x, box).cy(y, box);
+}
+function ax(x) {
+	return this.attr("x", x);
+}
+function ay(y) {
+	return this.attr("y", y);
+}
+function amove(x, y) {
+	return this.ax(x).ay(y);
+}
+function build(build) {
+	this._build = !!build;
+	return this;
+}
+var textable = {
+	__proto__: null,
+	plain,
+	length,
+	x: x$1,
+	y: y$1,
+	move: move$1,
+	cx,
+	cy,
+	center,
+	ax,
+	ay,
+	amove,
+	build
+};
+var Text = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("text", node), attrs);
+		this.dom.leading = new SVGNumber(1.3);
+		this._rebuild = true;
+		this._build = false;
+	}
+	leading(value) {
+		if (value == null) return this.dom.leading;
+		this.dom.leading = new SVGNumber(value);
+		return this.rebuild();
+	}
+	rebuild(rebuild) {
+		if (typeof rebuild === "boolean") this._rebuild = rebuild;
+		if (this._rebuild) {
+			const self = this;
+			let blankLineOffset = 0;
+			const leading = this.dom.leading;
+			this.each(function(i) {
+				const dy = leading * new SVGNumber(globals.window.getComputedStyle(this.node).getPropertyValue("font-size"));
+				if (this.dom.newLined) {
+					this.attr("x", self.attr("x"));
+					if (this.text() === "\n") blankLineOffset += dy;
+					else {
+						this.attr("dy", i ? dy + blankLineOffset : 0);
+						blankLineOffset = 0;
+					}
+				}
+			});
+			this.fire("rebuild");
+		}
+		return this;
+	}
+	setData(o) {
+		this.dom = o;
+		this.dom.leading = new SVGNumber(o.leading || 1.3);
+		return this;
+	}
+	text(text) {
+		if (text === void 0) {
+			const children = this.node.childNodes;
+			let firstLine = 0;
+			text = "";
+			for (let i = 0, len = children.length; i < len; ++i) {
+				if (children[i].nodeName === "textPath") {
+					if (i === 0) firstLine = 1;
+					continue;
+				}
+				if (i !== firstLine && children[i].nodeType !== 3 && adopt(children[i]).dom.newLined === true) text += "\n";
+				text += children[i].textContent;
+			}
+			return text;
+		}
+		this.clear().build(true);
+		if (typeof text === "function") text.call(this, this);
+		else {
+			text = (text + "").split("\n");
+			for (let j = 0, jl = text.length; j < jl; j++) this.newLine(text[j]);
+		}
+		return this.build(false).rebuild();
+	}
+};
+extend(Text, textable);
+registerMethods({ Container: {
+	text: wrapWithAttrCheck(function(text = "") {
+		return this.put(new Text()).text(text);
+	}),
+	plain: wrapWithAttrCheck(function(text = "") {
+		return this.put(new Text()).plain(text);
+	})
+} });
+register(Text, "Text");
+var Tspan = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("tspan", node), attrs);
+		this._build = false;
+	}
+	dx(dx) {
+		return this.attr("dx", dx);
+	}
+	dy(dy) {
+		return this.attr("dy", dy);
+	}
+	newLine() {
+		this.dom.newLined = true;
+		const text = this.parent();
+		if (!(text instanceof Text)) return this;
+		const i = text.index(this);
+		const fontSize = globals.window.getComputedStyle(this.node).getPropertyValue("font-size");
+		const dy = text.dom.leading * new SVGNumber(fontSize);
+		return this.dy(i ? dy : 0).attr("x", text.x());
+	}
+	text(text) {
+		if (text == null) return this.node.textContent + (this.dom.newLined ? "\n" : "");
+		if (typeof text === "function") {
+			this.clear().build(true);
+			text.call(this, this);
+			this.build(false);
+		} else this.plain(text);
+		return this;
+	}
+};
+extend(Tspan, textable);
+registerMethods({
+	Tspan: { tspan: wrapWithAttrCheck(function(text = "") {
+		const tspan = new Tspan();
+		if (!this._build) this.clear();
+		return this.put(tspan).text(text);
+	}) },
+	Text: { newLine: function(text = "") {
+		return this.tspan(text).newLine();
+	} }
+});
+register(Tspan, "Tspan");
+var Circle = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("circle", node), attrs);
+	}
+	radius(r) {
+		return this.attr("r", r);
+	}
+	rx(rx) {
+		return this.attr("r", rx);
+	}
+	ry(ry) {
+		return this.rx(ry);
+	}
+	size(size) {
+		return this.radius(new SVGNumber(size).divide(2));
+	}
+};
+extend(Circle, {
+	x: x$3,
+	y: y$3,
+	cx: cx$1,
+	cy: cy$1,
+	width: width$2,
+	height: height$2
+});
+registerMethods({ Container: { circle: wrapWithAttrCheck(function(size = 0) {
+	return this.put(new Circle()).size(size).move(0, 0);
+}) } });
+register(Circle, "Circle");
+var ClipPath = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("clipPath", node), attrs);
+	}
+	remove() {
+		this.targets().forEach(function(el) {
+			el.unclip();
+		});
+		return super.remove();
+	}
+	targets() {
+		return baseFind("svg [clip-path*=" + this.id() + "]");
+	}
+};
+registerMethods({
+	Container: { clip: wrapWithAttrCheck(function() {
+		return this.defs().put(new ClipPath());
+	}) },
+	Element: {
+		clipper() {
+			return this.reference("clip-path");
+		},
+		clipWith(element) {
+			const clipper = element instanceof ClipPath ? element : this.parent().clip().add(element);
+			return this.attr("clip-path", "url(#" + clipper.id() + ")");
+		},
+		unclip() {
+			return this.attr("clip-path", null);
+		}
+	}
+});
+register(ClipPath, "ClipPath");
+var ForeignObject = class extends Element$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("foreignObject", node), attrs);
+	}
+};
+registerMethods({ Container: { foreignObject: wrapWithAttrCheck(function(width, height) {
+	return this.put(new ForeignObject()).size(width, height);
+}) } });
+register(ForeignObject, "ForeignObject");
+function dmove(dx, dy) {
+	this.children().forEach((child, i) => {
+		let bbox;
+		try {
+			bbox = child.bbox();
+		} catch (e) {
+			return;
+		}
+		const m = new Matrix(child);
+		const matrix = m.translate(dx, dy).transform(m.inverse());
+		const p = new Point(bbox.x, bbox.y).transform(matrix);
+		child.move(p.x, p.y);
+	});
+	return this;
+}
+function dx(dx) {
+	return this.dmove(dx, 0);
+}
+function dy(dy) {
+	return this.dmove(0, dy);
+}
+function height(height, box = this.bbox()) {
+	if (height == null) return box.height;
+	return this.size(box.width, height, box);
+}
+function move(x = 0, y = 0, box = this.bbox()) {
+	const dx = x - box.x;
+	const dy = y - box.y;
+	return this.dmove(dx, dy);
+}
+function size(width, height, box = this.bbox()) {
+	const p = proportionalSize(this, width, height, box);
+	const scaleX = p.width / box.width;
+	const scaleY = p.height / box.height;
+	this.children().forEach((child, i) => {
+		const o = new Point(box).transform(new Matrix(child).inverse());
+		child.scale(scaleX, scaleY, o.x, o.y);
+	});
+	return this;
+}
+function width(width, box = this.bbox()) {
+	if (width == null) return box.width;
+	return this.size(width, box.height, box);
+}
+function x(x, box = this.bbox()) {
+	if (x == null) return box.x;
+	return this.move(x, box.y, box);
+}
+function y(y, box = this.bbox()) {
+	if (y == null) return box.y;
+	return this.move(box.x, y, box);
+}
+var containerGeometry = {
+	__proto__: null,
+	dmove,
+	dx,
+	dy,
+	height,
+	move,
+	size,
+	width,
+	x,
+	y
+};
+var G = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("g", node), attrs);
+	}
+};
+extend(G, containerGeometry);
+registerMethods({ Container: { group: wrapWithAttrCheck(function() {
+	return this.put(new G());
+}) } });
+register(G, "G");
+var A = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("a", node), attrs);
+	}
+	target(target) {
+		return this.attr("target", target);
+	}
+	to(url) {
+		return this.attr("href", url, xlink);
+	}
+};
+extend(A, containerGeometry);
+registerMethods({
+	Container: { link: wrapWithAttrCheck(function(url) {
+		return this.put(new A()).to(url);
+	}) },
+	Element: {
+		unlink() {
+			const link = this.linker();
+			if (!link) return this;
+			const parent = link.parent();
+			if (!parent) return this.remove();
+			const index = parent.index(link);
+			parent.add(this, index);
+			link.remove();
+			return this;
+		},
+		linkTo(url) {
+			let link = this.linker();
+			if (!link) {
+				link = new A();
+				this.wrap(link);
+			}
+			if (typeof url === "function") url.call(link, link);
+			else link.to(url);
+			return this;
+		},
+		linker() {
+			const link = this.parent();
+			if (link && link.node.nodeName.toLowerCase() === "a") return link;
+			return null;
+		}
+	}
+});
+register(A, "A");
+var Mask = class extends Container {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("mask", node), attrs);
+	}
+	remove() {
+		this.targets().forEach(function(el) {
+			el.unmask();
+		});
+		return super.remove();
+	}
+	targets() {
+		return baseFind("svg [mask*=" + this.id() + "]");
+	}
+};
+registerMethods({
+	Container: { mask: wrapWithAttrCheck(function() {
+		return this.defs().put(new Mask());
+	}) },
+	Element: {
+		masker() {
+			return this.reference("mask");
+		},
+		maskWith(element) {
+			const masker = element instanceof Mask ? element : this.parent().mask().add(element);
+			return this.attr("mask", "url(#" + masker.id() + ")");
+		},
+		unmask() {
+			return this.attr("mask", null);
+		}
+	}
+});
+register(Mask, "Mask");
+var Stop = class extends Element$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("stop", node), attrs);
+	}
+	update(o) {
+		if (typeof o === "number" || o instanceof SVGNumber) o = {
+			offset: arguments[0],
+			color: arguments[1],
+			opacity: arguments[2]
+		};
+		if (o.opacity != null) this.attr("stop-opacity", o.opacity);
+		if (o.color != null) this.attr("stop-color", o.color);
+		if (o.offset != null) this.attr("offset", new SVGNumber(o.offset));
+		return this;
+	}
+};
+registerMethods({ Gradient: { stop: function(offset, color, opacity) {
+	return this.put(new Stop()).update(offset, color, opacity);
+} } });
+register(Stop, "Stop");
+function cssRule(selector, rule) {
+	if (!selector) return "";
+	if (!rule) return selector;
+	let ret = selector + "{";
+	for (const i in rule) ret += unCamelCase(i) + ":" + rule[i] + ";";
+	ret += "}";
+	return ret;
+}
+var Style$1 = class extends Element$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("style", node), attrs);
+	}
+	addText(w = "") {
+		this.node.textContent += w;
+		return this;
+	}
+	font(name, src, params = {}) {
+		return this.rule("@font-face", {
+			fontFamily: name,
+			src,
+			...params
+		});
+	}
+	rule(selector, obj) {
+		return this.addText(cssRule(selector, obj));
+	}
+};
+registerMethods("Dom", {
+	style(selector, obj) {
+		return this.put(new Style$1()).rule(selector, obj);
+	},
+	fontface(name, src, params) {
+		return this.put(new Style$1()).font(name, src, params);
+	}
+});
+register(Style$1, "Style");
+var TextPath = class extends Text {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("textPath", node), attrs);
+	}
+	array() {
+		const track = this.track();
+		return track ? track.array() : null;
+	}
+	plot(d) {
+		const track = this.track();
+		let pathArray = null;
+		if (track) pathArray = track.plot(d);
+		return d == null ? pathArray : this;
+	}
+	track() {
+		return this.reference("href");
+	}
+};
+registerMethods({
+	Container: { textPath: wrapWithAttrCheck(function(text, path) {
+		if (!(text instanceof Text)) text = this.text(text);
+		return text.path(path);
+	}) },
+	Text: {
+		path: wrapWithAttrCheck(function(track, importNodes = true) {
+			const textPath = new TextPath();
+			if (!(track instanceof Path)) track = this.defs().path(track);
+			textPath.attr("href", "#" + track, xlink);
+			let node;
+			if (importNodes) while (node = this.node.firstChild) textPath.node.appendChild(node);
+			return this.put(textPath);
+		}),
+		textPath() {
+			return this.findOne("textPath");
+		}
+	},
+	Path: {
+		text: wrapWithAttrCheck(function(text) {
+			if (!(text instanceof Text)) text = new Text().addTo(this.parent()).text(text);
+			return text.path(this);
+		}),
+		targets() {
+			return baseFind("svg textPath").filter((node) => {
+				return (node.attr("href") || "").includes(this.id());
+			});
+		}
+	}
+});
+TextPath.prototype.MorphArray = PathArray;
+register(TextPath, "TextPath");
+var Use = class extends Shape$1 {
+	constructor(node, attrs = node) {
+		super(nodeOrNew("use", node), attrs);
+	}
+	use(element, file) {
+		return this.attr("href", (file || "") + "#" + element, xlink);
+	}
+};
+registerMethods({ Container: { use: wrapWithAttrCheck(function(element, file) {
+	return this.put(new Use()).use(element, file);
+}) } });
+register(Use, "Use");
+var SVG = makeInstance;
+extend([
+	Svg,
+	Symbol$1,
+	Image$1,
+	Pattern,
+	Marker
+], getMethodsFor("viewbox"));
+extend([
+	Line,
+	Polyline,
+	Polygon,
+	Path
+], getMethodsFor("marker"));
+extend(Text, getMethodsFor("Text"));
+extend(Path, getMethodsFor("Path"));
+extend(Defs, getMethodsFor("Defs"));
+extend([Text, Tspan], getMethodsFor("Tspan"));
+extend([
+	Rect,
+	Ellipse,
+	Gradient,
+	Runner
+], getMethodsFor("radius"));
+extend(EventTarget, getMethodsFor("EventTarget"));
+extend(Dom, getMethodsFor("Dom"));
+extend(Element$1, getMethodsFor("Element"));
+extend(Shape$1, getMethodsFor("Shape"));
+extend([Container, Fragment], getMethodsFor("Container"));
+extend(Gradient, getMethodsFor("Gradient"));
+extend(Runner, getMethodsFor("Runner"));
+List.extend(getMethodNames());
+registerMorphableType([
+	SVGNumber,
+	Color,
+	Box,
+	Matrix,
+	SVGArray,
+	PointArray,
+	PathArray,
+	Point
+]);
+makeMorphable();
+//#endregion
+//#region node_modules/simple-mind-map/src/theme/default.js
+var default_default = {
+	paddingX: 15,
+	paddingY: 5,
+	imgMaxWidth: 200,
+	imgMaxHeight: 100,
+	iconSize: 20,
+	lineWidth: 1,
+	lineColor: "#549688",
+	lineDasharray: "none",
+	lineFlow: false,
+	lineFlowDuration: 1,
+	lineFlowForward: true,
+	lineStyle: "straight",
+	rootLineKeepSameInCurve: true,
+	rootLineStartPositionKeepSameInCurve: false,
+	lineRadius: 5,
+	showLineMarker: false,
+	generalizationLineWidth: 1,
+	generalizationLineColor: "#549688",
+	generalizationLineMargin: 0,
+	generalizationNodeMargin: 20,
+	associativeLineWidth: 2,
+	associativeLineColor: "rgb(51, 51, 51)",
+	associativeLineActiveWidth: 8,
+	associativeLineActiveColor: "rgba(2, 167, 240, 1)",
+	associativeLineDasharray: "6,4",
+	associativeLineTextColor: "rgb(51, 51, 51)",
+	associativeLineTextFontSize: 14,
+	associativeLineTextLineHeight: 1.2,
+	associativeLineTextFontFamily: "微软雅黑, Microsoft YaHei",
+	backgroundColor: "#fafafa",
+	backgroundImage: "none",
+	backgroundRepeat: "no-repeat",
+	backgroundPosition: "center center",
+	backgroundSize: "cover",
+	nodeUseLineStyle: false,
+	root: {
+		shape: "rectangle",
+		fillColor: "#549688",
+		fontFamily: "微软雅黑, Microsoft YaHei",
+		color: "#fff",
+		fontSize: 16,
+		fontWeight: "bold",
+		fontStyle: "normal",
+		borderColor: "transparent",
+		borderWidth: 0,
+		borderDasharray: "none",
+		borderRadius: 5,
+		textDecoration: "none",
+		gradientStyle: false,
+		startColor: "#549688",
+		endColor: "#fff",
+		startDir: [0, 0],
+		endDir: [1, 0],
+		lineMarkerDir: "end",
+		hoverRectColor: "",
+		hoverRectRadius: 5,
+		textAlign: "left",
+		imgPlacement: "top",
+		tagPlacement: "right"
+	},
+	second: {
+		shape: "rectangle",
+		marginX: 100,
+		marginY: 40,
+		fillColor: "#fff",
+		fontFamily: "微软雅黑, Microsoft YaHei",
+		color: "#565656",
+		fontSize: 16,
+		fontWeight: "normal",
+		fontStyle: "normal",
+		borderColor: "#549688",
+		borderWidth: 1,
+		borderDasharray: "none",
+		borderRadius: 5,
+		textDecoration: "none",
+		gradientStyle: false,
+		startColor: "#549688",
+		endColor: "#fff",
+		startDir: [0, 0],
+		endDir: [1, 0],
+		lineMarkerDir: "end",
+		hoverRectColor: "",
+		hoverRectRadius: 5,
+		textAlign: "left",
+		imgPlacement: "top",
+		tagPlacement: "right"
+	},
+	node: {
+		shape: "rectangle",
+		marginX: 50,
+		marginY: 0,
+		fillColor: "transparent",
+		fontFamily: "微软雅黑, Microsoft YaHei",
+		color: "#6a6d6c",
+		fontSize: 14,
+		fontWeight: "normal",
+		fontStyle: "normal",
+		borderColor: "transparent",
+		borderWidth: 0,
+		borderRadius: 5,
+		borderDasharray: "none",
+		textDecoration: "none",
+		gradientStyle: false,
+		startColor: "#549688",
+		endColor: "#fff",
+		startDir: [0, 0],
+		endDir: [1, 0],
+		lineMarkerDir: "end",
+		hoverRectColor: "",
+		hoverRectRadius: 5,
+		textAlign: "left",
+		imgPlacement: "top",
+		tagPlacement: "right"
+	},
+	generalization: {
+		shape: "rectangle",
+		marginX: 100,
+		marginY: 40,
+		fillColor: "#fff",
+		fontFamily: "微软雅黑, Microsoft YaHei",
+		color: "#565656",
+		fontSize: 16,
+		fontWeight: "normal",
+		fontStyle: "normal",
+		borderColor: "#549688",
+		borderWidth: 1,
+		borderDasharray: "none",
+		borderRadius: 5,
+		textDecoration: "none",
+		gradientStyle: false,
+		startColor: "#549688",
+		endColor: "#fff",
+		startDir: [0, 0],
+		endDir: [1, 0],
+		hoverRectColor: "",
+		hoverRectRadius: 5,
+		textAlign: "left",
+		imgPlacement: "top",
+		tagPlacement: "right"
+	}
+};
+var nodeSizeIndependenceList = [
+	"lineWidth",
+	"lineColor",
+	"lineDasharray",
+	"lineStyle",
+	"generalizationLineWidth",
+	"generalizationLineColor",
+	"associativeLineWidth",
+	"associativeLineColor",
+	"associativeLineActiveWidth",
+	"associativeLineActiveColor",
+	"associativeLineTextColor",
+	"associativeLineTextFontSize",
+	"associativeLineTextLineHeight",
+	"associativeLineTextFontFamily",
+	"backgroundColor",
+	"backgroundImage",
+	"backgroundRepeat",
+	"backgroundPosition",
+	"backgroundSize",
+	"rootLineKeepSameInCurve",
+	"rootLineStartPositionKeepSameInCurve",
+	"showLineMarker",
+	"lineRadius",
+	"hoverRectColor",
+	"hoverRectRadius",
+	"lineFlow",
+	"lineFlowDuration",
+	"lineFlowForward",
+	"textAlign"
+];
+var checkIsNodeSizeIndependenceConfig = (config) => {
+	let keys = Object.keys(config);
+	for (let i = 0; i < keys.length; i++) if (!nodeSizeIndependenceList.find((item) => {
+		return item === keys[i];
+	})) return false;
+	return true;
+};
+var lineStyleProps = [
+	"lineColor",
+	"lineDasharray",
+	"lineWidth",
+	"lineMarkerDir",
+	"lineFlow",
+	"lineFlowDuration",
+	"lineFlowForward"
+];
+//#endregion
+//#region node_modules/simple-mind-map/src/utils/index.js
+var walk = (root, parent, beforeCallback, afterCallback, isRoot, layerIndex = 0, index = 0, ancestors = []) => {
+	let stop = false;
+	if (beforeCallback) stop = beforeCallback(root, parent, isRoot, layerIndex, index, ancestors);
+	if (!stop && root.children && root.children.length > 0) {
+		let _layerIndex = layerIndex + 1;
+		root.children.forEach((node, nodeIndex) => {
+			walk(node, root, beforeCallback, afterCallback, false, _layerIndex, nodeIndex, [...ancestors, root]);
+		});
+	}
+	afterCallback && afterCallback(root, parent, isRoot, layerIndex, index, ancestors);
+};
+var bfsWalk = (root, callback) => {
+	let stack = [root];
+	let isStop = false;
+	if (callback(root, null) === "stop") isStop = true;
+	while (stack.length) {
+		if (isStop) break;
+		let cur = stack.shift();
+		if (cur.children && cur.children.length) cur.children.forEach((item) => {
+			if (isStop) return;
+			stack.push(item);
+			if (callback(item, cur) === "stop") isStop = true;
+		});
+	}
+};
+var resizeImgSize = (width, height, maxWidth, maxHeight) => {
+	let nRatio = width / height;
+	let arr = [];
+	if (maxWidth && maxHeight) if (width <= maxWidth && height <= maxHeight) arr = [width, height];
+	else if (nRatio > maxWidth / maxHeight) arr = [maxWidth, maxWidth / nRatio];
+	else arr = [nRatio * maxHeight, maxHeight];
+	else if (maxWidth) if (width <= maxWidth) arr = [width, height];
+	else arr = [maxWidth, maxWidth / nRatio];
+	else if (maxHeight) if (height <= maxHeight) arr = [width, height];
+	else arr = [nRatio * maxHeight, maxHeight];
+	return arr;
+};
+var getStrWithBrFromHtml = (str) => {
+	str = str.replace(/<br>/gim, "\n");
+	let el = document.createElement("div");
+	el.innerHTML = str;
+	str = el.textContent;
+	return str;
+};
+var simpleDeepClone = (data) => {
+	try {
+		return JSON.parse(JSON.stringify(data));
+	} catch (error) {
+		return null;
+	}
+};
+var copyRenderTree = (tree, root, removeActiveState = false) => {
+	tree.data = simpleDeepClone(root.data);
+	if (removeActiveState) {
+		tree.data.isActive = false;
+		formatGetNodeGeneralization(tree.data).forEach((item) => {
+			item.isActive = false;
+		});
+	}
+	tree.children = [];
+	if (root.children && root.children.length > 0) root.children.forEach((item, index) => {
+		tree.children[index] = copyRenderTree({}, item, removeActiveState);
+	});
+	Object.keys(root).forEach((key) => {
+		if (!["data", "children"].includes(key) && !/^_/.test(key)) tree[key] = root[key];
+	});
+	return tree;
+};
+var copyNodeTree = (tree, root, removeActiveState = false, removeId = true) => {
+	const rootData = root.nodeData ? root.nodeData : root;
+	tree.data = simpleDeepClone(rootData.data);
+	if (removeId) delete tree.data.uid;
+	else if (!tree.data.uid) tree.data.uid = createUid();
+	if (removeActiveState) tree.data.isActive = false;
+	tree.children = [];
+	if (root.children && root.children.length > 0) root.children.forEach((item, index) => {
+		tree.children[index] = copyNodeTree({}, item, removeActiveState, removeId);
+	});
+	else if (root.nodeData && root.nodeData.children && root.nodeData.children.length > 0) root.nodeData.children.forEach((item, index) => {
+		tree.children[index] = copyNodeTree({}, item, removeActiveState, removeId);
+	});
+	Object.keys(rootData).forEach((key) => {
+		if (!["data", "children"].includes(key) && !/^_/.test(key)) tree[key] = rootData[key];
+	});
+	return tree;
+};
+var throttle = (fn, time = 300, ctx) => {
+	let timer = null;
+	return (...args) => {
+		if (timer) return;
+		timer = setTimeout(() => {
+			fn.call(ctx, ...args);
+			timer = null;
+		}, time);
+	};
+};
+var debounce = (fn, wait = 300, ctx) => {
+	let timeout = null;
+	return (...args) => {
+		if (timeout) clearTimeout(timeout);
+		timeout = setTimeout(() => {
+			timeout = null;
+			fn.apply(ctx, args);
+		}, wait);
+	};
+};
+var asyncRun = (taskList, callback = () => {}) => {
+	let index = 0;
+	let len = taskList.length;
+	if (len <= 0) return callback();
+	let loop = () => {
+		if (index >= len) {
+			callback();
+			return;
+		}
+		taskList[index]();
+		setTimeout(() => {
+			index++;
+			loop();
+		}, 0);
+	};
+	loop();
+};
+var degToRad = (deg) => {
+	return deg * (Math.PI / 180);
+};
+var camelCaseToHyphen = (str) => {
+	return str.replace(/([a-z])([A-Z])/g, (...args) => {
+		return args[1] + "-" + args[2].toLowerCase();
+	});
+};
+var nextTick = function(fn, ctx) {
+	let pending = false;
+	let timerFunc = null;
+	let handle = () => {
+		pending = false;
+		ctx ? fn.call(ctx) : fn();
+	};
+	if (typeof MutationObserver !== "undefined") {
+		let counter = 1;
+		let observer = new MutationObserver(handle);
+		let textNode = document.createTextNode(counter);
+		observer.observe(textNode, { characterData: true });
+		timerFunc = function() {
+			counter = (counter + 1) % 2;
+			textNode.data = counter;
+		};
+	} else timerFunc = setTimeout;
+	return function() {
+		if (pending) return;
+		pending = true;
+		timerFunc(handle, 0);
+	};
+};
+var checkNodeOuter = (mindMap, node, offsetX = 0, offsetY = 0) => {
+	let elRect = mindMap.elRect;
+	let { scaleX, scaleY, translateX, translateY } = mindMap.draw.transform();
+	let { left, top, width, height } = node;
+	let right = (left + width) * scaleX + translateX;
+	let bottom = (top + height) * scaleY + translateY;
+	left = left * scaleX + translateX;
+	top = top * scaleY + translateY;
+	let offsetLeft = 0;
+	let offsetTop = 0;
+	if (left < 0 + offsetX) offsetLeft = -left + offsetX;
+	if (right > elRect.width - offsetX) offsetLeft = -(right - elRect.width) - offsetX;
+	if (top < 0 + offsetY) offsetTop = -top + offsetY;
+	if (bottom > elRect.height - offsetY) offsetTop = -(bottom - elRect.height) - offsetY;
+	return {
+		isOuter: offsetLeft !== 0 || offsetTop !== 0,
+		offsetLeft,
+		offsetTop
+	};
+};
+var getTextFromHtmlEl = null;
+var getTextFromHtml = (html) => {
+	if (!getTextFromHtmlEl) getTextFromHtmlEl = document.createElement("div");
+	getTextFromHtmlEl.innerHTML = html;
+	return getTextFromHtmlEl.textContent;
+};
+var getImageSize = (src) => {
+	return new Promise((resolve) => {
+		let img = new Image();
+		img.src = src;
+		img.onload = () => {
+			resolve({
+				width: img.width,
+				height: img.height
+			});
+		};
+		img.onerror = () => {
+			resolve({
+				width: 0,
+				height: 0
+			});
+		};
+	});
+};
+var createUid = () => {
+	return v4();
+};
+var loadImage = (imgFile) => {
+	return new Promise((resolve, reject) => {
+		let fr = new FileReader();
+		fr.readAsDataURL(imgFile);
+		fr.onload = async (e) => {
+			let url = e.target.result;
+			resolve({
+				url,
+				size: await getImageSize(url)
+			});
+		};
+		fr.onerror = (error) => {
+			reject(error);
+		};
+	});
+};
+var getType = (data) => {
+	return Object.prototype.toString.call(data).slice(8, -1);
+};
+var isUndef = (data) => {
+	return data === null || data === void 0 || data === "";
+};
+var checkIsRichTextEl = null;
+var checkIsRichText = (str) => {
+	if (!checkIsRichTextEl) checkIsRichTextEl = document.createElement("div");
+	checkIsRichTextEl.innerHTML = str;
+	for (let c = checkIsRichTextEl.childNodes, i = c.length; i--;) if (c[i].nodeType == 1) return true;
+	return false;
+};
+var isWhite = (color) => {
+	color = String(color).replace(/\s+/g, "");
+	return [
+		"#fff",
+		"#ffffff",
+		"#FFF",
+		"#FFFFFF",
+		"rgb(255,255,255)"
+	].includes(color) || /rgba\(255,255,255,[^)]+\)/.test(color);
+};
+var isTransparent = (color) => {
+	color = String(color).replace(/\s+/g, "");
+	return ["", "transparent"].includes(color) || /rgba\(\d+,\d+,\d+,0\)/.test(color);
+};
+var getVisibleColorFromTheme = (themeConfig) => {
+	let { lineColor, root, second, node } = themeConfig;
+	let list = [
+		lineColor,
+		root.fillColor,
+		root.color,
+		second.fillColor,
+		second.color,
+		node.fillColor,
+		node.color,
+		root.borderColor,
+		second.borderColor,
+		node.borderColor
+	];
+	for (let i = 0; i < list.length; i++) {
+		let color = list[i];
+		if (!isTransparent(color) && !isWhite(color)) return color;
+	}
+};
+var removeRichTextStyesEl = null;
+var removeRichTextStyes = (html) => {
+	if (!removeRichTextStyesEl) removeRichTextStyesEl = document.createElement("div");
+	removeRichTextStyesEl.innerHTML = html;
+	const formulaList = removeRichTextStyesEl.querySelectorAll(".ql-formula");
+	Array.from(formulaList).forEach((el) => {
+		const placeholder = document.createTextNode("$smmformula$");
+		el.parentNode.replaceChild(placeholder, el);
+	});
+	const childNodes = removeRichTextStyesEl.childNodes;
+	let list = [];
+	for (let i = 0; i < childNodes.length; i++) {
+		const node = childNodes[i];
+		if (node.nodeType === 1) list.push(node.textContent);
+		else if (node.nodeType === 3) list.push(node.nodeValue);
+	}
+	html = list.map((item) => {
+		return `<p><span>${htmlEscape(item)}</span></p>`;
+	}).join("");
+	if (formulaList.length > 0) {
+		html = html.replace(/\$smmformula\$/g, "<span class=\"smmformula\"></span>");
+		removeRichTextStyesEl.innerHTML = html;
+		const els = removeRichTextStyesEl.querySelectorAll(".smmformula");
+		Array.from(els).forEach((el, index) => {
+			el.parentNode.replaceChild(formulaList[index], el);
+		});
+		html = removeRichTextStyesEl.innerHTML;
+	}
+	return html;
+};
+var getObjectChangedProps = (oldObject, newObject) => {
+	const res = {};
+	Object.keys(newObject).forEach((prop) => {
+		const oldVal = oldObject[prop];
+		const newVal = newObject[prop];
+		if (getType(oldVal) !== getType(newVal)) {
+			res[prop] = newVal;
+			return;
+		}
+		if (getType(oldVal) === "Object") {
+			if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+				res[prop] = newVal;
+				return;
+			}
+		} else if (oldVal !== newVal) {
+			res[prop] = newVal;
+			return;
+		}
+	});
+	return res;
+};
+var checkIsNodeStyleDataKey = (key) => {
+	if (/^_/.test(key)) return false;
+	if (!nodeDataNoStylePropList.includes(key)) return true;
+	return false;
+};
+var isNodeNotNeedRenderData = (config) => {
+	const list = [...lineStyleProps];
+	const keys = Object.keys(config);
+	for (let i = 0; i < keys.length; i++) if (!list.includes(keys[i])) return false;
+	return true;
+};
+var mergerIconList = (list) => {
+	return list.reduce((result, item) => {
+		const existingItem = result.find((x) => x.type === item.type);
+		if (existingItem) item.list.forEach((newObj) => {
+			const existingObj = existingItem.list.find((x) => x.name === newObj.name);
+			if (existingObj) existingObj.icon = newObj.icon;
+			else existingItem.list.push(newObj);
+		});
+		else result.push({ ...item });
+		return result;
+	}, []);
+};
+var getTopAncestorsFomNodeList = (list) => {
+	let res = [];
+	list.forEach((node) => {
+		if (!list.find((item) => {
+			return item.uid !== node.uid && item.isAncestor(node);
+		})) res.push(node);
+	});
+	return res;
+};
+var parseAddGeneralizationNodeList = (list) => {
+	const cache = {};
+	const uidToParent = {};
+	list.forEach((node) => {
+		const parent = node.parent;
+		if (parent) {
+			const pUid = parent.uid;
+			uidToParent[pUid] = parent;
+			const data = {
+				node,
+				index: node.getIndexInBrothers()
+			};
+			if (cache[pUid]) {
+				if (!cache[pUid].find((item) => {
+					return item.index === data.index;
+				})) cache[pUid].push(data);
+			} else cache[pUid] = [data];
+		}
+	});
+	const res = [];
+	Object.keys(cache).forEach((uid) => {
+		if (cache[uid].length > 1) {
+			const rangeList = cache[uid].map((item) => {
+				return item.index;
+			}).sort((a, b) => {
+				return a - b;
+			});
+			res.push({
+				node: uidToParent[uid],
+				range: [rangeList[0], rangeList[rangeList.length - 1]]
+			});
+		} else res.push({ node: cache[uid][0].node });
+	});
+	return res;
+};
+var focusInput = (el) => {
+	let selection = window.getSelection();
+	let range = document.createRange();
+	range.selectNodeContents(el);
+	range.collapse();
+	selection.removeAllRanges();
+	selection.addRange(range);
+};
+var selectAllInput = (el) => {
+	let selection = window.getSelection();
+	let range = document.createRange();
+	range.selectNodeContents(el);
+	selection.removeAllRanges();
+	selection.addRange(range);
+};
+var addDataToAppointNodes = (appointNodes, data = {}) => {
+	data = { ...data };
+	if (data && data.richText && data.resetRichText) delete data.resetRichText;
+	const walk = (list) => {
+		list.forEach((node) => {
+			node.data = {
+				...node.data,
+				...data
+			};
+			if (node.children && node.children.length > 0) walk(node.children);
+		});
+	};
+	walk(appointNodes);
+	return appointNodes;
+};
+var createUidForAppointNodes = (appointNodes, createNewId = false, handle = null, handleGeneralization = false) => {
+	const walk = (list) => {
+		list.forEach((node) => {
+			if (!node.data) node.data = {};
+			if (createNewId || isUndef(node.data.uid)) node.data.uid = createUid();
+			if (handleGeneralization) formatGetNodeGeneralization(node.data).forEach((gNode) => {
+				if (createNewId || isUndef(gNode.uid)) gNode.uid = createUid();
+			});
+			handle && handle(node);
+			if (node.children && node.children.length > 0) walk(node.children);
+		});
+	};
+	walk(appointNodes);
+	return appointNodes;
+};
+var formatDataToArray = (data) => {
+	if (!data) return [];
+	return Array.isArray(data) ? data : [data];
+};
+var getNodeDataIndex = (node) => {
+	return node.parent ? node.parent.nodeData.children.findIndex((item) => {
+		return item.data.uid === node.uid;
+	}) : 0;
+};
+var getNodeIndexInNodeList = (node, nodeList) => {
+	return nodeList.findIndex((item) => {
+		return item.uid === node.uid;
+	});
+};
+var generateColorByContent = (str) => {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	return "hsla(" + new MersenneTwister(hash).genrand_int32() % 360 + ", 50%, 50%, 1)";
+};
+var htmlEscape = (str) => {
+	[
+		["&", "&amp;"],
+		["<", "&lt;"],
+		[">", "&gt;"]
+	].forEach((item) => {
+		str = str.replace(new RegExp(item[0], "g"), item[1]);
+	});
+	return str;
+};
+var isSameObject = (a, b) => {
+	const type = getType(a);
+	if (type !== getType(b)) return false;
+	if (type === "Object") {
+		const keysa = Object.keys(a);
+		const keysb = Object.keys(b);
+		if (keysa.length !== keysb.length) return false;
+		for (let i = 0; i < keysa.length; i++) {
+			const key = keysa[i];
+			if (!keysb.includes(key)) return false;
+			if (!isSameObject(a[key], b[key])) return false;
+		}
+		return true;
+	} else if (type === "Array") {
+		if (a.length !== b.length) return false;
+		for (let i = 0; i < a.length; i++) {
+			const itema = a[i];
+			const itemb = b[i];
+			if (getType(itema) !== getType(itemb)) return false;
+			if (!isSameObject(itema, itemb)) return false;
+		}
+		return true;
+	} else return a === b;
+};
+var checkClipboardReadEnable = () => {
+	return navigator.clipboard && typeof navigator.clipboard.read === "function";
+};
+var setDataToClipboard = (data) => {
+	if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(JSON.stringify(data));
+};
+var getDataFromClipboard = async () => {
+	let text = null;
+	let img = null;
+	if (checkClipboardReadEnable()) {
+		const items = await navigator.clipboard.read();
+		if (items && items.length > 0) {
+			for (const clipboardItem of items) for (const type of clipboardItem.types) if (/^image\//.test(type)) img = await clipboardItem.getType(type);
+			else if (type === "text/plain") text = await (await clipboardItem.getType(type)).text();
+		}
+	}
+	return {
+		text,
+		img
+	};
+};
+var removeFromParentNodeData = (node) => {
+	if (!node || !node.parent) return;
+	const index = getNodeDataIndex(node);
+	if (index === -1) return;
+	node.parent.nodeData.children.splice(index, 1);
+};
+var checkNodeListIsEqual = (list1, list2) => {
+	if (list1.length !== list2.length) return false;
+	for (let i = 0; i < list1.length; i++) if (!list2.find((item) => {
+		return item.uid === list1[i].uid;
+	})) return false;
+	return true;
+};
+var createSmmFormatData = (data) => {
+	return {
+		simpleMindMap: true,
+		data
+	};
+};
+var checkSmmFormatData = (data) => {
+	let smmData = null;
+	if (typeof data === "string") try {
+		const parsedData = JSON.parse(data);
+		if (typeof parsedData === "object" && parsedData.simpleMindMap) smmData = parsedData.data;
+	} catch (error) {}
+	else if (typeof data === "object" && data.simpleMindMap) smmData = data.data;
+	const isSmm = !!smmData;
+	return {
+		isSmm,
+		data: isSmm ? smmData : String(data)
+	};
+};
+var handleInputPasteText = (e, text) => {
+	e.preventDefault();
+	const selection = window.getSelection();
+	if (!selection.rangeCount) return;
+	selection.deleteFromDocument();
+	text = text || e.clipboardData.getData("text");
+	text = htmlEscape(text);
+	text = getTextFromHtml(text);
+	const textArr = text.split(/\n/g);
+	const fragment = document.createDocumentFragment();
+	textArr.forEach((item, index) => {
+		const node = document.createTextNode(item);
+		fragment.appendChild(node);
+		if (index < textArr.length - 1) {
+			const br = document.createElement("br");
+			fragment.appendChild(br);
+		}
+	});
+	selection.getRangeAt(0).insertNode(fragment);
+	selection.collapseToEnd();
+};
+var transformTreeDataToObject = (data) => {
+	const res = {};
+	const walk = (root, parent) => {
+		const uid = root.data.uid;
+		if (parent) parent.children.push(uid);
+		res[uid] = {
+			isRoot: !parent,
+			data: { ...root.data },
+			children: []
+		};
+		if (root.children && root.children.length > 0) root.children.forEach((item) => {
+			walk(item, res[uid]);
+		});
+	};
+	walk(data, null);
+	return res;
+};
+var handleGetSvgDataExtraContent = ({ addContentToHeader, addContentToFooter }) => {
+	const cssTextList = [];
+	let header = null;
+	let headerHeight = 0;
+	let footer = null;
+	let footerHeight = 0;
+	const handle = (fn, callback) => {
+		if (typeof fn === "function") {
+			const res = fn();
+			if (!res) return;
+			const { el, cssText, height } = res;
+			if (el instanceof HTMLElement) {
+				addXmlns(el);
+				callback(createForeignObjectNode({
+					el,
+					height
+				}), height);
+			}
+			if (cssText) cssTextList.push(cssText);
+		}
+	};
+	handle(addContentToHeader, (foreignObject, height) => {
+		header = foreignObject;
+		headerHeight = height;
+	});
+	handle(addContentToFooter, (foreignObject, height) => {
+		footer = foreignObject;
+		footerHeight = height;
+	});
+	return {
+		cssTextList,
+		header,
+		headerHeight,
+		footer,
+		footerHeight
+	};
+};
+var getNodeTreeBoundingRect = (node, x = 0, y = 0, paddingX = 0, paddingY = 0, excludeSelf = false, excludeGeneralization = false) => {
+	let minX = Infinity;
+	let maxX = -Infinity;
+	let minY = Infinity;
+	let maxY = -Infinity;
+	const walk = (root, isRoot) => {
+		if (!(isRoot && excludeSelf) && root.group) try {
+			const { x, y, width, height } = root.group.findOne(".smm-node-shape").rbox();
+			if (x < minX) minX = x;
+			if (x + width > maxX) maxX = x + width;
+			if (y < minY) minY = y;
+			if (y + height > maxY) maxY = y + height;
+		} catch (e) {}
+		if (!excludeGeneralization && root._generalizationList.length > 0) root._generalizationList.forEach((item) => {
+			walk(item.generalizationNode);
+		});
+		if (root.children) root.children.forEach((item) => {
+			walk(item);
+		});
+	};
+	walk(node, true);
+	minX = minX - x + paddingX;
+	minY = minY - y + paddingY;
+	maxX = maxX - x + paddingX;
+	maxY = maxY - y + paddingY;
+	return {
+		left: minX,
+		top: minY,
+		width: maxX - minX,
+		height: maxY - minY
+	};
+};
+var getOnfullscreEnevt = () => {
+	if (document.documentElement.requestFullScreen) return "fullscreenchange";
+	else if (document.documentElement.webkitRequestFullScreen) return "webkitfullscreenchange";
+	else if (document.documentElement.mozRequestFullScreen) return "mozfullscreenchange";
+	else if (document.documentElement.msRequestFullscreen) return "msfullscreenchange";
+};
+getOnfullscreEnevt();
+var createForeignObjectNode = ({ el, width, height }) => {
+	const foreignObject = new ForeignObject();
+	if (width !== void 0) foreignObject.width(width);
+	if (height !== void 0) foreignObject.height(height);
+	foreignObject.add(el);
+	return foreignObject;
+};
+var formatGetNodeGeneralization = (data) => {
+	const generalization = data.generalization;
+	if (generalization) return Array.isArray(generalization) ? generalization : [generalization];
+	else return [];
+};
+var addXmlns = (el) => {
+	el.setAttribute("xmlns", "http://www.w3.org/1999/xhtml");
+};
+var sortNodeList = (nodeList) => {
+	nodeList = [...nodeList];
+	nodeList.sort((a, b) => {
+		return a.sortIndex - b.sortIndex;
+	});
+	return nodeList;
+};
+var mergeTheme = (dest, source) => {
+	return (0, import_cjs.default)(dest, source, { arrayMerge: (destinationArray, sourceArray) => {
+		return sourceArray;
+	} });
+};
+var getNodeRichTextStyles = (node) => {
+	const res = {};
+	richTextSupportStyleList.forEach((prop) => {
+		let value = node.style.merge(prop);
+		if (prop === "fontSize") value = value + "px";
+		res[prop] = value;
+	});
+	return res;
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/Style.js
+var backgroundStyleProps = [
+	"backgroundColor",
+	"backgroundImage",
+	"backgroundRepeat",
+	"backgroundPosition",
+	"backgroundSize"
+];
+var shapeStyleProps = [
+	"gradientStyle",
+	"startColor",
+	"endColor",
+	"startDir",
+	"endDir",
+	"fillColor",
+	"borderColor",
+	"borderWidth",
+	"borderDasharray"
+];
+var Style = class Style {
+	static setBackgroundStyle(el, themeConfig) {
+		if (!el) return;
+		if (!Style.cacheStyle) {
+			Style.cacheStyle = {};
+			let style = window.getComputedStyle(el);
+			backgroundStyleProps.forEach((prop) => {
+				Style.cacheStyle[prop] = style[prop];
+			});
+		}
+		let { backgroundColor, backgroundImage, backgroundRepeat, backgroundPosition, backgroundSize } = themeConfig;
+		el.style.backgroundColor = backgroundColor;
+		if (backgroundImage && backgroundImage !== "none") {
+			el.style.backgroundImage = `url(${backgroundImage})`;
+			el.style.backgroundRepeat = backgroundRepeat;
+			el.style.backgroundPosition = backgroundPosition;
+			el.style.backgroundSize = backgroundSize;
+		} else el.style.backgroundImage = "none";
+	}
+	static removeBackgroundStyle(el) {
+		if (!Style.cacheStyle) return;
+		backgroundStyleProps.forEach((prop) => {
+			el.style[prop] = Style.cacheStyle[prop];
+		});
+		Style.cacheStyle = null;
+	}
+	constructor(ctx) {
+		this.ctx = ctx;
+		this._markerPath = null;
+		this._marker = null;
+		this._gradient = null;
+	}
+	merge(prop, root) {
+		let themeConfig = this.ctx.mindMap.themeConfig;
+		let defaultConfig = null;
+		let useRoot = false;
+		if (root) {
+			useRoot = true;
+			defaultConfig = themeConfig;
+		} else if (this.ctx.isGeneralization) defaultConfig = themeConfig.generalization;
+		else if (this.ctx.layerIndex === 0) defaultConfig = themeConfig.root;
+		else if (this.ctx.layerIndex === 1) defaultConfig = themeConfig.second;
+		else defaultConfig = themeConfig.node;
+		let value = "";
+		if (this.getSelfStyle(prop) !== void 0) value = this.getSelfStyle(prop);
+		else if (defaultConfig[prop] !== void 0) value = defaultConfig[prop];
+		else value = themeConfig[prop];
+		if (!useRoot) this.addToEffectiveStyles({ [prop]: value });
+		return value;
+	}
+	getStyle(prop, root) {
+		return this.merge(prop, root);
+	}
+	getSelfStyle(prop) {
+		return this.ctx.getData(prop);
+	}
+	addToEffectiveStyles(styles) {
+		if (!this.ctx.mindMap.painter) return;
+		this.ctx.effectiveStyles = {
+			...this.ctx.effectiveStyles,
+			...styles
+		};
+	}
+	rect(node) {
+		this.shape(node);
+		node.radius(this.merge("borderRadius"));
+	}
+	shape(node) {
+		const styles = {};
+		shapeStyleProps.forEach((key) => {
+			styles[key] = this.merge(key);
+		});
+		if (styles.gradientStyle) {
+			if (!this._gradient) this._gradient = this.ctx.nodeDraw.gradient("linear");
+			this._gradient.update((add) => {
+				add.stop(0, styles.startColor);
+				add.stop(1, styles.endColor);
+			});
+			this._gradient.from(...styles.startDir).to(...styles.endDir);
+			node.fill(this._gradient);
+		} else node.fill({ color: styles.fillColor });
+		node.stroke({
+			color: styles.borderColor,
+			width: styles.borderWidth,
+			dasharray: styles.borderDasharray
+		});
+	}
+	text(node) {
+		const styles = {
+			color: this.merge("color"),
+			fontFamily: this.merge("fontFamily"),
+			fontSize: this.merge("fontSize"),
+			fontWeight: this.merge("fontWeight"),
+			fontStyle: this.merge("fontStyle"),
+			textDecoration: this.merge("textDecoration")
+		};
+		node.fill({ color: styles.color }).css({
+			"font-family": styles.fontFamily,
+			"font-size": styles.fontSize + "px",
+			"font-weight": styles.fontWeight,
+			"font-style": styles.fontStyle,
+			"text-decoration": styles.textDecoration
+		});
+	}
+	domText(node, fontSizeScale = 1) {
+		const styles = {
+			color: this.merge("color"),
+			fontFamily: this.merge("fontFamily"),
+			fontSize: this.merge("fontSize"),
+			fontWeight: this.merge("fontWeight"),
+			fontStyle: this.merge("fontStyle"),
+			textDecoration: this.merge("textDecoration"),
+			textAlign: this.merge("textAlign")
+		};
+		node.style.color = styles.color;
+		node.style.textDecoration = styles.textDecoration;
+		node.style.fontFamily = styles.fontFamily;
+		node.style.fontSize = styles.fontSize * fontSizeScale + "px";
+		node.style.fontWeight = styles.fontWeight || "normal";
+		node.style.fontStyle = styles.fontStyle;
+		node.style.textAlign = styles.textAlign;
+	}
+	tagText(node, style) {
+		node.fill({ color: "#fff" }).css({ "font-size": style.fontSize + "px" });
+	}
+	tagRect(node, style) {
+		node.fill({ color: style.fill });
+		if (style.radius) node.radius(style.radius);
+	}
+	iconNode(node, color) {
+		node.attr({ fill: color || this.merge("color") });
+	}
+	line(line, { width, color, dasharray } = {}, enableMarker, childNode) {
+		const { customHandleLine } = this.ctx.mindMap.opt;
+		if (typeof customHandleLine === "function") customHandleLine(this.ctx, line, {
+			width,
+			color,
+			dasharray
+		});
+		line.stroke({
+			color,
+			dasharray,
+			width
+		}).fill({ color: "none" });
+		if (enableMarker) {
+			const showMarker = this.merge("showLineMarker", true);
+			const childNodeStyle = childNode.style;
+			if (showMarker) {
+				childNodeStyle._marker = childNodeStyle._marker || childNodeStyle.createMarker();
+				childNodeStyle._markerPath.stroke({ color }).fill({ color });
+				line.attr("marker-start", "");
+				line.attr("marker-end", "");
+				const dir = childNodeStyle.merge("lineMarkerDir");
+				line.marker(dir, childNodeStyle._marker);
+			} else if (childNodeStyle._marker) {
+				line.attr("marker-start", "");
+				line.attr("marker-end", "");
+				childNodeStyle._marker.remove();
+				childNodeStyle._marker = null;
+			}
+		}
+	}
+	createMarker() {
+		return this.ctx.lineDraw.marker(20, 20, (add) => {
+			add.ref(8, 5);
+			add.size(20, 20);
+			add.attr("markerUnits", "userSpaceOnUse");
+			add.attr("orient", "auto-start-reverse");
+			this._markerPath = add.path("M0,0 L2,5 L0,10 L10,5 Z");
+		});
+	}
+	generalizationLine(node) {
+		node.stroke({
+			width: this.merge("generalizationLineWidth", true),
+			color: this.merge("generalizationLineColor", true)
+		}).fill({ color: "none" });
+	}
+	iconBtn(node, node2, fillNode) {
+		let { color, fill, fontSize, fontColor } = this.ctx.mindMap.opt.expandBtnStyle || {
+			color: "#808080",
+			fill: "#fff",
+			fontSize: 12,
+			strokeColor: "#333333",
+			fontColor: "#333333"
+		};
+		node.fill({ color });
+		node2.fill({ color });
+		fillNode.fill({ color: fill });
+		if (this.ctx.mindMap.opt.isShowExpandNum) node.attr({
+			"font-size": fontSize + "px",
+			"font-color": fontColor
+		});
+	}
+	hasCustomStyle() {
+		let res = false;
+		Object.keys(this.ctx.getData()).forEach((item) => {
+			if (checkIsNodeStyleDataKey(item)) res = true;
+		});
+		return res;
+	}
+	getCustomStyle() {
+		const customStyle = {};
+		Object.keys(this.ctx.getData()).forEach((item) => {
+			if (checkIsNodeStyleDataKey(item)) customStyle[item] = this.ctx.getData(item);
+		});
+		return customStyle;
+	}
+	hoverNode(node) {
+		const hoverRectColor = this.merge("hoverRectColor") || this.ctx.mindMap.opt.hoverRectColor;
+		const hoverRectRadius = this.merge("hoverRectRadius");
+		node.radius(hoverRectRadius).fill("none").stroke({ color: hoverRectColor });
+	}
+	onRemove() {
+		if (this._marker) {
+			this._marker.remove();
+			this._marker = null;
+		}
+		if (this._markerPath) {
+			this._markerPath.remove();
+			this._markerPath = null;
+		}
+		if (this._gradient) {
+			this._gradient.remove();
+			this._gradient = null;
+		}
+	}
+};
+Style.cacheStyle = null;
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/Shape.js
+var Shape = class {
+	constructor(node) {
+		this.node = node;
+		this.mindMap = node.mindMap;
+	}
+	getShapePadding(width, height, paddingX, paddingY) {
+		const shape = this.node.getShape();
+		const defaultPaddingX = 15;
+		const defaultPaddingY = 5;
+		const actWidth = width + paddingX * 2;
+		const actHeight = height + paddingY * 2;
+		const actOffset = Math.abs(actWidth - actHeight);
+		switch (shape) {
+			case CONSTANTS.SHAPE.ROUNDED_RECTANGLE: return {
+				paddingX: height > width ? (height - width) / 2 : 0,
+				paddingY: 0
+			};
+			case CONSTANTS.SHAPE.DIAMOND: return {
+				paddingX: width / 2,
+				paddingY: height / 2
+			};
+			case CONSTANTS.SHAPE.PARALLELOGRAM: return {
+				paddingX: paddingX <= 0 ? defaultPaddingX : 0,
+				paddingY: 0
+			};
+			case CONSTANTS.SHAPE.OUTER_TRIANGULAR_RECTANGLE: return {
+				paddingX: paddingX <= 0 ? defaultPaddingX : 0,
+				paddingY: 0
+			};
+			case CONSTANTS.SHAPE.INNER_TRIANGULAR_RECTANGLE: return {
+				paddingX: paddingX <= 0 ? defaultPaddingX : 0,
+				paddingY: 0
+			};
+			case CONSTANTS.SHAPE.ELLIPSE: return {
+				paddingX: paddingX <= 0 ? defaultPaddingX : 0,
+				paddingY: paddingY <= 0 ? defaultPaddingY : 0
+			};
+			case CONSTANTS.SHAPE.CIRCLE: return {
+				paddingX: actHeight > actWidth ? actOffset / 2 : 0,
+				paddingY: actHeight < actWidth ? actOffset / 2 : 0
+			};
+		}
+		const extendShape = this.getShapeFromExtendList(shape);
+		if (extendShape) return extendShape.getPadding({
+			node: this.node,
+			width,
+			height,
+			paddingX,
+			paddingY
+		}) || {
+			paddingX: 0,
+			paddingY: 0
+		};
+		else return {
+			paddingX: 0,
+			paddingY: 0
+		};
+	}
+	getShapeFromExtendList(shape) {
+		return this.mindMap.extendShapeList.find((item) => {
+			return item.name === shape;
+		});
+	}
+	createShape() {
+		const shape = this.node.getShape();
+		let node = null;
+		if (shape === CONSTANTS.SHAPE.RECTANGLE) node = this.createRect();
+		else if (shape === CONSTANTS.SHAPE.DIAMOND) node = this.createDiamond();
+		else if (shape === CONSTANTS.SHAPE.PARALLELOGRAM) node = this.createParallelogram();
+		else if (shape === CONSTANTS.SHAPE.ROUNDED_RECTANGLE) node = this.createRoundedRectangle();
+		else if (shape === CONSTANTS.SHAPE.OCTAGONAL_RECTANGLE) node = this.createOctagonalRectangle();
+		else if (shape === CONSTANTS.SHAPE.OUTER_TRIANGULAR_RECTANGLE) node = this.createOuterTriangularRectangle();
+		else if (shape === CONSTANTS.SHAPE.INNER_TRIANGULAR_RECTANGLE) node = this.createInnerTriangularRectangle();
+		else if (shape === CONSTANTS.SHAPE.ELLIPSE) node = this.createEllipse();
+		else if (shape === CONSTANTS.SHAPE.CIRCLE) node = this.createCircle();
+		if (!node) {
+			const extendShape = this.getShapeFromExtendList(shape);
+			if (extendShape) node = extendShape.createShape(this.node);
+		}
+		return node || this.createRect();
+	}
+	getNodeSize() {
+		const borderWidth = this.node.getBorderWidth();
+		let { width, height } = this.node;
+		width -= borderWidth;
+		height -= borderWidth;
+		return {
+			width,
+			height
+		};
+	}
+	createPath(pathStr) {
+		const { customCreateNodePath } = this.mindMap.opt;
+		if (customCreateNodePath) return SVG(customCreateNodePath(pathStr));
+		return new Path().plot(pathStr);
+	}
+	createPolygon(points) {
+		const { customCreateNodePolygon } = this.mindMap.opt;
+		if (customCreateNodePolygon) return SVG(customCreateNodePolygon(points));
+		return new Polygon().plot(points);
+	}
+	createRect() {
+		let { width, height } = this.getNodeSize();
+		let borderRadius = this.node.style.merge("borderRadius");
+		const pathStr = `
+      M${borderRadius},0
+      L${width - borderRadius},0
+      C${width - borderRadius},0 ${width},0 ${width},${borderRadius}
+      L${width},${height - borderRadius}
+      C${width},${height - borderRadius} ${width},${height} ${width - borderRadius},${height}
+      L${borderRadius},${height}
+      C${borderRadius},${height} 0,${height} 0,${height - borderRadius}
+      L0,${borderRadius}
+      C0,${borderRadius} 0,0 ${borderRadius},0
+      Z
+    `;
+		return this.createPath(pathStr);
+	}
+	createDiamond() {
+		let { width, height } = this.getNodeSize();
+		let halfWidth = width / 2;
+		let halfHeight = height / 2;
+		const points = [
+			[halfWidth, 0],
+			[width, halfHeight],
+			[halfWidth, height],
+			[0, halfHeight]
+		];
+		return this.createPolygon(points);
+	}
+	createParallelogram() {
+		let { paddingX } = this.node.getPaddingVale();
+		paddingX = paddingX || this.node.shapePadding.paddingX;
+		let { width, height } = this.getNodeSize();
+		const points = [
+			[paddingX, 0],
+			[width, 0],
+			[width - paddingX, height],
+			[0, height]
+		];
+		return this.createPolygon(points);
+	}
+	createRoundedRectangle() {
+		let { width, height } = this.getNodeSize();
+		let halfHeight = height / 2;
+		const pathStr = `
+      M${halfHeight},0
+      L${width - halfHeight},0
+      A${height / 2},${height / 2} 0 0,1 ${width - halfHeight},${height} 
+      L${halfHeight},${height}
+      A${height / 2},${height / 2} 0 0,1 ${halfHeight},0
+    `;
+		return this.createPath(pathStr);
+	}
+	createOctagonalRectangle() {
+		let w = 5;
+		let { width, height } = this.getNodeSize();
+		const points = [
+			[0, w],
+			[w, 0],
+			[width - w, 0],
+			[width, w],
+			[width, height - w],
+			[width - w, height],
+			[w, height],
+			[0, height - w]
+		];
+		return this.createPolygon(points);
+	}
+	createOuterTriangularRectangle() {
+		let { paddingX } = this.node.getPaddingVale();
+		paddingX = paddingX || this.node.shapePadding.paddingX;
+		let { width, height } = this.getNodeSize();
+		const points = [
+			[paddingX, 0],
+			[width - paddingX, 0],
+			[width, height / 2],
+			[width - paddingX, height],
+			[paddingX, height],
+			[0, height / 2]
+		];
+		return this.createPolygon(points);
+	}
+	createInnerTriangularRectangle() {
+		let { paddingX } = this.node.getPaddingVale();
+		paddingX = paddingX || this.node.shapePadding.paddingX;
+		let { width, height } = this.getNodeSize();
+		const points = [
+			[0, 0],
+			[width, 0],
+			[width - paddingX / 2, height / 2],
+			[width, height],
+			[0, height],
+			[paddingX / 2, height / 2]
+		];
+		return this.createPolygon(points);
+	}
+	createEllipse() {
+		let { width, height } = this.getNodeSize();
+		let halfWidth = width / 2;
+		let halfHeight = height / 2;
+		const pathStr = `
+      M${halfWidth},0
+      A${halfWidth},${halfHeight} 0 0,1 ${halfWidth},${height} 
+      M${halfWidth},${height} 
+      A${halfWidth},${halfHeight} 0 0,1 ${halfWidth},0 
+    `;
+		return this.createPath(pathStr);
+	}
+	createCircle() {
+		let { width, height } = this.getNodeSize();
+		let halfWidth = width / 2;
+		let halfHeight = height / 2;
+		const pathStr = `
+      M${halfWidth},0
+      A${halfWidth},${halfHeight} 0 0,1 ${halfWidth},${height} 
+      M${halfWidth},${height} 
+      A${halfWidth},${halfHeight} 0 0,1 ${halfWidth},0 
+    `;
+		return this.createPath(pathStr);
+	}
+};
+var shapeList = [
+	CONSTANTS.SHAPE.RECTANGLE,
+	CONSTANTS.SHAPE.DIAMOND,
+	CONSTANTS.SHAPE.PARALLELOGRAM,
+	CONSTANTS.SHAPE.ROUNDED_RECTANGLE,
+	CONSTANTS.SHAPE.OCTAGONAL_RECTANGLE,
+	CONSTANTS.SHAPE.OUTER_TRIANGULAR_RECTANGLE,
+	CONSTANTS.SHAPE.INNER_TRIANGULAR_RECTANGLE,
+	CONSTANTS.SHAPE.ELLIPSE,
+	CONSTANTS.SHAPE.CIRCLE
+];
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeGeneralization.js
+function formatGetGeneralization() {
+	const data = this.getData("generalization");
+	return Array.isArray(data) ? data : data ? [data] : [];
+}
+function checkHasGeneralization() {
+	return this.formatGetGeneralization().length > 0;
+}
+function checkHasSelfGeneralization() {
+	return !!this.formatGetGeneralization().find((item) => {
+		return !item.range || item.range.length <= 0;
+	});
+}
+function getGeneralizationNodeIndex(node) {
+	return this._generalizationList.findIndex((item) => {
+		return item.generalizationNode.uid === node.uid;
+	});
+}
+function createGeneralizationNode() {
+	if (this.isGeneralization || !this.checkHasGeneralization()) return;
+	let maxWidth = 0;
+	let maxHeight = 0;
+	this.formatGetGeneralization().forEach((item, index) => {
+		let cur = this._generalizationList[index];
+		if (!cur) cur = this._generalizationList[index] = {};
+		cur.node = this;
+		cur.range = item.range;
+		if (!cur.generalizationLine) cur.generalizationLine = this.lineDraw.path();
+		if (!cur.generalizationNode) cur.generalizationNode = new MindMapNode({
+			data: {
+				inserting: item.inserting,
+				data: item
+			},
+			uid: createUid(),
+			renderer: this.renderer,
+			mindMap: this.mindMap,
+			isGeneralization: true
+		});
+		delete item.inserting;
+		cur.generalizationNode.generalizationBelongNode = this;
+		if (cur.generalizationNode.width > maxWidth) maxWidth = cur.generalizationNode.width;
+		if (cur.generalizationNode.height > maxHeight) maxHeight = cur.generalizationNode.height;
+		if (item.isActive) this.renderer.addNodeToActiveList(cur.generalizationNode);
+	});
+	this._generalizationNodeWidth = maxWidth;
+	this._generalizationNodeHeight = maxHeight;
+}
+function updateGeneralization() {
+	if (this.isGeneralization) return;
+	this.removeGeneralization();
+	this.createGeneralizationNode();
+}
+function renderGeneralization(forceRender) {
+	if (this.isGeneralization) return;
+	this.updateGeneralizationData();
+	const list = this.formatGetGeneralization();
+	if (list.length <= 0 || this.getData("expand") === false) {
+		this.removeGeneralization();
+		return;
+	}
+	if (list.length !== this._generalizationList.length) this.removeGeneralization();
+	this.createGeneralizationNode();
+	this.renderer.layout.renderGeneralization(this._generalizationList);
+	this._generalizationList.forEach((item) => {
+		this.style.generalizationLine(item.generalizationLine);
+		item.generalizationNode.render(() => {}, forceRender);
+	});
+}
+function updateGeneralizationData() {
+	const childrenLength = this.getChildrenLength();
+	const list = this.formatGetGeneralization();
+	const newList = [];
+	list.forEach((item) => {
+		if (!item.range) {
+			newList.push(item);
+			return;
+		}
+		if (item.range.length > 0 && item.range[0] <= childrenLength - 1 && item.range[1] <= childrenLength - 1) newList.push(item);
+	});
+	if (newList.length !== list.length) this.setData({ generalization: newList });
+}
+function removeGeneralization() {
+	if (this.isGeneralization) return;
+	this._generalizationList.forEach((item) => {
+		item.generalizationNode.style.onRemove();
+		if (item.generalizationLine) {
+			item.generalizationLine.remove();
+			item.generalizationLine = null;
+		}
+		if (item.generalizationNode) {
+			this.renderer.removeNodeFromActiveList(item.generalizationNode);
+			item.generalizationNode.remove();
+			item.generalizationNode = null;
+		}
+	});
+	this._generalizationList = [];
+	if (this.generalizationBelongNode) this.nodeDraw.find(".generalization_" + this.generalizationBelongNode.uid).remove();
+}
+function hideGeneralization() {
+	if (this.isGeneralization) return;
+	this._generalizationList.forEach((item) => {
+		if (item.generalizationLine) item.generalizationLine.hide();
+		if (item.generalizationNode) item.generalizationNode.hide();
+	});
+}
+function showGeneralization() {
+	if (this.isGeneralization) return;
+	this._generalizationList.forEach((item) => {
+		if (item.generalizationLine) item.generalizationLine.show();
+		if (item.generalizationNode) item.generalizationNode.show();
+	});
+}
+function setGeneralizationOpacity(val) {
+	this._generalizationList.forEach((item) => {
+		item.generalizationLine.opacity(val);
+		item.generalizationNode.group.opacity(val);
+	});
+}
+function handleGeneralizationMouseenter() {
+	const belongNode = this.generalizationBelongNode;
+	const generalizationData = belongNode.formatGetGeneralization()[belongNode.getGeneralizationNodeIndex(this)];
+	const color = this.getStyle("hoverRectColor") || this.mindMap.opt.hoverRectColor;
+	const style = color ? { stroke: color } : null;
+	if (Array.isArray(generalizationData.range) && generalizationData.range.length > 0) this.mindMap.renderer.highlightNode(belongNode, generalizationData.range, style);
+	else this.mindMap.renderer.highlightNode(belongNode, null, style);
+}
+function handleGeneralizationMouseleave() {
+	this.mindMap.renderer.closeHighlightNode();
+}
+var nodeGeneralization_default = {
+	formatGetGeneralization,
+	checkHasGeneralization,
+	checkHasSelfGeneralization,
+	getGeneralizationNodeIndex,
+	createGeneralizationNode,
+	updateGeneralization,
+	updateGeneralizationData,
+	renderGeneralization,
+	removeGeneralization,
+	hideGeneralization,
+	showGeneralization,
+	setGeneralizationOpacity,
+	handleGeneralizationMouseenter,
+	handleGeneralizationMouseleave
+};
+var btns_default = {
+	open: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="200" height="200"><path d="M475.136 327.168v147.968h-147.968v74.24h147.968v147.968h74.24v-147.968h147.968v-74.24h-147.968v-147.968h-74.24z m36.864-222.208c225.28 0 407.04 181.76 407.04 407.04s-181.76 407.04-407.04 407.04-407.04-181.76-407.04-407.04 181.76-407.04 407.04-407.04z m0-74.24c-265.216 0-480.768 215.552-480.768 480.768s215.552 480.768 480.768 480.768 480.768-215.552 480.768-480.768-215.552-480.768-480.768-480.768z"></path></svg>`,
+	close: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="200" height="200"><path d="M512 105.472c225.28 0 407.04 181.76 407.04 407.04s-181.76 407.04-407.04 407.04-407.04-181.76-407.04-407.04 181.76-407.04 407.04-407.04z m0-74.24c-265.216 0-480.768 215.552-480.768 480.768s215.552 480.768 480.768 480.768 480.768-215.552 480.768-480.768-215.552-480.768-480.768-480.768z"></path><path d="M252.928 474.624h518.144v74.24h-518.144z"></path></svg>`,
+	remove: `<svg width="14px" height="14px" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="200" height="200"><path fill="#ffffff" d="M512 105.472c225.28 0 407.04 181.76 407.04 407.04s-181.76 407.04-407.04 407.04-407.04-181.76-407.04-407.04 181.76-407.04 407.04-407.04z m0-74.24c-265.216 0-480.768 215.552-480.768 480.768s215.552 480.768 480.768 480.768 480.768-215.552 480.768-480.768-215.552-480.768-480.768-480.768z"></path><path fill="#ffffff" d="M252.928 474.624h518.144v74.24h-518.144z"></path></svg>`,
+	imgAdjust: `<svg width="12px" height="12px" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="M1008.128 614.4a25.6 25.6 0 0 0-27.648 5.632l-142.848 142.848L259.072 186.88 401.92 43.52A25.6 25.6 0 0 0 384 0h-358.4a25.6 25.6 0 0 0-25.6 25.6v358.4a25.6 25.6 0 0 0 43.52 17.92l143.36-142.848 578.048 578.048-142.848 142.848a25.6 25.6 0 0 0 17.92 43.52h358.4a25.6 25.6 0 0 0 25.6-25.6v-358.4a25.6 25.6 0 0 0-15.872-25.088z"  /></svg>`,
+	quickCreateChild: `<svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="48" height="48"><path d="M514.048 62.464q93.184 0 175.616 35.328t143.872 96.768 96.768 143.872 35.328 175.616q0 94.208-35.328 176.128t-96.768 143.36-143.872 96.768-175.616 35.328q-94.208 0-176.64-35.328t-143.872-96.768-96.768-143.36-35.328-176.128q0-93.184 35.328-175.616t96.768-143.872 143.872-96.768 176.64-35.328zM772.096 576.512q26.624 0 45.056-18.944t18.432-45.568-18.432-45.056-45.056-18.432l-192.512 0 0-192.512q0-26.624-18.944-45.568t-45.568-18.944-45.056 18.944-18.432 45.568l0 192.512-192.512 0q-26.624 0-45.056 18.432t-18.432 45.056 18.432 45.568 45.056 18.944l192.512 0 0 191.488q0 26.624 18.432 45.568t45.056 18.944 45.568-18.944 18.944-45.568l0-191.488 192.512 0z"></path></svg>`
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeExpandBtn.js
+function createExpandNodeContent() {
+	if (this._openExpandNode) return;
+	const { expandBtnSize, expandBtnIcon, isShowExpandNum } = this.mindMap.opt;
+	let { close, open } = expandBtnIcon || {};
+	if (isShowExpandNum) {
+		this._openExpandNode = new Text();
+		this._openExpandNode.addClass("smm-expand-btn-text");
+		this._openExpandNode.attr({
+			"text-anchor": "middle",
+			"dominant-baseline": "middle",
+			x: expandBtnSize / 2,
+			y: 2
+		});
+	} else {
+		this._openExpandNode = SVG(open || btns_default.open).size(expandBtnSize, expandBtnSize);
+		this._openExpandNode.x(0).y(-expandBtnSize / 2);
+	}
+	this._closeExpandNode = SVG(close || btns_default.close).size(expandBtnSize, expandBtnSize);
+	this._closeExpandNode.x(0).y(-expandBtnSize / 2);
+	this._fillExpandNode = new Circle().size(expandBtnSize);
+	this._fillExpandNode.x(0).y(-expandBtnSize / 2);
+	this.style.iconBtn(this._openExpandNode, this._closeExpandNode, this._fillExpandNode);
+}
+function sumNode(data = []) {
+	return data.reduce((total, cur) => total + this.sumNode(cur.children || []), data.length);
+}
+function updateExpandBtnNode() {
+	let { expand } = this.getData();
+	if (expand === this._lastExpandBtnType) return;
+	if (this._expandBtn) this._expandBtn.clear();
+	this.createExpandNodeContent();
+	let node;
+	if (expand === false) {
+		node = this._openExpandNode;
+		this._lastExpandBtnType = false;
+	} else {
+		node = this._closeExpandNode;
+		this._lastExpandBtnType = true;
+	}
+	if (this._expandBtn) {
+		let { isShowExpandNum, expandBtnStyle, expandBtnNumHandler } = this.mindMap.opt;
+		if (isShowExpandNum) if (!expand) {
+			this._fillExpandNode.stroke({ color: expandBtnStyle.strokeColor });
+			let count = this.sumNode(this.nodeData.children || []);
+			if (typeof expandBtnNumHandler === "function") {
+				const res = expandBtnNumHandler(count, this);
+				if (!isUndef(res)) count = res;
+			}
+			node.text(String(count));
+		} else this._fillExpandNode.stroke("none");
+		this._expandBtn.add(this._fillExpandNode).add(node);
+	}
+}
+function updateExpandBtnPos() {
+	if (!this._expandBtn) return;
+	this.renderer.layout.renderExpandBtn(this, this._expandBtn);
+}
+function renderExpandBtn() {
+	if (this.getChildrenLength() <= 0 || this.isRoot) return;
+	if (this._expandBtn) this.group.add(this._expandBtn);
+	else {
+		this._expandBtn = new G();
+		this._expandBtn.on("mouseover", (e) => {
+			e.stopPropagation();
+			this._expandBtn.css({ cursor: "pointer" });
+		});
+		this._expandBtn.on("mouseout", (e) => {
+			e.stopPropagation();
+			this._expandBtn.css({ cursor: "auto" });
+		});
+		this._expandBtn.on("click", (e) => {
+			e.stopPropagation();
+			this.mindMap.execCommand("SET_NODE_EXPAND", this, !this.getData("expand"));
+			this.mindMap.emit("expand_btn_click", this);
+		});
+		this._expandBtn.on("dblclick", (e) => {
+			e.stopPropagation();
+		});
+		this._expandBtn.addClass("smm-expand-btn");
+		this.group.add(this._expandBtn);
+	}
+	this._showExpandBtn = true;
+	this.updateExpandBtnNode();
+	this.updateExpandBtnPos();
+}
+function removeExpandBtn() {
+	if (this._expandBtn && this._showExpandBtn) {
+		this._expandBtn.remove();
+		this._showExpandBtn = false;
+	}
+}
+function showExpandBtn() {
+	const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+	if (alwaysShowExpandBtn || notShowExpandBtn) return;
+	setTimeout(() => {
+		this.renderExpandBtn();
+	}, 0);
+}
+function hideExpandBtn() {
+	const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+	if (alwaysShowExpandBtn || this._isMouseenter || notShowExpandBtn) return;
+	let { isActive, expand } = this.getData();
+	if (!isActive && expand) setTimeout(() => {
+		this.removeExpandBtn();
+	}, 0);
+}
+var nodeExpandBtn_default = {
+	createExpandNodeContent,
+	updateExpandBtnNode,
+	updateExpandBtnPos,
+	renderExpandBtn,
+	removeExpandBtn,
+	showExpandBtn,
+	hideExpandBtn,
+	sumNode
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeCommandWraps.js
+function setData(data = {}) {
+	this.mindMap.execCommand("SET_NODE_DATA", this, data);
+}
+function setText(text, richText, resetRichText) {
+	this.mindMap.execCommand("SET_NODE_TEXT", this, text, richText, resetRichText);
+}
+function setImage(imgData) {
+	this.mindMap.execCommand("SET_NODE_IMAGE", this, imgData);
+}
+function setIcon(icons) {
+	this.mindMap.execCommand("SET_NODE_ICON", this, icons);
+}
+function setHyperlink(link, title) {
+	this.mindMap.execCommand("SET_NODE_HYPERLINK", this, link, title);
+}
+function setNote(note) {
+	this.mindMap.execCommand("SET_NODE_NOTE", this, note);
+}
+function setAttachment(url, name) {
+	this.mindMap.execCommand("SET_NODE_ATTACHMENT", this, url, name);
+}
+function setTag(tag) {
+	this.mindMap.execCommand("SET_NODE_TAG", this, tag);
+}
+function setShape(shape) {
+	this.mindMap.execCommand("SET_NODE_SHAPE", this, shape);
+}
+function setStyle(prop, value) {
+	this.mindMap.execCommand("SET_NODE_STYLE", this, prop, value);
+}
+function setStyles(style) {
+	this.mindMap.execCommand("SET_NODE_STYLES", this, style);
+}
+var nodeCommandWraps_default = {
+	setData,
+	setText,
+	setImage,
+	setIcon,
+	setHyperlink,
+	setNote,
+	setAttachment,
+	setTag,
+	setShape,
+	setStyle,
+	setStyles
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/svg/icons.js
+var hyperlink = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 1024 1024\" ><path d=\"M435.484444 251.733333v68.892445L295.822222 320.682667a168.504889 168.504889 0 0 0-2.844444 336.952889h142.506666v68.892444H295.822222a237.397333 237.397333 0 0 1 0-474.794667h139.662222z m248.945778 0a237.397333 237.397333 0 0 1 0 474.851556H544.654222v-69.006222l139.776 0.056889a168.504889 168.504889 0 0 0 2.844445-336.952889H544.597333V251.676444h139.776z m-25.827555 203.946667a34.474667 34.474667 0 0 1 0 68.892444H321.649778a34.474667 34.474667 0 0 1 0-68.892444h336.952889z\" ></path></svg>";
+var note = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 1024 1024\" ><path d=\"M152.768 985.984 152.768 49.856l434.56 0 66.816 0 234.048 267.392 0 66.816 0 601.92L152.768 985.984 152.768 985.984zM654.144 193.088l0 124.16 108.736 0L654.144 193.088 654.144 193.088zM821.312 384.064l-167.168 0L587.328 384.064 587.328 317.312 587.328 116.736 219.584 116.736 219.584 919.04l601.728 0L821.312 384.064 821.312 384.064zM386.688 517.888 319.808 517.888 319.808 450.944l66.816 0L386.624 517.888 386.688 517.888zM386.688 651.584 319.808 651.584 319.808 584.704l66.816 0L386.624 651.584 386.688 651.584zM386.688 785.344 319.808 785.344l0-66.88 66.816 0L386.624 785.344 386.688 785.344zM721.024 517.888 453.632 517.888 453.632 450.944l267.392 0L721.024 517.888 721.024 517.888zM654.144 651.584 453.632 651.584 453.632 584.704l200.512 0L654.144 651.584 654.144 651.584zM620.672 785.344l-167.04 0 0-66.88 167.04 0L620.672 785.344 620.672 785.344z\" ></path></svg>";
+var attachment = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 1024 1024\" width=\"128\" height=\"128\"><path d=\"M516.373333 375.978667l136.576-136.576a147.797333 147.797333 0 0 1 208.853334-0.021334 147.690667 147.690667 0 0 1-0.042667 208.832l-204.8 204.778667v0.021333l-153.621333 153.6c-85.973333 85.973333-225.28 85.973333-311.253334 0.021334-85.994667-85.973333-85.973333-225.216 0.149334-311.36L431.146667 256.362667a21.333333 21.333333 0 0 0-30.165334-30.165334L162.069333 465.066667c-102.805333 102.826667-102.826667 269.056-0.149333 371.733333 102.613333 102.613333 268.970667 102.613333 371.584 0l153.6-153.642667h0.021333l0.021334-0.021333 204.778666-204.778667c74.325333-74.325333 74.346667-194.858667 0.021334-269.184-74.24-74.24-194.88-74.24-269.162667 0.042667l-136.576 136.554667-187.626667 187.626666a117.845333 117.845333 0 0 0-0.106666 166.826667 118.037333 118.037333 0 0 0 166.826666-0.106667l255.850667-255.829333a21.333333 21.333333 0 0 0-30.165333-30.165333L435.136 669.973333a75.370667 75.370667 0 0 1-106.496 0.106667 75.178667 75.178667 0 0 1 0.128-106.496l187.605333-187.605333z\" ></path></svg>";
+var nodeIconList = [
+	{
+		name: "优先级图标",
+		type: "priority",
+		list: [
+			{
+				name: "1",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512.042667 1024C229.248 1024 0 794.794667 0 511.957333 0 229.205333 229.248 0 512.042667 0 794.752 0 1024 229.205333 1024 511.957333 1024 794.794667 794.752 1024 512.042667 1024z" fill="#E93B30"></path><path d="M580.309333 256h-75.52c-10.666667 29.824-30.165333 55.765333-58.709333 78.165333-28.416 22.314667-54.869333 37.418667-79.146667 45.397334v84.608a320 320 0 0 0 120.234667-70.698667v352.085333H580.266667V256z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "2",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M511.957333 1024C229.248 1024 0 794.752 0 512S229.248 0 511.957333 0C794.752 0 1024 229.248 1024 512s-229.248 512-512.042667 512z" fill="#FA8D2E"></path><path d="M667.946667 658.602667h-185.301334c4.864-8.533333 11.178667-17.066667 19.072-25.984 7.808-8.874667 26.453333-26.837333 55.936-53.888 29.525333-27.008 49.877333-47.786667 61.226667-62.165334 16.981333-21.717333 29.44-42.453333 37.290667-62.293333 7.808-19.84 11.776-40.746667 11.776-62.677333 0-38.570667-13.738667-70.741333-41.088-96.725334C599.466667 268.928 561.706667 256 513.834667 256c-43.690667 0-80.128 11.136-109.354667 33.578667-29.098667 22.4-46.506667 59.306667-52.010667 110.805333l93.184 9.301333c1.792-27.349333 8.405333-46.890667 19.754667-58.624 11.434667-11.776 26.837333-17.664 46.165333-17.664 19.541333 0 34.858667 5.589333 45.909334 16.768 11.136 11.264 16.682667 27.221333 16.682666 48.042667 0 18.858667-6.4 37.930667-19.242666 57.258667-9.472 14.037333-35.157333 40.533333-77.098667 79.872-52.096 48.554667-87.04 87.509333-104.704 116.821333A226.688 226.688 0 0 0 341.333333 745.429333h326.613334v-86.826666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "3",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#2E66FA"></path><path d="M627.754667 731.733333c-29.354667 25.088-66.901333 37.632-112.725334 37.632-44.928 0-81.792-11.52-110.592-34.773333-33.066667-26.538667-49.877333-64.469333-50.304-114.133333h92.16c0.426667 21.76 7.552 38.314667 21.333334 49.664 12.288 10.88 28.117333 16.341333 47.402666 16.341333 20.309333 0 36.778667-6.101333 49.322667-18.432 12.544-12.330667 18.773333-29.568 18.773333-51.797333 0-21.290667-6.229333-38.186667-18.773333-50.773334-12.544-12.501333-29.866667-18.773333-52.138667-18.773333h-13.525333v-80.042667H512c42.112 0 63.274667-21.034667 63.274667-63.146666 0-20.309333-5.888-36.096-17.706667-47.445334a60.757333 60.757333 0 0 0-43.818667-17.066666c-17.493333 0-32 5.504-43.434666 16.298666-11.562667 10.88-17.792 25.728-18.773334 44.714667H359.68c0.981333-43.946667 16.042667-78.976 45.397333-104.96 29.354667-25.941333 65.706667-39.04 109.226667-39.04 44.928 0 81.792 13.525333 110.592 40.490667 28.8 26.922667 43.306667 61.610667 43.306667 104.149333 0 48.213333-19.413333 82.688-58.154667 103.552 43.52 23.125333 65.28 61.44 65.28 114.858667 0 48.128-15.957333 85.76-47.573333 112.682666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "4",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512.042667 1024C229.248 1024 0 794.794667 0 512.042667 0 229.205333 229.248 0 512.042667 0 794.752 0 1024 229.205333 1024 512.042667 1024 794.794667 794.752 1024 512.042667 1024z" fill="#6D768D"></path><path d="M600.96 256v309.802667h60.117333v81.536h-60.16v98.218666h-90.154666v-98.218666H311.466667v-81.237334L522.666667 256h78.293333zM510.72 399.104l-112.042667 166.698667h112.042667V399.104z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "5",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512.042667 1024C229.248 1024 0 794.794667 0 512.042667 0 229.205333 229.248 0 512.042667 0 794.752 0 1024 229.205333 1024 512.042667 1024 794.794667 794.752 1024 512.042667 1024z" fill="#6D768D"></path><path d="M470.912 343.552h175.786667V256H400.256l-47.786667 253.952 75.434667 10.837333c21.205333-23.552 45.269333-35.413333 72.021333-35.413333 21.546667 0 38.997333 7.509333 52.437334 22.4 13.312 15.018667 20.053333 37.418667 20.053333 67.328 0 31.872-6.741333 55.765333-20.181333 71.552-13.397333 15.872-29.866667 23.765333-49.237334 23.765333-17.066667 0-32.085333-6.186667-45.013333-18.432-13.013333-12.373333-20.821333-29.013333-23.466667-50.133333L341.333333 611.498667c5.546667 40.874667 22.485333 73.429333 50.730667 97.621333 28.330667 24.32 64.938667 36.437333 109.866667 36.437333 56.149333 0 100.053333-21.546667 131.754666-64.554666a176.64 176.64 0 0 0 34.816-107.52c0-48.042667-14.378667-87.210667-43.221333-117.333334-28.8-30.208-63.957333-45.312-105.514667-45.312-21.674667 0-42.922667 5.248-63.829333 15.616l14.976-82.901333z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "6",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 1024C229.248 1024 0 794.794667 0 512.042667 0 229.205333 229.248 0 512 0c282.88 0 512 229.205333 512 512.042667C1024 794.794667 794.88 1024 512 1024z" fill="#6D768D"></path><path d="M519.210667 256c36.992 0 67.626667 10.368 91.776 31.189333 24.192 20.821333 39.68 51.029333 46.293333 90.709334l-90.197333 9.984c-2.176-18.56-7.978667-32.298667-17.28-41.173334-9.258667-8.874667-21.418667-13.226667-36.224-13.226666-19.754667 0-36.437333 8.789333-50.048 26.453333-13.696 17.664-22.314667 54.613333-25.856 110.549333 23.296-27.52 52.138667-41.258667 86.656-41.258666 38.997333 0 72.362667 14.805333 100.181333 44.544 27.733333 29.696 41.685333 68.010667 41.685333 114.858666 0 49.877333-14.634667 89.856-43.818666 119.936-29.226667 30.208-66.730667 45.226667-112.554667 45.226667-49.066667 0-89.429333-19.072-121.130667-57.344C357.12 658.218667 341.333333 595.541333 341.333333 508.416c0-89.344 16.469333-153.813333 49.493334-193.194667C423.722667 275.754667 466.56 256 519.168 256z m-9.472 241.834667c-17.962667 0-33.066667 6.997333-45.525334 21.12-12.330667 14.037333-18.56 34.858667-18.56 62.293333 0 30.421333 6.912 53.76 20.906667 70.4 13.952 16.469333 29.866667 24.746667 47.786667 24.746667 17.28 0 31.701333-6.826667 43.178666-20.309334 11.52-13.525333 17.237333-35.669333 17.237334-66.56 0-31.658667-6.186667-54.869333-18.517334-69.546666a58.197333 58.197333 0 0 0-46.506666-22.144z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "7",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512.042667 1024C229.248 1024 0 794.752 0 512S229.248 0 512.042667 0C794.752 0 1024 229.248 1024 512s-229.248 512-511.957333 512z" fill="#6D768D"></path><path d="M673.024 273.066667H354.133333v86.869333h212.224a691.2 691.2 0 0 0-104.746666 187.989333c-26.026667 70.101333-39.978667 138.88-41.429334 206.293334h89.6c-0.298667-42.922667 6.698667-91.776 21.034667-146.474667a654.72 654.72 0 0 1 62.08-154.965333c27.136-48.554667 53.888-85.76 80.128-111.701334V273.066667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "8",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z" fill="#6D768D"></path><path d="M512.426667 256c46.208 0 82.048 11.861333 107.605333 35.541333 25.6 23.68 38.314667 53.674667 38.314667 89.898667 0 22.613333-5.802667 42.666667-17.578667 60.330667a111.445333 111.445333 0 0 1-49.450667 40.277333c26.965333 10.837333 47.36 26.752 61.312 47.658667 13.994667 20.906667 21.034667 45.013333 21.034667 72.362666 0 45.098667-14.336 81.834667-42.965333 109.952-28.586667 28.245333-66.602667 42.368-114.090667 42.368-44.245333 0-81.066667-11.648-110.464-34.986666-34.645333-27.52-52.010667-65.28-52.010667-113.365334 0-26.368 6.528-50.645333 19.626667-72.746666 13.056-22.144 33.578667-39.210667 61.696-51.242667-24.064-10.154667-41.557333-24.192-52.48-41.941333a109.824 109.824 0 0 1-16.512-58.666667c0-36.224 12.757333-66.218667 37.973333-89.898667 25.386667-23.68 61.354667-35.541333 108.032-35.541333z m1.28 265.429333c-22.784 0-39.722667 7.978667-50.901334 23.893334-11.136 15.786667-16.64 33.066667-16.64 51.498666 0 25.984 6.485333 46.208 19.712 60.714667 13.098667 14.506667 29.525333 21.802667 49.152 21.802667 19.242667 0 35.157333-6.997333 47.786667-20.992 12.629333-13.909333 18.858667-34.048 18.858667-60.416 0-23.082667-6.314667-41.557333-19.2-55.466667a63.274667 63.274667 0 0 0-48.725334-21.034667z m-0.341334-191.488c-17.792 0-32 5.333333-42.581333 16-10.538667 10.666667-15.872 24.746667-15.872 42.325334 0 18.645333 5.248 33.152 15.701333 43.648 10.453333 10.453333 24.362667 15.658667 41.770667 15.658666 17.664 0 31.658667-5.290667 42.24-15.872 10.538667-10.581333 15.872-25.173333 15.872-43.818666 0-17.493333-5.248-31.573333-15.701333-42.154667s-24.277333-15.786667-41.429334-15.786667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "9",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 1024C229.248 1024 0 794.794667 0 512.042667 0 229.333333 229.248 0 512 0c282.88 0 512 229.333333 512 512.042667C1024 794.794667 794.88 1024 512 1024z" fill="#6D768D"></path><path d="M497.28 256c49.365333 0 89.856 19.157333 121.429333 57.429333 31.701333 38.229333 47.488 101.205333 47.488 188.842667 0 89.173333-16.384 153.386667-49.365333 192.853333-32.853333 39.594667-75.605333 59.264-128.426667 59.264-37.888 0-68.608-10.154667-91.989333-30.506666s-38.4-50.816-45.013333-91.306667l90.112-9.984c2.261333 18.474667 8.021333 32.085333 17.28 41.088 9.173333 8.874667 21.418667 13.312 36.608 13.312 19.2 0 35.541333-8.874667 48.981333-26.752 13.44-17.749333 22.016-54.613333 25.770667-110.549333-23.466667 27.264-52.821333 40.874667-88.064 40.874666-38.314667 0-71.253333-14.72-99.114667-44.330666C355.242667 506.709333 341.333333 468.224 341.333333 420.864c0-49.493333 14.592-89.258667 43.946667-119.466667C414.549333 271.104 451.925333 256 497.237333 256z m-4.352 77.482667c-17.237333 0-31.658667 6.826667-43.008 20.437333-11.477333 13.653333-17.194667 35.84-17.194667 66.816 0 31.402667 6.229333 54.485333 18.645334 69.205333 12.458667 14.72 27.946667 22.101333 46.592 22.101334 18.005333 0 33.066667-7.082667 45.44-21.205334 12.330667-14.208 18.432-35.029333 18.432-62.506666 0-29.994667-6.912-53.376-20.821334-69.973334-13.824-16.597333-29.866667-24.874667-48.085333-24.874666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "10",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512.042667 1024C229.248 1024 0 794.794667 0 511.957333 0 229.205333 229.248 0 512.042667 0 794.752 0 1024 229.205333 1024 511.957333 1024 794.794667 794.752 1024 512.042667 1024z" fill="#6D768D"></path><path d="M619.946667 273.066667c46.976 0 83.754667 16.042667 110.250666 48.042666 31.573333 37.973333 47.36 100.864 47.36 188.672 0 87.722667-15.829333 150.698667-47.658666 189.056-26.325333 31.616-62.976 47.36-109.952 47.36-47.274667 0-85.418667-17.237333-114.346667-51.968-28.885333-34.602667-43.392-96.426667-43.392-185.386666 0-87.168 15.872-150.016 47.701333-188.416 26.282667-31.488 62.933333-47.36 110.037334-47.36z m-207.488 12.8v452.266666H325.504V411.690667A299.904 299.904 0 0 1 213.333333 476.373333V398.933333c22.656-7.296 47.36-21.12 73.856-41.514666 26.624-20.522667 44.842667-44.288 54.784-71.552h70.485334z m207.488 60.842666c-11.306667 0-21.461333 3.413333-30.336 10.24-8.874667 6.826667-15.786667 19.157333-20.693334 36.864-6.4 22.997333-9.642667 61.653333-9.642666 115.968 0 54.442667 2.944 91.733333 8.661333 112.128 5.802667 20.352 13.098667 33.877333 21.845333 40.618667 8.789333 6.741333 18.858667 10.154667 30.165334 10.154667 11.349333 0 21.376-3.498667 30.250666-10.325334 8.874667-6.826667 15.786667-19.157333 20.693334-36.778666 6.4-22.826667 9.642667-61.354667 9.642666-115.797334 0-54.314667-2.858667-91.648-8.661333-112.042666-5.802667-20.352-13.013333-33.962667-21.76-40.789334a47.616 47.616 0 0 0-30.165333-10.24z" fill="#FFFFFF"></path></svg>`
+			}
+		]
+	},
+	{
+		name: "进度图标",
+		type: "progress",
+		list: [
+			{
+				name: "1",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 928c-229.76 0-416-186.24-416-416S282.24 96 512 96V512l294.144-294.144A414.72 414.72 0 0 1 928 512c0 229.76-186.24 416-416 416z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "2",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 928c-229.76 0-416-186.24-416-416S282.24 96 512 96V512h416c0 229.76-186.24 416-416 416z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "3",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 928c-229.76 0-416-186.24-416-416S282.24 96 512 96V512l294.144 294.144A414.72 414.72 0 0 1 512 928z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "4",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 928c-229.76 0-416-186.24-416-416S282.24 96 512 96v832z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "5",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 512l-294.144 294.144A414.72 414.72 0 0 1 96 512c0-229.76 186.24-416 416-416V512z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "6",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 512H96c0-229.76 186.24-416 416-416V512z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "7",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.752 0 512 0z" fill="#12BB37"></path><path d="M512 512L217.856 217.856A414.72 414.72 0 0 1 512 96V512z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "8",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M0 512c0 282.752 229.248 512 512 512s512-229.248 512-512S794.752 0 512 0 0 229.248 0 512z" fill="#12BB37"></path><path d="M716.629333 341.333333h-51.328a35.072 35.072 0 0 0-28.330666 14.293334l-171.989334 233.984-77.909333-106.026667a35.2 35.2 0 0 0-28.330667-14.293333H307.413333c-7.082667 0-11.264 7.936-7.082666 13.653333l136.32 185.472a35.2 35.2 0 0 0 56.533333 0l230.4-313.429333a8.533333 8.533333 0 0 0-6.954667-13.653334z" fill="#FFFFFF"></path></svg>`
+			}
+		]
+	},
+	{
+		name: "表情图标",
+		type: "expression",
+		list: [
+			{
+				name: "1",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1026 1024"><path d="M1.097856 1.097642h1021.804717v1021.804716H1.097856z" fill="#F09495" ></path><path d="M1024.000214 1024H0.000214V0h1024v1024z m-1021.804716-2.195284h1019.609433V2.195284H2.195498v1019.609432z" fill="#FFFFFF" ></path><path d="M234.695985 335.179887m-27.341259 0a27.341259 27.341259 0 1 0 54.682518 0 27.341259 27.341259 0 1 0-54.682518 0Z" fill="#040000" ></path><path d="M234.695985 363.519002c-15.666342 0-28.339115-12.772559-28.339115-28.339115 0-15.666342 12.772559-28.339115 28.339115-28.339115s28.339115 12.772559 28.339115 28.339115c0.099786 15.666342-12.672773 28.339115-28.339115 28.339115z m0-54.582732c-14.468914 0-26.243617 11.774703-26.243617 26.243617s11.774703 26.243617 26.243617 26.243617 26.243617-11.774703 26.243617-26.243617-11.774703-26.243617-26.243617-26.243617z" fill="#FFFFFF" ></path><path d="M776.232528 335.179887m-27.341259 0a27.341259 27.341259 0 1 0 54.682518 0 27.341259 27.341259 0 1 0-54.682518 0Z" fill="#040000" ></path><path d="M776.232528 363.519002c-15.666342 0-28.339115-12.772559-28.339115-28.339115 0-15.666342 12.772559-28.339115 28.339115-28.339115 15.666342 0 28.339115 12.772559 28.339115 28.339115 0 15.666342-12.772559 28.339115-28.339115 28.339115z m0-54.582732c-14.468914 0-26.243617 11.774703-26.243617 26.243617s11.774703 26.243617 26.243617 26.243617 26.243617-11.774703 26.243617-26.243617c-0.099786-14.468914-11.874488-26.243617-26.243617-26.243617z" fill="#FFFFFF" ></path><path d="M512.000214 671.656987c-52.58702 0-105.872539-17.961411-105.872539-52.387449S459.413194 566.882089 512.000214 566.882089s105.872539 17.961411 105.87254 52.387449S564.587234 671.656987 512.000214 671.656987z m0-74.240499c-21.952836 0-43.207172 3.592282-58.2748 9.77899-13.870201 5.68778-17.06334 11.275775-17.06334 12.07406s3.19314 6.386279 17.06334 12.07406c15.067628 6.186708 36.321965 9.77899 58.2748 9.77899s43.207172-3.592282 58.274801-9.77899c13.870201-5.68778 17.06334-11.275775 17.06334-12.07406s-3.19314-6.386279-17.06334-12.07406c-15.067628-6.286494-36.321965-9.77899-58.274801-9.77899z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "2",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M0 0h1024v1024H0z" fill="#E6A6C9" ></path><path d="M315.1 368.1c-23.9 0-43.3-19.4-43.3-43.3s19.4-43.3 43.3-43.3 43.3 19.4 43.3 43.3-19.4 43.3-43.3 43.3z m0-74.7c-17.3 0-31.3 14.1-31.3 31.3 0 17.3 14.1 31.3 31.3 31.3 17.3 0 31.3-14.1 31.3-31.3 0-17.2-14-31.3-31.3-31.3zM738.7 368.1c-23.9 0-43.3-19.4-43.3-43.3s19.4-43.3 43.3-43.3 43.3 19.4 43.3 43.3-19.4 43.3-43.3 43.3z m0-74.7c-17.3 0-31.3 14.1-31.3 31.3 0 17.3 14.1 31.3 31.3 31.3 17.3 0 31.3-14.1 31.3-31.3 0-17.2-14-31.3-31.3-31.3zM293.5 698.8l-14.5-1.3c0.1-0.6 1.5-14.6 15.1-27.9 17.2-16.7 45-24.8 82.7-24 4.9-0.1 10.9-10.5 16.1-19.6 8.4-14.7 19-33.1 37.9-34.3 19.4-1.2 42.2 16.4 71.5 55.4 9.9 5.2 16.5 11.2 21.8 16.1 8.4 7.7 13.1 11.9 25.1 10.8 14.9-1.4 38.9-11.1 77.5-31.4 26.8-28.4 56.4-41.4 83.5-36.6 27.9 4.9 50.6 27.6 67.5 67.5l-13.4 5.7c-14.7-34.5-34.3-54.9-56.7-58.8-22.3-3.9-47.6 7.8-71.2 33.1l-0.8 0.9-1.1 0.6c-85.6 45.1-99.4 38-120.2 19.1-5.5-5-11.2-10.2-20.1-14.7l-1.5-0.8-1-1.4c-32.2-43.2-50.4-51.6-60-51-11.1 0.7-18.8 14-26.2 27-7.6 13.2-15.4 26.9-28.8 26.9h-0.2c-78.4-1.6-83 38.3-83 38.7z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "3",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1026 1024" ><path d="M1.1 1.097642h1021.804716v1021.804716H1.1z" fill="#F7E983" ></path><path d="M1024.002358 1024H0.002358V0h1024v1024z m-1021.804716-2.195284h1019.609433V2.195284H2.197642v1019.609432z" fill="#FFFFFF" ></path><path d="M329.174412 344.491728a38.118106 10.277919 57.6 1 0 17.355867-11.014369 38.118106 10.277919 57.6 1 0-17.355867 11.014369Z" fill="#040000" ></path><path d="M644.769475 355.956059a11.175989 36.321965 30 1 0 36.321965-62.911488 11.175989 36.321965 30 1 0-36.321965 62.911488Z" fill="#040000" ></path><path d="M569.678445 671.158059c-26.343403 0-51.190021-5.288638-70.049503-14.967843-20.755408-10.577275-32.230754-25.445332-32.230755-41.710388 0-16.265056 11.475346-31.133112 32.230755-41.710387 18.859482-9.579419 43.805886-14.967843 70.049503-14.967843s51.190021 5.288638 70.049503 14.967843c20.755408 10.577275 32.230754 25.445332 32.230754 41.710387 0 16.265056-11.475346 31.133112-32.230754 41.710388-18.859482 9.679205-43.805886 14.967843-70.049503 14.967843z m0-95.095693c-49.693237 0-84.318846 20.356266-84.318846 38.517248s34.625609 38.517248 84.318846 38.517248 84.318846-20.356266 84.318846-38.517248-34.725395-38.517248-84.318846-38.517248z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "4",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1026 1024" ><path d="M1.1 1.097642h1021.804716v1021.804716H1.1z" fill="#A6D9E2" ></path><path d="M1024.002358 1024H0.002358V0h1024v1024z m-1021.804716-2.195284h1019.609433V2.195284H2.197642v1019.609432z" fill="#FFFFFF" ></path><path d="M376.194134 348.950302m-23.44962 0a23.44962 23.44962 0 1 0 46.89924 0 23.44962 23.44962 0 1 0-46.89924 0Z" fill="#040000" ></path><path d="M629.150672 348.950302m-24.647047 0a24.647047 24.647047 0 1 0 49.294095 0 24.647047 24.647047 0 1 0-49.294095 0Z" fill="#040000" ></path><path d="M397.847613 603.503411c13.471058 8.282206 28.738258 14.468914 43.7061 19.458195 29.835899 9.978562 62.266225 14.169558 93.299551 7.483921 21.054765-4.490353 40.213604-14.369129 56.778016-28.039758 6.785422-5.587995-2.893783-15.167414-9.579419-9.579419-46.999026 38.916391-112.258819 31.033327-163.847983 6.086922-4.590138-2.195284-9.080491-4.490353-13.371272-7.184564-7.583707-4.590138-14.468914 7.184564-6.984993 11.774703z" fill="#040000" ></path><path d="M627.753674 534.052621c-31.033327 24.048334-58.474371 68.253362-37.419607 106.970182 10.577275 19.35841 29.835899 32.629897 48.795167 42.708244 7.982849 4.190996 15.067628-7.883064 7.084779-12.07406-25.245761-13.271487-53.485091-35.324108-49.094524-66.557006 2.793997-20.156695 15.766127-37.319821 29.736114-51.190022 3.392711-3.392711 6.984993-6.785422 10.776847-9.77899 2.993569-2.295069 2.394855-7.483921 0-9.878776-2.893783-3.19314-6.885208-2.49464-9.878776-0.199572z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "5",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1026 1024" ><path d="M1.1 1.097642h1021.804716v1021.804716H1.1z" fill="#AD6F59" ></path><path d="M1024.002358 1024H0.002358V0h1024v1024z m-1021.804716-2.195284h1019.609433V2.195284H2.197642v1019.609432z" fill="#FFFFFF" ></path><path d="M411.829832 330.730879a38.118106 10.277919 57.6 1 0 17.355867-11.014368 38.118106 10.277919 57.6 1 0-17.355867 11.014368Z" fill="#040000" ></path><path d="M480.669675 609.989476c11.774703-25.844475 27.740401-51.788735 44.60417-73.342429 13.770415-17.462483 29.237186-33.92711 47.897096-44.803742 17.262912-10.078347 35.324108-13.67063 54.283376-6.58585 11.974274 4.390567 23.948548 14.468914 33.128825 24.547261 14.369129 15.865913 25.145975 34.625609 34.725394 53.684662 4.290782 8.581563 17.262912 0.997856 12.972131-7.583707-15.167414-30.334828-35.224323-63.763009-66.157864-80.327421-21.054765-11.37556-44.504385-11.475346-66.157864-1.895927-21.054765 9.280062-38.617034 25.644904-53.485091 42.907815-14.468914 16.863769-27.041902 35.324108-38.217891 54.582733-5.887351 10.178133-11.674917 20.555837-16.464627 31.232898-1.696355 3.692068-0.997856 7.982849 2.694212 10.277918 3.19314 1.895927 8.581563 0.898071 10.178133-2.694211z" fill="#040000" ></path><path d="M663.863649 338.091735a14.468914 33.727538 30 1 0 33.727538-58.417811 14.468914 33.727538 30 1 0-33.727538 58.417811Z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "6",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M762.9 77.4H261.1L10.2 512l250.9 434.6h501.8L1013.8 512z" fill="#83CEE3" ></path><path d="M369 375.8m-34.6 0a34.6 34.6 0 1 0 69.2 0 34.6 34.6 0 1 0-69.2 0Z" fill="#040000" ></path><path d="M369 411.7c-19.8 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.1 36-36 36z m0-69.1c-18.3 0-33.2 14.9-33.2 33.2S350.7 409 369 409s33.2-14.9 33.2-33.2-14.9-33.2-33.2-33.2z" fill="#FFFFFF" ></path><path d="M672.2 333.6c-15.1 7.6-30.2 15.6-44.3 25-5.9 3.9-17 10.4-14.6 19.1 1.8 6.5 12 11.2 17.3 14.3 15.7 9.3 32.1 17.6 48.3 25.9 8.6 4.4 16.2-8.5 7.6-13-14.1-7.3-28.3-14.5-42.1-22.3-3.9-2.2-7.9-4.5-11.7-6.9-1.2-0.8-2.4-1.5-3.5-2.4-0.6-0.4-1.1-0.8-1.6-1.2 2.2 1.7-0.3-0.3-0.3-0.3-0.9 0.1-1.5-3.2-0.2 0.5 0.9 2.4 1.1 3.8 0.3 5.8 0.6-1.5-0.9 0.8-0.1 0 0.5-0.5 1-1.1 1.6-1.6 0.5-0.5 1-0.9 1.6-1.3 0.6-0.5 0 0 1.2-0.9 1.7-1.3 3.5-2.5 5.3-3.6 8.4-5.5 17.2-10.4 26-15.2 5.6-3 11.2-6 16.8-8.9 8.6-4.4 1-17.3-7.6-13zM578.2 720.9c-12.5-96.7-33.3-154.7-55.6-155.6-8.8 3.9-22.3 17.5-37.7 60.1-10.8 29.8-18.4 62.2-23 81.6-1.2 5.1-2.1 9.1-2.9 11.8l-9.3-2.4c0.7-2.6 1.6-6.6 2.8-11.6 14.9-63 36-136.8 67.5-148.8l0.8-0.3h0.8c18.2-0.4 33.2 19.5 45.8 60.8 10.2 33.3 16.7 74.6 20.5 103.3l-9.7 1.1z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "7",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M762.9 77.4H261.1L10.2 512l250.9 434.6h501.8L1013.8 512z" fill="#8CC66D" ></path><path d="M375.778679 404.47473a14.5 33.8 30 1 0 33.8-58.543317 14.5 33.8 30 1 0-33.8 58.543317Z" fill="#040000" ></path><path d="M627.220263 374.211388a43.1 11.6 57.6 1 0 19.588408-12.431182 43.1 11.6 57.6 1 0-19.588408 12.431182Z" fill="#040000" ></path><path d="M451.1 548.5c17.6-9.3 63.9-30 105.3-16.2 17 20.3 32.7 98.8 28.8 138.1-27.5 10.2-82.5 10.2-106.1 5.8-8.3-10.5-32.7-81.8-35.3-114.6-0.4-5.5 2.5-10.6 7.3-13.1z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "8",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M762.9 77.4H261.1L10.2 512l250.9 434.6h501.8L1013.8 512z" fill="#5A74B8" ></path><path d="M357.7 400m-34.6 0a34.6 34.6 0 1 0 69.2 0 34.6 34.6 0 1 0-69.2 0Z" fill="#040000" ></path><path d="M357.7 436c-19.8 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.2 36-36 36z m0-69.2c-18.3 0-33.2 14.9-33.2 33.2s14.9 33.2 33.2 33.2 33.2-14.9 33.2-33.2-14.9-33.2-33.2-33.2z" fill="#FFFFFF" ></path><path d="M676 400m-34.6 0a34.6 34.6 0 1 0 69.2 0 34.6 34.6 0 1 0-69.2 0Z" fill="#040000" ></path><path d="M676 436c-19.8 0-36-16.1-36-36s16.1-36 36-36 36 16.1 36 36-16.2 36-36 36z m0-69.2c-18.3 0-33.2 14.9-33.2 33.2s14.9 33.2 33.2 33.2c18.3 0 33.2-14.9 33.2-33.2s-14.9-33.2-33.2-33.2z" fill="#FFFFFF" ></path><path d="M347.6 684.1c0.3-0.9 0.6-1.7 0.9-2.6 0.2-0.5 1.4-3.2 0.3-0.8 0.6-1.4 1.3-2.9 2-4.3 3.2-6.3 6-10.7 10.9-15.3 4.3-4 10.8-7.5 17.1-6.1 3.9 0.9 7.9 4.9 11.1 7.2 3.1 2.2 6.3 4.5 9.7 6.2 7.5 3.8 15.3 4.4 23.4 1.9 4.7-1.5 9.2-3.6 13.6-5.9 5-2.6 10.7-5 14.2-9.5 4.5-5.7 6.1-8.5 11.4-14.1 1-1 2-2 3.1-3 0.2-0.2 2.2-1.7 0.6-0.5 0.6-0.4 1.2-0.9 1.8-1.3 1-0.6 2.1-1.3 3.2-1.7-2 0.8 0.2 0 0.6-0.1 2.3-0.7-0.3-0.2 1.2-0.3 2.8-0.1 3.6 0 5.5 1 3.8 1.9 6.6 4.7 9.5 7.8 4.5 5 7.5 11.1 11.7 16.2 1.8 2.2 3.7 4.3 5.4 6.5 8.1 10.3 17.7 22.2 32.2 22 8.8-0.1 16.6-5.2 22.6-11.2 4.2-4.1 7.7-8.9 11-13.7 2.9-4.2 4.6-9.9 6.2-13.5 3.2-7.1 7.2-13.1 13-18.1 4.8-4.2 11.1-6.5 16.7-5.3 10.5 2.4 17.2 12.1 23.1 20.2 4.7 6.5 9.8 13 16 18.2 7.8 6.4 17.1 11.4 27.5 11.1 14.1-0.4 25.5-9.5 34.2-19.9 3-3.6 3.6-8.8 0-12.4-3.1-3.1-9.4-3.7-12.4 0-6.3 7.6-14.7 15.9-24.9 14.7-2.2-0.3-5.3-1.5-7.9-3.1-3.5-2.1-6.1-4.4-9.1-7.5-4.9-5.1-6.8-8.1-10.9-13.8-7.3-10.1-16.1-19.6-28.2-23.7-18.5-6.3-35.7 5.6-46 20.1-2.4 3.3-4.4 6.9-6.1 10.6-1.8 3.9-2.7 8.5-5.2 11.9-3.1 4.4-6.2 8.8-10.2 12.5-3 2.8-5.7 4.4-8.6 5.1-0.4 0.1-1.7 0.1 0.1 0h-2.2c2.1 0.1 0 0-0.5-0.1-0.7-0.2-1.4-0.4-2-0.6 1.8 0.7-1.8-1.1-2.4-1.5l-1.2-0.9c1.5 1.2-0.9-0.9-1.2-1.1-4.7-4.3-8.4-9.5-12.3-14.4-10.9-13.6-20.9-34-41-34.9-14.2-0.6-24.5 10.6-32.4 20.8-1.2 1.6-2.5 3.2-3.7 4.8-1.5 1.9 1.1-1.4-0.4 0.5-0.4 0.5-0.8 1.2-1.3 1.6-1.7 1.4-4.6 2.6-6.6 3.6-2.9 1.6-5.9 3.2-9 4.5-1.6 0.7-3.4 1.2-5.1 1.7-2.2 0.6-0.7 0.5-2.8 0.4-2.8 0-3.9-0.4-6.6-1.9-3.9-2.2-7.5-4.9-11.1-7.5-5.6-4-10-6.9-17-7.5-10.5-0.9-20.3 3.2-28.2 9.9-9.4 8.1-16.4 20.2-20.1 32-3.6 11.2 13.3 15.8 16.8 5.1z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "9",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M762.9 77.4H261.1L10.2 512l250.9 434.6h501.8L1013.8 512z" fill="#F0884F" ></path><path d="M287.2 382c6.4 2.3 11.6-3.7 15.4-7.9 5.1-5.5 10.2-11 16-15.9 0.8-0.7 1.7-1.4 2.5-2.1 1.2-0.9-1.7 1.3 0.2-0.2l1.2-0.9c2.1-1.5 4.3-2.9 6.5-4.3 2-1.2 4-2.2 6.1-3.2 0.6-0.3 1.2-0.6 1.9-0.9-0.3 0.2-1.5 0.6 0.2-0.1 1.3-0.5 2.6-1 4-1.5 11.2-3.7 21.8-4 33.4-1.1 19.5 4.9 36.4 17 51.2 30.2 8.6 7.7 21.4-5 12.7-12.7-25.2-22.6-57.1-42.1-92.2-36.2-20.4 3.4-37.7 16.1-51.6 30.9-2.3 2.4-4.5 5-6.8 7.4-0.7 0.7-1.9 1.5-2.4 2.4-0.5 0.8 2.3-1.5 0.8-0.7 1.3-0.7 3.9-1.4 5.8-0.7-11.1-3.7-15.8 13.7-4.9 17.5zM598 382c6.4 2.3 11.6-3.7 15.4-7.9 5.1-5.5 10.2-11 16-15.9 0.8-0.7 1.7-1.4 2.5-2.1 1.2-0.9-1.7 1.3 0.2-0.2l1.2-0.9c2.1-1.5 4.3-2.9 6.5-4.3 2-1.2 4-2.2 6.1-3.2 0.6-0.3 1.2-0.6 1.9-0.9-0.3 0.2-1.5 0.6 0.2-0.1 1.3-0.5 2.6-1 4-1.5 11.2-3.7 21.8-4 33.4-1.1 19.5 4.9 36.4 17 51.2 30.2 8.6 7.7 21.4-5 12.7-12.7-25.2-22.6-57.1-42.1-92.2-36.2-20.4 3.4-37.7 16.1-51.6 30.9-2.3 2.4-4.5 5-6.8 7.4-0.7 0.7-1.9 1.5-2.4 2.4-0.5 0.8 2.3-1.5 0.8-0.7 1.3-0.7 3.9-1.4 5.8-0.7-11.1-3.7-15.8 13.7-4.9 17.5zM505.9 527.1c3.4 0.7 6.8 1.7 10.2 2.8 6.7 2.2 10.4 3.5 16.6 7.7 1.6 1.1-0.5-0.5 0.6 0.5 0.6 0.5 1.1 1.1 1.7 1.6 1.5 1.4-0.1-0.4 0.5 0.6 0.4 0.6 0.7 1.2 1 1.8-1-2 0.1 0 0 0.5 0.1-2-0.1 0-0.1 0-0.1 0.8 0 0.7 0.1-0.5-0.1 0.4-0.1 0.7-0.3 1.1-0.6 1 0.7-0.9-0.4 1-1.6 2.5-4.6 5.4-8.1 7.8-6.8 4.6-14.4 8.2-22 11.4-7 3-7.4 11.9 0 14.8 7.4 2.8 15 5.3 22.4 8.1 3.1 1.1 4.2 1.5 6.9 2.9 1.1 0.6 2.1 1.2 3.2 1.8 1.2 0.8-0.7-0.5 0.1 0 0.4 0.3 0.8 0.7 1.1 1.1 0.6 0.8-1.1-1.2-0.2-0.2 0.8 0.9-0.3-1.4-0.1-0.2 0.1 0.9 0.2-1.9 0-0.9-0.1 0.5-0.8 1.8 0 0.2-0.2 0.5-0.5 1-0.8 1.4-0.3 0.3-0.9 1.3-0.3 0.5-0.5 0.7-1.1 1.3-1.7 1.9-6.9 7.3-15.9 12.8-24.4 18.1-8.3 5.3-0.6 18.5 7.7 13.2 9.9-6.3 20.9-12.8 28.6-21.8 4.8-5.5 8.1-12.9 4.2-19.9-3.4-6-10.5-8.9-16.6-11.4-8.6-3.5-17.5-6.2-26.2-9.5v14.8c14.4-6.1 47.2-18.8 41.2-40.3-3.5-12.9-19.4-18.9-30.8-22.6-3.4-1.1-6.9-2.1-10.5-2.9-9.1-2.2-13.3 12.5-3.6 14.6z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "10",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M762.9 77.4H261.1L10.2 512l250.9 434.6h501.8L1013.8 512z" fill="#F6F180" ></path><path d="M342.9 400.6m-29.5 0a29.5 29.5 0 1 0 59 0 29.5 29.5 0 1 0-59 0Z" fill="#040000" ></path><path d="M342.9 431.3c-16.9 0-30.7-13.8-30.7-30.7s13.8-30.7 30.7-30.7 30.7 13.8 30.7 30.7-13.7 30.7-30.7 30.7z m0-59c-15.6 0-28.3 12.7-28.3 28.3s12.7 28.3 28.3 28.3 28.3-12.7 28.3-28.3-12.6-28.3-28.3-28.3z" fill="#FFFFFF" ></path><path d="M702 400.6m-29.5 0a29.5 29.5 0 1 0 59 0 29.5 29.5 0 1 0-59 0Z" fill="#040000" ></path><path d="M702 431.3c-16.9 0-30.7-13.8-30.7-30.7s13.8-30.7 30.7-30.7 30.7 13.8 30.7 30.7-13.8 30.7-30.7 30.7z m0-59c-15.6 0-28.3 12.7-28.3 28.3s12.7 28.3 28.3 28.3 28.3-12.7 28.3-28.3-12.7-28.3-28.3-28.3z" fill="#FFFFFF" ></path><path d="M358.7 519.9c20 22 45.5 40.4 71.3 54.8 51.2 28.5 111.7 39.9 168 19.5 44.3-16.1 80.7-47.8 110.2-83.9 3-3.7 3.6-8.9 0-12.5-3.1-3.1-9.5-3.7-12.5 0-25.5 31.4-56.2 59.7-93.7 76-27.1 11.7-56.6 15.7-85.8 12.2-24.7-2.9-49.5-11.8-71.5-23.4-18.7-9.8-36.6-22.2-51.1-34.3-7.8-6.5-15.5-13.3-22.4-20.9-7.7-8.5-20.1 4.1-12.5 12.5z" ></path></svg>`
+			},
+			{
+				name: "11",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M48.2 844.9c-68.5-210.6 186-782.1 409.1-795.4 6.3-0.4 12.5 0.2 18.6 1.6C665.1 94.6 985.4 515 987.1 821.3c0.1 20-12.9 37.9-22.4 43.1-162.7 89.8-605.8 179.7-884.4 30.9-15-7.9-24.2-26.1-32.1-50.4z" fill="#F0884F" ></path><path d="M401 352.1m-52.4 0a52.4 52.4 0 1 0 104.8 0 52.4 52.4 0 1 0-104.8 0Z" fill="#FFFFFF" ></path><path d="M408.7 329m-29.3 0a29.3 29.3 0 1 0 58.6 0 29.3 29.3 0 1 0-58.6 0Z" fill="#040000" ></path><path d="M527.5 352.1m-52.4 0a52.4 52.4 0 1 0 104.8 0 52.4 52.4 0 1 0-104.8 0Z" fill="#FFFFFF" ></path><path d="M527.5 329m-29.3 0a29.3 29.3 0 1 0 58.6 0 29.3 29.3 0 1 0-58.6 0Z" fill="#040000" ></path><path d="M450.7 517c1.1-8.2 3.2-16.4 6.1-24.1 0.1-0.3 1-2.5 0.5-1.4s0.3-0.7 0.5-1c0.7-1.4 1.4-2.8 2.2-4.1 0.4-0.8 2.8-3.9 1.3-2.1 0.8-1 1.7-1.9 2.6-2.8 1-1-1.5 1 0.1 0 0.5-0.3 1-0.6 1.5-0.8-1.3 0.7-1.2 0.3 0 0.1 1.9-0.3-1.8 0.3 0.1 0 1.2-0.2 1.5 0.3 0-0.1 0.6 0.2 1.3 0.3 1.9 0.5 0.3 0.1-1.3-0.7 0.2 0.1 0.8 0.5 1.6 0.9 2.4 1.4 1.4 1 0-0.1 1.4 1.1 0.9 0.8 1.8 1.7 2.6 2.6 1.8 1.9 3.5 3.9 5 6.1 5.1 7.1 9.3 14.8 13.2 22.6 3.5 6.9 13.7 4.7 15.8-2.1 2.6-8.7 4.8-17.4 7.4-26.1 0.9-3.2 1.9-6.4 3.2-9.4-0.7 1.6 0.8-1.6 1.2-2.2l0.9-1.5c0.7-1.2-1.4 0.7 0.1-0.1 1.7-0.9-1.2 0.3-0.3 0.1 0.8-0.2 1-1.2 0.3-0.3-0.6 0.8 0.6 0-0.5 0.2-2 0.3 2.4 0.5-1.1 0 0.5 0.1 1.2 0.2 1.6 0.4-1.1-0.8-0.8-0.4 0.2 0.2 0.7 0.4 3.4 2.3 2.7 1.8 8.9 7.1 15.9 16.9 22.5 26 2.8 3.8 7.5 5.6 11.8 3.1 3.7-2.2 5.9-8 3.1-11.8-8.2-11.1-16.6-23-27.7-31.4-6.3-4.7-14.5-7.6-21.7-3-6.7 4.2-9.6 12.5-11.9 19.6-3.2 9.9-5.5 20-8.6 29.9 5.3-0.7 10.5-1.4 15.8-2.1-7.8-15.5-24.8-50.1-48-41.7-14.1 5.1-19.7 23-22.9 36.2-0.9 3.8-1.8 7.7-2.3 11.6-0.6 4.6 1.1 9.3 6 10.6 4.2 1 10.2-1.5 10.8-6.1z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "12",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M485.538528 993.072489a362.00362 481.804818 3.149 1 0 52.933731-962.15464 362.00362 481.804818 3.149 1 0-52.933731 962.15464Z" fill="#AADCF0" ></path><path d="M688.2 334.1c-15.1 7.6-30.2 15.6-44.3 25-5.9 3.9-17 10.4-14.6 19.1 1.8 6.5 12 11.2 17.3 14.3 15.7 9.3 32.1 17.6 48.3 25.9 8.6 4.4 16.2-8.5 7.6-13-14.1-7.3-28.3-14.5-42.1-22.3-3.9-2.2-7.9-4.5-11.7-6.9-1.2-0.8-2.4-1.5-3.5-2.4-0.6-0.4-1.1-0.8-1.6-1.2 2.2 1.7-0.3-0.3-0.3-0.3-0.9 0.1-1.5-3.2-0.2 0.5 0.9 2.4 1.1 3.8 0.3 5.8 0.6-1.5-0.9 0.8-0.1 0 0.5-0.5 1-1.1 1.6-1.6 0.5-0.5 1-0.9 1.6-1.3 0.6-0.5 0 0 1.2-0.9 1.7-1.3 3.5-2.5 5.3-3.6 8.4-5.5 17.2-10.4 26-15.2 5.6-3 11.2-6 16.8-8.9 8.6-4.4 1-17.4-7.6-13zM375.8 347c13.4 6.8 26.7 14 39.5 21.9 1.8 1.2 3.7 2.3 5.5 3.5 0.9 0.6 1.7 1.2 2.6 1.8 0.9 0.6 1.9 1.4 1.6 1.1 1.1 0.9 2.1 1.9 3.1 2.8 1.2 1 0-0.3 0.1 0 0-0.2-0.8-2.4-0.3-4.1 1.5-5.5 2.3-2.7 0.8-2-0.4 0.2-0.9 0.8-1.3 1.1 1.7-1.4-1.6 1.1-2.3 1.6-3.4 2.3-6.9 4.4-10.4 6.4-14.9 8.6-30.3 16.4-45.6 24.3-8.6 4.4-1 17.4 7.6 13 15-7.7 30.1-15.4 44.8-23.8 6.2-3.6 13.8-7.3 18.7-12.7 7.6-8.3-3.8-16.6-9.9-20.9-8.7-6.1-18-11.3-27.3-16.4-6.5-3.6-13-7.1-19.6-10.4-8.6-4.5-16.3 8.5-7.6 12.8zM412.8 570.9c13.5 7.7 28.5 13.3 43.3 17.9 29.8 9.2 61.7 13.1 92.6 7.3 20.6-3.9 40-12.5 56.6-25.2 2.8-2.2 4.3-5.6 2.3-9-1.6-2.8-6.2-4.5-9-2.3-48.3 36.9-113.3 30-165.6 6.7-4.6-2.1-9.2-4.2-13.7-6.7-7.3-4.2-13.9 7.2-6.5 11.3z" fill="#040000" ></path><path d="M644.6 505.2c-30.1 21.5-60.6 62.5-39.1 99.8 10.7 18.6 30.3 30.9 49.1 40.1 7.8 3.8 14.6-7.9 6.8-11.7-23.6-11.5-53.7-31.4-49.4-60.9 2.8-18.9 15.8-34.6 29.5-47.2 2.5-2.3 5.1-4.6 7.8-6.7 0.5-0.4 0.9-0.7 1.4-1.1-0.4 0.3-1.2 0.9-0.1 0.1l0.9-0.6c6.9-5.1 0.2-16.8-6.9-11.8z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "13",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M235.1 76.9c75.6-26.5 297.3-90.1 514.2-16.6 16.3 5.5 29.8 17.4 37.1 33 57.5 122.4 127.1 602.1 62.1 785.6a62.58 62.58 0 0 1-32.5 35.8c-109.5 51.8-428.1 136.7-609.3 37.2-14.4-7.9-25-21.3-29.7-37.1-41.9-140.6-37-627.7 19.1-798 6.1-18.7 20.5-33.4 39-39.9z" fill="#F9DABD" ></path><path d="M392.2 360.2m-35.2 0a35.2 35.2 0 1 0 70.4 0 35.2 35.2 0 1 0-70.4 0Z" fill="#040000" ></path><path d="M618.6 360.2m-35.2 0a35.2 35.2 0 1 0 70.4 0 35.2 35.2 0 1 0-70.4 0Z" fill="#040000" ></path><path d="M512 562.6c-36 0-65.3-29.3-65.3-65.3S476 432 512 432s65.3 29.3 65.3 65.3-29.3 65.3-65.3 65.3z m0-122.9c-31.7 0-57.6 25.8-57.6 57.6s25.8 57.6 57.6 57.6c31.7 0 57.6-25.8 57.6-57.6s-25.9-57.6-57.6-57.6z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "14",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M178.1 971.5c38.1 15.9 98.7 26.6 171.3-12.3 3.7-2 8.4-1.6 11.6 1.1 43.3 35.9 123.3 80.8 236 10.9 3.8-2.4 8.7-2.4 12.6-0.2 41.8 23.9 191.6 58.2 246.6 14.2 4.4-3.5 9.1-6.6 14.5-8.5C1065 909.5 678.2-652 194.3 351c-37.5 77.8-38.4 94.1-71.9 211.3-27.6 96.3-29.1 231.3 1.4 348.1 7.2 27.3 27.3 49.9 54.3 61.1z" fill="#ABAAAA" ></path><path d="M468.9 349H418c-6.1 0-11.1-5-11.1-11.1V336c0-6.1 5-11.1 11.1-11.1h50.9c6.1 0 11.1 5 11.1 11.1v1.9c0 6.1-5 11.1-11.1 11.1zM643 471.9H390c-6.6 0-12-5.4-12-12s5.4-12 12-12h253c6.6 0 12 5.4 12 12s-5.4 12-12 12zM609 349h-61.2c-6 0-11-4.9-11-11v-2.1c0-6 4.9-11 11-11H609c6 0 11 4.9 11 11v2.1c0 6.1-4.9 11-11 11z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "15",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M673.1 318.7c3.7-17.5 5.6-35.7 5.6-54.4 0-137.9-105.5-249.7-235.6-249.7S207.4 126.4 207.4 264.3c0 55.4 17.1 106.7 45.9 148.1-55.2 63.3-88.6 145.9-88.6 236.3 0 199.2 162.1 360.6 362.1 360.6 200 0 362.1-161.5 362.1-360.6 0.1-147.3-88.7-274-215.8-330z" fill="#4F8A54" ></path><path d="M392 246.2m-47.1 0a47.1 47.1 0 1 0 94.2 0 47.1 47.1 0 1 0-94.2 0Z" fill="#FFFFFF" ></path><path d="M386 252.8m-26.4 0a26.4 26.4 0 1 0 52.8 0 26.4 26.4 0 1 0-52.8 0Z" fill="#040000" ></path><path d="M505.6 246.2m-47.1 0a47.1 47.1 0 1 0 94.2 0 47.1 47.1 0 1 0-94.2 0Z" fill="#FFFFFF" ></path><path d="M501.4 252.8m-26.4 0a26.4 26.4 0 1 0 52.8 0 26.4 26.4 0 1 0-52.8 0Z" fill="#040000" ></path><path d="M474.3 364.8h-50.9c-6.1 0-11.1-5-11.1-11.1v-1.9c0-6.1 5-11.1 11.1-11.1h50.9c6.1 0 11.1 5 11.1 11.1v1.9c0 6.2-5 11.1-11.1 11.1z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "16",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M246.4 227.6c-166.9 101.1-461.9 344 87 564.1 1.5 0.6 2.9 1.1 4.4 1.6 80.7 27.7 392.8 165.4 641-198.1 40-58.6 38.5-136.2-3.7-193.3C892 289.5 727 201.1 429.1 182.7c-64.1-4-127.8 11.6-182.7 44.9z" fill="#CF92BE" ></path><path d="M617.1 393.4c-17.4 8.8-34.9 18.1-51.2 28.9-6.9 4.6-20.3 12.3-17.4 22.6 1.2 4.3 5.6 7 9 9.5 3.7 2.7 7.6 5 11.5 7.3 18.2 10.8 37.1 20.3 55.9 30 10 5.1 18.9-10 8.8-15.1-16.4-8.4-32.9-16.9-49-26-4.5-2.6-9.1-5.2-13.5-8l-4.5-3c-0.7-0.5-1.3-1-2-1.5 1.6 1.2 0.7 0.4-0.2-0.2-1.3-0.9-0.3-0.9-0.5-0.3 0.2 0.2 0.4 0.5 0.6 0.7 1 1.9 1.3 3.7 0.8 5.7 0.1-0.6 0.7-1.4-0.6 1.3 0.7-1.5-0.1 0-0.2 0.1 0.6-0.6 1.2-1.3 1.9-1.9l1.8-1.5c1.8-1.6-0.6 0.3 1.2-0.9 2-1.5 4.1-2.9 6.2-4.3 10-6.5 20.4-12.4 30.9-18 6.5-3.5 13.1-7 19.7-10.4 9.6-5 0.8-20.1-9.2-15zM323.1 408.5c15.9 8.1 31.7 16.5 46.8 26 2.2 1.4 4.3 2.8 6.5 4.2 1 0.7 1.9 1.3 2.8 2 0.5 0.3 1 0.7 1.4 1.1-1.1-0.9-0.3-0.3 0.3 0.3 1.1 1 2.2 2.2 3.3 3.1 1.4 1.1-1-1.7-0.1-0.1-0.6-1.1-0.9-4.1 0.3-6.7 2.2-4.8 0.7 0.1 0-0.5 0 0-1.1 0.9-1.3 1 2.3-1.9 0 0-0.5 0.4-0.8 0.5-1.5 1.1-2.3 1.6-4 2.7-8.1 5.1-12.3 7.5-17.3 10-35.1 19.1-52.8 28.2-10 5.1-1.2 20.2 8.8 15.1 17.5-9 35-17.9 52-27.7 7.3-4.2 15.9-8.6 21.8-14.7 9.3-9.7-4.3-19.7-11.5-24.7-10.1-7.1-20.9-13.1-31.7-19-7.6-4.2-15.2-8.2-22.9-12.1-9.7-5.2-18.6 9.9-8.6 15zM513 592.1c-12.2 0-24.6-1.4-36.3-4.3-8-2-13.9-8.2-15.4-16.2s1.7-15.8 8.4-20.5c23.2-16.3 60.5-31.9 106.2-13 6.4 2.6 11 8.3 12.3 15.1 1.3 6.7-0.8 13.6-5.7 18.3-13.5 13.1-40.9 20.6-69.5 20.6z m-37.4-32.5c-3.4 2.4-4.9 6.2-4.2 10.2 0.8 4.1 3.6 7.1 7.7 8.1 39.1 9.7 81.2 0.7 96.1-13.7 2.4-2.3 3.4-5.6 2.7-8.9-0.7-3.4-2.9-6.2-6.1-7.5-41.2-17.2-75.1-3.1-96.2 11.8z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "17",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M1008.6 465.7c0-124.9-95.5-226.2-213.4-226.2-12 0-23.8 1.1-35.2 3.1v-3.1c0-124.9-95.5-226.2-213.4-226.2S333.4 114.6 333.4 239.5c0 2.4 0 4.8 0.1 7.2-17.1-4.7-35-7.2-53.4-7.2-117.8 0-213.4 101.3-213.4 226.2 0 92.1 51.9 171.3 126.3 206.6-13.7 29.9-21.4 63.4-21.4 98.8 0 124.9 95.5 226.2 213.4 226.2 68.8 0 130-34.5 169-88.1 39 53.6 100.2 88.1 169 88.1 117.8 0 213.4-101.3 213.4-226.2 0-41.2-10.4-79.9-28.6-113.1 60.5-39.9 100.8-111.1 100.8-192.3z" fill="#8CC66D" ></path><path d="M437.8 400.7m-24.7 0a24.7 24.7 0 1 0 49.4 0 24.7 24.7 0 1 0-49.4 0Z" fill="#040000" ></path><path d="M649.7 400.7m-24.7 0a24.7 24.7 0 1 0 49.4 0 24.7 24.7 0 1 0-49.4 0Z" fill="#040000" ></path><path d="M527.3 625.9c6.3-14.2 13.1-28.3 17.9-43 6.2-19 8.3-38.6 10.5-58.3l2.1-19.2c0.7-6.2-9-6.1-9.7 0-1.7 16.3-2.8 32.8-5.7 48.9-4.2 23.7-13.8 45-23.5 66.7-2.5 5.6 5.9 10.5 8.4 4.9z" fill="#252525" ></path><path d="M447.7 522.3c20.3-0.1 40.6-0.2 61-0.4l96.6-0.6c7.5 0 14.9-0.1 22.4-0.1 16.6-0.1 16.7-25.9 0-25.8-20.3 0.1-40.6 0.2-61 0.4l-96.6 0.6c-7.5 0-14.9 0.1-22.4 0.1-16.6 0.1-16.7 25.9 0 25.8z" fill="#040000" ></path><path d="M495.4 508.2c-10.3 3.8-9.2 20.9-9.2 29.5 0.1 16 2.1 32.3 6.1 47.8 3.5 13.7 8.7 29.9 20.6 38.7 12.9 9.5 27.6 2.1 37.6-7.9 10.2-10.3 17.8-23 24.7-35.6 11.6-21.3 20.9-43.8 29.7-66.4 3-7.8-9.5-11.1-12.5-3.4-7.4 19.1-15.3 38.1-24.7 56.4-5.9 11.5-12.2 23-20.3 33.1-2.8 3.5-5.8 6.9-9.2 9.8-1.9 1.7-1.4 1.3-3.3 2.5-1.3 0.8-2.6 1.6-3.9 2.2-0.7 0.3 1-0.2-0.8 0.3-0.6 0.2-1.2 0.3-1.8 0.5-1.1 0.3-1.2 0.2-0.5 0.1-0.6 0-1.3 0-1.9 0.1-2.2 0.1 0.6 0.5-1.8-0.2l-1.8-0.6c1.5 0.5 0.2 0.1-0.5-0.3-0.8-0.5-2.9-2.1-1.7-1.1-1-0.9-2-1.7-2.8-2.7-0.4-0.5-0.9-1-1.3-1.5 0.4 0.5 0.1 0.2-0.5-0.7-0.8-1.3-1.7-2.5-2.4-3.9-0.7-1.3-1.4-2.5-2-3.8-0.4-0.8-0.8-1.6-1.1-2.4-0.1-0.2-0.5-1.1 0 0l-0.6-1.5a86.8 86.8 0 0 1-3.3-9.8c-4.4-14.9-6.2-27.9-6.8-42.8-0.3-6.6-0.3-13.1 0.4-19.7 0.2-1.5-0.3 1.5 0.1-0.5l0.3-1.8c0.2-0.9 0.5-1.8 0.7-2.8 0.4-1.9-0.7 1.1 0.3-0.7 0.5-1-1.3 1.2-0.3 0.5-0.3 0.3-1.1 0.8-2 1.1 7.7-2.9 4.3-15.4-3.5-12.5z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "18",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M75.4 739.8c-78.7-134.4-194-455.7 401.4-579.6 9.8-2 19.2-6.2 29.2-7.5C656.8 133 947.3 205 1000.1 578.4c42.6 223.8 29.7 392.1-822 233.6-43.1-8-80.6-34.4-102.7-72.2z" fill="#F09495" ></path><path d="M704.6 875.4c-129 0-301.8-20.5-526.6-62.3-43.5-8.1-81.2-34.6-103.5-72.7-19.3-32.9-44.8-84.3-57.1-142.5-13.9-65.1-8.8-125.3 15.1-179.2 54.3-122.3 203.7-209.6 444-259.6 4.1-0.9 8.3-2.1 12.3-3.4 5.5-1.7 11.1-3.4 16.9-4.2 29-3.8 75.7-5.9 133.8 5.7 54.5 10.9 105.3 31 150.8 59.9C843.7 251 888.2 296 922.7 351c39.7 63.1 66.1 139.6 78.5 227.3 8.1 42.4 15.2 87.3 12.5 127.9-2.8 42.6-16.4 75.5-41.5 100.7-42.5 42.7-120.3 65-237.8 68.1-9.6 0.2-19.6 0.4-29.8 0.4zM76.3 739.3c22 37.6 59.2 63.7 102.1 71.7 242.5 45.1 424.4 65.3 556.1 61.9 116.9-3.1 194.1-25.2 236.3-67.5 55.4-55.6 44.4-142.5 28.3-226.7C976 415.8 903.4 291.5 789.2 219c-124-78.7-248.1-69.9-283.2-65.3-5.6 0.7-11.2 2.4-16.6 4.1-4.1 1.2-8.3 2.5-12.5 3.4C237.3 211.1 88.5 298 34.5 419.6c-54.6 122.8 2.8 253 41.8 319.7z" fill="#FFFFFF" ></path><path d="M424.1 442.5m-24.7 0a24.7 24.7 0 1 0 49.4 0 24.7 24.7 0 1 0-49.4 0Z" fill="#040000" ></path><path d="M635.9 442.5m-24.7 0a24.7 24.7 0 1 0 49.4 0 24.7 24.7 0 1 0-49.4 0Z" fill="#040000" ></path><path d="M426.2 543.3c17.1 7.9 36.6 26 25.5 46.1-6.9 12.5-19.8 21.2-31.7 28.4-4.5 2.7-0.4 9.8 4.1 7.1 17.4-10.5 41.6-27.6 39-51.1-1.6-14-12.4-24.8-23.5-32.3-3-2-6.1-3.9-9.3-5.4-4.8-2.1-8.9 5-4.1 7.2zM629.5 535.4c-21.8 11.7-40.6 37-25.7 61.3 8.2 13.4 22.2 22.7 35.7 30.3 4.7 2.7 8.9-4.6 4.2-7.2-15.5-8.7-39.9-23.9-36.9-45.2 1.6-11.4 10.7-20.7 19.6-27.2 2.4-1.7 4.8-3.4 7.4-4.8 4.7-2.5 0.4-9.8-4.3-7.2z" fill="#040000" ></path><path d="M457.2 584.6c25.6 25.6 66.7 41 101.8 28.3 18.2-6.6 33.2-19.1 45.5-33.8 4.2-5.1-3-12.4-7.3-7.3-18.5 22-43.3 38.1-73 35-18.6-1.9-36.2-10.8-50.9-22-2.9-2.2-6.1-4.8-8.8-7.5-4.7-4.7-12 2.6-7.3 7.3z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "19",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M915.9 510.5c8.4-19 13.1-39.8 13.1-61.7 0-90-78.9-162.9-176.2-162.9-3.2 0-6.3 0.1-9.5 0.2v-0.2c0-94.8-116.2-171.6-259.6-171.6S224 191.2 224 286v2c-96.2 0-174.1 72-174.1 160.9 0 38 14.3 73 38.2 100.5-41.8 29.4-68.8 75.9-68.8 128.2 0 88.9 78 160.9 174.1 160.9 17.1 0 33.6-2.3 49.3-6.5 28.9 46.1 88.7 77.7 157.6 77.7 49.4 0 94-16.2 126-42.3 32 26.1 76.6 42.3 126 42.3 77.3 0 143-39.7 166.7-95 3.1 0.2 6.3 0.2 9.5 0.2 97.3 0 176.2-72.9 176.2-162.9 0-60.6-35.7-113.4-88.8-141.5z" fill="#5A74B8" ></path><path d="M357.6 449.5a46.6 73.2 0 1 0 93.2 0 46.6 73.2 0 1 0-93.2 0Z" fill="#FEFEFD" ></path><path d="M357.5 449.5a25.1 39.4 0 1 0 50.2 0 25.1 39.4 0 1 0-50.2 0Z" fill="#040000" ></path><path d="M531.3 449.5a46.6 73.2 0 1 0 93.2 0 46.6 73.2 0 1 0-93.2 0Z" fill="#FEFEFD" ></path><path d="M531.2 449.5a25.1 39.4 0 1 0 50.2 0 25.1 39.4 0 1 0-50.2 0Z" fill="#040000" ></path><path d="M426.7 574.6c20.9 29.9 59.7 52.2 96.2 38.6 19.2-7.2 34.7-21.2 47.6-36.9 2.8-3.5 3.4-8.3 0-11.7-2.9-2.9-8.9-3.5-11.7 0-16.5 20.2-40.9 40.9-68.1 35.5-17.3-3.4-31-13.2-42.9-25.9-2-2.2-3.9-4.4-5.8-6.7-1.6-1.9 1.1 1.5-0.4-0.6-0.2-0.2-0.3-0.5-0.5-0.7-6.2-8.7-20.6-0.4-14.4 8.4z" fill="#040000" ></path></svg>`
+			},
+			{
+				name: "20",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024" ><path d="M792.8 301.4c-8.2 0-16.2 0.4-24.2 1.3-12.3-81.8-129.2-145.9-271.8-145.9-137.1 0-250.5 59.3-269.9 136.6C105.3 295.5 7.4 391.2 7.4 508.9c0 119.1 100.2 215.6 223.7 215.6 5.3 0 10.6-0.2 15.8-0.5 14.4 80.5 130.4 143.2 271.3 143.2 135.9 0 248.6-58.3 269.4-134.6 1.7 0 3.4 0.1 5.1 0.1 123.6 0 223.7-96.5 223.7-215.6s-100-215.7-223.6-215.7z" fill="#F6CD50" ></path><path d="M435.9 431.5m-52.2 0a52.2 52.2 0 1 0 104.4 0 52.2 52.2 0 1 0-104.4 0Z" fill="#FAFAFA" ></path><path d="M588.1 431.5m-52.2 0a52.2 52.2 0 1 0 104.4 0 52.2 52.2 0 1 0-104.4 0Z" fill="#FAFAFA" ></path><path d="M435.9 431.5m-27.8 0a27.8 27.8 0 1 0 55.6 0 27.8 27.8 0 1 0-55.6 0Z" fill="#040000" ></path><path d="M601.9 407.4c-5.7 2.9-11.3 5.9-16.9 9-6.8 3.8-15.3 7.8-20.5 13.8-5.6 6.5 1.6 11.1 6.7 14.4 11.2 7.1 23.3 13 35.1 19 5.7 2.9 10.8-5.7 5.1-8.6-10.9-5.6-21.9-11.1-32.4-17.4-2.4-1.4-4.6-3.1-7-4.6 1 0.6-0.4-0.4-0.4-0.4-1.9-0.3-0.5 4.2 0.5 4.1-0.1 0-0.6 0.3 0.3-0.3 0.5-0.3 1-0.9 1.5-1.3 9.7-7.9 21.9-13.5 33.1-19.2 5.7-2.7 0.6-11.4-5.1-8.5zM406.6 547.6c11.5 14.4 27 26.7 42.7 36.3 32.2 19.8 71.2 27.2 107.6 15.4 29.5-9.6 54.6-29.1 75.5-51.6 10.8-11.6-6.6-29.1-17.5-17.5-9.4 10.1-19.5 19.7-30.8 27.7-4.6 3.2-9.3 6.2-14.2 8.9-5 2.8-9.9 5.1-14.1 6.7-4.6 1.7-9.3 3.2-14.1 4.4-2.2 0.5-4.4 1-6.6 1.4-1 0.2-2 0.3-2.9 0.5 2.6-0.4-2.1 0.2-2.5 0.3-4.1 0.4-8.3 0.5-12.5 0.4-2.2-0.1-4.4-0.2-6.6-0.4-1.1-0.1-2.2-0.2-3.2-0.3-1.5-0.2-1.4-0.2 0.1 0l-2.1-0.3c-7.8-1.3-15.4-3.4-22.8-6.2-0.9-0.4-1.8-0.7-2.8-1.1-3.1-1.2 2.3 1.1-0.7-0.3-1.5-0.7-2.9-1.3-4.4-2-3.7-1.8-7.2-3.7-10.8-5.8-5.7-3.4-11.1-7.1-16.4-11.1 3 2.3-1.1-0.9-1.8-1.5-1.1-0.9-2.1-1.7-3.1-2.6-2.1-1.8-4.2-3.7-6.3-5.6-4.4-4.1-8.7-8.4-12.4-13.1-4.2-5.2-13.1-4.3-17.5 0-5 5.1-4 12.2 0.2 17.4z" fill="#040000" ></path></svg>`
+			}
+		]
+	},
+	{
+		name: "标记图标",
+		type: "sign",
+		list: [
+			{
+				name: "1",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M809.728 429.696a18.901333 18.901333 0 0 0-15.274667-12.885333l-183.466666-26.624-81.92-166.272a18.901333 18.901333 0 0 0-34.005334 0l-81.92 166.272-183.594666 26.624a19.029333 19.029333 0 0 0-10.496 32.298666l132.693333 129.536-31.274667 182.741334a18.816 18.816 0 0 0 27.477334 19.84l164.138666-86.186667 164.096 86.058667a18.773333 18.773333 0 1 0 27.434667-19.84l-31.36-182.741334 132.693333-129.408a18.901333 18.901333 0 0 0 4.778667-19.413333z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "2",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M644.565333 306.901333c32.128 0 65.834667-5.76 101.077334-17.237333a17.066667 17.066667 0 0 1 22.357333 16.213333v328.32c-1.109333 0.768 10.325333 27.093333-99.370667 19.84-109.653333-7.210667-181.76-45.098667-246.869333-45.098666-65.152 0-49.322667 2.688-74.154667 8.405333v168.064a24.746667 24.746667 0 0 1-24.490666 25.258667 22.528 22.528 0 0 1-17.28-7.253334 24.149333 24.149333 0 0 1-7.168-18.005333V281.258667C299.776 280.490667 328.106667 256 421.76 256s164.437333 50.901333 222.805333 50.901333z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "3",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M524.074667 225.408l274.517333 274.517333a17.066667 17.066667 0 0 1 0 24.149334l-274.517333 274.517333a17.066667 17.066667 0 0 1-24.149334 0l-274.517333-274.517333a17.066667 17.066667 0 0 1 0-24.149334l274.517333-274.517333a17.066667 17.066667 0 0 1 24.149334 0z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "4",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M317.866667 300.8h388.266666c9.386667 0 17.066667 7.68 17.066667 17.066667v388.266666a17.066667 17.066667 0 0 1-17.066667 17.066667h-388.266666a17.066667 17.066667 0 0 1-17.066667-17.066667v-388.266666c0-9.386667 7.68-17.066667 17.066667-17.066667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "5",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M498.346667 279.082667L248.789333 701.44a15.829333 15.829333 0 0 0 13.653334 23.893333h499.114666a15.829333 15.829333 0 0 0 13.653334-23.893333l-249.6-422.357333a15.829333 15.829333 0 0 0-27.264 0z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "6",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M497.749333 798.549333l-31.445333-28.501333C313.941333 631.722667 213.333333 540.501333 213.333333 428.8a160.981333 160.981333 0 0 1 162.730667-162.730667c51.498667 0 100.906667 23.978667 133.12 61.696a177.536 177.536 0 0 1 133.162667-61.696 160.981333 160.981333 0 0 1 162.730666 162.730667c0 111.701333-100.608 202.965333-252.970666 341.333333l-31.445334 28.458667a17.066667 17.066667 0 0 1-22.912 0z" fill="#FFFFFF"></path><path d="M634.538667 487.808L555.050667 426.24 507.306667 256a201.002667 201.002667 0 0 0-23.594667 20.394667l-0.256-0.256L525.653333 426.666667l-133.290666 59.946666a14.08 14.08 0 0 0-8.021334 15.957334l28.757334 126.378666a14.208 14.208 0 0 0 27.733333-6.229333l-26.24-115.114667 126.037333-56.704 76.416 59.136a14.250667 14.250667 0 0 0 19.968-2.474666 14.08 14.08 0 0 0-2.474666-19.797334z" fill="#6D768D"></path></svg>`
+			},
+			{
+				name: "7",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M497.749333 798.549333l-31.445333-28.501333C313.941333 631.722667 213.333333 540.501333 213.333333 428.8a160.981333 160.981333 0 0 1 162.730667-162.730667c51.498667 0 100.906667 23.978667 133.12 61.696a177.536 177.536 0 0 1 133.162667-61.696 160.981333 160.981333 0 0 1 162.730666 162.730667c0 111.701333-100.608 202.965333-252.970666 341.333333l-31.445334 28.458667a17.066667 17.066667 0 0 1-22.912 0z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "8",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M374.656 273.194667c5.973333 4.48 12.117333 9.6 18.346667 15.36 6.272 5.717333 11.904 12.373333 16.896 19.84 2.517333 4.010667 5.504 8.490667 9.002666 13.482666a529.493333 529.493333 0 0 1 20.266667 32.213334h155.221333a169.813333 169.813333 0 0 0 9.770667-15.744c2.474667-4.48 5.248-8.96 8.234667-13.482667a460.842667 460.842667 0 0 1 23.253333-31.829333c4.992-6.229333 12.245333-12.373333 21.76-18.346667a34.261333 34.261333 0 0 0 10.112-9.728 31.274667 31.274667 0 0 0 5.248-11.989333 18.56 18.56 0 0 0-1.536-11.605334 17.664 17.664 0 0 0-10.112-8.618666c-4.48-1.493333-8.362667-2.005333-11.605333-1.493334a46.933333 46.933333 0 0 0-9.770667 2.602667c-3.242667 1.28-6.613333 2.645333-10.112 4.138667a32.426667 32.426667 0 0 1-12.757333 2.261333 26.026667 26.026667 0 0 1-12.373334-2.645333 45.653333 45.653333 0 0 1-8.96-6.357334l-8.661333-7.850666a30.336 30.336 0 0 0-11.989333-6.4c-9.984-3.968-18.005333-4.693333-24.021334-2.218667-5.973333 2.474667-11.946667 6.485333-17.962666 11.946667a88.618667 88.618667 0 0 1-11.989334 10.496 7.338667 7.338667 0 0 1-3.754666 1.493333 46.165333 46.165333 0 0 1-8.277334-5.205333 71.808 71.808 0 0 1-7.125333-4.906667 37.973333 37.973333 0 0 1-6.4-6.357333c-3.968-3.968-9.941333-6.613333-17.92-7.850667a31.061333 31.061333 0 0 0-21.76 4.138667c-8.533333 5.461333-14.506667 10.069333-18.048 13.824a29.354667 29.354667 0 0 1-15.744 7.893333 23.978667 23.978667 0 0 1-13.098667-0.768 987.733333 987.733333 0 0 0-14.634666-4.48 80.725333 80.725333 0 0 0-14.250667-2.986667 16.768 16.768 0 0 0-11.989333 2.986667c-6.997333 5.461333-9.258667 12.074667-6.741334 19.84a34.56 34.56 0 0 0 13.482667 18.346667z" fill="#FFFFFF"></path><path d="M780.757333 545.152a219.306667 219.306667 0 0 0-19.882666-65.536 224.981333 224.981333 0 0 0-33.365334-49.792 430.336 430.336 0 0 0-37.12-37.12c-14.506667-11.946667-27.264-23.296-38.272-34.048a544.512 544.512 0 0 1-27.733333-28.842667 305.28 305.28 0 0 1-22.485333-26.197333h-168.746667c-6.485333 8.490667-13.994667 17.493333-22.485333 26.965333a360.96 360.96 0 0 1-26.24 28.074667c-10.538667 10.24-22.272 21.12-35.285334 32.597333a305.493333 305.493333 0 0 0-41.6 44.16 250.026667 250.026667 0 0 0-49.493333 117.589334 216.106667 216.106667 0 0 0 1.877333 70.4 220.586667 220.586667 0 0 0 75.349334 126.549333c21.248 18.005333 47.146667 32.597333 77.653333 43.818667 30.464 11.264 65.493333 16.853333 104.96 16.853333 38.528 0 72.874667-4.864 103.125333-14.592a265.045333 265.045333 0 0 0 78.378667-39.338667c21.973333-16.469333 39.594667-35.797333 52.864-58.026666 13.226667-22.186667 22.101333-45.824 26.624-70.784 4.992-30.421333 5.632-58.026667 1.877333-82.773334z" fill="#FFFFFF"></path><path d="M593.322667 647.509333a20.48 20.48 0 0 1-11.861334 3.2h-50.133333v14.165334c0 4.266667-1.792 8.362667-5.376 12.373333a15.914667 15.914667 0 0 1-13.952 5.333333 24.917333 24.917333 0 0 1-14.336-3.882666c-3.84-2.602667-5.973333-7.210667-6.4-13.824v-14.165334h-48.725333a17.792 17.792 0 0 1-11.818667-3.882666 10.24 10.24 0 0 1-3.968-9.6c0-4.266667 1.578667-7.68 4.693333-10.24a16.768 16.768 0 0 1 11.093334-3.925334h48.682666v-24.789333h-48.682666a15.573333 15.573333 0 0 1-11.52-4.266667 13.525333 13.525333 0 0 1-4.266667-9.941333 15.36 15.36 0 0 1 4.693333-10.624 14.72 14.72 0 0 1 11.093334-4.949333h48.682666l0.725334-14.890667a1053.568 1053.568 0 0 1-40.832-42.538667l-10.752-9.898666a41.216 41.216 0 0 1-6.442667-11.690667c-1.92-4.992-0.938667-10.069333 2.858667-15.274667a13.653333 13.653333 0 0 1 15.786666-3.84c6.186667 2.090667 11.221333 4.821333 15.018667 8.106667 1.92 2.389333 5.248 5.888 10.026667 10.666667l15.061333 14.848 19.328 19.157333 22.186667-20.565333a987.605333 987.605333 0 0 1 29.397333-25.514667 21.162667 21.162667 0 0 1 14.293333-5.674667c5.290667 0 9.557333 2.133333 12.928 6.4 6.186667 7.082667 3.84 15.36-7.168 24.789334a179.072 179.072 0 0 0-12.885333 12.373333c-5.76 5.973333-11.52 11.733333-17.194667 17.408-6.698667 7.082667-14.08 14.378667-22.186666 21.973333v13.44h46.506666c6.698667 0 11.605333 1.536 14.72 4.608a14.165333 14.165333 0 0 1 4.650667 10.282667c0 4.266667-1.450667 7.936-4.309333 11.008-2.858667 3.029333-7.637333 4.352-14.336 3.84l-46.506667 0.768-0.768 24.064h45.866667c13.354667 0 20.053333 4.992 20.053333 14.933333 0.469333 4.693333-0.853333 8.106667-3.925333 10.24z" fill="#6D768D"></path></svg>`
+			},
+			{
+				name: "9",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M512 213.333333l234.666667 341.333334h-128v213.333333h-213.333334v-213.333333h-128L512 213.333333z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "10",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M533.333333 810.666667L298.666667 469.333333h128V256h213.333333v213.333333h128l-234.666667 341.333334z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "11",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M213.333333 533.333333L554.666667 298.666667v128h213.333333v213.333333h-213.333333v128l-341.333334-234.666667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "12",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M810.666667 533.333333L469.333333 768v-128H256v-213.333333h213.333333V298.666667l341.333334 234.666666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "13",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M0 512c0 282.752 229.248 512 512 512s512-229.248 512-512S794.752 0 512 0 0 229.248 0 512z" fill="#6D768D"></path><path d="M571.349333 508.586667l162.389334-162.346667a44.330667 44.330667 0 1 0-62.72-62.72l-162.389334 162.389333-162.517333-162.389333a44.330667 44.330667 0 1 0-62.72 62.72l162.389333 162.389333-162.389333 162.474667a44.330667 44.330667 0 1 0 62.72 62.72l162.389333-162.346667 162.389334 162.389334a44.330667 44.330667 0 1 0 62.72-62.72l-162.261334-162.56z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "14",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C233.386667 0 0 225.877333 0 512s225.877333 512 512 512 512-225.877333 512-512S790.613333 0 512 0z" fill="#6D768D"></path><path d="M726.144 311.210667l-277.333333 305.066666-124.8-124.8c-13.866667-13.866667-41.6-13.866667-55.466667 0-13.866667 13.866667-13.866667 41.6 0 55.466667l159.445333 152.533333c13.866667 13.866667 41.6 13.866667 55.466667 0l305.066667-332.8c13.866667-13.866667 13.866667-41.6 0-55.466666-20.778667-13.866667-48.512-13.866667-62.378667 0z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "15",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M541.952 755.626667a40.618667 40.618667 0 0 1-29.824 12.373333 41.344 41.344 0 0 1-30.122667-12.373333 40.106667 40.106667 0 0 1-12.672-30.122667c0-11.605333 4.096-21.845333 12.672-30.122667a40.405333 40.405333 0 0 1 30.122667-12.714666c11.605333 0 21.546667 4.138667 29.824 12.714666a40.32 40.32 0 0 1 12.714667 30.122667c0 11.861333-4.096 21.76-12.714667 30.122667zM450.986667 241.28A77.866667 77.866667 0 0 1 512.256 213.333333c24.874667 0 45.354667 8.917333 61.354667 27.946667 15.488 18.432 23.722667 41.685333 23.722666 69.674667 0 23.765333-33.152 200.533333-44.672 329.045333h-80.128C463.146667 511.402667 426.666667 334.677333 426.666667 310.954667c0-27.392 8.277333-50.645333 24.32-69.674667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "16",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 0C229.248 0 0 229.248 0 512s229.248 512 512 512 512-229.248 512-512S794.794667 0 512 0z" fill="#6D768D"></path><path d="M490.666667 682.666667a64 64 0 1 1 0 128 64 64 0 0 1 0-128z m13.994666-490.752c61.397333 0 112.341333 14.634667 153.002667 43.946666 40.533333 29.269333 60.885333 72.618667 60.885333 130.133334 0 35.242667-12.373333 64.938667-29.952 89.045333-10.282667 14.677333-33.664 33.408-62.890666 56.192l-32.426667 22.357333c-15.701333 12.202667-29.696 26.453333-34.858667 42.666667-1.706667 5.546667-3.072 14.677333-3.968 24.533333-0.426667 4.949333-4.864 15.018667-15.232 15.018667h-83.328c-13.568 0-15.957333-10.581333-15.744-15.786667 1.493333-34.005333 4.608-64.213333 18.474667-80.469333 28.074667-32.896 91.904-73.813333 91.904-73.813333a104.106667 104.106667 0 0 0 23.552-24.021334c10.837333-14.933333 19.797333-31.317333 19.797333-49.237333 0-20.565333-6.016-39.338667-18.090666-56.32-12.032-16.938667-34.090667-25.386667-66.005334-25.386667-31.445333 0-53.76 10.410667-66.901333 31.274667-9.685333 15.445333-15.786667 29.610667-18.346667 45.013333-0.853333 5.461333-4.394667 16.981333-16.042666 16.981334H327.210667c-17.322667 0-21.12-11.221333-20.650667-16.64 6.272-68.138667 32.896-114.688 80-144.597334 32-20.565333 71.381333-30.890667 118.101333-30.890666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "17",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M336.256 410.026667H253.312a40.021333 40.021333 0 0 0-39.850667 43.264l23.296 278.101333c1.706667 20.693333 19.072 36.608 39.850667 36.608h59.648c11.050667 0 20.010667-8.96 20.010667-19.968v-318.037333a19.968 19.968 0 0 0-20.010667-19.968z m434.432 0h-178.944C653.312 182.314667 548.949333 170.666667 548.949333 170.666667c-44.288 0-35.114667 34.986667-38.442666 40.832 0 84.48-68.010667 155.093333-101.034667 184.362666a39.552 39.552 0 0 0-13.226667 29.653334v322.56c0 11.008 8.96 19.925333 20.010667 19.925333h233.728c30.378667 0 58.154667-17.152 71.68-44.373333 18.176-36.736 40.448-90.112 54.656-133.973334 13.781333-42.410667 26.24-94.976 33.578667-131.968a39.850667 39.850667 0 0 0-39.253334-47.658666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "18",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M796.16 413.909333c-31.146667-0.298667-115.626667-0.085333-146.858667-0.085333h-158.464c8.533333-7.68 15.914667-14.506667 23.594667-20.906667 29.781333-24.874667 25.813333-71.082667-14.208-88.874666-22.954667-10.24-44.970667-5.632-64 11.52-34.944 31.274667-69.632 62.677333-104.277333 93.994666a15.488 15.488 0 0 1-11.178667 4.437334c-11.221333-0.085333-26.88-0.128-46.933333-0.170667a17.066667 17.066667 0 0 0-17.109334 17.066667L256 719.701333a17.066667 17.066667 0 0 0 17.066667 17.152l49.578666-0.085333c3.968 0 7.466667 0.768 10.88 2.602667 15.829333 8.832 31.701333 17.493333 47.616 26.24a18.133333 18.133333 0 0 0 9.301334 2.346666h168.405333c6.186667 0 11.946667-0.981333 17.834667-2.56 29.44-7.253333 40.021333-30.293333 38.528-52.565333-0.768-9.728-4.266667-18.346667-9.984-26.24 19.626667-5.76 35.114667-16.213333 42.112-36.096 7.125333-20.394667 1.621333-38.4-12.672-53.333333 28.16-19.754667 34.858667-44.672 18.645333-75.648h140.458667c6.570667 0 13.013333-0.597333 19.370666-2.645334 31.957333-9.813333 48.810667-42.88 35.626667-71.552-10.154667-22.186667-28.629333-33.152-52.608-33.450666z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "19",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M270.506667 413.909333c31.146667-0.298667 115.626667-0.085333 146.858666-0.085333h158.464c-8.533333-7.68-15.914667-14.506667-23.594666-20.906667-29.781333-24.874667-25.813333-71.082667 14.208-88.874666 22.954667-10.24 44.970667-5.632 64 11.52 34.944 31.274667 69.632 62.677333 104.277333 93.994666 3.413333 2.986667 6.528 4.437333 11.178667 4.437334 11.221333-0.085333 26.88-0.128 46.933333-0.170667a17.066667 17.066667 0 0 1 17.109333 17.066667l0.682667 288.853333a17.066667 17.066667 0 0 1-17.066667 17.152l-49.578666-0.085333a22.101333 22.101333 0 0 0-10.88 2.602666c-15.829333 8.832-31.701333 17.493333-47.616 26.24a18.133333 18.133333 0 0 1-9.301334 2.346667h-168.405333a68.693333 68.693333 0 0 1-17.834667-2.56c-29.44-7.253333-40.021333-30.293333-38.528-52.565333 0.768-9.728 4.266667-18.346667 9.984-26.24-19.626667-5.76-35.114667-16.213333-42.112-36.096-7.125333-20.394667-1.621333-38.4 12.672-53.333334-28.16-19.754667-34.858667-44.672-18.645333-75.648H272.853333c-6.570667 0-13.013333-0.597333-19.370666-2.645333-31.957333-9.813333-48.810667-42.88-35.626667-71.552 10.154667-22.186667 28.629333-33.152 52.608-33.450667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "20",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M667.733333 480.128H400v-111.36a97.706667 97.706667 0 0 1 97.621333-97.621333 97.706667 97.706667 0 0 1 97.578667 97.621333 28.885333 28.885333 0 0 0 57.813333 0A155.605333 155.605333 0 0 0 497.621333 213.333333a155.605333 155.605333 0 0 0-155.392 155.434667v111.36h-14.677333A28.885333 28.885333 0 0 0 298.666667 509.013333v292.010667a28.885333 28.885333 0 0 0 28.885333 28.885333h340.138667a28.885333 28.885333 0 0 0 28.928-28.885333V509.013333a28.885333 28.885333 0 0 0-28.928-28.885333z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "21",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M400.042667 437.461333v-111.36a97.706667 97.706667 0 0 1 97.621333-97.621333 97.706667 97.706667 0 0 1 97.578667 97.621333 28.885333 28.885333 0 0 0 57.813333 0A155.605333 155.605333 0 0 0 497.621333 170.666667a155.605333 155.605333 0 0 0-155.392 155.434666v111.36h-14.677333A28.885333 28.885333 0 0 0 298.666667 466.346667v292.010666a28.885333 28.885333 0 0 0 28.885333 28.885334h340.138667a28.885333 28.885333 0 0 0 28.928-28.885334V466.346667a28.885333 28.885333 0 0 0-28.928-28.885334H400.042667z" fill="#FFFFFF"></path><path d="M595.242667 437.461333v-111.36a97.706667 97.706667 0 0 0-97.621334-97.621333 97.706667 97.706667 0 0 0-97.578666 97.621333 28.885333 28.885333 0 0 1-57.813334 0A155.605333 155.605333 0 0 1 497.621333 170.666667a155.605333 155.605333 0 0 1 155.434667 155.434666v111.36h14.634667c16 0 28.928 12.928 28.928 28.885334v292.010666a28.885333 28.885333 0 0 1-28.928 28.885334H327.552A28.885333 28.885333 0 0 1 298.666667 758.357333V466.346667c0-15.957333 12.928-28.885333 28.885333-28.885334h267.690667z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "22",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M511.999787 512.000213m-511.999787 0a511.999787 511.999787 0 1 0 1023.999573 0 511.999787 511.999787 0 1 0-1023.999573 0Z" fill="#6D768D"></path><path d="M381.354508 364.586941c0 54.015977 29.013321 103.935957 75.946635 130.986613a152.53327 152.53327 0 0 0 151.935936 0 151.12527 151.12527 0 0 0 75.946636-130.986613A151.594604 151.594604 0 0 0 533.333111 213.333671a151.594604 151.594604 0 0 0-151.89327 151.25327zM660.479725 498.901552a185.258589 185.258589 0 0 1-127.146614 50.346646c-49.066646 0-93.866628-19.199992-127.06128-50.346646C317.141201 544.853533 255.999893 637.440161 255.999893 744.106783c0 13.183995 10.709329 23.850657 23.978657 23.850657h506.709122a23.893323 23.893323 0 0 0 23.978657-23.893323c0-106.538622-61.098641-199.25325-150.186604-245.205232z" fill="#FFFFFF"></path></svg>`
+			},
+			{
+				name: "23",
+				icon: `<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 1024"><path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#6D768D"></path><path d="M445.610667 401.578667a129.322667 129.322667 0 1 0 258.645333 0 129.322667 129.322667 0 0 0-258.645333 0z m237.568 114.901333a157.354667 157.354667 0 0 1-216.362667 0 236.373333 236.373333 0 0 0-127.957333 209.706667c0 11.264 9.130667 20.394667 20.394666 20.394666h431.402667a20.394667 20.394667 0 0 0 20.394667-20.394666 236.373333 236.373333 0 0 0-127.872-209.706667zM409.813333 401.578667c0-40.362667 14.592-77.397333 38.698667-106.112a112.725333 112.725333 0 0 0-29.013333-3.925334 112.64 112.64 0 0 0-112.426667 112.469334 112.64 112.64 0 0 0 144.853333 107.648 164.693333 164.693333 0 0 1-42.112-110.08z m-18.602666 136.704a136.533333 136.533333 0 0 1-65.706667-34.474667 205.44 205.44 0 0 0-111.232 182.4c0 9.813333 7.936 17.706667 17.706667 17.706667H303.36a273.621333 273.621333 0 0 1 87.893333-165.632z" fill="#FFFFFF"></path></svg>`
+			}
+		]
+	}
+];
+var getNodeIconListIcon = (name, extendIconList = []) => {
+	let arr = name.split("_");
+	let typeData = mergerIconList([...nodeIconList, ...extendIconList]).find((item) => {
+		return item.type === arr[0];
+	});
+	if (typeData) {
+		let typeName = typeData.list.find((item) => {
+			return item.name === arr[1];
+		});
+		if (typeName) return typeName.icon;
+		return "";
+	} else return "";
+};
+var icons_default = {
+	hyperlink,
+	note,
+	attachment,
+	nodeIconList,
+	getNodeIconListIcon
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeCreateContents.js
+var measureText = (text, style) => {
+	const g = new G();
+	const node = new Text().text(text);
+	style.text(node);
+	g.add(node);
+	return g.bbox();
+};
+var defaultTagStyle = {
+	radius: 3,
+	fontSize: 12,
+	fill: "",
+	height: 20,
+	paddingX: 8
+};
+function getImageUrl() {
+	const img = this.getData("image");
+	return (this.mindMap.renderer.renderTree.data.imgMap || {})[img] || img;
+}
+function createImgNode() {
+	let img = this.getImageUrl();
+	if (!img) return;
+	img = (this.mindMap.renderer.renderTree.data.imgMap || {})[img] || img;
+	const imgSize = this.getImgShowSize();
+	const node = new Image$1().load(img).size(...imgSize);
+	const { defaultNodeImage } = this.mindMap.opt;
+	if (defaultNodeImage) {
+		const imgEl = new Image();
+		imgEl.onerror = () => {
+			node.load(defaultNodeImage);
+		};
+		imgEl.src = img;
+	}
+	if (this.getData("imageTitle")) node.attr("title", this.getData("imageTitle"));
+	node.on("click", (e) => {
+		this.mindMap.emit("node_img_click", this, node, e);
+	});
+	node.on("dblclick", (e) => {
+		this.mindMap.emit("node_img_dblclick", this, e, node);
+	});
+	node.on("mouseenter", (e) => {
+		this.mindMap.emit("node_img_mouseenter", this, node, e);
+	});
+	node.on("mouseleave", (e) => {
+		this.mindMap.emit("node_img_mouseleave", this, node, e);
+	});
+	node.on("mousemove", (e) => {
+		this.mindMap.emit("node_img_mousemove", this, node, e);
+	});
+	return {
+		node,
+		width: imgSize[0],
+		height: imgSize[1]
+	};
+}
+function getImgShowSize() {
+	const { custom, width, height } = this.getData("imageSize");
+	if (custom) return [width, height];
+	return resizeImgSize(width, height, this.mindMap.themeConfig.imgMaxWidth, this.mindMap.themeConfig.imgMaxHeight);
+}
+function createIconNode() {
+	let _data = this.getData();
+	if (!_data.icon || _data.icon.length <= 0) return [];
+	let iconSize = this.mindMap.themeConfig.iconSize;
+	return _data.icon.map((item) => {
+		let src = icons_default.getNodeIconListIcon(item, this.mindMap.opt.iconList || []);
+		let node = null;
+		if (/^<svg/.test(src)) node = SVG(src);
+		else node = new Image$1().load(src);
+		node.size(iconSize, iconSize);
+		node.on("click", (e) => {
+			this.mindMap.emit("node_icon_click", this, item, e, node);
+		});
+		node.on("mouseenter", (e) => {
+			this.mindMap.emit("node_icon_mouseenter", this, item, e, node);
+		});
+		node.on("mouseleave", (e) => {
+			this.mindMap.emit("node_icon_mouseleave", this, item, e, node);
+		});
+		return {
+			node,
+			width: iconSize,
+			height: iconSize
+		};
+	});
+}
+function createRichTextNode(specifyText) {
+	const hasCustomWidth = this.hasCustomWidth();
+	let text = typeof specifyText === "string" ? specifyText : this.getData("text");
+	let { textAutoWrapWidth, emptyTextMeasureHeightText } = this.mindMap.opt;
+	textAutoWrapWidth = hasCustomWidth ? this.customTextWidth : textAutoWrapWidth;
+	const g = new G();
+	let recoverText = false;
+	if (this.getData("resetRichText")) {
+		delete this.nodeData.data.resetRichText;
+		recoverText = true;
+	}
+	if (recoverText && !isUndef(text)) {
+		if (checkIsRichText(text)) text = removeRichTextStyes(text);
+		else text = `<p>${text}</p>`;
+		this.setData({ text });
+	}
+	const nodeTextStyleList = [];
+	const nodeRichTextStyles = getNodeRichTextStyles(this);
+	Object.keys(nodeRichTextStyles).forEach((prop) => {
+		nodeTextStyleList.push([prop, nodeRichTextStyles[prop]]);
+	});
+	if (!this.mindMap.commonCaches.measureRichtextNodeTextSizeEl) {
+		this.mindMap.commonCaches.measureRichtextNodeTextSizeEl = document.createElement("div");
+		this.mindMap.commonCaches.measureRichtextNodeTextSizeEl.style.position = "fixed";
+		this.mindMap.commonCaches.measureRichtextNodeTextSizeEl.style.left = "-999999px";
+		this.mindMap.el.appendChild(this.mindMap.commonCaches.measureRichtextNodeTextSizeEl);
+	}
+	const div = this.mindMap.commonCaches.measureRichtextNodeTextSizeEl;
+	nodeTextStyleList.forEach(([prop, value]) => {
+		div.style[prop] = value;
+	});
+	div.style.lineHeight = 1.2;
+	const html = `<div>${text}</div>`;
+	div.innerHTML = html;
+	const el = div.children[0];
+	el.classList.add("smm-richtext-node-wrap");
+	addXmlns(el);
+	el.style.maxWidth = textAutoWrapWidth + "px";
+	if (hasCustomWidth) el.style.width = this.customTextWidth + "px";
+	else el.style.width = "";
+	let { width, height } = el.getBoundingClientRect();
+	if (height <= 0) {
+		div.innerHTML = `<p>${emptyTextMeasureHeightText}</p>`;
+		let elTmp = div.children[0];
+		elTmp.classList.add("smm-richtext-node-wrap");
+		height = elTmp.getBoundingClientRect().height;
+		div.innerHTML = html;
+	}
+	width = Math.min(Math.ceil(width) + 1, textAutoWrapWidth);
+	height = Math.ceil(height);
+	g.attr("data-width", width);
+	g.attr("data-height", height);
+	const foreignObject = createForeignObjectNode({
+		el: div.children[0],
+		width,
+		height
+	});
+	const foreignObjectStyle = { "line-height": 1.2 };
+	nodeTextStyleList.forEach(([prop, value]) => {
+		foreignObjectStyle[camelCaseToHyphen(prop)] = value;
+	});
+	foreignObject.css(foreignObjectStyle);
+	g.add(foreignObject);
+	return {
+		node: g,
+		nodeContent: foreignObject,
+		width,
+		height
+	};
+}
+function createTextNode(specifyText) {
+	if (this.getData("needUpdate")) delete this.nodeData.data.needUpdate;
+	if (this.getData("richText")) return this.createRichTextNode(specifyText);
+	const text = typeof specifyText === "string" ? specifyText : this.getData("text");
+	if (this.getData("resetRichText")) delete this.nodeData.data.resetRichText;
+	const g = new G();
+	const fontSize = this.getStyle("fontSize", false);
+	const textAlign = this.getStyle("textAlign", false);
+	let textArr = [];
+	if (!isUndef(text)) textArr = String(text).split(/\n/gim);
+	const { textAutoWrapWidth: maxWidth, emptyTextMeasureHeightText } = this.mindMap.opt;
+	let isMultiLine = textArr.length > 1;
+	textArr.forEach((item, index) => {
+		let arr = item.split("");
+		let lines = [];
+		let line = [];
+		while (arr.length) {
+			let str = arr.shift();
+			if (measureText([...line, str].join(""), this.style).width <= maxWidth) line.push(str);
+			else {
+				lines.push(line.join(""));
+				line = [str];
+			}
+		}
+		if (line.length > 0) lines.push(line.join(""));
+		if (lines.length > 1) isMultiLine = true;
+		textArr[index] = lines.join("\n");
+	});
+	textArr = textArr.join("\n").replace(/\n$/g, "").split(/\n/gim);
+	textArr.forEach((item, index) => {
+		if (item === "") item = "﻿";
+		const node = new Text().text(item);
+		node.addClass("smm-text-node-wrap");
+		node.attr("text-anchor", {
+			left: "start",
+			center: "middle",
+			right: "end"
+		}[textAlign] || "start");
+		this.style.text(node);
+		node.y(fontSize * noneRichTextNodeLineHeight * index + (noneRichTextNodeLineHeight - 1) * fontSize / 2);
+		g.add(node);
+	});
+	let { width, height } = g.bbox();
+	if (height <= 0) {
+		const tmpNode = new Text().text(emptyTextMeasureHeightText);
+		this.style.text(tmpNode);
+		height = tmpNode.bbox().height;
+	}
+	width = Math.min(Math.ceil(width), maxWidth);
+	height = Math.ceil(height);
+	g.attr("data-width", width);
+	g.attr("data-height", height);
+	g.attr("data-ismultiLine", isMultiLine || textArr.length > 1);
+	return {
+		node: g,
+		width,
+		height
+	};
+}
+function createHyperlinkNode() {
+	const { hyperlink, hyperlinkTitle } = this.getData();
+	if (!hyperlink) return;
+	const { customHyperlinkJump, hyperlinkIcon } = this.mindMap.opt;
+	const { icon, style } = hyperlinkIcon;
+	const iconSize = this.getNodeIconSize("hyperlinkIcon");
+	const node = new SVG().size(iconSize, iconSize);
+	const a = new A().to(hyperlink).target("_blank");
+	a.node.addEventListener("click", (e) => {
+		if (typeof customHyperlinkJump === "function") {
+			e.preventDefault();
+			customHyperlinkJump(hyperlink, this);
+		}
+	});
+	if (hyperlinkTitle) node.add(SVG(`<title>${hyperlinkTitle}</title>`));
+	a.rect(iconSize, iconSize).fill({ color: "transparent" });
+	const iconNode = SVG(icon || icons_default.hyperlink).size(iconSize, iconSize);
+	this.style.iconNode(iconNode, style.color);
+	a.add(iconNode);
+	node.add(a);
+	return {
+		node,
+		width: iconSize,
+		height: iconSize
+	};
+}
+function createTagNode() {
+	const tagData = this.getData("tag");
+	if (!tagData || tagData.length <= 0) return [];
+	let { maxTag, tagsColorMap } = this.mindMap.opt;
+	tagsColorMap = tagsColorMap || {};
+	const nodes = [];
+	tagData.slice(0, maxTag).forEach((item, index) => {
+		let str = "";
+		let style = { ...defaultTagStyle };
+		if (typeof item === "string") str = item;
+		else {
+			str = item.text;
+			style = {
+				...defaultTagStyle,
+				...item.style
+			};
+		}
+		const hasCustomWidth = typeof style.width !== "undefined";
+		const tag = new G();
+		tag.on("click", () => {
+			this.mindMap.emit("node_tag_click", this, item, index, tag);
+		});
+		const text = new Text().text(str);
+		this.style.tagText(text, style);
+		const { width: textWidth, height: textHeight } = text.bbox();
+		const rectWidth = hasCustomWidth ? style.width : textWidth + style.paddingX * 2;
+		const maxWidth = hasCustomWidth ? Math.max(rectWidth, textWidth) : rectWidth;
+		const maxHeight = Math.max(style.height, textHeight);
+		if (hasCustomWidth) text.x((maxWidth - textWidth) / 2);
+		else text.x(hasCustomWidth ? 0 : style.paddingX);
+		text.cy(-maxHeight / 2);
+		const rect = new Rect().size(rectWidth, style.height).cy(-maxHeight / 2);
+		if (hasCustomWidth) rect.x((maxWidth - rectWidth) / 2);
+		this.style.tagRect(rect, {
+			...style,
+			fill: style.fill || tagsColorMap[text.node.textContent] || generateColorByContent(text.node.textContent)
+		});
+		tag.add(rect).add(text);
+		nodes.push({
+			node: tag,
+			width: maxWidth,
+			height: maxHeight
+		});
+	});
+	return nodes;
+}
+function createNoteNode() {
+	if (!this.getData("note")) return null;
+	const { icon, style } = this.mindMap.opt.noteIcon;
+	const iconSize = this.getNodeIconSize("noteIcon");
+	const node = new SVG().attr("cursor", "pointer").addClass("smm-node-note").size(iconSize, iconSize);
+	node.add(new Rect().size(iconSize, iconSize).fill({ color: "transparent" }));
+	const iconNode = SVG(icon || icons_default.note).size(iconSize, iconSize);
+	this.style.iconNode(iconNode, style.color);
+	node.add(iconNode);
+	if (!this.mindMap.opt.customNoteContentShow) {
+		if (!this.noteEl) {
+			this.noteEl = document.createElement("div");
+			this.noteEl.style.cssText = `
+          position: fixed;
+          padding: 10px;
+          border-radius: 5px;
+          box-shadow: 0 2px 5px rgb(0 0 0 / 10%);
+          display: none;
+          background-color: #fff;
+          z-index: ${this.mindMap.opt.nodeNoteTooltipZIndex}
+      `;
+			(this.mindMap.opt.customInnerElsAppendTo || document.body).appendChild(this.noteEl);
+		}
+		this.noteEl.innerText = this.getData("note");
+	}
+	node.on("mouseover", () => {
+		const { left, top } = this.getNoteContentPosition();
+		if (!this.mindMap.opt.customNoteContentShow) {
+			this.noteEl.style.left = left + "px";
+			this.noteEl.style.top = top + "px";
+			this.noteEl.style.display = "block";
+		} else this.mindMap.opt.customNoteContentShow.show(this.getData("note"), left, top, this);
+	});
+	node.on("mouseout", () => {
+		if (!this.mindMap.opt.customNoteContentShow) this.noteEl.style.display = "none";
+		else this.mindMap.opt.customNoteContentShow.hide();
+	});
+	node.on("click", (e) => {
+		this.mindMap.emit("node_note_click", this, e, node);
+	});
+	node.on("dblclick", (e) => {
+		this.mindMap.emit("node_note_dblclick", this, e, node);
+	});
+	return {
+		node,
+		width: iconSize,
+		height: iconSize
+	};
+}
+function createAttachmentNode() {
+	const { attachmentUrl, attachmentName } = this.getData();
+	if (!attachmentUrl) return;
+	const iconSize = this.getNodeIconSize("attachmentIcon");
+	const { icon, style } = this.mindMap.opt.attachmentIcon;
+	const node = new SVG().attr("cursor", "pointer").size(iconSize, iconSize);
+	if (attachmentName) node.add(SVG(`<title>${attachmentName}</title>`));
+	node.add(new Rect().size(iconSize, iconSize).fill({ color: "transparent" }));
+	const iconNode = SVG(icon || icons_default.attachment).size(iconSize, iconSize);
+	this.style.iconNode(iconNode, style.color);
+	node.add(iconNode);
+	node.on("click", (e) => {
+		this.mindMap.emit("node_attachmentClick", this, e, node);
+	});
+	node.on("contextmenu", (e) => {
+		this.mindMap.emit("node_attachmentContextmenu", this, e, node);
+	});
+	return {
+		node,
+		width: iconSize,
+		height: iconSize
+	};
+}
+function getNodeIconSize(prop) {
+	const { style } = this.mindMap.opt[prop];
+	return isUndef(style.size) ? this.mindMap.themeConfig.iconSize : style.size;
+}
+function getNoteContentPosition() {
+	const iconSize = this.getNodeIconSize("noteIcon");
+	const { scaleY } = this.mindMap.view.getTransformData().transform;
+	const iconSizeAddScale = iconSize * scaleY;
+	let { left, top } = this._noteData.node.node.getBoundingClientRect();
+	top += iconSizeAddScale;
+	return {
+		left,
+		top
+	};
+}
+function measureCustomNodeContentSize(content) {
+	if (!this.mindMap.commonCaches.measureCustomNodeContentSizeEl) {
+		this.mindMap.commonCaches.measureCustomNodeContentSizeEl = document.createElement("div");
+		this.mindMap.commonCaches.measureCustomNodeContentSizeEl.style.cssText = `
+      position: fixed;
+      left: -99999px;
+      top: -99999px;
+    `;
+		this.mindMap.el.appendChild(this.mindMap.commonCaches.measureCustomNodeContentSizeEl);
+	}
+	this.mindMap.commonCaches.measureCustomNodeContentSizeEl.innerHTML = "";
+	this.mindMap.commonCaches.measureCustomNodeContentSizeEl.appendChild(content);
+	let rect = this.mindMap.commonCaches.measureCustomNodeContentSizeEl.getBoundingClientRect();
+	return {
+		width: rect.width,
+		height: rect.height
+	};
+}
+function isUseCustomNodeContent() {
+	return !!this._customNodeContent;
+}
+var nodeCreateContents_default = {
+	getImageUrl,
+	createImgNode,
+	getImgShowSize,
+	createIconNode,
+	createRichTextNode,
+	createTextNode,
+	createHyperlinkNode,
+	createTagNode,
+	createNoteNode,
+	createAttachmentNode,
+	getNoteContentPosition,
+	getNodeIconSize,
+	measureCustomNodeContentSize,
+	isUseCustomNodeContent
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeExpandBtnPlaceholderRect.js
+function renderExpandBtnPlaceholderRect() {
+	if (this.getChildrenLength() <= 0 || this.isRoot) return;
+	const { alwaysShowExpandBtn, notShowExpandBtn, expandBtnSize } = this.mindMap.opt;
+	if (!alwaysShowExpandBtn && !notShowExpandBtn) {
+		let { width, height } = this;
+		if (!this._unVisibleRectRegionNode) {
+			this._unVisibleRectRegionNode = new Rect();
+			this._unVisibleRectRegionNode.fill({ color: "transparent" });
+		}
+		this.group.add(this._unVisibleRectRegionNode);
+		this.renderer.layout.renderExpandBtnRect(this._unVisibleRectRegionNode, expandBtnSize, width, height, this);
+	}
+}
+function clearExpandBtnPlaceholderRect() {
+	if (!this._unVisibleRectRegionNode) return;
+	this._unVisibleRectRegionNode.remove();
+	this._unVisibleRectRegionNode = null;
+}
+function updateExpandBtnPlaceholderRect() {
+	if (this.needRerenderExpandBtnPlaceholderRect) {
+		this.needRerenderExpandBtnPlaceholderRect = false;
+		this.renderExpandBtnPlaceholderRect();
+	}
+	if (this.getChildrenLength() > 0) {
+		if (!this._unVisibleRectRegionNode) this.renderExpandBtnPlaceholderRect();
+	} else if (this._unVisibleRectRegionNode) this.clearExpandBtnPlaceholderRect();
+}
+var nodeExpandBtnPlaceholderRect_default = {
+	renderExpandBtnPlaceholderRect,
+	clearExpandBtnPlaceholderRect,
+	updateExpandBtnPlaceholderRect
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeModifyWidth.js
+function initDragHandle() {
+	if (!this.checkEnableDragModifyNodeWidth()) return;
+	this._dragHandleNodes = null;
+	this.dragHandleWidth = 4;
+	this.dragHandleMousedownX = 0;
+	this.isDragHandleMousedown = false;
+	this.dragHandleIndex = 0;
+	this.dragHandleMousedownCustomTextWidth = 0;
+	this.dragHandleMousedownBodyCursor = "";
+	this.dragHandleMousedownLeft = 0;
+	this.onDragMousemoveHandle = this.onDragMousemoveHandle.bind(this);
+	window.addEventListener("mousemove", this.onDragMousemoveHandle);
+	this.onDragMouseupHandle = this.onDragMouseupHandle.bind(this);
+	window.addEventListener("mouseup", this.onDragMouseupHandle);
+	this.mindMap.on("node_mouseup", this.onDragMouseupHandle);
+}
+function onDragMousemoveHandle(e) {
+	if (!this.isDragHandleMousedown) return;
+	e.stopPropagation();
+	e.preventDefault();
+	let { minNodeTextModifyWidth, maxNodeTextModifyWidth, isUseCustomNodeContent, customCreateNodeContent } = this.mindMap.opt;
+	const useCustomContent = isUseCustomNodeContent && customCreateNodeContent && this._customNodeContent;
+	document.body.style.cursor = "ew-resize";
+	this.group.css({ cursor: "ew-resize" });
+	const { scaleX } = this.mindMap.draw.transform();
+	const ox = e.clientX - this.dragHandleMousedownX;
+	let newWidth = this.dragHandleMousedownCustomTextWidth + (this.dragHandleIndex === 0 ? -ox : ox) / scaleX;
+	newWidth = Math.max(newWidth, minNodeTextModifyWidth);
+	if (maxNodeTextModifyWidth !== -1) newWidth = Math.min(newWidth, maxNodeTextModifyWidth);
+	if (!useCustomContent && this.getData("image")) {
+		const imgSize = this.getImgShowSize();
+		if (this._rectInfo.textContentWidth - this.customTextWidth + newWidth <= imgSize[0]) newWidth = imgSize[0] + this.customTextWidth - this._rectInfo.textContentWidth;
+	}
+	this.customTextWidth = newWidth;
+	if (this.dragHandleIndex === 0) this.left = this.dragHandleMousedownLeft + ox / scaleX;
+	this.reRender(useCustomContent ? [] : ["text"], { ignoreUpdateCustomTextWidth: true });
+}
+function onDragMouseupHandle() {
+	if (!this.isDragHandleMousedown) return;
+	document.body.style.cursor = this.dragHandleMousedownBodyCursor;
+	this.group.css({ cursor: "default" });
+	this.isDragHandleMousedown = false;
+	this.dragHandleMousedownX = 0;
+	this.dragHandleIndex = 0;
+	this.dragHandleMousedownCustomTextWidth = 0;
+	this.setData({ customTextWidth: this.customTextWidth });
+	this.mindMap.render();
+	this.mindMap.emit("dragModifyNodeWidthEnd", this);
+}
+function createDragHandleNode() {
+	const list = [new Rect(), new Rect()];
+	list.forEach((node, index) => {
+		node.size(this.dragHandleWidth, this.height).fill({ color: "transparent" }).css({ cursor: "ew-resize" });
+		node.on("mousedown", (e) => {
+			e.stopPropagation();
+			e.preventDefault();
+			this.dragHandleMousedownX = e.clientX;
+			this.dragHandleIndex = index;
+			this.dragHandleMousedownCustomTextWidth = this.customTextWidth === void 0 ? this._textData ? this._textData.width : this.width : this.customTextWidth;
+			this.dragHandleMousedownBodyCursor = document.body.style.cursor;
+			this.dragHandleMousedownLeft = this.left;
+			this.isDragHandleMousedown = true;
+		});
+	});
+	return list;
+}
+function updateDragHandle() {
+	if (!this.checkEnableDragModifyNodeWidth()) return;
+	if (!this._dragHandleNodes) this._dragHandleNodes = this.createDragHandleNode();
+	if (this.getData("isActive")) {
+		this._dragHandleNodes.forEach((node) => {
+			node.height(this.height);
+			this.group.add(node);
+		});
+		this._dragHandleNodes[1].x(this.width - this.dragHandleWidth);
+	} else this._dragHandleNodes.forEach((node) => {
+		node.remove();
+	});
+}
+var nodeModifyWidth_default = {
+	initDragHandle,
+	onDragMousemoveHandle,
+	onDragMouseupHandle,
+	createDragHandleNode,
+	updateDragHandle
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeCooperate.js
+function createUserListNode() {
+	if (!this.mindMap.cooperate) return;
+	this._userListGroup = new G();
+	this.group.add(this._userListGroup);
+}
+function createTextAvatar(item) {
+	const { avatarSize, fontSize } = this.mindMap.opt.cooperateStyle;
+	const g = new G();
+	const str = item.isMore ? item.name : String(item.name)[0];
+	const circle = new Circle().size(avatarSize, avatarSize);
+	circle.fill({ color: item.color || generateColorByContent(str) });
+	const text = new Text().text(str).fill({ color: "#fff" }).css({ "font-size": fontSize + "px" }).dx(-fontSize / 2).dy((avatarSize - fontSize) / 2);
+	g.add(circle).add(text);
+	return g;
+}
+function createImageAvatar(item) {
+	const { avatarSize } = this.mindMap.opt.cooperateStyle;
+	return new Image$1().load(item.avatar).size(avatarSize, avatarSize);
+}
+function updateUserListNode() {
+	if (!this._userListGroup) return;
+	const { avatarSize } = this.mindMap.opt.cooperateStyle;
+	this._userListGroup.clear();
+	const length = this.userList.length;
+	const maxShowCount = Math.floor(this.width / avatarSize);
+	const list = [];
+	if (length > maxShowCount) list.push(...this.userList.slice(0, maxShowCount - 1), {
+		isMore: true,
+		name: "+" + (length - maxShowCount + 1)
+	});
+	else list.push(...this.userList);
+	list.forEach((item, index) => {
+		let node = null;
+		if (item.avatar) node = this.createImageAvatar(item);
+		else node = this.createTextAvatar(item);
+		node.on("click", (e) => {
+			this.mindMap.emit("node_cooperate_avatar_click", item, this, node, e);
+		});
+		node.on("mouseenter", (e) => {
+			this.mindMap.emit("node_cooperate_avatar_mouseenter", item, this, node, e);
+		});
+		node.on("mouseleave", (e) => {
+			this.mindMap.emit("node_cooperate_avatar_mouseleave", item, this, node, e);
+		});
+		node.x(index * avatarSize).cy(-avatarSize / 2);
+		this._userListGroup.add(node);
+	});
+}
+function addUser(userInfo) {
+	if (this.userList.find((item) => {
+		return item.id == userInfo.id;
+	})) return;
+	this.userList.push(userInfo);
+	this.updateUserListNode();
+}
+function removeUser(userInfo) {
+	const index = this.userList.findIndex((item) => {
+		return item.id == userInfo.id;
+	});
+	if (index === -1) return;
+	this.userList.splice(index, 1);
+	this.updateUserListNode();
+}
+function emptyUser() {
+	this.userList = [];
+	this.updateUserListNode();
+}
+var nodeCooperate_default = {
+	createUserListNode,
+	updateUserListNode,
+	createTextAvatar,
+	createImageAvatar,
+	addUser,
+	removeUser,
+	emptyUser
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/quickCreateChildBtn.js
+function initQuickCreateChildBtn() {
+	if (this.isGeneralization) return;
+	this._quickCreateChildBtn = null;
+	this._showQuickCreateChildBtn = false;
+}
+function showQuickCreateChildBtn() {
+	if (this.isGeneralization || this.getChildrenLength() > 0) return;
+	if (this._quickCreateChildBtn) this.group.add(this._quickCreateChildBtn);
+	else {
+		const { quickCreateChildBtnIcon, expandBtnStyle, expandBtnSize } = this.mindMap.opt;
+		const { icon, style } = quickCreateChildBtnIcon;
+		let { color, fill } = expandBtnStyle || {
+			color: "#808080",
+			fill: "#fff"
+		};
+		color = style.color || color;
+		const iconNode = SVG(icon || btns_default.quickCreateChild).size(expandBtnSize, expandBtnSize);
+		iconNode.css({ cursor: "pointer" });
+		iconNode.x(0).y(-expandBtnSize / 2);
+		this.style.iconNode(iconNode, color);
+		const fillNode = new Circle().size(expandBtnSize);
+		fillNode.x(0).y(-expandBtnSize / 2);
+		fillNode.fill({ color: fill }).css({ cursor: "pointer" });
+		this._quickCreateChildBtn = new G();
+		this._quickCreateChildBtn.add(fillNode).add(iconNode);
+		this._quickCreateChildBtn.on("click", (e) => {
+			e.stopPropagation();
+			this.mindMap.emit("quick_create_btn_click", this);
+			const { customQuickCreateChildBtnClick } = this.mindMap.opt;
+			if (typeof customQuickCreateChildBtnClick === "function") {
+				customQuickCreateChildBtnClick(this);
+				return;
+			}
+			this.mindMap.execCommand("INSERT_CHILD_NODE", true, [this]);
+		});
+		this._quickCreateChildBtn.on("dblclick", (e) => {
+			e.stopPropagation();
+		});
+		this._quickCreateChildBtn.addClass("smm-quick-create-child-btn");
+		this.group.add(this._quickCreateChildBtn);
+	}
+	this._showQuickCreateChildBtn = true;
+	this.renderer.layout.renderExpandBtn(this, this._quickCreateChildBtn);
+}
+function removeQuickCreateChildBtn() {
+	if (this.isGeneralization) return;
+	if (this._quickCreateChildBtn && this._showQuickCreateChildBtn) {
+		this._quickCreateChildBtn.remove();
+		this._showQuickCreateChildBtn = false;
+	}
+}
+function hideQuickCreateChildBtn() {
+	if (this.isGeneralization) return;
+	const { isActive } = this.getData();
+	if (!isActive) this.removeQuickCreateChildBtn();
+}
+var quickCreateChildBtn_default = {
+	initQuickCreateChildBtn,
+	showQuickCreateChildBtn,
+	removeQuickCreateChildBtn,
+	hideQuickCreateChildBtn
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/nodeLayout.js
+function getImgTextMarin(dir, imgWidth, textWidth, imgHeight, textHeight) {
+	const { imgTextMargin } = this.mindMap.opt;
+	if (dir === "v") return imgHeight > 0 && textHeight > 0 ? imgTextMargin : 0;
+	else return imgWidth > 0 && textWidth > 0 ? imgTextMargin : 0;
+}
+function getTagContentSize(space) {
+	let maxTagHeight = 0;
+	let width = this._tagData.reduce((sum, cur) => {
+		maxTagHeight = Math.max(maxTagHeight, cur.height);
+		return sum += cur.width;
+	}, 0);
+	width += (this._tagData.length - 1) * space;
+	return {
+		width,
+		height: maxTagHeight
+	};
+}
+function getNodeRect() {
+	if (this.isUseCustomNodeContent()) {
+		const rect = this.measureCustomNodeContentSize(this._customNodeContent.cloneNode(true));
+		return {
+			width: this.hasCustomWidth() ? this.customTextWidth : rect.width,
+			height: rect.height
+		};
+	}
+	const { TAG_PLACEMENT, IMG_PLACEMENT } = CONSTANTS;
+	const { textContentMargin } = this.mindMap.opt;
+	const tagIsBottom = (this.getStyle("tagPlacement") || TAG_PLACEMENT.RIGHT) === TAG_PLACEMENT.BOTTOM;
+	const imgPlacement = this.getStyle("imgPlacement") || IMG_PLACEMENT.TOP;
+	let imgContentWidth = 0;
+	let imgContentHeight = 0;
+	let textContentWidth = 0;
+	let textContentHeight = 0;
+	let tagContentWidth = 0;
+	let tagContentHeight = 0;
+	let spaceCount = 0;
+	if (this._imgData) {
+		imgContentWidth = this._imgData.width;
+		imgContentHeight = this._imgData.height;
+	}
+	this.mindMap.nodeInnerPrefixList.forEach((item) => {
+		const itemData = this[`_${item.name}Data`];
+		if (itemData) {
+			textContentWidth += itemData.width;
+			textContentHeight = Math.max(textContentHeight, itemData.height);
+			spaceCount++;
+		}
+	});
+	if (this._prefixData) {
+		textContentWidth += this._prefixData.width;
+		textContentHeight = Math.max(textContentHeight, this._prefixData.height);
+		spaceCount++;
+	}
+	if (this._iconData.length > 0) {
+		textContentWidth += this._iconData.reduce((sum, cur) => {
+			textContentHeight = Math.max(textContentHeight, cur.height);
+			return sum += cur.width;
+		}, 0) + (this._iconData.length - 1) * textContentMargin;
+		spaceCount++;
+	}
+	if (this._textData) {
+		textContentWidth += this._textData.width;
+		textContentHeight = Math.max(textContentHeight, this._textData.height);
+		spaceCount++;
+	}
+	if (this._hyperlinkData) {
+		textContentWidth += this._hyperlinkData.width;
+		textContentHeight = Math.max(textContentHeight, this._hyperlinkData.height);
+		spaceCount++;
+	}
+	if (this._tagData.length > 0) {
+		const { width: totalTagWidth, height: maxTagHeight } = this.getTagContentSize(textContentMargin);
+		if (tagIsBottom) {
+			tagContentWidth = totalTagWidth;
+			tagContentHeight = maxTagHeight;
+		} else {
+			textContentWidth += totalTagWidth;
+			textContentHeight = Math.max(textContentHeight, maxTagHeight);
+			spaceCount++;
+		}
+	}
+	if (this._noteData) {
+		textContentWidth += this._noteData.width;
+		textContentHeight = Math.max(textContentHeight, this._noteData.height);
+		spaceCount++;
+	}
+	if (this._attachmentData) {
+		textContentWidth += this._attachmentData.width;
+		textContentHeight = Math.max(textContentHeight, this._attachmentData.height);
+		spaceCount++;
+	}
+	if (this._postfixData) {
+		textContentWidth += this._postfixData.width;
+		textContentHeight = Math.max(textContentHeight, this._postfixData.height);
+		spaceCount++;
+	}
+	this.mindMap.nodeInnerPostfixList.forEach((item) => {
+		const itemData = this[`_${item.name}Data`];
+		if (itemData) {
+			textContentWidth += itemData.width;
+			textContentHeight = Math.max(textContentHeight, itemData.height);
+			spaceCount++;
+		}
+	});
+	textContentWidth += (spaceCount - 1) * textContentMargin;
+	if (tagIsBottom && textContentWidth > 0 && tagContentHeight > 0) {
+		this._rectInfo.textContentWidthWithoutTag = textContentWidth;
+		textContentWidth = Math.max(textContentWidth, tagContentWidth);
+		textContentHeight = textContentHeight + textContentMargin + tagContentHeight;
+	}
+	this._rectInfo.textContentWidth = textContentWidth;
+	this._rectInfo.textContentHeight = textContentHeight;
+	let _width = 0;
+	let _height = 0;
+	if ([IMG_PLACEMENT.TOP, IMG_PLACEMENT.BOTTOM].includes(imgPlacement)) {
+		_width = Math.max(imgContentWidth, textContentWidth);
+		_height = imgContentHeight + textContentHeight + this.getImgTextMarin("v", 0, 0, imgContentHeight, textContentHeight);
+	} else {
+		_width = imgContentWidth + textContentWidth + this.getImgTextMarin("h", imgContentWidth, textContentWidth);
+		_height = Math.max(imgContentHeight, textContentHeight);
+	}
+	const { paddingX, paddingY } = this.getPaddingVale();
+	const { paddingX: shapePaddingX, paddingY: shapePaddingY } = this.shapeInstance.getShapePadding(_width, _height, paddingX, paddingY);
+	this.shapePadding.paddingX = shapePaddingX;
+	this.shapePadding.paddingY = shapePaddingY;
+	const borderWidth = this.getBorderWidth();
+	return {
+		width: _width + paddingX * 2 + shapePaddingX * 2 + borderWidth,
+		height: _height + paddingY * 2 + shapePaddingY * 2 + borderWidth
+	};
+}
+function addHoverNode(width, height) {
+	const { hoverRectPadding } = this.mindMap.opt;
+	this.hoverNode = new Rect().size(width + hoverRectPadding * 2, height + hoverRectPadding * 2).x(-hoverRectPadding).y(-hoverRectPadding);
+	this.hoverNode.addClass("smm-hover-node");
+	this.style.hoverNode(this.hoverNode, width, height);
+	this.group.add(this.hoverNode);
+}
+function customNodeContentRealtimeLayout() {
+	if (!this.group) return;
+	if (!this.isUseCustomNodeContent()) return;
+	if (this.shapeNode) this.shapeNode.remove();
+	if (this._unVisibleRectRegionNode) this._unVisibleRectRegionNode.remove();
+	if (this.hoverNode) this.hoverNode.remove();
+	const { width, height } = this;
+	const halfBorderWidth = this.getBorderWidth() / 2;
+	this.shapeNode = this.shapeInstance.createShape();
+	this.shapeNode.addClass("smm-node-shape");
+	this.shapeNode.translate(halfBorderWidth, halfBorderWidth);
+	this.style.shape(this.shapeNode);
+	this.group.add(this.shapeNode);
+	this.renderExpandBtnPlaceholderRect();
+	if (this.isGeneralization && this.generalizationBelongNode) this.group.addClass("generalization_" + this.generalizationBelongNode.uid);
+	this.addHoverNode(width, height);
+	this.shapeNode.back();
+	this.group.findOne("foreignObject").size(width, height);
+}
+function layout() {
+	if (!this.group) return;
+	this.group.clear();
+	const { openRealtimeRenderOnNodeTextEdit, textContentMargin, addCustomContentToNode } = this.mindMap.opt;
+	const { width, height } = this;
+	let { paddingX, paddingY } = this.getPaddingVale();
+	const halfBorderWidth = this.getBorderWidth() / 2;
+	paddingX += this.shapePadding.paddingX + halfBorderWidth;
+	paddingY += this.shapePadding.paddingY + halfBorderWidth;
+	this.shapeNode = this.shapeInstance.createShape();
+	this.shapeNode.addClass("smm-node-shape");
+	this.shapeNode.translate(halfBorderWidth, halfBorderWidth);
+	this.style.shape(this.shapeNode);
+	this.group.add(this.shapeNode);
+	this.renderExpandBtnPlaceholderRect();
+	if (this.createUserListNode) this.createUserListNode();
+	if (this.isGeneralization && this.generalizationBelongNode) this.group.addClass("generalization_" + this.generalizationBelongNode.uid);
+	if (this.isUseCustomNodeContent()) {
+		const foreignObject = createForeignObjectNode({
+			el: this._customNodeContent,
+			width,
+			height
+		});
+		this.group.add(foreignObject);
+		this.addHoverNode(width, height);
+		return;
+	}
+	const { IMG_PLACEMENT, TAG_PLACEMENT } = CONSTANTS;
+	const imgPlacement = this.getStyle("imgPlacement") || IMG_PLACEMENT.TOP;
+	const tagIsBottom = (this.getStyle("tagPlacement") || TAG_PLACEMENT.RIGHT) === TAG_PLACEMENT.BOTTOM;
+	let { textContentWidth, textContentHeight, textContentWidthWithoutTag } = this._rectInfo;
+	const textContentHeightWithTag = textContentHeight;
+	let totalTagWidth = 0;
+	let maxTagHeight = 0;
+	const hasTagContent = this._tagData && this._tagData.length > 0;
+	if (hasTagContent) {
+		const res = this.getTagContentSize(textContentMargin);
+		totalTagWidth = res.width;
+		maxTagHeight = res.height;
+		if (tagIsBottom) textContentHeight -= maxTagHeight + textContentMargin;
+	}
+	let imgWidth = 0;
+	let imgHeight = 0;
+	if (this._imgData) {
+		imgWidth = this._imgData.width;
+		imgHeight = this._imgData.height;
+		this.group.add(this._imgData.node);
+		switch (imgPlacement) {
+			case IMG_PLACEMENT.TOP:
+				this._imgData.node.cx(width / 2).y(paddingY);
+				break;
+			case IMG_PLACEMENT.BOTTOM:
+				this._imgData.node.cx(width / 2).y(height - paddingY - imgHeight);
+				break;
+			case IMG_PLACEMENT.LEFT:
+				this._imgData.node.x(paddingX).cy(height / 2);
+				break;
+			case IMG_PLACEMENT.RIGHT:
+				this._imgData.node.x(width - paddingX - imgWidth).cy(height / 2);
+				break;
+			default: break;
+		}
+	}
+	let textContentNested = new G();
+	let textContentOffsetX = 0;
+	if (hasTagContent && tagIsBottom) textContentOffsetX = textContentWidthWithoutTag < textContentWidth ? (textContentWidth - textContentWidthWithoutTag) / 2 : 0;
+	this.mindMap.nodeInnerPrefixList.forEach((item) => {
+		const itemData = this[`_${item.name}Data`];
+		if (itemData) {
+			itemData.node.x(textContentOffsetX).y((textContentHeight - itemData.height) / 2);
+			textContentNested.add(itemData.node);
+			textContentOffsetX += itemData.width + textContentMargin;
+		}
+	});
+	if (this._prefixData) {
+		const foreignObject = createForeignObjectNode({
+			el: this._prefixData.el,
+			width: this._prefixData.width,
+			height: this._prefixData.height
+		});
+		foreignObject.x(textContentOffsetX).y((textContentHeight - this._prefixData.height) / 2);
+		textContentNested.add(foreignObject);
+		textContentOffsetX += this._prefixData.width + textContentMargin;
+	}
+	let iconNested = new G();
+	if (this._iconData && this._iconData.length > 0) {
+		let iconLeft = 0;
+		this._iconData.forEach((item) => {
+			item.node.x(textContentOffsetX + iconLeft).y((textContentHeight - item.height) / 2);
+			iconNested.add(item.node);
+			iconLeft += item.width + textContentMargin;
+		});
+		textContentNested.add(iconNested);
+		textContentOffsetX += iconLeft;
+	}
+	if (this._textData) {
+		const oldX = this._textData.node.attr("data-offsetx") || 0;
+		this._textData.node.attr("data-offsetx", textContentOffsetX);
+		(this._textData.nodeContent || this._textData.node).x(-oldX).x(textContentOffsetX).y((textContentHeight - this._textData.height) / 2);
+		if (openRealtimeRenderOnNodeTextEdit) this._textData.node.opacity(this.mindMap.renderer.textEdit.getCurrentEditNode() === this ? 0 : 1);
+		textContentNested.add(this._textData.node);
+		textContentOffsetX += this._textData.width + textContentMargin;
+	}
+	if (this._hyperlinkData) {
+		this._hyperlinkData.node.x(textContentOffsetX).y((textContentHeight - this._hyperlinkData.height) / 2);
+		textContentNested.add(this._hyperlinkData.node);
+		textContentOffsetX += this._hyperlinkData.width + textContentMargin;
+	}
+	let tagNested = new G();
+	if (hasTagContent) if (tagIsBottom) {
+		let tagLeft = 0;
+		this._tagData.forEach((item) => {
+			item.node.x(tagLeft).y((maxTagHeight - item.height) / 2);
+			tagNested.add(item.node);
+			tagLeft += item.width + textContentMargin;
+		});
+		tagNested.x((textContentWidth - totalTagWidth) / 2).y(textContentHeightWithTag - maxTagHeight);
+		textContentNested.add(tagNested);
+	} else {
+		let tagLeft = 0;
+		this._tagData.forEach((item) => {
+			item.node.x(textContentOffsetX + tagLeft).y((textContentHeight - item.height) / 2);
+			tagNested.add(item.node);
+			tagLeft += item.width + textContentMargin;
+		});
+		textContentNested.add(tagNested);
+		textContentOffsetX += tagLeft;
+	}
+	if (this._noteData) {
+		this._noteData.node.x(textContentOffsetX).y((textContentHeight - this._noteData.height) / 2);
+		textContentNested.add(this._noteData.node);
+		textContentOffsetX += this._noteData.width + textContentMargin;
+	}
+	if (this._attachmentData) {
+		this._attachmentData.node.x(textContentOffsetX).y((textContentHeight - this._attachmentData.height) / 2);
+		textContentNested.add(this._attachmentData.node);
+		textContentOffsetX += this._attachmentData.width + textContentMargin;
+	}
+	if (this._postfixData) {
+		const foreignObject = createForeignObjectNode({
+			el: this._postfixData.el,
+			width: this._postfixData.width,
+			height: this._postfixData.height
+		});
+		foreignObject.x(textContentOffsetX).y((textContentHeight - this._postfixData.height) / 2);
+		textContentNested.add(foreignObject);
+		textContentOffsetX += this._postfixData.width + textContentMargin;
+	}
+	this.mindMap.nodeInnerPostfixList.forEach((item) => {
+		const itemData = this[`_${item.name}Data`];
+		if (itemData) {
+			itemData.node.x(textContentOffsetX).y((textContentHeight - itemData.height) / 2);
+			textContentNested.add(itemData.node);
+			textContentOffsetX += itemData.width + textContentMargin;
+		}
+	});
+	this.group.add(textContentNested);
+	const { width: bboxWidth, height: bboxHeight } = textContentNested.bbox();
+	let translateX = 0;
+	let translateY = 0;
+	switch (imgPlacement) {
+		case IMG_PLACEMENT.TOP:
+			translateX = width / 2 - bboxWidth / 2;
+			translateY = paddingY + imgHeight + this.getImgTextMarin("v", 0, 0, imgHeight, textContentHeightWithTag);
+			break;
+		case IMG_PLACEMENT.BOTTOM:
+			translateX = width / 2 - bboxWidth / 2;
+			translateY = paddingY;
+			break;
+		case IMG_PLACEMENT.LEFT:
+			translateX = imgWidth + paddingX + this.getImgTextMarin("h", imgWidth, textContentWidth);
+			translateY = height / 2 - bboxHeight / 2;
+			break;
+		case IMG_PLACEMENT.RIGHT:
+			translateX = paddingX;
+			translateY = height / 2 - bboxHeight / 2;
+			break;
+	}
+	textContentNested.translate(translateX, translateY);
+	this.addHoverNode(width, height);
+	if (this._customContentAddToNodeAdd && this._customContentAddToNodeAdd.el) {
+		const foreignObject = createForeignObjectNode(this._customContentAddToNodeAdd);
+		this.group.add(foreignObject);
+		if (addCustomContentToNode && typeof addCustomContentToNode.handle === "function") addCustomContentToNode.handle({
+			content: this._customContentAddToNodeAdd,
+			element: foreignObject,
+			node: this
+		});
+	}
+	this.mindMap.emit("node_layout_end", this);
+}
+var nodeLayout_default = {
+	getImgTextMarin,
+	getTagContentSize,
+	getNodeRect,
+	addHoverNode,
+	layout,
+	customNodeContentRealtimeLayout
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/node/MindMapNode.js
+var MindMapNode = class MindMapNode {
+	constructor(opt = {}) {
+		this.opt = opt;
+		this.nodeData = this.handleData(opt.data || {});
+		this.nodeDataSnapshot = "";
+		this.uid = opt.uid;
+		this.mindMap = opt.mindMap;
+		this.renderer = opt.renderer;
+		this.draw = this.mindMap.draw;
+		this.nodeDraw = this.mindMap.nodeDraw;
+		this.lineDraw = this.mindMap.lineDraw;
+		this.style = new Style(this);
+		this.effectiveStyles = {};
+		this.shapeInstance = new Shape(this);
+		this.shapePadding = {
+			paddingX: 0,
+			paddingY: 0
+		};
+		this.isRoot = opt.isRoot === void 0 ? false : opt.isRoot;
+		this.isGeneralization = opt.isGeneralization === void 0 ? false : opt.isGeneralization;
+		this.generalizationBelongNode = null;
+		this.layerIndex = opt.layerIndex === void 0 ? 0 : opt.layerIndex;
+		this.width = opt.width || 0;
+		this.height = opt.height || 0;
+		this.customTextWidth = opt.data.data.customTextWidth || void 0;
+		this._left = opt.left || 0;
+		this._top = opt.top || 0;
+		this.customLeft = opt.data.data.customLeft || void 0;
+		this.customTop = opt.data.data.customTop || void 0;
+		this.isDrag = false;
+		this.parent = opt.parent || null;
+		this.children = opt.children || [];
+		this.userList = [];
+		this.group = null;
+		this.shapeNode = null;
+		this.hoverNode = null;
+		this._customNodeContent = null;
+		this._imgData = null;
+		this._iconData = null;
+		this._textData = null;
+		this._hyperlinkData = null;
+		this._tagData = null;
+		this._noteData = null;
+		this.noteEl = null;
+		this.noteContentIsShow = false;
+		this._attachmentData = null;
+		this._prefixData = null;
+		this._postfixData = null;
+		this._expandBtn = null;
+		this._lastExpandBtnType = null;
+		this._showExpandBtn = false;
+		this._openExpandNode = null;
+		this._closeExpandNode = null;
+		this._fillExpandNode = null;
+		this._userListGroup = null;
+		this._lines = [];
+		this._generalizationList = [];
+		this._unVisibleRectRegionNode = null;
+		this._isMouseenter = false;
+		this._customContentAddToNodeAdd = null;
+		this._rectInfo = {
+			textContentWidth: 0,
+			textContentHeight: 0,
+			textContentWidthWithoutTag: 0
+		};
+		this._generalizationNodeWidth = 0;
+		this._generalizationNodeHeight = 0;
+		this.expandBtnSize = this.mindMap.opt.expandBtnSize;
+		this.isMultipleChoice = false;
+		this.needLayout = false;
+		this.isHide = false;
+		const proto = Object.getPrototypeOf(this);
+		if (!proto.bindEvent) {
+			Object.keys(nodeLayout_default).forEach((item) => {
+				proto[item] = nodeLayout_default[item];
+			});
+			Object.keys(nodeGeneralization_default).forEach((item) => {
+				proto[item] = nodeGeneralization_default[item];
+			});
+			Object.keys(nodeExpandBtn_default).forEach((item) => {
+				proto[item] = nodeExpandBtn_default[item];
+			});
+			Object.keys(nodeExpandBtnPlaceholderRect_default).forEach((item) => {
+				proto[item] = nodeExpandBtnPlaceholderRect_default[item];
+			});
+			Object.keys(nodeCommandWraps_default).forEach((item) => {
+				proto[item] = nodeCommandWraps_default[item];
+			});
+			Object.keys(nodeCreateContents_default).forEach((item) => {
+				proto[item] = nodeCreateContents_default[item];
+			});
+			if (this.mindMap.cooperate) Object.keys(nodeCooperate_default).forEach((item) => {
+				proto[item] = nodeCooperate_default[item];
+			});
+			Object.keys(nodeModifyWidth_default).forEach((item) => {
+				proto[item] = nodeModifyWidth_default[item];
+			});
+			if (this.mindMap.opt.isShowCreateChildBtnIcon) {
+				Object.keys(quickCreateChildBtn_default).forEach((item) => {
+					proto[item] = quickCreateChildBtn_default[item];
+				});
+				this.initQuickCreateChildBtn();
+			}
+			proto.bindEvent = true;
+		}
+		this.getSize();
+		this.updateGeneralization();
+		this.initDragHandle();
+	}
+	get left() {
+		return this.customLeft || this._left;
+	}
+	set left(val) {
+		this._left = val;
+	}
+	get top() {
+		return this.customTop || this._top;
+	}
+	set top(val) {
+		this._top = val;
+	}
+	reset() {
+		this.children = [];
+		this.parent = null;
+		this.isRoot = false;
+		this.layerIndex = 0;
+		this.left = 0;
+		this.top = 0;
+	}
+	resetWhenDelete() {
+		this._isMouseenter = false;
+	}
+	handleData(data) {
+		data.data.expand = data.data.expand === false ? false : true;
+		data.data.isActive = data.data.isActive === true ? true : false;
+		data.children = data.children || [];
+		return data;
+	}
+	createNodeData(recreateTypes) {
+		const { isUseCustomNodeContent, customCreateNodeContent, createNodePrefixContent, createNodePostfixContent, addCustomContentToNode } = this.mindMap.opt;
+		const typeList = [
+			"custom",
+			"image",
+			"icon",
+			"text",
+			"hyperlink",
+			"tag",
+			"note",
+			"attachment",
+			"prefix",
+			"postfix",
+			...this.mindMap.nodeInnerPrefixList.map((item) => {
+				return item.name;
+			}),
+			...this.mindMap.nodeInnerPostfixList.map((item) => {
+				return item.name;
+			})
+		];
+		const createTypes = {};
+		if (Array.isArray(recreateTypes)) typeList.forEach((item) => {
+			if (recreateTypes.includes(item)) createTypes[item] = true;
+		});
+		else typeList.forEach((item) => {
+			createTypes[item] = true;
+		});
+		if (isUseCustomNodeContent && customCreateNodeContent && createTypes.custom) this._customNodeContent = customCreateNodeContent(this);
+		if (this._customNodeContent) {
+			addXmlns(this._customNodeContent);
+			return;
+		}
+		if (createTypes.image) this._imgData = this.createImgNode();
+		if (createTypes.icon) this._iconData = this.createIconNode();
+		if (createTypes.text) this._textData = this.createTextNode();
+		if (createTypes.hyperlink) this._hyperlinkData = this.createHyperlinkNode();
+		if (createTypes.tag) this._tagData = this.createTagNode();
+		if (createTypes.note) this._noteData = this.createNoteNode();
+		if (createTypes.attachment) this._attachmentData = this.createAttachmentNode();
+		this.mindMap.nodeInnerPrefixList.forEach((item) => {
+			if (createTypes[item.name]) this[`_${item.name}Data`] = item.createContent(this);
+		});
+		if (createTypes.prefix) {
+			this._prefixData = createNodePrefixContent ? createNodePrefixContent(this) : null;
+			if (this._prefixData && this._prefixData.el) addXmlns(this._prefixData.el);
+		}
+		if (createTypes.postfix) {
+			this._postfixData = createNodePostfixContent ? createNodePostfixContent(this) : null;
+			if (this._postfixData && this._postfixData.el) addXmlns(this._postfixData.el);
+		}
+		this.mindMap.nodeInnerPostfixList.forEach((item) => {
+			if (createTypes[item.name]) this[`_${item.name}Data`] = item.createContent(this);
+		});
+		if (addCustomContentToNode && typeof addCustomContentToNode.create === "function") {
+			this._customContentAddToNodeAdd = addCustomContentToNode.create(this);
+			if (this._customContentAddToNodeAdd && this._customContentAddToNodeAdd.el) addXmlns(this._customContentAddToNodeAdd.el);
+		}
+	}
+	getSize(recreateTypes, opt = {}) {
+		if (!(opt.ignoreUpdateCustomTextWidth || false)) this.customTextWidth = this.getData("customTextWidth") || void 0;
+		this.customLeft = this.getData("customLeft") || void 0;
+		this.customTop = this.getData("customTop") || void 0;
+		this.createNodeData(recreateTypes);
+		const { width, height } = this.getNodeRect();
+		const changed = this.width !== width || this.height !== height;
+		this.width = width;
+		this.height = height;
+		return changed;
+	}
+	bindGroupEvent() {
+		this.group.on("click", (e) => {
+			this.mindMap.emit("node_click", this, e);
+			if (this.isMultipleChoice) {
+				e.stopPropagation();
+				this.isMultipleChoice = false;
+				return;
+			}
+			if (this.mindMap.opt.onlyOneEnableActiveNodeOnCooperate && this.userList.length > 0) return;
+			this.active(e);
+		});
+		this.group.on("mousedown", (e) => {
+			const { readonly, enableCtrlKeyNodeSelection, useLeftKeySelectionRightKeyDrag, mousedownEventPreventDefault } = this.mindMap.opt;
+			if (mousedownEventPreventDefault) e.preventDefault();
+			if (!readonly) {
+				if (this.isRoot) {
+					if (e.which === 3 && !useLeftKeySelectionRightKeyDrag) e.stopPropagation();
+				} else if (e.which !== 2) e.stopPropagation();
+			}
+			if (!readonly && (e.ctrlKey || e.metaKey) && enableCtrlKeyNodeSelection) {
+				this.isMultipleChoice = true;
+				const isActive = this.getData("isActive");
+				if (!isActive) this.mindMap.emit("before_node_active", this, this.renderer.activeNodeList);
+				this.mindMap.renderer[isActive ? "removeNodeFromActiveList" : "addNodeToActiveList"](this, true);
+				this.renderer.emitNodeActiveEvent(isActive ? null : this);
+			}
+			this.mindMap.emit("node_mousedown", this, e);
+		});
+		this.group.on("mouseup", (e) => {
+			if (!this.isRoot && e.which !== 2 && !this.mindMap.opt.readonly) e.stopPropagation();
+			this.mindMap.emit("node_mouseup", this, e);
+		});
+		this.group.on("mouseenter", (e) => {
+			if (this.isDrag) return;
+			this._isMouseenter = true;
+			this.showExpandBtn();
+			if (this.isGeneralization) this.handleGeneralizationMouseenter();
+			this.mindMap.emit("node_mouseenter", this, e);
+		});
+		this.group.on("mouseleave", (e) => {
+			if (!this._isMouseenter) return;
+			this._isMouseenter = false;
+			this.hideExpandBtn();
+			if (this.isGeneralization) this.handleGeneralizationMouseleave();
+			this.mindMap.emit("node_mouseleave", this, e);
+		});
+		this.group.on("dblclick", (e) => {
+			const { readonly, onlyOneEnableActiveNodeOnCooperate } = this.mindMap.opt;
+			if (readonly || e.ctrlKey || e.metaKey) return;
+			e.stopPropagation();
+			if (onlyOneEnableActiveNodeOnCooperate && this.userList.length > 0) return;
+			this.mindMap.emit("node_dblclick", this, e);
+		});
+		this.group.on("contextmenu", (e) => {
+			const { readonly, useLeftKeySelectionRightKeyDrag } = this.mindMap.opt;
+			if (readonly || e.ctrlKey) return;
+			e.stopPropagation();
+			e.preventDefault();
+			if (this.mindMap.select && !useLeftKeySelectionRightKeyDrag && this.mindMap.select.hasSelectRange()) return;
+			if (!(this.getData("isActive") && this.renderer.activeNodeList.length === 1)) {
+				this.renderer.clearActiveNodeList();
+				this.active(e);
+			}
+			this.mindMap.emit("node_contextmenu", e, this);
+		});
+	}
+	active(e) {
+		if (this.mindMap.opt.readonly) return;
+		e && e.stopPropagation();
+		if (this.getData("isActive")) return;
+		this.mindMap.emit("before_node_active", this, this.renderer.activeNodeList);
+		this.renderer.clearActiveNodeList();
+		this.renderer.addNodeToActiveList(this, true);
+		this.renderer.emitNodeActiveEvent(this);
+	}
+	deactivate() {
+		this.mindMap.renderer.removeNodeFromActiveList(this);
+		this.mindMap.renderer.emitNodeActiveEvent();
+	}
+	update(forceRender) {
+		if (!this.group) return;
+		this.updateNodeActiveClass();
+		const { alwaysShowExpandBtn, notShowExpandBtn, isShowCreateChildBtnIcon, readonly } = this.mindMap.opt;
+		const childrenLength = this.getChildrenLength();
+		if (!notShowExpandBtn) if (alwaysShowExpandBtn) if (this._expandBtn && childrenLength <= 0) this.removeExpandBtn();
+		else this.renderExpandBtn();
+		else {
+			const { isActive, expand } = this.getData();
+			if (childrenLength <= 0) this.removeExpandBtn();
+			else if (expand && !isActive && !this._isMouseenter) this.hideExpandBtn();
+			else this.showExpandBtn();
+		}
+		if (isShowCreateChildBtnIcon) if (childrenLength > 0) this.removeQuickCreateChildBtn();
+		else {
+			const { isActive } = this.getData();
+			if (isActive) this.showQuickCreateChildBtn();
+			else this.hideQuickCreateChildBtn();
+		}
+		this.updateDragHandle();
+		this.renderGeneralization(forceRender);
+		if (this.updateUserListNode) this.updateUserListNode();
+		const t = this.group.transform();
+		this.nodeDataSnapshot = readonly ? "" : JSON.stringify(this.getData());
+		if (this.left !== t.translateX || this.top !== t.translateY) this.group.translate(this.left - t.translateX, this.top - t.translateY);
+	}
+	getNodePosInClient(_left, _top) {
+		const { scaleX, scaleY, translateX, translateY } = this.mindMap.draw.transform();
+		return {
+			left: _left * scaleX + translateX,
+			top: _top * scaleY + translateY
+		};
+	}
+	checkIsInClient(padding = 0) {
+		const { left: nx, top: ny } = this.getNodePosInClient(this.left, this.top);
+		return nx + this.width > 0 - padding && ny + this.height > 0 - padding && nx < this.mindMap.width + padding && ny < this.mindMap.height + padding;
+	}
+	reRender(recreateTypes, opt) {
+		const sizeChange = this.getSize(recreateTypes, opt);
+		this.layout();
+		this.update();
+		return sizeChange;
+	}
+	updateNodeActiveClass() {
+		if (!this.group) return;
+		const isActive = this.getData("isActive");
+		this.group[isActive ? "addClass" : "removeClass"]("active");
+	}
+	updateNodeByActive(active) {
+		if (this.group) {
+			const { isShowCreateChildBtnIcon } = this.mindMap.opt;
+			if (active) {
+				this.showExpandBtn();
+				if (isShowCreateChildBtnIcon) this.showQuickCreateChildBtn();
+			} else {
+				this.hideExpandBtn();
+				if (isShowCreateChildBtnIcon) this.hideQuickCreateChildBtn();
+			}
+			this.updateNodeActiveClass();
+			this.updateDragHandle();
+		}
+	}
+	render(callback = () => {}, forceRender = false, async = false) {
+		this.renderLine();
+		const { openPerformance, performanceConfig } = this.mindMap.opt;
+		if (forceRender || !openPerformance || this.checkIsInClient(performanceConfig.padding) || this.isRoot) if (!this.group) {
+			this.group = new G();
+			this.group.addClass("smm-node");
+			this.group.css({ cursor: "default" });
+			this.bindGroupEvent();
+			this.nodeDraw.add(this.group);
+			this.layout();
+			this.update(forceRender);
+		} else {
+			if (!this.nodeDraw.has(this.group)) this.nodeDraw.add(this.group);
+			if (this.needLayout) {
+				this.needLayout = false;
+				this.layout();
+			}
+			this.updateExpandBtnPlaceholderRect();
+			this.update(forceRender);
+		}
+		else if (openPerformance && performanceConfig.removeNodeWhenOutCanvas) this.removeSelf();
+		if (this.children && this.children.length && this.getData("expand") !== false) {
+			let index = 0;
+			this.children.forEach((item) => {
+				const renderChild = () => {
+					item.render(() => {
+						index++;
+						if (index >= this.children.length) callback();
+					}, forceRender, async);
+				};
+				if (async) setTimeout(renderChild, 0);
+				else renderChild();
+			});
+		} else callback();
+		if (this.nodeData.inserting) {
+			delete this.nodeData.inserting;
+			this.active();
+			this.mindMap.emit("node_dblclick", this, null, true);
+		}
+	}
+	removeSelf() {
+		if (!this.group) return;
+		this.group.remove();
+		this.removeGeneralization();
+	}
+	remove() {
+		if (!this.group) return;
+		this.group.remove();
+		this.removeGeneralization();
+		this.removeLine();
+		if (this.children && this.children.length) this.children.forEach((item) => {
+			item.remove();
+		});
+	}
+	destroy() {
+		this.removeLine();
+		if (this.parent) this.parent.removeLine();
+		if (!this.group) return;
+		if (this.emptyUser) this.emptyUser();
+		this.resetWhenDelete();
+		this.group.remove();
+		this.removeGeneralization();
+		this.group = null;
+		this.style.onRemove();
+	}
+	hide() {
+		if (this.group) this.group.hide();
+		this.hideGeneralization();
+		if (this.parent) {
+			const index = this.parent.children.indexOf(this);
+			this.parent._lines[index] && this.parent._lines[index].hide();
+			this._lines.forEach((item) => {
+				item.hide();
+			});
+		}
+		if (this.children && this.children.length) this.children.forEach((item) => {
+			item.hide();
+		});
+	}
+	show() {
+		if (!this.group) return;
+		this.group.show();
+		this.showGeneralization();
+		if (this.parent) {
+			const index = this.parent.children.indexOf(this);
+			this.parent._lines[index] && this.parent._lines[index].show();
+			this._lines.forEach((item) => {
+				item.show();
+			});
+		}
+		if (this.children && this.children.length) this.children.forEach((item) => {
+			item.show();
+		});
+	}
+	setOpacity(val) {
+		if (this.group) this.group.opacity(val);
+		this._lines.forEach((line) => {
+			line.opacity(val);
+		});
+		this.children.forEach((item) => {
+			item.setOpacity(val);
+		});
+		this.setGeneralizationOpacity(val);
+	}
+	hideChildren() {
+		this._lines.forEach((item) => {
+			item.hide();
+		});
+		if (this.children && this.children.length) this.children.forEach((item) => {
+			item.hide();
+		});
+	}
+	showChildren() {
+		this._lines.forEach((item) => {
+			item.show();
+		});
+		if (this.children && this.children.length) this.children.forEach((item) => {
+			item.show();
+		});
+	}
+	startDrag() {
+		this.isDrag = true;
+		if (this.group) this.group.addClass("smm-node-dragging");
+	}
+	endDrag() {
+		this.isDrag = false;
+		if (this.group) this.group.removeClass("smm-node-dragging");
+	}
+	renderLine(deep = false) {
+		if (this.getData("expand") === false) return;
+		let childrenLen = this.getChildrenLength();
+		if (this.mindMap.renderer.layout.nodeIsRemoveAllLines) {
+			if (this.mindMap.renderer.layout.nodeIsRemoveAllLines(this)) childrenLen = 0;
+		}
+		if (childrenLen > this._lines.length) new Array(childrenLen - this._lines.length).fill(0).forEach(() => {
+			this._lines.push(this.lineDraw.path());
+		});
+		else if (childrenLen < this._lines.length) {
+			this._lines.slice(childrenLen).forEach((line) => {
+				line.remove();
+			});
+			this._lines = this._lines.slice(0, childrenLen);
+		}
+		this.renderer.layout.renderLine(this, this._lines, (...args) => {
+			this.styleLine(...args);
+		}, this.style.getStyle("lineStyle", true));
+		if (deep && this.children && this.children.length > 0) this.children.forEach((item) => {
+			item.renderLine(deep);
+		});
+	}
+	getShape() {
+		return this.mindMap.themeConfig.nodeUseLineStyle ? CONSTANTS.SHAPE.RECTANGLE : this.style.getStyle("shape", false, false);
+	}
+	hasCustomPosition() {
+		return this.customLeft !== void 0 && this.customTop !== void 0;
+	}
+	ancestorHasCustomPosition() {
+		let node = this;
+		while (node) {
+			if (node.hasCustomPosition()) return true;
+			node = node.parent;
+		}
+		return false;
+	}
+	ancestorHasGeneralization() {
+		let node = this.parent;
+		while (node) {
+			if (node.checkHasGeneralization()) return true;
+			node = node.parent;
+		}
+		return false;
+	}
+	addChildren(node) {
+		this.children.push(node);
+	}
+	styleLine(line, childNode, enableMarker) {
+		const { enableInheritAncestorLineStyle } = this.mindMap.opt;
+		const getName = enableInheritAncestorLineStyle ? "getSelfInhertStyle" : "getSelfStyle";
+		const width = childNode[getName]("lineWidth") || childNode.getStyle("lineWidth", true);
+		const color = childNode[getName]("lineColor") || this.getRainbowLineColor(childNode) || childNode.getStyle("lineColor", true);
+		const dasharray = childNode[getName]("lineDasharray") || childNode.getStyle("lineDasharray", true);
+		this.style.line(line, {
+			width,
+			color,
+			dasharray
+		}, enableMarker, childNode);
+	}
+	getRainbowLineColor(node) {
+		return this.mindMap.rainbowLines ? this.mindMap.rainbowLines.getNodeColor(node) : "";
+	}
+	removeLine() {
+		this._lines.forEach((line) => {
+			line.remove();
+		});
+		this._lines = [];
+	}
+	isAncestor(node) {
+		if (this.uid === node.uid) return false;
+		let parent = node.parent;
+		while (parent) {
+			if (this.uid === parent.uid) return true;
+			parent = parent.parent;
+		}
+		return false;
+	}
+	isParent(node) {
+		if (this.uid === node.uid) return false;
+		const parent = node.parent;
+		if (parent && this.uid === parent.uid) return true;
+		return false;
+	}
+	isBrother(node) {
+		if (!this.parent || this.uid === node.uid) return false;
+		return this.parent.children.find((item) => {
+			return item.uid === node.uid;
+		});
+	}
+	getIndexInBrothers() {
+		return this.parent && this.parent.children ? this.parent.children.findIndex((item) => {
+			return item.uid === this.uid;
+		}) : -1;
+	}
+	getPaddingVale() {
+		return {
+			paddingX: this.getStyle("paddingX"),
+			paddingY: this.getStyle("paddingY")
+		};
+	}
+	getStyle(prop, root) {
+		const v = this.style.merge(prop, root);
+		return v === void 0 ? "" : v;
+	}
+	getSelfStyle(prop) {
+		return this.style.getSelfStyle(prop);
+	}
+	getParentSelfStyle(prop) {
+		if (this.parent) return this.parent.getSelfStyle(prop) || this.parent.getParentSelfStyle(prop);
+		return null;
+	}
+	getSelfInhertStyle(prop) {
+		return this.getSelfStyle(prop) || this.getParentSelfStyle(prop);
+	}
+	getBorderWidth() {
+		return this.style.merge("borderWidth", false) || 0;
+	}
+	getData(key) {
+		return key ? this.nodeData.data[key] : this.nodeData.data;
+	}
+	getPureData(removeActiveState = true, removeId = false) {
+		return copyNodeTree({}, this, removeActiveState, removeId);
+	}
+	getAncestorNodes() {
+		const list = [];
+		let parent = this.parent;
+		while (parent) {
+			list.unshift(parent);
+			parent = parent.parent;
+		}
+		return list;
+	}
+	hasCustomStyle() {
+		return this.style.hasCustomStyle();
+	}
+	getRect() {
+		return this.group ? this.group.rbox() : null;
+	}
+	getRectInSvg() {
+		const { scaleX, scaleY, translateX, translateY } = this.mindMap.draw.transform();
+		let { left, top, width, height } = this;
+		const right = (left + width) * scaleX + translateX;
+		const bottom = (top + height) * scaleY + translateY;
+		left = left * scaleX + translateX;
+		top = top * scaleY + translateY;
+		return {
+			left,
+			right,
+			top,
+			bottom,
+			width: width * scaleX,
+			height: height * scaleY
+		};
+	}
+	highlight() {
+		if (this.group) this.group.addClass("smm-node-highlight");
+	}
+	closeHighlight() {
+		if (this.group) this.group.removeClass("smm-node-highlight");
+	}
+	fakeClone() {
+		const newNode = new MindMapNode({
+			...this.opt,
+			uid: createUid()
+		});
+		Object.keys(this).forEach((item) => {
+			newNode[item] = this[item];
+		});
+		return newNode;
+	}
+	createSvgTextNode(text = "") {
+		return new Text().text(text);
+	}
+	getSvgObjects() {
+		return {
+			SVG,
+			G,
+			Rect
+		};
+	}
+	checkEnableDragModifyNodeWidth() {
+		const { enableDragModifyNodeWidth, isUseCustomNodeContent, customCreateNodeContent } = this.mindMap.opt;
+		return enableDragModifyNodeWidth && (this.mindMap.richText || isUseCustomNodeContent && customCreateNodeContent);
+	}
+	hasCustomWidth() {
+		return this.checkEnableDragModifyNodeWidth() && this.customTextWidth !== void 0;
+	}
+	getChildrenLength() {
+		return this.nodeData.children ? this.nodeData.children.length : 0;
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/utils/Lru.js
+var Lru = class {
+	constructor(max) {
+		this.max = max || 1e3;
+		this.size = 0;
+		this.pool = /* @__PURE__ */ new Map();
+	}
+	add(key, value) {
+		if (!this.has(key) && this.size >= this.max) return false;
+		this.delete(key);
+		this.pool.set(key, value);
+		this.size++;
+		return true;
+	}
+	delete(key) {
+		if (this.pool.has(key)) {
+			this.pool.delete(key);
+			this.size--;
+		}
+	}
+	has(key) {
+		return this.pool.has(key);
+	}
+	get(key) {
+		if (this.pool.has(key)) return this.pool.get(key);
+	}
+	clear() {
+		this.size = 0;
+		this.pool = /* @__PURE__ */ new Map();
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/Base.js
+var Base = class {
+	constructor(renderer) {
+		this.renderer = renderer;
+		this.mindMap = renderer.mindMap;
+		this.draw = this.mindMap.draw;
+		this.lineDraw = this.mindMap.lineDraw;
+		this.root = null;
+		this.lru = new Lru(this.mindMap.opt.maxNodeCacheCount);
+		this.rootNodeCenterOffset = null;
+	}
+	doLayout() {
+		throw new Error("【computed】方法为必要方法，需要子类进行重写！");
+	}
+	renderLine() {
+		throw new Error("【renderLine】方法为必要方法，需要子类进行重写！");
+	}
+	renderExpandBtn() {
+		throw new Error("【renderExpandBtn】方法为必要方法，需要子类进行重写！");
+	}
+	renderGeneralization() {}
+	cacheNode(uid, node) {
+		this.renderer.nodeCache[uid] = node;
+		this.lru.add(uid, node);
+	}
+	checkIsNeedResizeSources() {
+		return this.renderer.checkHasRenderSource(CONSTANTS.CHANGE_THEME);
+	}
+	checkIsLayerTypeChange(oldIndex, newIndex) {
+		if (oldIndex >= 2 && newIndex >= 2) return false;
+		if (oldIndex >= 2 && newIndex < 2) return true;
+		if (oldIndex < 2 && newIndex >= 2) return true;
+	}
+	checkIsLayoutChangeRerenderExpandBtnPlaceholderRect(node) {
+		if (this.renderer.checkHasRenderSource(CONSTANTS.CHANGE_LAYOUT)) node.needRerenderExpandBtnPlaceholderRect = true;
+	}
+	checkIsNodeDataChange(lastData, curData) {
+		if (lastData) {
+			lastData = typeof lastData === "string" ? JSON.parse(lastData) : lastData;
+			lastData.isActive = curData.isActive;
+			lastData.expand = curData.expand;
+			lastData = JSON.stringify(lastData);
+		} else return false;
+		return lastData !== JSON.stringify(curData);
+	}
+	checkNodeFixChange(newNode, nodeInnerPrefixData, nodeInnerPostfixData) {
+		let isNodeInnerPrefixChange = false;
+		this.mindMap.nodeInnerPrefixList.forEach((item) => {
+			if (item.updateNodeData) {
+				const isChange = item.updateNodeData(newNode, nodeInnerPrefixData);
+				if (isChange) isNodeInnerPrefixChange = isChange;
+			}
+		});
+		let isNodeInnerPostfixChange = false;
+		this.mindMap.nodeInnerPostfixList.forEach((item) => {
+			if (item.updateNodeData) {
+				const isChange = item.updateNodeData(newNode, nodeInnerPostfixData);
+				if (isChange) isNodeInnerPostfixChange = isChange;
+			}
+		});
+		return isNodeInnerPrefixChange || isNodeInnerPostfixChange;
+	}
+	createNode(data, parent, isRoot, layerIndex, index, ancestors) {
+		const nodeInnerPrefixData = {};
+		this.mindMap.nodeInnerPrefixList.forEach((item) => {
+			if (item.createNodeData) {
+				const [key, value] = item.createNodeData({
+					data,
+					parent,
+					ancestors,
+					layerIndex,
+					index
+				});
+				nodeInnerPrefixData[key] = value;
+			}
+		});
+		const nodeInnerPostfixData = {};
+		this.mindMap.nodeInnerPostfixList.forEach((item) => {
+			if (item.createNodeData) {
+				const [key, value] = item.createNodeData({
+					data,
+					parent,
+					ancestors,
+					layerIndex,
+					index
+				});
+				nodeInnerPostfixData[key] = value;
+			}
+		});
+		const uid = data.data.uid;
+		let newNode = null;
+		if (data && data._node && !this.renderer.reRender) {
+			newNode = data._node;
+			const isLayerTypeChange = this.checkIsLayerTypeChange(newNode.layerIndex, layerIndex);
+			newNode.reset();
+			newNode.layerIndex = layerIndex;
+			if (isRoot) newNode.isRoot = true;
+			else newNode.parent = parent._node;
+			this.cacheNode(data._node.uid, newNode);
+			this.checkIsLayoutChangeRerenderExpandBtnPlaceholderRect(newNode);
+			const isNodeInnerFixChange = this.checkNodeFixChange(newNode, nodeInnerPrefixData, nodeInnerPostfixData);
+			const isResizeSource = this.checkIsNeedResizeSources();
+			const isNodeDataChange = this.checkIsNodeDataChange(data._node.nodeDataSnapshot, data.data);
+			if (isResizeSource || isNodeDataChange || isLayerTypeChange || newNode.getData("resetRichText") && !newNode.isUseCustomNodeContent() || newNode.getData("needUpdate") || isNodeInnerFixChange) {
+				newNode.getSize();
+				newNode.needLayout = true;
+			}
+			this.checkGetGeneralizationChange(newNode, isResizeSource);
+		} else if ((this.lru.has(uid) || this.renderer.lastNodeCache[uid]) && !this.renderer.reRender) {
+			newNode = this.lru.get(uid) || this.renderer.lastNodeCache[uid];
+			const lastData = JSON.stringify(newNode.getData());
+			const isLayerTypeChange = this.checkIsLayerTypeChange(newNode.layerIndex, layerIndex);
+			newNode.reset();
+			newNode.nodeData = newNode.handleData(data || {});
+			newNode.layerIndex = layerIndex;
+			if (isRoot) newNode.isRoot = true;
+			else newNode.parent = parent._node;
+			this.cacheNode(uid, newNode);
+			this.checkIsLayoutChangeRerenderExpandBtnPlaceholderRect(newNode);
+			data._node = newNode;
+			const isResizeSource = this.checkIsNeedResizeSources();
+			const isNodeDataChange = this.checkIsNodeDataChange(lastData, data.data);
+			const isNodeInnerFixChange = this.checkNodeFixChange(newNode, nodeInnerPrefixData, nodeInnerPostfixData);
+			if (isResizeSource || isNodeDataChange || isLayerTypeChange || newNode.getData("resetRichText") && !newNode.isUseCustomNodeContent() || newNode.getData("needUpdate") || isNodeInnerFixChange) {
+				newNode.getSize();
+				newNode.needLayout = true;
+			}
+			this.checkGetGeneralizationChange(newNode, isResizeSource);
+		} else {
+			const newUid = uid || createUid();
+			newNode = new MindMapNode({
+				data,
+				uid: newUid,
+				renderer: this.renderer,
+				mindMap: this.mindMap,
+				draw: this.draw,
+				layerIndex,
+				isRoot,
+				parent: !isRoot ? parent._node : null,
+				...nodeInnerPrefixData
+			});
+			data.data.uid = newUid;
+			this.cacheNode(newUid, newNode);
+			data._node = newNode;
+		}
+		if (data.data.isActive) this.renderer.addNodeToActiveList(newNode);
+		if (this.mindMap.renderer.findActiveNodeIndex(newNode) !== -1) newNode.setData({ isActive: true });
+		if (isRoot) this.root = newNode;
+		else parent._node.addChildren(newNode);
+		return newNode;
+	}
+	checkGetGeneralizationChange(node, isResizeSource) {
+		const generalizationList = node.getData("generalization");
+		if (generalizationList && node._generalizationList && node._generalizationList.length > 0) node._generalizationList.forEach((item, index) => {
+			const gNode = item.generalizationNode;
+			const oldData = gNode.getData();
+			const newData = generalizationList[index];
+			if (isResizeSource || newData && JSON.stringify(oldData) !== JSON.stringify(newData)) {
+				if (newData) gNode.nodeData.data = newData;
+				gNode.getSize();
+				gNode.needLayout = true;
+			}
+		});
+	}
+	formatPosition(value, size, nodeSize) {
+		if (typeof value === "number") return value;
+		else if (initRootNodePositionMap[value] !== void 0) return size * initRootNodePositionMap[value];
+		else if (/^\d\d*%$/.test(value)) return Number.parseFloat(value) / 100 * size;
+		else return (size - nodeSize) / 2;
+	}
+	formatInitRootNodePosition(pos) {
+		const { CENTER } = CONSTANTS.INIT_ROOT_NODE_POSITION;
+		if (!pos || !Array.isArray(pos) || pos.length < 2) pos = [CENTER, CENTER];
+		return pos;
+	}
+	setNodeCenter(node, position) {
+		let { initRootNodePosition } = this.mindMap.opt;
+		initRootNodePosition = this.formatInitRootNodePosition(position || initRootNodePosition);
+		node.left = this.formatPosition(initRootNodePosition[0], this.mindMap.width, node.width);
+		node.top = this.formatPosition(initRootNodePosition[1], this.mindMap.height, node.height);
+	}
+	getRootCenterOffset(width, height) {
+		if (this.rootNodeCenterOffset) return this.rootNodeCenterOffset;
+		let { initRootNodePosition } = this.mindMap.opt;
+		const { CENTER } = CONSTANTS.INIT_ROOT_NODE_POSITION;
+		initRootNodePosition = this.formatInitRootNodePosition(initRootNodePosition);
+		if (initRootNodePosition[0] === CENTER && initRootNodePosition[1] === CENTER) this.rootNodeCenterOffset = {
+			x: 0,
+			y: 0
+		};
+		else {
+			const tmpNode = {
+				width,
+				height
+			};
+			const tmpNode2 = {
+				width,
+				height
+			};
+			this.setNodeCenter(tmpNode, [CENTER, CENTER]);
+			this.setNodeCenter(tmpNode2);
+			this.rootNodeCenterOffset = {
+				x: tmpNode2.left - tmpNode.left,
+				y: tmpNode2.top - tmpNode.top
+			};
+		}
+		return this.rootNodeCenterOffset;
+	}
+	updateChildren(children, prop, offset) {
+		children.forEach((item) => {
+			item[prop] += offset;
+			if (item.children && item.children.length && !item.hasCustomPosition()) this.updateChildren(item.children, prop, offset);
+		});
+	}
+	updateChildrenPro(children, props) {
+		children.forEach((item) => {
+			Object.keys(props).forEach((prop) => {
+				item[prop] += props[prop];
+			});
+			if (item.children && item.children.length && !item.hasCustomPosition()) this.updateChildrenPro(item.children, props);
+		});
+	}
+	getNodeAreaWidth(node, withGeneralization = false) {
+		let widthArr = [];
+		let totalGeneralizationNodeWidth = 0;
+		let loop = (node, width) => {
+			if (withGeneralization && node.checkHasGeneralization()) totalGeneralizationNodeWidth += node._generalizationNodeWidth;
+			if (node.children.length) {
+				width += node.width / 2;
+				node.children.forEach((item) => {
+					loop(item, width);
+				});
+			} else {
+				width += node.width;
+				widthArr.push(width);
+			}
+		};
+		loop(node, 0);
+		return Math.max(...widthArr) + totalGeneralizationNodeWidth;
+	}
+	quadraticCurvePath(x1, y1, x2, y2, v = false) {
+		let cx, cy;
+		if (v) {
+			cx = x1 + (x2 - x1) * .8;
+			cy = y1 + (y2 - y1) * .2;
+		} else {
+			cx = x1 + (x2 - x1) * .2;
+			cy = y1 + (y2 - y1) * .8;
+		}
+		return `M ${x1},${y1} Q ${cx},${cy} ${x2},${y2}`;
+	}
+	cubicBezierPath(x1, y1, x2, y2, v = false) {
+		let cx1, cy1, cx2, cy2;
+		if (v) {
+			cx1 = x1;
+			cy1 = y1 + (y2 - y1) / 2;
+			cx2 = x2;
+			cy2 = cy1;
+		} else {
+			cx1 = x1 + (x2 - x1) / 2;
+			cy1 = y1;
+			cx2 = cx1;
+			cy2 = y2;
+		}
+		return `M ${x1},${y1} C ${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`;
+	}
+	computeNewPoint(a, b, radius = 0) {
+		if (a[0] === b[0]) if (b[1] > a[1]) return [b[0], b[1] - radius];
+		else return [b[0], b[1] + radius];
+		else if (a[1] === b[1]) if (b[0] > a[0]) return [b[0] - radius, b[1]];
+		else return [b[0] + radius, b[1]];
+	}
+	createFoldLine(list) {
+		const { lineRadius } = this.mindMap.themeConfig;
+		const len = list.length;
+		let path = "";
+		let radiusPath = "";
+		if (len >= 3 && lineRadius > 0) {
+			const start = list[len - 3];
+			const center = list[len - 2];
+			const end = list[len - 1];
+			if (!(start[0].toFixed(0) === center[0].toFixed(0) && center[0].toFixed(0) === end[0].toFixed(0) || start[1].toFixed(0) === center[1].toFixed(0) && center[1].toFixed(0) === end[1].toFixed(0))) {
+				const cStart = this.computeNewPoint(start, center, lineRadius);
+				const cEnd = this.computeNewPoint(end, center, lineRadius);
+				radiusPath = `Q ${center[0]},${center[1]} ${cEnd[0]},${cEnd[1]}`;
+				list.splice(len - 2, 1, cStart, radiusPath);
+			}
+		}
+		list.forEach((item, index) => {
+			if (typeof item === "string") path += item;
+			else {
+				const [x, y] = item;
+				if (index === 0) path += `M ${x},${y}`;
+				else path += `L ${x},${y}`;
+			}
+		});
+		return path;
+	}
+	getMarginX(layerIndex) {
+		const { themeConfig, opt } = this.mindMap;
+		const { second, node } = themeConfig;
+		const hoverRectPadding = opt.hoverRectPadding * 2;
+		return layerIndex === 1 ? second.marginX + hoverRectPadding : node.marginX + hoverRectPadding;
+	}
+	getMarginY(layerIndex) {
+		const { themeConfig, opt } = this.mindMap;
+		const { second, node } = themeConfig;
+		const hoverRectPadding = opt.hoverRectPadding * 2;
+		return layerIndex === 1 ? second.marginY + hoverRectPadding : node.marginY + hoverRectPadding;
+	}
+	getNodeWidthWithGeneralization(node) {
+		return Math.max(node.width, node.checkHasGeneralization() ? node._generalizationNodeWidth : 0);
+	}
+	getNodeHeightWithGeneralization(node) {
+		return Math.max(node.height, node.checkHasGeneralization() ? node._generalizationNodeHeight : 0);
+	}
+	/**
+	* dir：生长方向，h（水平）、v（垂直）
+	* isLeft：是否向左生长
+	*/
+	getNodeBoundaries(node, dir) {
+		let { generalizationLineMargin, generalizationNodeMargin } = this.mindMap.themeConfig;
+		let walk = (root) => {
+			let _left = Infinity;
+			let _right = -Infinity;
+			let _top = Infinity;
+			let _bottom = -Infinity;
+			if (root.children && root.children.length > 0) root.children.forEach((child) => {
+				let { left, right, top, bottom } = walk(child);
+				let generalizationWidth = child.checkHasGeneralization() && child.getData("expand") ? child._generalizationNodeWidth + generalizationNodeMargin : 0;
+				let generalizationHeight = child.checkHasGeneralization() && child.getData("expand") ? child._generalizationNodeHeight + generalizationNodeMargin : 0;
+				if (left - (dir === "h" ? generalizationWidth : 0) < _left) _left = left - (dir === "h" ? generalizationWidth : 0);
+				if (right + (dir === "h" ? generalizationWidth : 0) > _right) _right = right + (dir === "h" ? generalizationWidth : 0);
+				if (top < _top) _top = top;
+				if (bottom + (dir === "v" ? generalizationHeight : 0) > _bottom) _bottom = bottom + (dir === "v" ? generalizationHeight : 0);
+			});
+			let cur = {
+				left: root.left,
+				right: root.left + root.width,
+				top: root.top,
+				bottom: root.top + root.height
+			};
+			return {
+				left: cur.left < _left ? cur.left : _left,
+				right: cur.right > _right ? cur.right : _right,
+				top: cur.top < _top ? cur.top : _top,
+				bottom: cur.bottom > _bottom ? cur.bottom : _bottom
+			};
+		};
+		let { left, right, top, bottom } = walk(node);
+		return {
+			left,
+			right,
+			top,
+			bottom,
+			generalizationLineMargin,
+			generalizationNodeMargin
+		};
+	}
+	getChildrenBoundaries(node, dir, startIndex = 0, endIndex) {
+		let { generalizationLineMargin, generalizationNodeMargin } = this.mindMap.themeConfig;
+		const children = node.children.slice(startIndex, endIndex + 1);
+		let left = Infinity;
+		let right = -Infinity;
+		let top = Infinity;
+		let bottom = -Infinity;
+		children.forEach((item) => {
+			const cur = this.getNodeBoundaries(item, dir);
+			left = cur.left < left ? cur.left : left;
+			right = cur.right > right ? cur.right : right;
+			top = cur.top < top ? cur.top : top;
+			bottom = cur.bottom > bottom ? cur.bottom : bottom;
+		});
+		return {
+			left,
+			right,
+			top,
+			bottom,
+			generalizationLineMargin,
+			generalizationNodeMargin
+		};
+	}
+	getNodeGeneralizationRenderBoundaries(item, dir) {
+		let res = null;
+		if (item.range) res = this.getChildrenBoundaries(item.node, dir, item.range[0], item.range[1]);
+		else res = this.getNodeBoundaries(item.node, dir);
+		return res;
+	}
+	getNodeActChildrenLength(node) {
+		return node.nodeData.children && node.nodeData.children.length;
+	}
+	setLineStyle(style, line, path, childNode) {
+		line.plot(this.transformPath(path));
+		style && style(line, childNode, true);
+	}
+	transformPath(path) {
+		const { customTransformNodeLinePath } = this.mindMap.opt;
+		if (customTransformNodeLinePath) return customTransformNodeLinePath(path);
+		else return path;
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/LogicalStructure.js
+var LogicalStructure = class extends Base {
+	constructor(opt = {}, layout) {
+		super(opt);
+		this.isUseLeft = layout === CONSTANTS.LAYOUT.LOGICAL_STRUCTURE_LEFT;
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedTopValue();
+			},
+			() => {
+				this.adjustTopValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		let sortIndex = 0;
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			newNode.sortIndex = sortIndex;
+			sortIndex++;
+			if (isRoot) this.setNodeCenter(newNode);
+			else if (this.isUseLeft) newNode.left = parent._node.left - newNode.width - this.getMarginX(layerIndex);
+			else newNode.left = parent._node.left + parent._node.width + this.getMarginX(layerIndex);
+			if (!cur.data.expand) return true;
+		}, (cur, parent, isRoot, layerIndex) => {
+			let len = cur.data.expand === false ? 0 : cur._node.children.length;
+			cur._node.childrenAreaHeight = len ? cur._node.children.reduce((h, item) => {
+				return h + item.height;
+			}, 0) + (len + 1) * this.getMarginY(layerIndex + 1) : 0;
+			let generalizationNodeHeight = cur._node.checkHasGeneralization() ? cur._node._generalizationNodeHeight + this.getMarginY(layerIndex + 1) : 0;
+			cur._node.childrenAreaHeight2 = Math.max(cur._node.childrenAreaHeight, generalizationNodeHeight);
+		}, true, 0);
+	}
+	computedTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginY = this.getMarginY(layerIndex + 1);
+				let totalTop = node.top + node.height / 2 - node.childrenAreaHeight / 2 + marginY;
+				node.children.forEach((cur) => {
+					cur.top = totalTop;
+					totalTop += cur.height + marginY;
+				});
+			}
+		}, null, true);
+	}
+	adjustTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			let difference = node.childrenAreaHeight2 - this.getMarginY(layerIndex + 1) * 2 - node.height;
+			if (difference > 0) this.updateBrothers(node, difference / 2);
+		}, null, true);
+	}
+	updateBrothers(node, addHeight) {
+		if (node.parent) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.uid === node.uid || item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index < index) _offset = -addHeight;
+				else if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothers(node.parent, addHeight);
+		}
+	}
+	renderLine(node, lines, style, lineStyle) {
+		if (lineStyle === "curve") this.renderLineCurve(node, lines, style);
+		else if (lineStyle === "direct") this.renderLineDirect(node, lines, style);
+		else this.renderLineStraight(node, lines, style);
+	}
+	renderLineStraight(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let s1 = (this.getMarginX(node.layerIndex + 1) - expandBtnSize) * .6;
+		if (this.isUseLeft) s1 *= -1;
+		let nodeUseLineStyle = this.mindMap.themeConfig.nodeUseLineStyle;
+		node.children.forEach((item, index) => {
+			let x1;
+			if (this.isUseLeft) x1 = node.layerIndex === 0 ? left : left - expandBtnSize;
+			else x1 = node.layerIndex === 0 ? left + width : left + width + expandBtnSize;
+			let y1 = top + height / 2;
+			let x2 = this.isUseLeft ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			let nodeUseLineStyleOffset = nodeUseLineStyle ? item.width * (this.isUseLeft ? -1 : 1) : 0;
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let path = this.createFoldLine([
+				[x1, y1],
+				[x1 + s1, y1],
+				[x1 + s1, y2],
+				[x2 + nodeUseLineStyleOffset, y2]
+			]);
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineDirect(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		const { nodeUseLineStyle } = this.mindMap.themeConfig;
+		node.children.forEach((item, index) => {
+			if (node.layerIndex === 0) expandBtnSize = 0;
+			let x1 = this.isUseLeft ? left - expandBtnSize : left + width + expandBtnSize;
+			let y1 = top + height / 2;
+			let x2 = this.isUseLeft ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let nodeUseLineStylePath = nodeUseLineStyle ? ` L ${this.isUseLeft ? item.left : item.left + item.width},${y2}` : "";
+			let path = `M ${x1},${y1} L ${x2},${y2}` + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineCurve(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		const { nodeUseLineStyle, rootLineStartPositionKeepSameInCurve, rootLineKeepSameInCurve } = this.mindMap.themeConfig;
+		node.children.forEach((item, index) => {
+			if (node.layerIndex === 0) expandBtnSize = 0;
+			let x1;
+			if (this.isUseLeft) x1 = node.layerIndex === 0 && !rootLineStartPositionKeepSameInCurve ? left + width / 2 : left - expandBtnSize;
+			else x1 = node.layerIndex === 0 && !rootLineStartPositionKeepSameInCurve ? left + width / 2 : left + width + expandBtnSize;
+			let y1 = top + height / 2;
+			let x2 = this.isUseLeft ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			let path = "";
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let nodeUseLineStylePath;
+			if (this.isUseLeft) nodeUseLineStylePath = nodeUseLineStyle ? ` L ${item.left},${y2}` : "";
+			else nodeUseLineStylePath = nodeUseLineStyle ? ` L ${item.left + item.width},${y2}` : "";
+			if (node.isRoot && !rootLineKeepSameInCurve) path = this.quadraticCurvePath(x1, y1, x2, y2) + nodeUseLineStylePath;
+			else path = this.cubicBezierPath(x1, y1, x2, y2) + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize, layerIndex } = node;
+		if (layerIndex === 0) expandBtnSize = 0;
+		let { translateX, translateY } = btn.transform();
+		let nodeUseLineStyleOffset = this.mindMap.themeConfig.nodeUseLineStyle ? height / 2 : 0;
+		let _x = this.isUseLeft ? 0 - expandBtnSize : width;
+		let _y = height / 2 + nodeUseLineStyleOffset;
+		if (_x === translateX && _y === translateY) return;
+		btn.translate(_x - translateX, _y - translateY);
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let { left, top, bottom, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x = this.isUseLeft ? left - generalizationLineMargin : right + generalizationLineMargin;
+			let x1 = x;
+			let y1 = top;
+			let x2 = x;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + (this.isUseLeft ? -20 : 20)},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(path);
+			item.generalizationNode.left = x + (this.isUseLeft ? -generalizationNodeMargin : generalizationNodeMargin) - (this.isUseLeft ? item.generalizationNode.width : 0);
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height) {
+		if (this.isUseLeft) rect.size(expandBtnSize, height).x(-expandBtnSize).y(0);
+		else rect.size(expandBtnSize, height).x(width).y(0);
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/MindMap.js
+var MindMap$1 = class extends Base {
+	constructor(opt = {}) {
+		super(opt);
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedTopValue();
+			},
+			() => {
+				this.adjustTopValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else {
+				if (parent._node.dir) newNode.dir = parent._node.dir;
+				else newNode.dir = newNode.getData("dir") || (index % 2 === 0 ? CONSTANTS.LAYOUT_GROW_DIR.RIGHT : CONSTANTS.LAYOUT_GROW_DIR.LEFT);
+				newNode.left = newNode.dir === CONSTANTS.LAYOUT_GROW_DIR.RIGHT ? parent._node.left + parent._node.width + this.getMarginX(layerIndex) : parent._node.left - this.getMarginX(layerIndex) - newNode.width;
+			}
+			if (!cur.data.expand) return true;
+		}, (cur, parent, isRoot, layerIndex) => {
+			if (!cur.data.expand) {
+				cur._node.leftChildrenAreaHeight = 0;
+				cur._node.rightChildrenAreaHeight = 0;
+				return;
+			}
+			let leftLen = 0;
+			let rightLen = 0;
+			let leftChildrenAreaHeight = 0;
+			let rightChildrenAreaHeight = 0;
+			cur._node.children.forEach((item) => {
+				if (item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) {
+					leftLen++;
+					leftChildrenAreaHeight += item.height;
+				} else {
+					rightLen++;
+					rightChildrenAreaHeight += item.height;
+				}
+			});
+			cur._node.leftChildrenAreaHeight = leftChildrenAreaHeight + (leftLen + 1) * this.getMarginY(layerIndex + 1);
+			cur._node.rightChildrenAreaHeight = rightChildrenAreaHeight + (rightLen + 1) * this.getMarginY(layerIndex + 1);
+			let generalizationNodeHeight = cur._node.checkHasGeneralization() ? cur._node._generalizationNodeHeight + this.getMarginY(layerIndex + 1) : 0;
+			cur._node.leftChildrenAreaHeight2 = Math.max(cur._node.leftChildrenAreaHeight, generalizationNodeHeight);
+			cur._node.rightChildrenAreaHeight2 = Math.max(cur._node.rightChildrenAreaHeight, generalizationNodeHeight);
+		}, true, 0);
+	}
+	computedTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginY = this.getMarginY(layerIndex + 1);
+				let baseTop = node.top + node.height / 2 + marginY;
+				let leftTotalTop = baseTop - node.leftChildrenAreaHeight / 2;
+				let rightTotalTop = baseTop - node.rightChildrenAreaHeight / 2;
+				node.children.forEach((cur) => {
+					if (cur.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) {
+						cur.top = leftTotalTop;
+						leftTotalTop += cur.height + marginY;
+					} else {
+						cur.top = rightTotalTop;
+						rightTotalTop += cur.height + marginY;
+					}
+				});
+			}
+		}, null, true);
+	}
+	adjustTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			let base = this.getMarginY(layerIndex + 1) * 2 + node.height;
+			let leftDifference = node.leftChildrenAreaHeight2 - base;
+			let rightDifference = node.rightChildrenAreaHeight2 - base;
+			if (leftDifference > 0 || rightDifference > 0) this.updateBrothers(node, leftDifference / 2, rightDifference / 2);
+		}, null, true);
+	}
+	updateBrothers(node, leftAddHeight, rightAddHeight) {
+		if (node.parent) {
+			let childrenList = node.parent.children.filter((item) => {
+				return item.dir === node.dir;
+			});
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				let addHeight = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? leftAddHeight : rightAddHeight;
+				if (_index < index) _offset = -addHeight;
+				else if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothers(node.parent, leftAddHeight, rightAddHeight);
+		}
+	}
+	renderLine(node, lines, style, lineStyle) {
+		if (lineStyle === "curve") this.renderLineCurve(node, lines, style);
+		else if (lineStyle === "direct") this.renderLineDirect(node, lines, style);
+		else this.renderLineStraight(node, lines, style);
+	}
+	renderLineStraight(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let s1 = (this.getMarginX(node.layerIndex + 1) - expandBtnSize) * .6;
+		let nodeUseLineStyle = this.mindMap.themeConfig.nodeUseLineStyle;
+		node.children.forEach((item, index) => {
+			let x1 = 0;
+			let _s = 0;
+			let nodeUseLineStyleOffset = nodeUseLineStyle ? item.width : 0;
+			if (item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) {
+				_s = -s1;
+				x1 = node.layerIndex === 0 ? left : left - expandBtnSize;
+				nodeUseLineStyleOffset = -nodeUseLineStyleOffset;
+			} else {
+				_s = s1;
+				x1 = node.layerIndex === 0 ? left + width : left + width + expandBtnSize;
+			}
+			let y1 = top + height / 2;
+			let x2 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let path = this.createFoldLine([
+				[x1, y1],
+				[x1 + _s, y1],
+				[x1 + _s, y2],
+				[x2 + nodeUseLineStyleOffset, y2]
+			]);
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineDirect(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		const { nodeUseLineStyle } = this.mindMap.themeConfig;
+		node.children.forEach((item, index) => {
+			if (node.layerIndex === 0) expandBtnSize = 0;
+			let x1 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? left - expandBtnSize : left + width + expandBtnSize;
+			let y1 = top + height / 2;
+			let x2 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let nodeUseLineStylePath = "";
+			if (nodeUseLineStyle) if (item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) nodeUseLineStylePath = ` L ${item.left},${y2}`;
+			else nodeUseLineStylePath = ` L ${item.left + item.width},${y2}`;
+			let path = `M ${x1},${y1} L ${x2},${y2}` + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineCurve(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		const { nodeUseLineStyle, rootLineKeepSameInCurve, rootLineStartPositionKeepSameInCurve } = this.mindMap.themeConfig;
+		node.children.forEach((item, index) => {
+			if (node.layerIndex === 0) expandBtnSize = 0;
+			let x1 = node.layerIndex === 0 && !rootLineStartPositionKeepSameInCurve ? left + width / 2 : item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? left - expandBtnSize : left + width + expandBtnSize;
+			let y1 = top + height / 2;
+			let x2 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? item.left + item.width : item.left;
+			let y2 = item.top + item.height / 2;
+			let path = "";
+			y1 = nodeUseLineStyle && !node.isRoot ? y1 + height / 2 : y1;
+			y2 = nodeUseLineStyle ? y2 + item.height / 2 : y2;
+			let nodeUseLineStylePath = "";
+			if (nodeUseLineStyle) if (item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) nodeUseLineStylePath = ` L ${item.left},${y2}`;
+			else nodeUseLineStylePath = ` L ${item.left + item.width},${y2}`;
+			if (node.isRoot && !rootLineKeepSameInCurve) path = this.quadraticCurvePath(x1, y1, x2, y2) + nodeUseLineStylePath;
+			else path = this.cubicBezierPath(x1, y1, x2, y2) + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize } = node;
+		let { translateX, translateY } = btn.transform();
+		let nodeUseLineStyleOffset = this.mindMap.themeConfig.nodeUseLineStyle ? height / 2 : 0;
+		let _x = node.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? 0 - expandBtnSize : width;
+		let _y = height / 2 + nodeUseLineStyleOffset;
+		if (_x === translateX && _y === translateY) return;
+		let x = _x - translateX;
+		let y = _y - translateY;
+		btn.translate(x, y);
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let isLeft = item.node.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT;
+			let { top, bottom, left, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x = isLeft ? left - generalizationLineMargin : right + generalizationLineMargin;
+			let x1 = x;
+			let y1 = top;
+			let x2 = x;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + (isLeft ? -20 : 20)},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(path);
+			item.generalizationNode.left = x + (isLeft ? -generalizationNodeMargin : generalizationNodeMargin) - (isLeft ? item.generalizationNode.width : 0);
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) rect.size(expandBtnSize, height).x(-expandBtnSize).y(0);
+		else rect.size(expandBtnSize, height).x(width).y(0);
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/CatalogOrganization.js
+var CatalogOrganization = class extends Base {
+	constructor(opt = {}) {
+		super(opt);
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedLeftTopValue();
+			},
+			() => {
+				this.adjustLeftTopValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else if (parent._node.isRoot) newNode.top = parent._node.top + parent._node.height + this.getMarginX(layerIndex);
+			if (!cur.data.expand) return true;
+		}, (cur, parent, isRoot, layerIndex) => {
+			if (isRoot) {
+				let len = cur.data.expand === false ? 0 : cur._node.children.length;
+				cur._node.childrenAreaWidth = len ? cur._node.children.reduce((h, item) => {
+					return h + item.width;
+				}, 0) + (len + 1) * this.getMarginX(layerIndex + 1) : 0;
+			}
+		}, true, 0);
+	}
+	computedLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginX = this.getMarginX(layerIndex + 1);
+				let marginY = this.getMarginY(layerIndex + 1);
+				if (isRoot) {
+					let totalLeft = node.left + node.width / 2 - node.childrenAreaWidth / 2 + marginX;
+					node.children.forEach((cur) => {
+						cur.left = totalLeft;
+						totalLeft += cur.width + marginX;
+					});
+				} else {
+					let totalTop = node.top + this.getNodeHeightWithGeneralization(node) + marginY + (this.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0);
+					node.children.forEach((cur) => {
+						cur.left = node.left + node.width * .5;
+						cur.top = totalTop;
+						totalTop += this.getNodeHeightWithGeneralization(cur) + marginY + (this.getNodeActChildrenLength(cur) > 0 ? cur.expandBtnSize : 0);
+					});
+				}
+			}
+		}, null, true);
+	}
+	adjustLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			if (parent && parent.isRoot) {
+				let difference = this.getNodeAreaWidth(node, true) - node.width;
+				if (difference > 0) this.updateBrothersLeft(node, difference);
+			}
+			let len = node.children.length;
+			if (parent && !parent.isRoot && len > 0) {
+				let marginY = this.getMarginY(layerIndex + 1);
+				let totalHeight = node.children.reduce((h, item) => {
+					return h + this.getNodeHeightWithGeneralization(item) + (this.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0);
+				}, 0) + len * marginY;
+				this.updateBrothersTop(node, totalHeight);
+			}
+		}, (node, parent, isRoot) => {
+			if (isRoot) {
+				let { right, left } = this.getNodeBoundaries(node, "h");
+				let childrenWidth = right - left;
+				let offset = node.left - left - (childrenWidth - node.width) / 2;
+				this.updateChildren(node.children, "left", offset);
+			}
+		}, true);
+	}
+	updateBrothersLeft(node, addWidth) {
+		if (node.parent) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition() || _index <= index) return;
+				item.left += addWidth;
+				if (item.children && item.children.length) this.updateChildren(item.children, "left", addWidth);
+			});
+			this.updateBrothersLeft(node.parent, addWidth);
+		}
+	}
+	updateBrothersTop(node, addHeight) {
+		if (node.parent && !node.parent.isRoot) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothersTop(node.parent, addHeight);
+		}
+	}
+	renderLine(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let len = node.children.length;
+		let marginX = this.getMarginX(node.layerIndex + 1);
+		if (node.isRoot) {
+			let x1 = left + width / 2;
+			let y1 = top + height;
+			let s1 = marginX * .7;
+			let minx = Infinity;
+			let maxx = -Infinity;
+			node.children.forEach((item, index) => {
+				let x2 = item.left + item.width / 2;
+				let y2 = item.top;
+				if (x2 < minx) minx = x2;
+				if (x2 > maxx) maxx = x2;
+				let nodeUseLineStylePath = this.mindMap.themeConfig.nodeUseLineStyle ? ` L ${item.left},${y2} L ${item.left + item.width},${y2}` : "";
+				let path = `M ${x2},${y1 + s1} L ${x2},${y1 + s1 > y2 ? y2 + item.height : y2}` + nodeUseLineStylePath;
+				this.setLineStyle(style, lines[index], path, item);
+			});
+			minx = Math.min(minx, x1);
+			maxx = Math.max(maxx, x1);
+			let line1 = this.lineDraw.path();
+			node.style.line(line1);
+			line1.plot(this.transformPath(`M ${x1},${y1} L ${x1},${y1 + s1}`));
+			node._lines.push(line1);
+			style && style(line1, node);
+			if (len > 0) {
+				let lin2 = this.lineDraw.path();
+				node.style.line(lin2);
+				lin2.plot(this.transformPath(`M ${minx},${y1 + s1} L ${maxx},${y1 + s1}`));
+				node._lines.push(lin2);
+				style && style(lin2, node);
+			}
+		} else {
+			let y1 = top + height;
+			let maxy = -Infinity;
+			let x2 = node.left + node.width * .3;
+			node.children.forEach((item, index) => {
+				let y2 = item.top + item.height / 2;
+				if (y2 > maxy) maxy = y2;
+				let path = "";
+				let _left = item.left;
+				let _isLeft = item.left + item.width < x2;
+				let _isXCenter = false;
+				if (_isLeft) _left = item.left + item.width;
+				else if (item.left < x2 && item.left + item.width > x2) {
+					_isXCenter = true;
+					y2 = item.top;
+					maxy = y2;
+				}
+				if (y2 > top && y2 < y1) path = `M ${_isLeft ? node.left : node.left + node.width},${y2} L ${_left},${y2}`;
+				else if (y2 < y1) {
+					if (_isXCenter) {
+						y2 = item.top + item.height;
+						_left = x2;
+					}
+					path = `M ${x2},${top} L ${x2},${y2} L ${_left},${y2}`;
+				} else {
+					if (_isXCenter) _left = x2;
+					path = `M ${x2},${y2} L ${_left},${y2}`;
+				}
+				let nodeUseLineStylePath = this.mindMap.themeConfig.nodeUseLineStyle ? ` L ${_left},${y2 - item.height / 2} L ${_left},${y2 + item.height / 2}` : "";
+				path += nodeUseLineStylePath;
+				this.setLineStyle(style, lines[index], path, item);
+			});
+			if (len > 0) {
+				let lin2 = this.lineDraw.path();
+				expandBtnSize = len > 0 ? expandBtnSize : 0;
+				node.style.line(lin2);
+				if (maxy < y1 + expandBtnSize) lin2.hide();
+				else {
+					lin2.plot(this.transformPath(`M ${x2},${y1 + expandBtnSize} L ${x2},${maxy}`));
+					lin2.show();
+				}
+				node._lines.push(lin2);
+				style && style(lin2, node);
+			}
+		}
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize, isRoot } = node;
+		if (!isRoot) {
+			let { translateX, translateY } = btn.transform();
+			btn.translate(width * .3 - expandBtnSize / 2 - translateX, height + expandBtnSize / 2 - translateY);
+		}
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let { top, bottom, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x1 = right + generalizationLineMargin;
+			let y1 = top;
+			let x2 = right + generalizationLineMargin;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + 20},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(this.transformPath(path));
+			item.generalizationNode.left = right + generalizationNodeMargin;
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		rect.size(width, expandBtnSize).x(0).y(height);
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/OrganizationStructure.js
+var OrganizationStructure = class extends Base {
+	constructor(opt = {}) {
+		super(opt);
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedLeftValue();
+			},
+			() => {
+				this.adjustLeftValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else newNode.top = parent._node.top + parent._node.height + this.getMarginX(layerIndex);
+			if (!cur.data.expand) return true;
+		}, (cur, parent, isRoot, layerIndex) => {
+			let len = cur.data.expand === false ? 0 : cur._node.children.length;
+			cur._node.childrenAreaWidth = len ? cur._node.children.reduce((h, item) => {
+				return h + item.width;
+			}, 0) + (len + 1) * this.getMarginY(layerIndex + 1) : 0;
+			let generalizationNodeWidth = cur._node.checkHasGeneralization() ? cur._node._generalizationNodeWidth + this.getMarginY(layerIndex + 1) : 0;
+			cur._node.childrenAreaWidth2 = Math.max(cur._node.childrenAreaWidth, generalizationNodeWidth);
+		}, true, 0);
+	}
+	computedLeftValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginX = this.getMarginY(layerIndex + 1);
+				let totalLeft = node.left + node.width / 2 - node.childrenAreaWidth / 2 + marginX;
+				node.children.forEach((cur) => {
+					cur.left = totalLeft;
+					totalLeft += cur.width + marginX;
+				});
+			}
+		}, null, true);
+	}
+	adjustLeftValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			let difference = node.childrenAreaWidth2 - this.getMarginY(layerIndex + 1) * 2 - node.width;
+			if (difference > 0) this.updateBrothers(node, difference / 2);
+		}, null, true);
+	}
+	updateBrothers(node, addWidth) {
+		if (node.parent) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index < index) _offset = -addWidth;
+				else if (_index > index) _offset = addWidth;
+				item.left += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "left", _offset);
+			});
+			this.updateBrothers(node.parent, addWidth);
+		}
+	}
+	renderLine(node, lines, style, lineStyle) {
+		if (lineStyle === "curve") this.renderLineCurve(node, lines, style);
+		else if (lineStyle === "direct") this.renderLineDirect(node, lines, style);
+		else this.renderLineStraight(node, lines, style);
+	}
+	renderLineCurve(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		const { nodeUseLineStyle, rootLineStartPositionKeepSameInCurve, rootLineKeepSameInCurve } = this.mindMap.themeConfig;
+		node.children.forEach((item, index) => {
+			if (node.layerIndex === 0) expandBtnSize = 0;
+			let x1 = left + width / 2;
+			let y1 = node.layerIndex === 0 && !rootLineStartPositionKeepSameInCurve ? top + height / 2 : top + height + expandBtnSize;
+			let x2 = item.left + item.width / 2;
+			let y2 = item.top;
+			let path = "";
+			let nodeUseLineStylePath = nodeUseLineStyle ? ` L ${item.left},${y2} L ${item.left + item.width},${y2}` : "";
+			if (node.isRoot && !rootLineKeepSameInCurve) path = this.quadraticCurvePath(x1, y1, x2, y2, true) + nodeUseLineStylePath;
+			else path = this.cubicBezierPath(x1, y1, x2, y2, true) + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineDirect(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height } = node;
+		const { nodeUseLineStyle } = this.mindMap.themeConfig;
+		let x1 = left + width / 2;
+		let y1 = top + height;
+		node.children.forEach((item, index) => {
+			let x2 = item.left + item.width / 2;
+			let y2 = item.top;
+			let nodeUseLineStylePath = nodeUseLineStyle ? ` L ${item.left},${y2} L ${item.left + item.width},${y2}` : "";
+			let path = `M ${x1},${y1} L ${x2},${y2}` + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+	}
+	renderLineStraight(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize, isRoot } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let x1 = left + width / 2;
+		let y1 = top + height;
+		let s1 = this.getMarginX(node.layerIndex + 1) * .7;
+		let minx = Infinity;
+		let maxx = -Infinity;
+		let len = node.children.length;
+		node.children.forEach((item, index) => {
+			let x2 = item.left + item.width / 2;
+			let y2 = y1 + s1 > item.top ? item.top + item.height : item.top;
+			if (x2 < minx) minx = x2;
+			if (x2 > maxx) maxx = x2;
+			let nodeUseLineStylePath = this.mindMap.themeConfig.nodeUseLineStyle ? ` L ${item.left},${y2} L ${item.left + item.width},${y2}` : "";
+			let path = `M ${x2},${y1 + s1} L ${x2},${y2}` + nodeUseLineStylePath;
+			this.setLineStyle(style, lines[index], path, item);
+		});
+		minx = Math.min(x1, minx);
+		maxx = Math.max(x1, maxx);
+		let line1 = this.lineDraw.path();
+		node.style.line(line1);
+		expandBtnSize = len > 0 && !isRoot ? expandBtnSize : 0;
+		line1.plot(this.transformPath(`M ${x1},${y1 + expandBtnSize} L ${x1},${y1 + s1}`));
+		node._lines.push(line1);
+		style && style(line1, node);
+		if (len > 0) {
+			let lin2 = this.lineDraw.path();
+			node.style.line(lin2);
+			lin2.plot(this.transformPath(`M ${minx},${y1 + s1} L ${maxx},${y1 + s1}`));
+			node._lines.push(lin2);
+			style && style(lin2, node);
+		}
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize } = node;
+		let { translateX, translateY } = btn.transform();
+		btn.translate(width / 2 - expandBtnSize / 2 - translateX, height + expandBtnSize / 2 - translateY);
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let { bottom, left, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "v");
+			let x1 = left;
+			let y1 = bottom + generalizationLineMargin;
+			let x2 = right;
+			let y2 = bottom + generalizationLineMargin;
+			let path = `M ${x1},${y1} Q ${x1 + (x2 - x1) / 2},${y1 + 20} ${x2},${y2}`;
+			item.generalizationLine.plot(this.transformPath(path));
+			item.generalizationNode.top = bottom + generalizationNodeMargin;
+			item.generalizationNode.left = left + (right - left - item.generalizationNode.width) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		rect.size(width, expandBtnSize).x(0).y(height);
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/Timeline.js
+var Timeline = class extends Base {
+	constructor(opt = {}, layout) {
+		super(opt);
+		this.layout = layout;
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedLeftTopValue();
+			},
+			() => {
+				this.adjustLeftTopValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else {
+				if (this.layout === CONSTANTS.LAYOUT.TIMELINE2) if (parent._node.dir) newNode.dir = parent._node.dir;
+				else newNode.dir = index % 2 === 0 ? CONSTANTS.LAYOUT_GROW_DIR.BOTTOM : CONSTANTS.LAYOUT_GROW_DIR.TOP;
+				else newNode.dir = "";
+				if (parent._node.isRoot) newNode.top = parent._node.top + (cur._node.height > parent._node.height ? -(cur._node.height - parent._node.height) / 2 : (parent._node.height - cur._node.height) / 2);
+			}
+			if (!cur.data.expand) return true;
+		}, null, true, 0);
+	}
+	computedLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex, index) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginX = this.getMarginX(layerIndex + 1);
+				let marginY = this.getMarginY(layerIndex + 1);
+				if (isRoot) {
+					let totalLeft = node.left + node.width + marginX;
+					node.children.forEach((cur) => {
+						cur.left = totalLeft;
+						totalLeft += cur.width + marginX;
+					});
+				} else {
+					let totalTop = node.top + node.height + marginY + (this.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0);
+					node.children.forEach((cur) => {
+						cur.left = node.left + node.width * .5;
+						cur.top = totalTop;
+						totalTop += cur.height + marginY + (this.getNodeActChildrenLength(cur) > 0 ? cur.expandBtnSize : 0);
+					});
+				}
+			}
+		}, null, true);
+	}
+	adjustLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			if (node.isRoot) this.updateBrothersLeft(node);
+			let len = node.children.length;
+			if (parent && !parent.isRoot && len > 0) {
+				let marginY = this.getMarginY(layerIndex + 1);
+				let totalHeight = node.children.reduce((h, item) => {
+					return h + item.height + (this.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0);
+				}, 0) + len * marginY;
+				this.updateBrothersTop(node, totalHeight);
+			}
+		}, (node, parent, isRoot, layerIndex) => {
+			if (parent && parent.isRoot && node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) node.children.forEach((item) => {
+				let totalHeight = this.getNodeAreaHeight(item);
+				let _top = item.top;
+				item.top = node.top - (item.top - node.top) - totalHeight + node.height;
+				this.updateChildren(item.children, "top", item.top - _top);
+			});
+		}, true);
+	}
+	getNodeAreaHeight(node) {
+		let totalHeight = 0;
+		let loop = (node) => {
+			totalHeight += node.height + (this.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0) + this.getMarginY(node.layerIndex);
+			if (node.children.length) node.children.forEach((item) => {
+				loop(item);
+			});
+		};
+		loop(node);
+		return totalHeight;
+	}
+	updateBrothersLeft(node) {
+		let childrenList = node.children;
+		let totalAddWidth = 0;
+		childrenList.forEach((item) => {
+			item.left += totalAddWidth;
+			if (item.children && item.children.length) this.updateChildren(item.children, "left", totalAddWidth);
+			let { left, right } = this.getNodeBoundaries(item, "h");
+			let difference = right - left - item.width;
+			if (difference > 0) totalAddWidth += difference;
+		});
+	}
+	updateBrothersTop(node, addHeight) {
+		if (node.parent && !node.parent.isRoot) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothersTop(node.parent, addHeight);
+		}
+	}
+	renderLine(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let len = node.children.length;
+		if (node.isRoot) {
+			let prevBother = node;
+			node.children.forEach((item, index) => {
+				let x1 = prevBother.left + prevBother.width;
+				let x2 = item.left;
+				let y = node.top + node.height / 2;
+				let path = `M ${x1},${y} L ${x2},${y}`;
+				this.setLineStyle(style, lines[index], path, item);
+				prevBother = item;
+			});
+		} else {
+			let maxy = -Infinity;
+			let miny = Infinity;
+			let x = node.left + node.width * .3;
+			node.children.forEach((item, index) => {
+				let y = item.top + item.height / 2;
+				if (y > maxy) maxy = y;
+				if (y < miny) miny = y;
+				let path = `M ${x},${y} L ${item.left},${y}`;
+				this.setLineStyle(style, lines[index], path, item);
+			});
+			if (len > 0) {
+				let line = this.lineDraw.path();
+				expandBtnSize = len > 0 ? expandBtnSize : 0;
+				if (node.parent && node.parent.isRoot && node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) line.plot(this.transformPath(`M ${x},${top} L ${x},${miny}`));
+				else line.plot(this.transformPath(`M ${x},${top + height + expandBtnSize} L ${x},${maxy}`));
+				node.style.line(line);
+				node._lines.push(line);
+				style && style(line, node);
+			}
+		}
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize, isRoot } = node;
+		if (!isRoot) {
+			let { translateX, translateY } = btn.transform();
+			if (node.parent && node.parent.isRoot && node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) btn.translate(width * .3 - expandBtnSize / 2 - translateX, -expandBtnSize / 2 - translateY);
+			else btn.translate(width * .3 - expandBtnSize / 2 - translateX, height + expandBtnSize / 2 - translateY);
+		}
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let { top, bottom, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x1 = right + generalizationLineMargin;
+			let y1 = top;
+			let x2 = right + generalizationLineMargin;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + 20},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(this.transformPath(path));
+			item.generalizationNode.left = right + generalizationNodeMargin;
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		if (this.layout === CONSTANTS.LAYOUT.TIMELINE) rect.size(width, expandBtnSize).x(0).y(height);
+		else {
+			let dir = "";
+			if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) dir = node.layerIndex === 1 ? CONSTANTS.LAYOUT_GROW_DIR.TOP : CONSTANTS.LAYOUT_GROW_DIR.BOTTOM;
+			else dir = CONSTANTS.LAYOUT_GROW_DIR.BOTTOM;
+			if (dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) rect.size(width, expandBtnSize).x(0).y(-expandBtnSize);
+			else rect.size(width, expandBtnSize).x(0).y(height);
+		}
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/VerticalTimeline.js
+var VerticalTimeline = class extends Base {
+	constructor(opt = {}, layout) {
+		super(opt);
+		this.layout = layout;
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+			},
+			() => {
+				this.computedTopValue();
+			},
+			() => {
+				this.adjustLeftTopValue();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (cur, parent, isRoot, layerIndex, index, ancestors) => {
+			let newNode = this.createNode(cur, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else {
+				if (parent._node.dir) newNode.dir = parent._node.dir;
+				else if (this.layout === CONSTANTS.LAYOUT.VERTICAL_TIMELINE2) newNode.dir = CONSTANTS.LAYOUT_GROW_DIR.LEFT;
+				else if (this.layout === CONSTANTS.LAYOUT.VERTICAL_TIMELINE3) newNode.dir = CONSTANTS.LAYOUT_GROW_DIR.RIGHT;
+				else newNode.dir = index % 2 === 0 ? CONSTANTS.LAYOUT_GROW_DIR.RIGHT : CONSTANTS.LAYOUT_GROW_DIR.LEFT;
+				if (parent._node.isRoot) newNode.left = parent._node.left + (cur._node.width > parent._node.width ? -(cur._node.width - parent._node.width) / 2 : (parent._node.width - cur._node.width) / 2);
+				else newNode.left = newNode.dir === CONSTANTS.LAYOUT_GROW_DIR.RIGHT ? parent._node.left + parent._node.width + this.getMarginX(layerIndex) : parent._node.left - this.getMarginX(layerIndex) - newNode.width;
+			}
+			if (!cur.data.expand) return true;
+		}, (cur, parent, isRoot, layerIndex) => {
+			if (isRoot) return;
+			let len = cur.data.expand === false ? 0 : cur._node.children.length;
+			cur._node.childrenAreaHeight = len ? cur._node.children.reduce((h, item) => {
+				return h + item.height;
+			}, 0) + (len + 1) * this.getMarginY(layerIndex + 1) : 0;
+		}, true, 0);
+	}
+	computedTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex, index) => {
+			if (node.getData("expand") && node.children && node.children.length) {
+				let marginY = this.getMarginY(layerIndex + 1);
+				if (isRoot) {
+					let totalTop = node.top + node.height + marginY;
+					node.children.forEach((cur) => {
+						cur.top = totalTop;
+						totalTop += cur.height + marginY;
+					});
+				} else {
+					let marginY = this.getMarginY(layerIndex + 1);
+					let totalTop = node.top + node.height / 2 + marginY - node.childrenAreaHeight / 2;
+					node.children.forEach((cur) => {
+						cur.top = totalTop;
+						totalTop += cur.height + marginY;
+					});
+				}
+			}
+		}, null, true);
+	}
+	adjustLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			if (isRoot) return;
+			let base = this.getMarginY(layerIndex + 1) * 2 + node.height;
+			let difference = node.childrenAreaHeight - base;
+			if (difference > 0) this.updateBrothers(node, difference / 2);
+		}, null, true);
+	}
+	updateBrothers(node, addHeight) {
+		if (node.parent) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				if (!node.parent.isRoot && item.uid === node.uid) return;
+				let _offset = 0;
+				if (node.parent.isRoot) if (_index < index) _offset = 0;
+				else if (_index > index) _offset = addHeight * 2;
+				else _offset = addHeight;
+				else if (_index < index) _offset = -addHeight;
+				else if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothers(node.parent, addHeight);
+		}
+	}
+	updateBrothersTop(node, addHeight) {
+		if (node.parent && !node.parent.isRoot) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			this.updateBrothersTop(node.parent, addHeight);
+		}
+	}
+	renderLine(node, lines, style, lineStyle) {
+		if (lineStyle === "curve") this.renderLineCurve(node, lines, style);
+		else if (lineStyle === "direct") this.renderLineDirect(node, lines, style);
+		else this.renderLineStraight(node, lines, style);
+	}
+	renderLineStraight(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		if (node.isRoot) {
+			let prevBother = node;
+			node.children.forEach((item, index) => {
+				let y1 = prevBother.top + prevBother.height;
+				let y2 = item.top;
+				let x = node.left + node.width / 2;
+				let path = `M ${x},${y1} L ${x},${y2}`;
+				this.setLineStyle(style, lines[index], path, item);
+				prevBother = item;
+			});
+		} else if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.RIGHT) {
+			let nodeRight = node.left + node.width;
+			let nodeYCenter = node.top + node.height / 2;
+			let offset = (this.getMarginX(node.layerIndex + 1) - expandBtnSize) * .6;
+			node.children.forEach((item, index) => {
+				let itemLeft = item.left;
+				let itemYCenter = item.top + item.height / 2;
+				let path = this.createFoldLine([
+					[nodeRight, nodeYCenter],
+					[nodeRight + offset, nodeYCenter],
+					[nodeRight + offset, itemYCenter],
+					[itemLeft, itemYCenter]
+				]);
+				this.setLineStyle(style, lines[index], path, item);
+			});
+		} else {
+			let nodeLeft = node.left;
+			let nodeYCenter = node.top + node.height / 2;
+			let offset = (this.getMarginX(node.layerIndex + 1) - expandBtnSize) * .6;
+			node.children.forEach((item, index) => {
+				let itemRight = item.left + item.width;
+				let itemYCenter = item.top + item.height / 2;
+				let path = this.createFoldLine([
+					[nodeLeft, nodeYCenter],
+					[nodeLeft - offset, nodeYCenter],
+					[nodeLeft - offset, itemYCenter],
+					[itemRight, itemYCenter]
+				]);
+				this.setLineStyle(style, lines[index], path, item);
+			});
+		}
+	}
+	renderLineDirect(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		node.children.forEach((item, index) => {
+			if (node.isRoot) {
+				let prevBother = node;
+				node.children.forEach((item, index) => {
+					let y1 = prevBother.top + prevBother.height;
+					let y2 = item.top;
+					let x = node.left + node.width / 2;
+					let path = `M ${x},${y1} L ${x},${y2}`;
+					this.setLineStyle(style, lines[index], path, item);
+					prevBother = item;
+				});
+			} else {
+				let path = `M ${item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? left - expandBtnSize : left + width + expandBtnSize},${top + height / 2} L ${item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? item.left + item.width : item.left},${item.top + item.height / 2}`;
+				this.setLineStyle(style, lines[index], path, item);
+			}
+		});
+	}
+	renderLineCurve(node, lines, style) {
+		if (node.children.length <= 0) return [];
+		let { left, top, width, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		node.children.forEach((item, index) => {
+			if (node.isRoot) {
+				let prevBother = node;
+				node.children.forEach((item, index) => {
+					let y1 = prevBother.top + prevBother.height;
+					let y2 = item.top;
+					let x = node.left + node.width / 2;
+					let path = `M ${x},${y1} L ${x},${y2}`;
+					this.setLineStyle(style, lines[index], path, item);
+					prevBother = item;
+				});
+			} else {
+				let x1 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? left - expandBtnSize : left + width + expandBtnSize;
+				let y1 = top + height / 2;
+				let x2 = item.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT ? item.left + item.width : item.left;
+				let y2 = item.top + item.height / 2;
+				let path = this.cubicBezierPath(x1, y1, x2, y2);
+				this.setLineStyle(style, lines[index], path, item);
+			}
+		});
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize, isRoot } = node;
+		if (!isRoot) {
+			let { translateX, translateY } = btn.transform();
+			if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.RIGHT) btn.translate(width - translateX, height / 2 - translateY);
+			else btn.translate(-expandBtnSize - translateX, height / 2 - translateY);
+		}
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let isLeft = item.node.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT;
+			let { top, bottom, left, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x = isLeft ? left - generalizationLineMargin : right + generalizationLineMargin;
+			let x1 = x;
+			let y1 = top;
+			let x2 = x;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + (isLeft ? -20 : 20)},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(this.transformPath(path));
+			item.generalizationNode.left = x + (isLeft ? -generalizationNodeMargin : generalizationNodeMargin) - (isLeft ? item.generalizationNode.width : 0);
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.LEFT) rect.size(expandBtnSize, height).x(-expandBtnSize).y(0);
+		else rect.size(expandBtnSize, height).x(width).y(0);
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/fishboneUtils.js
+var fishboneUtils_default = {
+	top: {
+		renderExpandBtn({ node, btn, expandBtnSize, translateX, translateY, width, height }) {
+			if (node.parent && node.parent.isRoot) btn.translate(width * .3 - expandBtnSize / 2 - translateX, -expandBtnSize / 2 - translateY);
+			else btn.translate(width * .3 - expandBtnSize / 2 - translateX, height + expandBtnSize / 2 - translateY);
+		},
+		renderLine({ node, line, top, x, lineLength, height, expandBtnSize, maxy, ctx }) {
+			if (node.parent && node.parent.isRoot) line.plot(ctx.transformPath(`M ${x},${top} L ${x + lineLength},${top - Math.tan(degToRad(ctx.mindMap.opt.fishboneDeg)) * lineLength}`));
+			else line.plot(ctx.transformPath(`M ${x},${top + height + expandBtnSize} L ${x},${maxy}`));
+		},
+		computedLeftTopValue({ layerIndex, node, ctx }) {
+			if (layerIndex >= 1 && node.children) {
+				let marginY = ctx.getMarginY(layerIndex + 1);
+				let startLeft = node.left + node.width * ctx.childIndent;
+				let totalTop = node.top + node.height + (ctx.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0) + marginY;
+				node.children.forEach((item) => {
+					item.left = startLeft;
+					item.top += totalTop;
+					totalTop += item.height + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0) + marginY;
+				});
+			}
+		},
+		adjustLeftTopValueBefore({ node, parent, ctx, layerIndex }) {
+			let len = node.children.length;
+			let marginY = ctx.getMarginY(layerIndex + 1);
+			if (parent && !parent.isRoot && len > 0) {
+				let totalHeight = node.children.reduce((h, item) => {
+					return h + item.height + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0) + marginY;
+				}, 0);
+				ctx.updateBrothersTop(node, totalHeight);
+			}
+		},
+		adjustLeftTopValueAfter({ parent, node, ctx }) {
+			if (parent && parent.isRoot) {
+				let marginY = ctx.getMarginY(node.layerIndex + 1);
+				let totalHeight = node.expandBtnSize + marginY;
+				node.children.forEach((item) => {
+					let nodeTotalHeight = ctx.getNodeAreaHeight(item);
+					let _top = item.top;
+					let _left = item.left;
+					item.top = node.top - (item.top - node.top) - nodeTotalHeight + node.height;
+					item.left = node.left + node.width * ctx.indent + (nodeTotalHeight + totalHeight) / Math.tan(degToRad(ctx.mindMap.opt.fishboneDeg));
+					totalHeight += nodeTotalHeight;
+					ctx.updateChildrenPro(item.children, {
+						top: item.top - _top,
+						left: item.left - _left
+					});
+				});
+			}
+		}
+	},
+	bottom: {
+		renderExpandBtn({ node, btn, expandBtnSize, translateX, translateY, width, height }) {
+			if (node.parent && node.parent.isRoot) btn.translate(width * .3 - expandBtnSize / 2 - translateX, height + expandBtnSize / 2 - translateY);
+			else btn.translate(width * .3 - expandBtnSize / 2 - translateX, -expandBtnSize / 2 - translateY);
+		},
+		renderLine({ node, line, top, x, lineLength, height, miny, ctx }) {
+			if (node.parent && node.parent.isRoot) line.plot(ctx.transformPath(`M ${x},${top + height} L ${x + lineLength},${top + height + Math.tan(degToRad(ctx.mindMap.opt.fishboneDeg)) * lineLength}`));
+			else line.plot(ctx.transformPath(`M ${x},${top} L ${x},${miny}`));
+		},
+		computedLeftTopValue({ layerIndex, node, ctx }) {
+			let marginY = ctx.getMarginY(layerIndex + 1);
+			if (layerIndex === 1 && node.children) {
+				let startLeft = node.left + node.width * ctx.childIndent;
+				let totalTop = node.top + node.height + (ctx.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0) + marginY;
+				node.children.forEach((item) => {
+					item.left = startLeft;
+					item.top = totalTop + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0);
+					totalTop += item.height + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0) + marginY;
+				});
+			}
+			if (layerIndex > 1 && node.children) {
+				let startLeft = node.left + node.width * ctx.childIndent;
+				let totalTop = node.top - (ctx.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0) - marginY;
+				node.children.forEach((item) => {
+					item.left = startLeft;
+					item.top = totalTop - item.height;
+					totalTop -= item.height + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0) + marginY;
+				});
+			}
+		},
+		adjustLeftTopValueBefore({ node, ctx, layerIndex }) {
+			let marginY = ctx.getMarginY(layerIndex + 1);
+			let len = node.children.length;
+			if (layerIndex > 2 && len > 0) {
+				let totalHeight = node.children.reduce((h, item) => {
+					return h + item.height + (ctx.getNodeActChildrenLength(item) > 0 ? item.expandBtnSize : 0) + marginY;
+				}, 0);
+				ctx.updateBrothersTop(node, -totalHeight);
+			}
+		},
+		adjustLeftTopValueAfter({ parent, node, ctx }) {
+			if (parent && parent.isRoot) {
+				let marginY = ctx.getMarginY(node.layerIndex + 1);
+				let totalHeight = 0;
+				let totalHeight2 = node.expandBtnSize;
+				node.children.forEach((item) => {
+					let hasChildren = ctx.getNodeActChildrenLength(item) > 0;
+					let nodeTotalHeight = ctx.getNodeAreaHeight(item);
+					let offset = hasChildren ? nodeTotalHeight - item.height - (hasChildren ? item.expandBtnSize : 0) : 0;
+					offset -= hasChildren ? marginY : 0;
+					let _top = totalHeight + offset;
+					let _left = item.left;
+					item.top += _top;
+					item.left = node.left + node.width * ctx.indent + (nodeTotalHeight + totalHeight2) / Math.tan(degToRad(ctx.mindMap.opt.fishboneDeg));
+					totalHeight += offset;
+					totalHeight2 += nodeTotalHeight;
+					ctx.updateChildrenPro(item.children, {
+						top: _top,
+						left: item.left - _left
+					});
+				});
+			}
+		}
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/layouts/Fishbone.js
+var Fishbone = class extends Base {
+	constructor(opt = {}, layout) {
+		super(opt);
+		this.layout = layout;
+		this.indent = .3;
+		this.childIndent = .5;
+		this.fishTail = null;
+		this.maxx = 0;
+		this.headRatio = 1;
+		this.tailRatio = .6;
+		this.paddingXRatio = .3;
+		this.fishHeadPathStr = "M4,181 C4,181, 0,177, 4,173 Q 96.09523809523809,0, 288.2857142857143,0 L 288.2857142857143,354 Q 48.047619047619044,354, 8,218.18367346938777 C8,218.18367346938777, 6,214.18367346938777, 8,214.18367346938777 L 41.183673469387756,214.18367346938777 Z";
+		this.fishTailPathStr = "M 606.9342905223708 0 Q 713.1342905223709 -177 819.3342905223708 -177 L 766.2342905223709 0 L 819.3342905223708 177 Q 713.1342905223709 177 606.9342905223708 0 z";
+		this.bindEvent();
+		this.extendShape();
+		this.beforeChange = this.beforeChange.bind(this);
+	}
+	nodeIsRemoveAllLines(node) {
+		return node.isRoot || node.layerIndex === 1;
+	}
+	isFishbone2() {
+		return this.layout === CONSTANTS.LAYOUT.FISHBONE2;
+	}
+	bindEvent() {
+		if (!this.isFishbone2()) return;
+		this.onCheckUpdateFishTail = this.onCheckUpdateFishTail.bind(this);
+		this.mindMap.on("afterExecCommand", this.onCheckUpdateFishTail);
+	}
+	unBindEvent() {
+		this.mindMap.off("afterExecCommand", this.onCheckUpdateFishTail);
+	}
+	extendShape() {
+		if (!this.isFishbone2()) return;
+		this.mindMap.addShape({
+			name: "fishHead",
+			createShape: (node) => {
+				const rect = SVG(`<path d="${this.fishHeadPathStr}"></path>`);
+				const { width, height } = node.shapeInstance.getNodeSize();
+				rect.size(width, height);
+				return rect;
+			},
+			getPadding: ({ width, height, paddingX, paddingY }) => {
+				width += paddingX * 2;
+				height += paddingY * 2;
+				let shapePaddingX = this.paddingXRatio * width;
+				let shapePaddingY = 0;
+				width += shapePaddingX * 2;
+				shapePaddingY = (width / this.headRatio - height) / 2;
+				return {
+					paddingX: shapePaddingX,
+					paddingY: shapePaddingY
+				};
+			}
+		});
+	}
+	doLayout(callback) {
+		asyncRun([
+			() => {
+				this.computedBaseValue();
+				this.addFishTail();
+			},
+			() => {
+				this.computedLeftTopValue();
+			},
+			() => {
+				this.adjustLeftTopValue();
+				this.updateFishTailPosition();
+			},
+			() => {
+				callback(this.root);
+			}
+		]);
+	}
+	addFishTail() {
+		if (!this.isFishbone2()) return;
+		const exist = this.mindMap.lineDraw.findOne(".smm-layout-fishbone-tail");
+		if (!exist) {
+			this.fishTail = SVG(`<path d="${this.fishTailPathStr}"></path>`);
+			this.fishTail.addClass("smm-layout-fishbone-tail");
+		} else this.fishTail = exist;
+		const tailHeight = this.root.height;
+		const tailWidth = tailHeight * this.tailRatio;
+		this.fishTail.size(tailWidth, tailHeight);
+		this.styleFishTail();
+		this.mindMap.lineDraw.add(this.fishTail);
+	}
+	onCheckUpdateFishTail(name, node, data) {
+		if (name === "SET_NODE_DATA") {
+			let hasShapeProp = false;
+			Object.keys(data).forEach((key) => {
+				if (shapeStyleProps.includes(key)) hasShapeProp = true;
+			});
+			if (hasShapeProp) this.styleFishTail();
+		}
+	}
+	styleFishTail() {
+		this.root.style.shape(this.fishTail);
+	}
+	removeFishTail() {
+		const exist = this.mindMap.lineDraw.findOne(".smm-layout-fishbone-tail");
+		if (exist) exist.remove();
+	}
+	updateFishTailPosition() {
+		if (!this.isFishbone2()) return;
+		this.fishTail.x(this.maxx).cy(this.root.top + this.root.height / 2);
+	}
+	computedBaseValue() {
+		walk(this.renderer.renderTree, null, (node, parent, isRoot, layerIndex, index, ancestors) => {
+			if (isRoot && this.isFishbone2()) node.data.shape = "fishHead";
+			let newNode = this.createNode(node, parent, isRoot, layerIndex, index, ancestors);
+			if (isRoot) this.setNodeCenter(newNode);
+			else {
+				if (parent._node.dir) newNode.dir = parent._node.dir;
+				else newNode.dir = index % 2 === 0 ? CONSTANTS.LAYOUT_GROW_DIR.TOP : CONSTANTS.LAYOUT_GROW_DIR.BOTTOM;
+				if (parent._node.isRoot) {
+					let marginY = this.getMarginY(layerIndex);
+					const topOffset = this.isFishbone2() ? parent._node.height / 4 : 0;
+					if (this.checkIsTop(newNode)) newNode.top = parent._node.top - newNode.height - marginY + topOffset;
+					else newNode.top = parent._node.top + parent._node.height + marginY - topOffset;
+				}
+			}
+			if (!node.data.expand) return true;
+		}, null, true, 0);
+	}
+	computedLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (node.isRoot) {
+				let marginX = this.getMarginX(layerIndex + 1);
+				const heightOffsetRatio = this.isFishbone2() ? 2 : 1;
+				let topTotalLeft = node.left + node.width + node.height / heightOffsetRatio + marginX;
+				let bottomTotalLeft = node.left + node.width + node.height / heightOffsetRatio + marginX;
+				node.children.forEach((item) => {
+					if (this.checkIsTop(item)) {
+						item.left = topTotalLeft;
+						topTotalLeft += item.width + marginX;
+					} else {
+						item.left = bottomTotalLeft + 20;
+						bottomTotalLeft += item.width + marginX;
+					}
+				});
+			}
+			let params = {
+				layerIndex,
+				node,
+				ctx: this
+			};
+			if (this.checkIsTop(node)) fishboneUtils_default.top.computedLeftTopValue(params);
+			else fishboneUtils_default.bottom.computedLeftTopValue(params);
+		}, null, true);
+	}
+	adjustLeftTopValue() {
+		walk(this.root, null, (node, parent, isRoot, layerIndex) => {
+			if (!node.getData("expand")) return;
+			let params = {
+				node,
+				parent,
+				layerIndex,
+				ctx: this
+			};
+			if (this.checkIsTop(node)) fishboneUtils_default.top.adjustLeftTopValueBefore(params);
+			else fishboneUtils_default.bottom.adjustLeftTopValueBefore(params);
+		}, (node, parent) => {
+			let params = {
+				parent,
+				node,
+				ctx: this
+			};
+			if (this.checkIsTop(node)) fishboneUtils_default.top.adjustLeftTopValueAfter(params);
+			else fishboneUtils_default.bottom.adjustLeftTopValueAfter(params);
+			if (node.isRoot) {
+				let topTotalLeft = 0;
+				let bottomTotalLeft = 0;
+				let maxx = -Infinity;
+				node.children.forEach((item) => {
+					if (this.checkIsTop(item)) {
+						item.left += topTotalLeft;
+						this.updateChildren(item.children, "left", topTotalLeft);
+						let { left, right } = this.getNodeBoundaries(item, "h");
+						if (right > maxx) maxx = right;
+						topTotalLeft += right - left;
+					} else {
+						item.left += bottomTotalLeft;
+						this.updateChildren(item.children, "left", bottomTotalLeft);
+						let { left, right } = this.getNodeBoundaries(item, "h");
+						if (right > maxx) maxx = right;
+						bottomTotalLeft += right - left;
+					}
+				});
+				this.maxx = maxx;
+			}
+		}, true);
+	}
+	getNodeAreaHeight(node) {
+		let totalHeight = 0;
+		let loop = (node) => {
+			let marginY = this.getMarginY(node.layerIndex);
+			totalHeight += node.height + (this.getNodeActChildrenLength(node) > 0 ? node.expandBtnSize : 0) + marginY;
+			if (node.children.length) node.children.forEach((item) => {
+				loop(item);
+			});
+		};
+		loop(node);
+		return totalHeight;
+	}
+	updateBrothersLeft(node) {
+		let childrenList = node.children;
+		let totalAddWidth = 0;
+		childrenList.forEach((item) => {
+			item.left += totalAddWidth;
+			if (item.children && item.children.length) this.updateChildren(item.children, "left", totalAddWidth);
+			let { left, right } = this.getNodeBoundaries(item, "h");
+			let difference = right - left - item.width;
+			if (difference > 0) totalAddWidth += difference;
+		});
+	}
+	updateBrothersTop(node, addHeight) {
+		if (node.parent && !node.parent.isRoot) {
+			let childrenList = node.parent.children;
+			let index = getNodeIndexInNodeList(node, childrenList);
+			childrenList.forEach((item, _index) => {
+				if (item.hasCustomPosition()) return;
+				let _offset = 0;
+				if (_index > index) _offset = addHeight;
+				item.top += _offset;
+				if (item.children && item.children.length) this.updateChildren(item.children, "top", _offset);
+			});
+			if (this.checkIsTop(node)) this.updateBrothersTop(node.parent, addHeight);
+			else this.updateBrothersTop(node.parent, node.layerIndex === 3 ? 0 : addHeight);
+		}
+	}
+	checkIsTop(node) {
+		return node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP;
+	}
+	renderLine(node, lines, style) {
+		if (node.layerIndex !== 1 && node.children.length <= 0) return [];
+		let { top, height, expandBtnSize } = node;
+		const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+		if (!alwaysShowExpandBtn || notShowExpandBtn) expandBtnSize = 0;
+		let len = node.children.length;
+		if (node.isRoot) {
+			let maxx = -Infinity;
+			node.children.forEach((item) => {
+				if (item.left > maxx) maxx = item.left;
+				let marginY = this.getMarginY(item.layerIndex);
+				let nodeLineX = item.left;
+				let offset = node.height / 2 + marginY - (this.isFishbone2() ? node.height / 4 : 0);
+				let offsetX = offset / Math.tan(degToRad(this.mindMap.opt.fishboneDeg));
+				let line = this.lineDraw.path();
+				if (this.checkIsTop(item)) line.plot(this.transformPath(`M ${nodeLineX - offsetX},${item.top + item.height + offset} L ${item.left},${item.top + item.height}`));
+				else line.plot(this.transformPath(`M ${nodeLineX - offsetX},${item.top - offset} L ${nodeLineX},${item.top}`));
+				node.style.line(line);
+				node._lines.push(line);
+				style && style(line, node);
+			});
+			let nodeHalfTop = node.top + node.height / 2;
+			let offset = node.height / 2 + this.getMarginY(node.layerIndex + 1);
+			let line = this.lineDraw.path();
+			const lineEndX = this.isFishbone2() ? this.maxx : maxx - offset / Math.tan(degToRad(this.mindMap.opt.fishboneDeg));
+			line.plot(this.transformPath(`M ${node.left + node.width},${nodeHalfTop} L ${lineEndX},${nodeHalfTop}`));
+			node.style.line(line);
+			node._lines.push(line);
+			style && style(line, node);
+		} else {
+			let maxy = -Infinity;
+			let miny = Infinity;
+			let maxx = -Infinity;
+			let x = node.left + node.width * this.indent;
+			node.children.forEach((item, index) => {
+				if (item.left > maxx) maxx = item.left;
+				let y = item.top + item.height / 2;
+				if (y > maxy) maxy = y;
+				if (y < miny) miny = y;
+				if (node.layerIndex > 1) {
+					let path = `M ${x},${y} L ${item.left},${y}`;
+					this.setLineStyle(style, lines[index], path, item);
+				}
+			});
+			if (len >= 0) {
+				let line = this.lineDraw.path();
+				expandBtnSize = len > 0 ? expandBtnSize : 0;
+				let lineLength = maxx - node.left - node.width * this.indent;
+				lineLength = Math.max(lineLength, 0);
+				let params = {
+					node,
+					line,
+					top,
+					x,
+					lineLength,
+					height,
+					expandBtnSize,
+					maxy,
+					miny,
+					ctx: this
+				};
+				if (this.checkIsTop(node)) fishboneUtils_default.top.renderLine(params);
+				else fishboneUtils_default.bottom.renderLine(params);
+				node.style.line(line);
+				node._lines.push(line);
+				style && style(line, node);
+			}
+		}
+	}
+	renderExpandBtn(node, btn) {
+		let { width, height, expandBtnSize, isRoot } = node;
+		if (!isRoot) {
+			let { translateX, translateY } = btn.transform();
+			let params = {
+				node,
+				btn,
+				expandBtnSize,
+				translateX,
+				translateY,
+				width,
+				height
+			};
+			if (this.checkIsTop(node)) fishboneUtils_default.top.renderExpandBtn(params);
+			else fishboneUtils_default.bottom.renderExpandBtn(params);
+		}
+	}
+	renderGeneralization(list) {
+		list.forEach((item) => {
+			let { top, bottom, right, generalizationLineMargin, generalizationNodeMargin } = this.getNodeGeneralizationRenderBoundaries(item, "h");
+			let x1 = right + generalizationLineMargin;
+			let y1 = top;
+			let x2 = right + generalizationLineMargin;
+			let y2 = bottom;
+			let path = `M ${x1},${y1} Q ${x1 + 20},${y1 + (y2 - y1) / 2} ${x2},${y2}`;
+			item.generalizationLine.plot(this.transformPath(path));
+			item.generalizationNode.left = right + generalizationNodeMargin;
+			item.generalizationNode.top = top + (bottom - top - item.generalizationNode.height) / 2;
+		});
+	}
+	renderExpandBtnRect(rect, expandBtnSize, width, height, node) {
+		let dir = "";
+		if (node.dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) dir = node.layerIndex === 1 ? CONSTANTS.LAYOUT_GROW_DIR.TOP : CONSTANTS.LAYOUT_GROW_DIR.BOTTOM;
+		else dir = node.layerIndex === 1 ? CONSTANTS.LAYOUT_GROW_DIR.BOTTOM : CONSTANTS.LAYOUT_GROW_DIR.TOP;
+		if (dir === CONSTANTS.LAYOUT_GROW_DIR.TOP) rect.size(width, expandBtnSize).x(0).y(-expandBtnSize);
+		else rect.size(width, expandBtnSize).x(0).y(height);
+	}
+	beforeChange() {
+		if (!this.isFishbone2()) return;
+		this.root.nodeData.data.shape = CONSTANTS.SHAPE.RECTANGLE;
+		this.removeFishTail();
+		this.unBindEvent();
+		this.mindMap.removeShape("fishHead");
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/TextEdit.js
+var SMM_NODE_EDIT_WRAP = "smm-node-edit-wrap";
+var TextEdit = class {
+	constructor(renderer) {
+		this.renderer = renderer;
+		this.mindMap = renderer.mindMap;
+		this.currentNode = null;
+		this.textEditNode = null;
+		this.showTextEdit = false;
+		this.cacheEditingText = "";
+		this.hasBodyMousedown = false;
+		this.textNodePaddingX = 5;
+		this.textNodePaddingY = 3;
+		this.isNeedUpdateTextEditNode = false;
+		this.mindMap.addEditNodeClass(SMM_NODE_EDIT_WRAP);
+		this.bindEvent();
+	}
+	bindEvent() {
+		this.show = this.show.bind(this);
+		this.onScale = this.onScale.bind(this);
+		this.onKeydown = this.onKeydown.bind(this);
+		this.mindMap.on("node_dblclick", (node, e, isInserting) => {
+			this.show({
+				node,
+				e,
+				isInserting
+			});
+		});
+		this.mindMap.on("draw_click", () => {
+			this.hideEditTextBox();
+		});
+		this.mindMap.on("body_mousedown", () => {
+			this.hasBodyMousedown = true;
+		});
+		this.mindMap.on("body_click", () => {
+			if (!this.hasBodyMousedown) return;
+			this.hasBodyMousedown = false;
+			if (this.mindMap.opt.isEndNodeTextEditOnClickOuter) this.hideEditTextBox();
+		});
+		this.mindMap.on("svg_mousedown", () => {
+			this.hideEditTextBox();
+		});
+		this.mindMap.on("expand_btn_click", () => {
+			this.hideEditTextBox();
+		});
+		this.mindMap.on("before_node_active", () => {
+			this.hideEditTextBox();
+		});
+		this.mindMap.on("mousewheel", () => {
+			if (this.mindMap.opt.mousewheelAction === CONSTANTS.MOUSE_WHEEL_ACTION.MOVE) this.hideEditTextBox();
+		});
+		this.mindMap.keyCommand.addShortcut("F2", () => {
+			if (this.renderer.activeNodeList.length <= 0) return;
+			this.show({ node: this.renderer.activeNodeList[0] });
+		});
+		this.mindMap.on("scale", this.onScale);
+		if (this.mindMap.opt.enableAutoEnterTextEditWhenKeydown) window.addEventListener("keydown", this.onKeydown);
+		this.mindMap.on("beforeDestroy", () => {
+			this.unBindEvent();
+		});
+		this.mindMap.on("after_update_config", (opt, lastOpt) => {
+			if (opt.openRealtimeRenderOnNodeTextEdit !== lastOpt.openRealtimeRenderOnNodeTextEdit) if (this.mindMap.richText) this.mindMap.richText.onOpenRealtimeRenderOnNodeTextEditConfigUpdate(opt.openRealtimeRenderOnNodeTextEdit);
+			else this.onOpenRealtimeRenderOnNodeTextEditConfigUpdate(opt.openRealtimeRenderOnNodeTextEdit);
+			if (opt.enableAutoEnterTextEditWhenKeydown !== lastOpt.enableAutoEnterTextEditWhenKeydown) window[opt.enableAutoEnterTextEditWhenKeydown ? "addEventListener" : "removeEventListener"]("keydown", this.onKeydown);
+		});
+		this.mindMap.on("afterExecCommand", () => {
+			if (!this.isShowTextEdit()) return;
+			this.isNeedUpdateTextEditNode = true;
+		});
+		this.mindMap.on("node_tree_render_end", () => {
+			if (!this.isShowTextEdit()) return;
+			if (this.isNeedUpdateTextEditNode) {
+				this.isNeedUpdateTextEditNode = false;
+				this.updateTextEditNode();
+			}
+		});
+	}
+	unBindEvent() {
+		window.removeEventListener("keydown", this.onKeydown);
+	}
+	onKeydown(e) {
+		if (e.target !== document.body) return;
+		const activeNodeList = this.mindMap.renderer.activeNodeList;
+		if (activeNodeList.length <= 0 || activeNodeList.length > 1) return;
+		const node = activeNodeList[0];
+		if (node && this.checkIsAutoEnterTextEditKey(e)) {
+			e.preventDefault();
+			this.show({
+				node,
+				e,
+				isInserting: false,
+				isFromKeyDown: true
+			});
+		}
+	}
+	checkIsAutoEnterTextEditKey(e) {
+		const keyCode = e.keyCode;
+		return (keyCode === 229 || keyCode >= 65 && keyCode <= 90 || keyCode >= 48 && keyCode <= 57) && !this.mindMap.keyCommand.hasCombinationKey(e);
+	}
+	registerTmpShortcut() {
+		this.mindMap.keyCommand.addShortcut("Enter", () => {
+			this.hideEditTextBox();
+		});
+		this.mindMap.keyCommand.addShortcut("Tab", () => {
+			this.hideEditTextBox();
+		});
+	}
+	isShowTextEdit() {
+		if (this.mindMap.richText) return this.mindMap.richText.showTextEdit;
+		return this.showTextEdit;
+	}
+	setIsShowTextEdit(val) {
+		this.showTextEdit = val;
+		if (val) this.mindMap.keyCommand.stopCheckInSvg();
+		else this.mindMap.keyCommand.recoveryCheckInSvg();
+	}
+	async show({ node, isInserting = false, isFromKeyDown = false, isFromScale = false }) {
+		if (node.isUseCustomNodeContent()) return;
+		if (this.getCurrentEditNode()) this.hideEditTextBox();
+		const { beforeTextEdit, openRealtimeRenderOnNodeTextEdit } = this.mindMap.opt;
+		if (typeof beforeTextEdit === "function") {
+			let isShow = false;
+			try {
+				isShow = await beforeTextEdit(node, isInserting);
+			} catch (error) {
+				isShow = false;
+				this.mindMap.opt.errorHandler(ERROR_TYPES.BEFORE_TEXT_EDIT_ERROR, error);
+			}
+			if (!isShow) return;
+		}
+		const { offsetLeft, offsetTop } = checkNodeOuter(this.mindMap, node);
+		this.mindMap.view.translateXY(offsetLeft, offsetTop);
+		const g = node._textData.node;
+		if (openRealtimeRenderOnNodeTextEdit) g.show();
+		const rect = g.node.getBoundingClientRect();
+		if (openRealtimeRenderOnNodeTextEdit) g.hide();
+		const params = {
+			node,
+			rect,
+			isInserting,
+			isFromKeyDown,
+			isFromScale
+		};
+		if (this.mindMap.richText) {
+			this.mindMap.richText.showEditText(params);
+			return;
+		}
+		this.currentNode = node;
+		this.showEditTextBox(params);
+	}
+	onOpenRealtimeRenderOnNodeTextEditConfigUpdate(openRealtimeRenderOnNodeTextEdit) {
+		if (!this.textEditNode) return;
+		this.textEditNode.style.background = openRealtimeRenderOnNodeTextEdit ? "transparent" : this.currentNode ? this.getBackground(this.currentNode) : "";
+		this.textEditNode.style.boxShadow = openRealtimeRenderOnNodeTextEdit ? "none" : "0 0 20px rgba(0,0,0,.5)";
+	}
+	onScale() {
+		const node = this.getCurrentEditNode();
+		if (!node) return;
+		if (this.mindMap.richText) {
+			this.mindMap.richText.cacheEditingText = this.mindMap.richText.getEditText();
+			this.mindMap.richText.showTextEdit = false;
+		} else {
+			this.cacheEditingText = this.getEditText();
+			this.setIsShowTextEdit(false);
+		}
+		this.show({
+			node,
+			isFromScale: true
+		});
+	}
+	showEditTextBox({ node, rect, isInserting, isFromKeyDown, isFromScale }) {
+		if (this.showTextEdit) return;
+		const { nodeTextEditZIndex, textAutoWrapWidth, selectTextOnEnterEditText, openRealtimeRenderOnNodeTextEdit, autoEmptyTextWhenKeydownEnterEdit } = this.mindMap.opt;
+		if (!isFromScale) this.mindMap.emit("before_show_text_edit");
+		this.registerTmpShortcut();
+		if (!this.textEditNode) {
+			this.textEditNode = document.createElement("div");
+			this.textEditNode.classList.add(SMM_NODE_EDIT_WRAP);
+			this.textEditNode.style.cssText = `
+        position: fixed;
+        box-sizing: border-box;
+        ${openRealtimeRenderOnNodeTextEdit ? "" : `box-shadow: 0 0 20px rgba(0,0,0,.5);`}
+        padding: ${this.textNodePaddingY}px ${this.textNodePaddingX}px;
+        margin-left: -${this.textNodePaddingX}px;
+        margin-top: -${this.textNodePaddingY}px;
+        outline: none; 
+        word-break: break-all;
+        line-break: anywhere;
+      `;
+			this.textEditNode.setAttribute("contenteditable", true);
+			this.textEditNode.addEventListener("keyup", (e) => {
+				e.stopPropagation();
+			});
+			this.textEditNode.addEventListener("click", (e) => {
+				e.stopPropagation();
+			});
+			this.textEditNode.addEventListener("mousedown", (e) => {
+				e.stopPropagation();
+			});
+			this.textEditNode.addEventListener("keydown", (e) => {
+				if (this.checkIsAutoEnterTextEditKey(e)) e.stopPropagation();
+			});
+			this.textEditNode.addEventListener("paste", (e) => {
+				const { isSmm, data } = checkSmmFormatData(e.clipboardData.getData("text"));
+				if (isSmm && data[0] && data[0].data) handleInputPasteText(e, getTextFromHtml(data[0].data.text));
+				else handleInputPasteText(e);
+				this.emitTextChangeEvent();
+			});
+			this.textEditNode.addEventListener("input", () => {
+				this.emitTextChangeEvent();
+			});
+			(this.mindMap.opt.customInnerElsAppendTo || document.body).appendChild(this.textEditNode);
+		}
+		const scale = this.mindMap.view.scale;
+		const fontSize = node.style.merge("fontSize");
+		const textLines = (this.cacheEditingText || node.getData("text")).split(/\n/gim).map((item) => {
+			return htmlEscape(item);
+		});
+		const isMultiLine = node._textData.node.attr("data-ismultiLine") === "true";
+		node.style.domText(this.textEditNode, scale);
+		if (!openRealtimeRenderOnNodeTextEdit) this.textEditNode.style.background = this.getBackground(node);
+		this.textEditNode.style.zIndex = nodeTextEditZIndex;
+		if (isFromKeyDown && autoEmptyTextWhenKeydownEnterEdit) this.textEditNode.innerHTML = "";
+		else this.textEditNode.innerHTML = textLines.join("<br>");
+		this.textEditNode.style.minWidth = rect.width + this.textNodePaddingX * 2 + "px";
+		this.textEditNode.style.minHeight = rect.height + "px";
+		this.textEditNode.style.left = Math.floor(rect.left) + "px";
+		this.textEditNode.style.top = Math.floor(rect.top) + "px";
+		this.textEditNode.style.display = "block";
+		this.textEditNode.style.maxWidth = textAutoWrapWidth * scale + "px";
+		if (isMultiLine) {
+			this.textEditNode.style.lineHeight = noneRichTextNodeLineHeight;
+			this.textEditNode.style.transform = `translateY(${(noneRichTextNodeLineHeight - 1) * fontSize / 2 * scale}px)`;
+		} else this.textEditNode.style.lineHeight = "normal";
+		this.setIsShowTextEdit(true);
+		if (isInserting || selectTextOnEnterEditText && !isFromKeyDown) selectAllInput(this.textEditNode);
+		else focusInput(this.textEditNode);
+		this.cacheEditingText = "";
+	}
+	emitTextChangeEvent() {
+		this.mindMap.emit("node_text_edit_change", {
+			node: this.currentNode,
+			text: this.getEditText(),
+			richText: false
+		});
+	}
+	updateTextEditNode() {
+		if (this.mindMap.richText) {
+			this.mindMap.richText.updateTextEditNode();
+			return;
+		}
+		if (!this.showTextEdit || !this.currentNode) return;
+		const rect = this.currentNode._textData.node.node.getBoundingClientRect();
+		this.textEditNode.style.minWidth = rect.width + this.textNodePaddingX * 2 + "px";
+		this.textEditNode.style.minHeight = rect.height + this.textNodePaddingY * 2 + "px";
+		this.textEditNode.style.left = Math.floor(rect.left) + "px";
+		this.textEditNode.style.top = Math.floor(rect.top) + "px";
+	}
+	getBackground(node) {
+		if (node.style.merge("gradientStyle")) return `linear-gradient(to right, ${node.style.merge("startColor")}, ${node.style.merge("endColor")})`;
+		else {
+			const bgColor = node.style.merge("fillColor");
+			const color = node.style.merge("color");
+			return bgColor === "transparent" ? isWhite(color) ? getVisibleColorFromTheme(this.mindMap.themeConfig) : "#fff" : bgColor;
+		}
+	}
+	removeTextEditEl() {
+		if (this.mindMap.richText) {
+			this.mindMap.richText.removeTextEditEl();
+			return;
+		}
+		if (!this.textEditNode) return;
+		(this.mindMap.opt.customInnerElsAppendTo || document.body).removeChild(this.textEditNode);
+	}
+	getEditText() {
+		return getStrWithBrFromHtml(this.textEditNode.innerHTML);
+	}
+	hideEditTextBox() {
+		if (this.mindMap.richText) return this.mindMap.richText.hideEditText();
+		if (!this.showTextEdit) return;
+		const currentNode = this.currentNode;
+		const text = this.getEditText();
+		this.currentNode = null;
+		this.textEditNode.style.display = "none";
+		this.textEditNode.innerHTML = "";
+		this.textEditNode.style.fontFamily = "inherit";
+		this.textEditNode.style.fontSize = "inherit";
+		this.textEditNode.style.fontWeight = "normal";
+		this.textEditNode.style.transform = "translateY(0)";
+		this.setIsShowTextEdit(false);
+		this.mindMap.execCommand("SET_NODE_TEXT", currentNode, text);
+		this.mindMap.render();
+		this.mindMap.emit("hide_text_edit", this.textEditNode, this.renderer.activeNodeList, currentNode);
+	}
+	getCurrentEditNode() {
+		if (this.mindMap.richText) return this.mindMap.richText.node;
+		return this.currentNode;
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/render/Render.js
+var layouts = {
+	[CONSTANTS.LAYOUT.LOGICAL_STRUCTURE]: LogicalStructure,
+	[CONSTANTS.LAYOUT.LOGICAL_STRUCTURE_LEFT]: LogicalStructure,
+	[CONSTANTS.LAYOUT.MIND_MAP]: MindMap$1,
+	[CONSTANTS.LAYOUT.CATALOG_ORGANIZATION]: CatalogOrganization,
+	[CONSTANTS.LAYOUT.ORGANIZATION_STRUCTURE]: OrganizationStructure,
+	[CONSTANTS.LAYOUT.TIMELINE]: Timeline,
+	[CONSTANTS.LAYOUT.TIMELINE2]: Timeline,
+	[CONSTANTS.LAYOUT.VERTICAL_TIMELINE]: VerticalTimeline,
+	[CONSTANTS.LAYOUT.VERTICAL_TIMELINE2]: VerticalTimeline,
+	[CONSTANTS.LAYOUT.VERTICAL_TIMELINE3]: VerticalTimeline,
+	[CONSTANTS.LAYOUT.FISHBONE]: Fishbone,
+	[CONSTANTS.LAYOUT.FISHBONE2]: Fishbone
+};
+var Render = class {
+	constructor(opt = {}) {
+		this.opt = opt;
+		this.mindMap = opt.mindMap;
+		this.themeConfig = this.mindMap.themeConfig;
+		this.renderTree = this.mindMap.opt.data ? (0, import_cjs.default)({}, this.mindMap.opt.data) : null;
+		this.reRender = false;
+		this.isRendering = false;
+		this.hasWaitRendering = false;
+		this.nodeCache = {};
+		this.lastNodeCache = {};
+		this.renderSourceList = [];
+		this.renderCallbackList = [];
+		this.activeNodeList = [];
+		this.emitNodeActiveEventTimer = null;
+		this.renderTimer = null;
+		this.root = null;
+		this.textEdit = new TextEdit(this);
+		this.beingCopyData = null;
+		this.highlightBoxNode = null;
+		this.highlightBoxNodeStyle = null;
+		this.lastActiveNodeList = [];
+		this.setLayout();
+		this.bindEvent();
+		this.registerCommands();
+		this.registerShortcutKeys();
+	}
+	setLayout() {
+		if (this.layout && this.layout.beforeChange) this.layout.beforeChange();
+		const { layout } = this.mindMap.opt;
+		let L = layouts[layout] || this.mindMap[layout];
+		if (!L) {
+			L = layouts[CONSTANTS.LAYOUT.LOGICAL_STRUCTURE];
+			this.mindMap.opt.layout = CONSTANTS.LAYOUT.LOGICAL_STRUCTURE;
+		}
+		this.layout = new L(this, layout);
+	}
+	setData(data) {
+		this.renderTree = data || null;
+	}
+	bindEvent() {
+		const { openPerformance, performanceConfig, openRealtimeRenderOnNodeTextEdit } = this.mindMap.opt;
+		this.mindMap.on("draw_click", (e) => {
+			this.clearActiveNodeListOnDrawClick(e, "click");
+		});
+		this.mindMap.on("contextmenu", (e) => {
+			this.clearActiveNodeListOnDrawClick(e, "contextmenu");
+		});
+		this.mindMap.svg.on("dblclick", () => {
+			if (!this.mindMap.opt.enableDblclickBackToRootNode) return;
+			this.setRootNodeCenter();
+		});
+		const onViewDataChange = throttle(() => {
+			if (!this.renderTree) return;
+			if (this.root) {
+				this.mindMap.emit("node_tree_render_start");
+				this.root.render(() => {
+					this.mindMap.emit("node_tree_render_end");
+				}, false, true);
+			}
+		}, performanceConfig.time);
+		if (openPerformance) this.mindMap.on("view_data_change", onViewDataChange);
+		this.onNodeTextEditChange = debounce(this.onNodeTextEditChange, 100, this);
+		if (openRealtimeRenderOnNodeTextEdit) this.mindMap.on("node_text_edit_change", this.onNodeTextEditChange);
+		this.mindMap.on("after_update_config", (opt, lastOpt) => {
+			if (opt.openPerformance !== lastOpt.openPerformance) {
+				this.mindMap[opt.openPerformance ? "on" : "off"]("view_data_change", onViewDataChange);
+				this.forceLoadNode();
+			}
+			if (opt.openRealtimeRenderOnNodeTextEdit !== lastOpt.openRealtimeRenderOnNodeTextEdit) this.mindMap[opt.openRealtimeRenderOnNodeTextEdit ? "on" : "off"]("node_text_edit_change", this.onNodeTextEditChange);
+		});
+	}
+	onNodeTextEditChange({ node, text }) {
+		node._textData = node.createTextNode(text);
+		const { width, height } = node.getNodeRect();
+		node.width = width;
+		node.height = height;
+		node.layout();
+		this.mindMap.render(() => {
+			this.textEdit.updateTextEditNode();
+		});
+	}
+	forceLoadNode(node) {
+		node = node || this.root;
+		if (node) {
+			this.mindMap.emit("node_tree_render_start");
+			node.render(() => {
+				this.mindMap.emit("node_tree_render_end");
+			}, true);
+		}
+	}
+	registerCommands() {
+		this.selectAll = this.selectAll.bind(this);
+		this.mindMap.command.add("SELECT_ALL", this.selectAll);
+		this.back = this.back.bind(this);
+		this.mindMap.command.add("BACK", this.back);
+		this.forward = this.forward.bind(this);
+		this.mindMap.command.add("FORWARD", this.forward);
+		this.insertNode = this.insertNode.bind(this);
+		this.mindMap.command.add("INSERT_NODE", this.insertNode);
+		this.insertMultiNode = this.insertMultiNode.bind(this);
+		this.mindMap.command.add("INSERT_MULTI_NODE", this.insertMultiNode);
+		this.insertChildNode = this.insertChildNode.bind(this);
+		this.mindMap.command.add("INSERT_CHILD_NODE", this.insertChildNode);
+		this.insertMultiChildNode = this.insertMultiChildNode.bind(this);
+		this.mindMap.command.add("INSERT_MULTI_CHILD_NODE", this.insertMultiChildNode);
+		this.insertParentNode = this.insertParentNode.bind(this);
+		this.mindMap.command.add("INSERT_PARENT_NODE", this.insertParentNode);
+		this.upNode = this.upNode.bind(this);
+		this.mindMap.command.add("UP_NODE", this.upNode);
+		this.downNode = this.downNode.bind(this);
+		this.mindMap.command.add("DOWN_NODE", this.downNode);
+		this.moveUpOneLevel = this.moveUpOneLevel.bind(this);
+		this.mindMap.command.add("MOVE_UP_ONE_LEVEL", this.moveUpOneLevel);
+		this.insertAfter = this.insertAfter.bind(this);
+		this.mindMap.command.add("INSERT_AFTER", this.insertAfter);
+		this.insertBefore = this.insertBefore.bind(this);
+		this.mindMap.command.add("INSERT_BEFORE", this.insertBefore);
+		this.moveNodeTo = this.moveNodeTo.bind(this);
+		this.mindMap.command.add("MOVE_NODE_TO", this.moveNodeTo);
+		this.removeNode = this.removeNode.bind(this);
+		this.mindMap.command.add("REMOVE_NODE", this.removeNode);
+		this.removeCurrentNode = this.removeCurrentNode.bind(this);
+		this.mindMap.command.add("REMOVE_CURRENT_NODE", this.removeCurrentNode);
+		this.pasteNode = this.pasteNode.bind(this);
+		this.mindMap.command.add("PASTE_NODE", this.pasteNode);
+		this.cutNode = this.cutNode.bind(this);
+		this.mindMap.command.add("CUT_NODE", this.cutNode);
+		this.setNodeStyle = this.setNodeStyle.bind(this);
+		this.mindMap.command.add("SET_NODE_STYLE", this.setNodeStyle);
+		this.setNodeStyles = this.setNodeStyles.bind(this);
+		this.mindMap.command.add("SET_NODE_STYLES", this.setNodeStyles);
+		this.setNodeActive = this.setNodeActive.bind(this);
+		this.mindMap.command.add("SET_NODE_ACTIVE", this.setNodeActive);
+		this.clearActiveNode = this.clearActiveNode.bind(this);
+		this.mindMap.command.add("CLEAR_ACTIVE_NODE", this.clearActiveNode);
+		this.setNodeExpand = this.setNodeExpand.bind(this);
+		this.mindMap.command.add("SET_NODE_EXPAND", this.setNodeExpand);
+		this.expandAllNode = this.expandAllNode.bind(this);
+		this.mindMap.command.add("EXPAND_ALL", this.expandAllNode);
+		this.unexpandAllNode = this.unexpandAllNode.bind(this);
+		this.mindMap.command.add("UNEXPAND_ALL", this.unexpandAllNode);
+		this.expandToLevel = this.expandToLevel.bind(this);
+		this.mindMap.command.add("UNEXPAND_TO_LEVEL", this.expandToLevel);
+		this.setNodeData = this.setNodeData.bind(this);
+		this.mindMap.command.add("SET_NODE_DATA", this.setNodeData);
+		this.setNodeText = this.setNodeText.bind(this);
+		this.mindMap.command.add("SET_NODE_TEXT", this.setNodeText);
+		this.setNodeImage = this.setNodeImage.bind(this);
+		this.mindMap.command.add("SET_NODE_IMAGE", this.setNodeImage);
+		this.setNodeIcon = this.setNodeIcon.bind(this);
+		this.mindMap.command.add("SET_NODE_ICON", this.setNodeIcon);
+		this.setNodeHyperlink = this.setNodeHyperlink.bind(this);
+		this.mindMap.command.add("SET_NODE_HYPERLINK", this.setNodeHyperlink);
+		this.setNodeNote = this.setNodeNote.bind(this);
+		this.mindMap.command.add("SET_NODE_NOTE", this.setNodeNote);
+		this.setNodeAttachment = this.setNodeAttachment.bind(this);
+		this.mindMap.command.add("SET_NODE_ATTACHMENT", this.setNodeAttachment);
+		this.setNodeTag = this.setNodeTag.bind(this);
+		this.mindMap.command.add("SET_NODE_TAG", this.setNodeTag);
+		this.insertFormula = this.insertFormula.bind(this);
+		this.mindMap.command.add("INSERT_FORMULA", this.insertFormula);
+		this.addGeneralization = this.addGeneralization.bind(this);
+		this.mindMap.command.add("ADD_GENERALIZATION", this.addGeneralization);
+		this.removeGeneralization = this.removeGeneralization.bind(this);
+		this.mindMap.command.add("REMOVE_GENERALIZATION", this.removeGeneralization);
+		this.setNodeCustomPosition = this.setNodeCustomPosition.bind(this);
+		this.mindMap.command.add("SET_NODE_CUSTOM_POSITION", this.setNodeCustomPosition);
+		this.resetLayout = this.resetLayout.bind(this);
+		this.mindMap.command.add("RESET_LAYOUT", this.resetLayout);
+		this.setNodeShape = this.setNodeShape.bind(this);
+		this.mindMap.command.add("SET_NODE_SHAPE", this.setNodeShape);
+		this.goTargetNode = this.goTargetNode.bind(this);
+		this.mindMap.command.add("GO_TARGET_NODE", this.goTargetNode);
+		this.removeCustomStyles = this.removeCustomStyles.bind(this);
+		this.mindMap.command.add("REMOVE_CUSTOM_STYLES", this.removeCustomStyles);
+		this.removeAllNodeCustomStyles = this.removeAllNodeCustomStyles.bind(this);
+		this.mindMap.command.add("REMOVE_ALL_NODE_CUSTOM_STYLES", this.removeAllNodeCustomStyles);
+	}
+	registerShortcutKeys() {
+		this.mindMap.keyCommand.addShortcut("Tab", () => {
+			this.mindMap.execCommand("INSERT_CHILD_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Insert", () => {
+			this.mindMap.execCommand("INSERT_CHILD_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Enter", () => {
+			this.mindMap.execCommand("INSERT_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Shift+Tab", () => {
+			this.mindMap.execCommand("INSERT_PARENT_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+g", () => {
+			this.mindMap.execCommand("ADD_GENERALIZATION");
+		});
+		this.toggleActiveExpand = this.toggleActiveExpand.bind(this);
+		this.mindMap.keyCommand.addShortcut("/", this.toggleActiveExpand);
+		this.mindMap.keyCommand.addShortcut("Del|Backspace", () => {
+			this.mindMap.execCommand("REMOVE_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Shift+Backspace", () => {
+			this.mindMap.execCommand("REMOVE_CURRENT_NODE");
+		});
+		this.mindMap.on("before_show_text_edit", () => {
+			this.startTextEdit();
+		});
+		this.mindMap.on("hide_text_edit", () => {
+			this.endTextEdit();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+a", () => {
+			this.mindMap.execCommand("SELECT_ALL");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+l", () => {
+			this.mindMap.execCommand("RESET_LAYOUT");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+Up", () => {
+			this.mindMap.execCommand("UP_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+Down", () => {
+			this.mindMap.execCommand("DOWN_NODE");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+c", () => {
+			this.copy();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+x", () => {
+			this.cut();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+v", () => {
+			this.paste();
+		});
+		this.mindMap.keyCommand.addShortcut("Control+Enter", () => {
+			this.setRootNodeCenter();
+		});
+	}
+	emitNodeActiveEvent(node = null, activeNodeList = [...this.activeNodeList]) {
+		if (!!checkNodeListIsEqual(this.lastActiveNodeList, activeNodeList)) return;
+		this.lastActiveNodeList = [...activeNodeList];
+		clearTimeout(this.emitNodeActiveEventTimer);
+		this.emitNodeActiveEventTimer = setTimeout(() => {
+			this.mindMap.emit("node_active", node, activeNodeList);
+		}, 0);
+	}
+	clearActiveNodeListOnDrawClick(e, eventType) {
+		if (this.activeNodeList.length <= 0) return;
+		let isTrueClick = true;
+		const { useLeftKeySelectionRightKeyDrag } = this.mindMap.opt;
+		if (eventType === "contextmenu" ? !useLeftKeySelectionRightKeyDrag : useLeftKeySelectionRightKeyDrag) {
+			const mousedownPos = this.mindMap.event.mousedownPos;
+			isTrueClick = Math.abs(e.clientX - mousedownPos.x) <= 5 && Math.abs(e.clientY - mousedownPos.y) <= 5;
+		}
+		if (isTrueClick) this.mindMap.execCommand("CLEAR_ACTIVE_NODE");
+	}
+	startTextEdit() {
+		this.mindMap.keyCommand.save();
+	}
+	endTextEdit() {
+		this.mindMap.keyCommand.restore();
+	}
+	clearCache() {
+		this.layout.lru.clear();
+		this.nodeCache = {};
+		this.lastNodeCache = {};
+	}
+	addRenderParams(callback, source) {
+		if (callback) {
+			if (this.renderCallbackList.findIndex((fn) => {
+				return fn === callback;
+			}) === -1) this.renderCallbackList.push(callback);
+		}
+		if (source) {
+			if (this.renderSourceList.findIndex((s) => {
+				return s === source;
+			}) === -1) this.renderSourceList.push(source);
+		}
+	}
+	checkHasRenderSource(val) {
+		val = Array.isArray(val) ? val : [val];
+		for (let i = 0; i < this.renderSourceList.length; i++) if (val.includes(this.renderSourceList[i])) return true;
+		return false;
+	}
+	onRenderEnd() {
+		this.renderCallbackList.forEach((fn) => {
+			fn();
+		});
+		this.isRendering = false;
+		this.reRender = false;
+		this.renderCallbackList = [];
+		this.renderSourceList = [];
+		this.mindMap.emit("node_tree_render_end");
+	}
+	render(callback, source) {
+		this.addRenderParams(callback, source);
+		clearTimeout(this.renderTimer);
+		this.renderTimer = setTimeout(() => {
+			this._render();
+		}, 0);
+	}
+	_render() {
+		if (this.checkHasRenderSource(CONSTANTS.CHANGE_THEME)) this.resetUnExpandNodeStyle();
+		if (this.isRendering) {
+			this.hasWaitRendering = true;
+			return;
+		}
+		this.isRendering = true;
+		this.lastNodeCache = this.nodeCache;
+		this.nodeCache = {};
+		if (this.reRender) this.clearActiveNodeList();
+		if (!this.renderTree) {
+			this.onRenderEnd();
+			return;
+		}
+		this.mindMap.emit("node_tree_render_start");
+		this.root = null;
+		this.layout.doLayout((root) => {
+			Object.keys(this.lastNodeCache).forEach((uid) => {
+				if (!this.nodeCache[uid]) {
+					this.removeNodeFromActiveList(this.lastNodeCache[uid]);
+					this.emitNodeActiveEvent();
+					this.lastNodeCache[uid].destroy();
+				}
+			});
+			this.root = root;
+			this.root.render(() => {
+				this.isRendering = false;
+				if (this.hasWaitRendering) {
+					this.hasWaitRendering = false;
+					this.render();
+					return;
+				}
+				this.onRenderEnd();
+			});
+		});
+		this.emitNodeActiveEvent();
+	}
+	renderByCustomNodeContentNode(node) {
+		node.getSize();
+		node.customNodeContentRealtimeLayout();
+		this.mindMap.render();
+	}
+	resetUnExpandNodeStyle() {
+		if (!this.renderTree) return;
+		walk(this.renderTree, null, (node) => {
+			if (!node.data.expand) {
+				walk(node, null, (node2) => {
+					node2.data["needUpdate"] = true;
+				});
+				return true;
+			}
+		});
+	}
+	clearActiveNode() {
+		if (this.activeNodeList.length <= 0) return;
+		this.clearActiveNodeList();
+		this.emitNodeActiveEvent(null, []);
+	}
+	clearActiveNodeList() {
+		this.activeNodeList.forEach((item) => {
+			this.mindMap.execCommand("SET_NODE_ACTIVE", item, false);
+		});
+		this.activeNodeList = [];
+	}
+	addNodeToActiveList(node, notEmitBeforeNodeActiveEvent = false) {
+		if (this.mindMap.opt.onlyOneEnableActiveNodeOnCooperate && node.userList.length > 0) return;
+		if (this.findActiveNodeIndex(node) === -1) {
+			if (!notEmitBeforeNodeActiveEvent) this.mindMap.emit("before_node_active", node, this.activeNodeList);
+			this.mindMap.execCommand("SET_NODE_ACTIVE", node, true);
+			this.activeNodeList.push(node);
+		}
+	}
+	removeNodeFromActiveList(node) {
+		let index = this.findActiveNodeIndex(node);
+		if (index === -1) return;
+		this.mindMap.execCommand("SET_NODE_ACTIVE", node, false);
+		this.activeNodeList.splice(index, 1);
+	}
+	activeMultiNode(nodeList = []) {
+		nodeList.forEach((node) => {
+			this.mindMap.emit("before_node_active", node, this.activeNodeList);
+			this.addNodeToActiveList(node, true);
+			this.emitNodeActiveEvent(node);
+		});
+	}
+	cancelActiveMultiNode(nodeList = []) {
+		nodeList.forEach((node) => {
+			this.removeNodeFromActiveList(node);
+			this.emitNodeActiveEvent(null);
+		});
+	}
+	findActiveNodeIndex(node) {
+		return getNodeIndexInNodeList(node, this.activeNodeList);
+	}
+	selectAll() {
+		if (this.mindMap.opt.readonly) return;
+		walk(this.root, null, (node) => {
+			if (!node.getData("isActive")) this.addNodeToActiveList(node);
+			if (node._generalizationList && node._generalizationList.length > 0) node._generalizationList.forEach((item) => {
+				const gNode = item.generalizationNode;
+				if (!gNode.getData("isActive")) this.addNodeToActiveList(gNode);
+			});
+		}, null, true, 0, 0);
+		this.emitNodeActiveEvent();
+	}
+	back(step) {
+		this.backForward("back", step);
+	}
+	forward(step) {
+		this.backForward("forward", step);
+	}
+	backForward(type, step) {
+		this.mindMap.execCommand("CLEAR_ACTIVE_NODE");
+		const data = this.mindMap.command[type](step);
+		if (data) {
+			this.renderTree = data;
+			this.mindMap.render();
+		}
+		this.mindMap.emit("data_change", data);
+	}
+	getNewNodeBehavior(openEdit = false, handleMultiNodes = false) {
+		const { createNewNodeBehavior } = this.mindMap.opt;
+		let focusNewNode = false;
+		let inserting = false;
+		switch (createNewNodeBehavior) {
+			case CONSTANTS.CREATE_NEW_NODE_BEHAVIOR.DEFAULT:
+				focusNewNode = handleMultiNodes || !openEdit;
+				inserting = handleMultiNodes ? false : openEdit;
+				break;
+			case CONSTANTS.CREATE_NEW_NODE_BEHAVIOR.NOT_ACTIVE:
+				focusNewNode = false;
+				inserting = false;
+				break;
+			case CONSTANTS.CREATE_NEW_NODE_BEHAVIOR.ACTIVE_ONLY:
+				focusNewNode = true;
+				inserting = false;
+				break;
+			default: break;
+		}
+		return {
+			focusNewNode,
+			inserting
+		};
+	}
+	insertNode(openEdit = true, appointNodes = [], appointData = null, appointChildren = []) {
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		this.textEdit.hideEditTextBox();
+		const { defaultInsertSecondLevelNodeText, defaultInsertBelowSecondLevelNodeText } = this.mindMap.opt;
+		const list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		const handleMultiNodes = list.length > 1;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode, inserting } = this.getNewNodeBehavior(openEdit, handleMultiNodes);
+		const params = {
+			expand: true,
+			richText: isRichText,
+			isActive: focusNewNode
+		};
+		if (isRichText) params.resetRichText = true;
+		appointChildren = addDataToAppointNodes(appointChildren, params);
+		const alreadyIsRichText = appointData && appointData.richText;
+		let createNewId = false;
+		list.forEach((node) => {
+			if (node.isGeneralization || node.isRoot) return;
+			appointChildren = simpleDeepClone(appointChildren);
+			const parent = node.parent;
+			const text = node.layerIndex === 1 ? defaultInsertSecondLevelNodeText : defaultInsertBelowSecondLevelNodeText;
+			const index = getNodeDataIndex(node);
+			if (alreadyIsRichText && params.resetRichText) delete params.resetRichText;
+			const newNodeData = {
+				inserting,
+				data: {
+					text,
+					...params,
+					uid: createUid(),
+					...appointData || {}
+				},
+				children: [...createUidForAppointNodes(appointChildren, createNewId)]
+			};
+			createNewId = true;
+			parent.nodeData.children.splice(index + 1, 0, newNodeData);
+		});
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render();
+	}
+	insertMultiNode(appointNodes, nodeList) {
+		if (!nodeList || nodeList.length <= 0) return;
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		this.textEdit.hideEditTextBox();
+		const list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode } = this.getNewNodeBehavior(false, true);
+		const params = {
+			expand: true,
+			richText: isRichText,
+			isActive: focusNewNode
+		};
+		if (isRichText) params.resetRichText = true;
+		nodeList = addDataToAppointNodes(nodeList, params);
+		let createNewId = false;
+		list.forEach((node) => {
+			if (node.isGeneralization || node.isRoot) return;
+			nodeList = simpleDeepClone(nodeList);
+			const parent = node.parent;
+			const index = getNodeDataIndex(node);
+			const newNodeList = createUidForAppointNodes(nodeList, createNewId);
+			createNewId = true;
+			parent.nodeData.children.splice(index + 1, 0, ...newNodeList);
+		});
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render();
+	}
+	insertChildNode(openEdit = true, appointNodes = [], appointData = null, appointChildren = []) {
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		this.textEdit.hideEditTextBox();
+		const { defaultInsertSecondLevelNodeText, defaultInsertBelowSecondLevelNodeText } = this.mindMap.opt;
+		const list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		const handleMultiNodes = list.length > 1;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode, inserting } = this.getNewNodeBehavior(openEdit, handleMultiNodes);
+		const params = {
+			expand: true,
+			richText: isRichText,
+			isActive: focusNewNode
+		};
+		if (isRichText) params.resetRichText = true;
+		appointChildren = addDataToAppointNodes(appointChildren, params);
+		const alreadyIsRichText = appointData && appointData.richText;
+		let createNewId = false;
+		list.forEach((node) => {
+			if (node.isGeneralization) return;
+			appointChildren = simpleDeepClone(appointChildren);
+			if (!node.nodeData.children) node.nodeData.children = [];
+			const text = node.isRoot ? defaultInsertSecondLevelNodeText : defaultInsertBelowSecondLevelNodeText;
+			if (alreadyIsRichText && params.resetRichText) delete params.resetRichText;
+			const newNode = {
+				inserting,
+				data: {
+					text,
+					uid: createUid(),
+					...params,
+					...appointData || {}
+				},
+				children: [...createUidForAppointNodes(appointChildren, createNewId)]
+			};
+			createNewId = true;
+			node.nodeData.children.push(newNode);
+			node.setData({ expand: true });
+		});
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render();
+	}
+	insertMultiChildNode(appointNodes, childList) {
+		if (!childList || childList.length <= 0) return;
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		this.textEdit.hideEditTextBox();
+		const list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode } = this.getNewNodeBehavior(false, true);
+		const params = {
+			expand: true,
+			richText: isRichText,
+			isActive: focusNewNode
+		};
+		if (isRichText) params.resetRichText = true;
+		childList = addDataToAppointNodes(childList, params);
+		let createNewId = false;
+		list.forEach((node) => {
+			if (node.isGeneralization) return;
+			childList = simpleDeepClone(childList);
+			if (!node.nodeData.children) node.nodeData.children = [];
+			childList = createUidForAppointNodes(childList, createNewId);
+			createNewId = true;
+			node.nodeData.children.push(...childList);
+			node.setData({ expand: true });
+		});
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render();
+	}
+	insertParentNode(openEdit = true, appointNodes, appointData) {
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		this.textEdit.hideEditTextBox();
+		const { defaultInsertSecondLevelNodeText, defaultInsertBelowSecondLevelNodeText } = this.mindMap.opt;
+		const list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		const handleMultiNodes = list.length > 1;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode, inserting } = this.getNewNodeBehavior(openEdit, handleMultiNodes);
+		const params = {
+			expand: true,
+			richText: isRichText,
+			isActive: focusNewNode
+		};
+		if (isRichText) params.resetRichText = true;
+		const alreadyIsRichText = appointData && appointData.richText;
+		list.forEach((node) => {
+			if (node.isGeneralization || node.isRoot) return;
+			const text = node.layerIndex === 1 ? defaultInsertSecondLevelNodeText : defaultInsertBelowSecondLevelNodeText;
+			if (alreadyIsRichText && params.resetRichText) delete params.resetRichText;
+			const newNode = {
+				inserting,
+				data: {
+					text,
+					uid: createUid(),
+					...params,
+					...appointData || {}
+				},
+				children: [node.nodeData]
+			};
+			const parent = node.parent;
+			const index = getNodeDataIndex(node);
+			parent.nodeData.children.splice(index, 1, newNode);
+		});
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render();
+	}
+	upNode(appointNode) {
+		if (this.activeNodeList.length <= 0 && !appointNode) return;
+		const node = (appointNode ? [appointNode] : this.activeNodeList)[0];
+		if (node.isRoot) return;
+		let parent = node.parent;
+		let childList = parent.children;
+		let index = getNodeIndexInNodeList(node, childList);
+		if (index === -1 || index === 0) return;
+		let insertIndex = index - 1;
+		childList.splice(index, 1);
+		childList.splice(insertIndex, 0, node);
+		parent.nodeData.children.splice(index, 1);
+		parent.nodeData.children.splice(insertIndex, 0, node.nodeData);
+		this.mindMap.render();
+	}
+	downNode(appointNode) {
+		if (this.activeNodeList.length <= 0 && !appointNode) return;
+		const node = (appointNode ? [appointNode] : this.activeNodeList)[0];
+		if (node.isRoot) return;
+		let parent = node.parent;
+		let childList = parent.children;
+		let index = getNodeIndexInNodeList(node, childList);
+		if (index === -1 || index === childList.length - 1) return;
+		let insertIndex = index + 1;
+		childList.splice(index, 1);
+		childList.splice(insertIndex, 0, node);
+		parent.nodeData.children.splice(index, 1);
+		parent.nodeData.children.splice(insertIndex, 0, node.nodeData);
+		this.mindMap.render();
+	}
+	moveUpOneLevel(node) {
+		node = node || this.activeNodeList[0];
+		if (!node || node.isRoot || node.layerIndex <= 1) return;
+		const parent = node.parent;
+		const grandpa = parent.parent;
+		const index = getNodeIndexInNodeList(node, parent.children);
+		const parentIndex = getNodeIndexInNodeList(parent, grandpa.children);
+		parent.nodeData.children.splice(index, 1);
+		grandpa.nodeData.children.splice(parentIndex + 1, 0, node.nodeData);
+		this.mindMap.render();
+	}
+	_handleRemoveCustomStyles(nodeData) {
+		let hasCustomStyles = false;
+		Object.keys(nodeData).forEach((key) => {
+			if (checkIsNodeStyleDataKey(key)) {
+				hasCustomStyles = true;
+				delete nodeData[key];
+			}
+		});
+		if (this.hasRichTextPlugin()) {
+			hasCustomStyles = true;
+			nodeData.resetRichText = true;
+		}
+		return hasCustomStyles;
+	}
+	removeCustomStyles(node) {
+		node = node || this.activeNodeList[0];
+		if (!node) return;
+		if (this._handleRemoveCustomStyles(node.getData())) this.reRenderNodeCheckChange(node);
+	}
+	removeAllNodeCustomStyles(appointNodes) {
+		appointNodes = formatDataToArray(appointNodes);
+		let hasCustomStyles = false;
+		if (appointNodes.length > 0) appointNodes.forEach((node) => {
+			if (this._handleRemoveCustomStyles(node.getData())) hasCustomStyles = true;
+		});
+		else {
+			if (!this.renderTree) return;
+			walk(this.renderTree, null, (node) => {
+				if (this._handleRemoveCustomStyles(node.data)) hasCustomStyles = true;
+				const generalizationList = formatGetNodeGeneralization(node.data);
+				if (generalizationList.length > 0) generalizationList.forEach((generalizationData) => {
+					if (this._handleRemoveCustomStyles(generalizationData)) hasCustomStyles = true;
+				});
+			});
+		}
+		if (hasCustomStyles) this.mindMap.reRender();
+	}
+	copy() {
+		this.beingCopyData = this.copyNode();
+		if (!this.beingCopyData) return;
+		if (!this.mindMap.opt.disabledClipboard) setDataToClipboard(createSmmFormatData(this.beingCopyData));
+	}
+	cut() {
+		this.mindMap.execCommand("CUT_NODE", (copyData) => {
+			this.beingCopyData = copyData;
+			if (!this.mindMap.opt.disabledClipboard) setDataToClipboard(createSmmFormatData(copyData));
+		});
+	}
+	handlePaste(event) {
+		const { disabledClipboard } = this.mindMap.opt;
+		if (disabledClipboard) return;
+		const clipboardData = event.clipboardData || event.originalEvent.clipboardData;
+		const items = clipboardData.items;
+		Array.from(items).forEach((item) => {
+			if (item.type.indexOf("image") > -1) item.getAsFile();
+			if (item.type.indexOf("text") > -1) clipboardData.getData("text");
+		});
+		this.paste();
+	}
+	async paste() {
+		const { errorHandler, handleIsSplitByWrapOnPasteCreateNewNode, handleNodePasteImg, disabledClipboard, onlyPasteTextWhenHasImgAndText } = this.mindMap.opt;
+		if (!disabledClipboard && checkClipboardReadEnable()) try {
+			const res = await getDataFromClipboard();
+			let text = res.text || "";
+			let img = res.img || null;
+			if (text) {
+				let smmData = null;
+				let useDefault = true;
+				if (this.mindMap.opt.customHandleClipboardText) try {
+					const res = await this.mindMap.opt.customHandleClipboardText(text);
+					if (!isUndef(res)) {
+						useDefault = false;
+						const checkRes = checkSmmFormatData(res);
+						if (checkRes.isSmm) smmData = checkRes.data;
+						else text = checkRes.data;
+					}
+				} catch (error) {
+					errorHandler(ERROR_TYPES.CUSTOM_HANDLE_CLIPBOARD_TEXT_ERROR, error);
+				}
+				if (useDefault) {
+					const checkRes = checkSmmFormatData(text);
+					if (checkRes.isSmm) smmData = checkRes.data;
+					else text = checkRes.data;
+				}
+				if (smmData) this.mindMap.execCommand("INSERT_MULTI_CHILD_NODE", [], Array.isArray(smmData) ? smmData : [smmData]);
+				else {
+					if (this.hasRichTextPlugin()) text = htmlEscape(text);
+					const textArr = text.split(/* @__PURE__ */ new RegExp("\r?\n|(?<!\n)\r", "g")).filter((item) => {
+						return !!item;
+					});
+					if (textArr.length > 1 && handleIsSplitByWrapOnPasteCreateNewNode) handleIsSplitByWrapOnPasteCreateNewNode().then(() => {
+						this.mindMap.execCommand("INSERT_MULTI_CHILD_NODE", [], textArr.map((item) => {
+							return {
+								data: { text: item },
+								children: []
+							};
+						}));
+					}).catch(() => {
+						this.mindMap.execCommand("INSERT_CHILD_NODE", false, [], { text });
+					});
+					else this.mindMap.execCommand("INSERT_CHILD_NODE", false, [], { text });
+				}
+			}
+			if (img && (!text || !onlyPasteTextWhenHasImgAndText)) try {
+				let imgData = null;
+				if (handleNodePasteImg && typeof handleNodePasteImg === "function") imgData = await handleNodePasteImg(img);
+				else imgData = await loadImage(img);
+				if (this.activeNodeList.length > 0) this.activeNodeList.forEach((node) => {
+					this.mindMap.execCommand("SET_NODE_IMAGE", node, {
+						url: imgData.url,
+						title: "",
+						width: imgData.size.width,
+						height: imgData.size.height
+					});
+				});
+			} catch (error) {
+				errorHandler(ERROR_TYPES.LOAD_CLIPBOARD_IMAGE_ERROR, error);
+			}
+		} catch (error) {
+			errorHandler(ERROR_TYPES.READ_CLIPBOARD_ERROR, error);
+		}
+		else if (this.beingCopyData) this.mindMap.execCommand("PASTE_NODE", this.beingCopyData);
+	}
+	insertBefore(node, exist) {
+		this.insertTo(node, exist, "before");
+	}
+	insertAfter(node, exist) {
+		this.insertTo(node, exist, "after");
+	}
+	insertTo(node, exist, dir = "before") {
+		let nodeList = formatDataToArray(node);
+		nodeList = nodeList.filter((item) => {
+			return !item.isRoot;
+		});
+		if (dir === "after") nodeList.reverse();
+		nodeList.forEach((item) => {
+			let nodeParent = item.parent;
+			let nodeBorthers = nodeParent.children;
+			let nodeIndex = getNodeIndexInNodeList(item, nodeBorthers);
+			if (nodeIndex === -1) return;
+			nodeBorthers.splice(nodeIndex, 1);
+			nodeParent.nodeData.children.splice(nodeIndex, 1);
+			let existParent = exist.parent;
+			let existBorthers = existParent.children;
+			let existIndex = getNodeIndexInNodeList(exist, existBorthers);
+			if (existIndex === -1) return;
+			if (dir === "after") existIndex++;
+			existBorthers.splice(existIndex, 0, item);
+			existParent.nodeData.children.splice(existIndex, 0, item.nodeData);
+		});
+		this.mindMap.render();
+	}
+	removeNode(appointNodes = []) {
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		let needActiveNode = null;
+		let isAppointNodes = appointNodes.length > 0;
+		let list = isAppointNodes ? appointNodes : this.activeNodeList;
+		let root = list.find((node) => {
+			return node.isRoot;
+		});
+		if (root) {
+			this.clearActiveNodeList();
+			root.children = [];
+			root.nodeData.children = [];
+		} else {
+			needActiveNode = this.getNextActiveNode(list);
+			for (let i = 0; i < list.length; i++) {
+				const node = list[i];
+				const currentEditNode = this.textEdit.getCurrentEditNode();
+				if (currentEditNode && currentEditNode.getData("uid") === node.getData("uid")) this.textEdit.hideEditTextBox();
+				if (isAppointNodes) list.splice(i, 1);
+				if (node.isGeneralization) {
+					this.deleteNodeGeneralization(node);
+					this.removeNodeFromActiveList(node);
+					i--;
+				} else {
+					this.removeNodeFromActiveList(node);
+					removeFromParentNodeData(node);
+					i--;
+				}
+			}
+		}
+		this.activeNodeList = [];
+		if (needActiveNode) this.addNodeToActiveList(needActiveNode);
+		this.emitNodeActiveEvent();
+		this.mindMap.render();
+	}
+	deleteNodeGeneralization(node) {
+		const targetNode = node.generalizationBelongNode;
+		const index = targetNode.getGeneralizationNodeIndex(node);
+		let generalization = targetNode.getData("generalization");
+		if (Array.isArray(generalization)) generalization.splice(index, 1);
+		else generalization = null;
+		this.mindMap.execCommand("SET_NODE_DATA", targetNode, { generalization });
+		this.closeHighlightNode();
+	}
+	removeCurrentNode(appointNodes = []) {
+		appointNodes = formatDataToArray(appointNodes);
+		if (this.activeNodeList.length <= 0 && appointNodes.length <= 0) return;
+		let list = appointNodes.length > 0 ? appointNodes : this.activeNodeList;
+		list = list.filter((node) => {
+			return !node.isRoot;
+		});
+		let needActiveNode = this.getNextActiveNode(list);
+		for (let i = 0; i < list.length; i++) {
+			let node = list[i];
+			if (node.isGeneralization) this.deleteNodeGeneralization(node);
+			else {
+				const parent = node.parent;
+				const index = getNodeDataIndex(node);
+				parent.nodeData.children.splice(index, 1, ...node.nodeData.children || []);
+			}
+		}
+		this.activeNodeList = [];
+		if (needActiveNode) this.addNodeToActiveList(needActiveNode);
+		this.emitNodeActiveEvent();
+		this.mindMap.render();
+	}
+	getNextActiveNode(deleteList) {
+		if (deleteList.length !== 1) return null;
+		if (this.findActiveNodeIndex(deleteList[0]) === -1) return null;
+		let needActiveNode = null;
+		if (this.activeNodeList.length === 1 && !this.activeNodeList[0].isGeneralization && this.mindMap.opt.deleteNodeActive) {
+			const node = this.activeNodeList[0];
+			const broList = node.parent.children;
+			const nodeIndex = getNodeIndexInNodeList(node, broList);
+			if (nodeIndex < broList.length - 1) needActiveNode = broList[nodeIndex + 1];
+			else if (nodeIndex > 0) needActiveNode = broList[nodeIndex - 1];
+			else needActiveNode = node.parent;
+		}
+		return needActiveNode;
+	}
+	copyNode() {
+		if (this.activeNodeList.length <= 0) return null;
+		let nodeList = getTopAncestorsFomNodeList(this.activeNodeList);
+		nodeList = sortNodeList(nodeList);
+		return nodeList.map((node) => {
+			return copyNodeTree({}, node, true);
+		});
+	}
+	cutNode(callback) {
+		if (this.activeNodeList.length <= 0) return;
+		let nodeList = getTopAncestorsFomNodeList(this.activeNodeList).filter((node) => {
+			return !node.isRoot;
+		});
+		nodeList = sortNodeList(nodeList);
+		const copyData = nodeList.map((node) => {
+			return copyNodeTree({}, node, true);
+		});
+		nodeList.forEach((node) => {
+			removeFromParentNodeData(node);
+		});
+		this.clearActiveNodeList();
+		this.mindMap.render();
+		if (callback && typeof callback === "function") callback(copyData);
+	}
+	moveNodeTo(node, toNode) {
+		let nodeList = formatDataToArray(node);
+		nodeList = nodeList.filter((item) => {
+			return !item.isRoot;
+		});
+		nodeList.forEach((item) => {
+			this.removeNodeFromActiveList(item);
+			removeFromParentNodeData(item);
+			toNode.setData({ expand: true });
+			toNode.nodeData.children.push(item.nodeData);
+		});
+		this.emitNodeActiveEvent();
+		this.mindMap.render();
+	}
+	pasteNode(data) {
+		data = formatDataToArray(data);
+		this.mindMap.execCommand("INSERT_MULTI_CHILD_NODE", [], data);
+	}
+	setNodeStyle(node, prop, value) {
+		const data = { [prop]: value };
+		this.setNodeDataRender(node, data);
+		if (lineStyleProps.includes(prop)) (node.parent || node).renderLine(true);
+	}
+	setNodeStyles(node, style) {
+		const data = { ...style };
+		this.setNodeDataRender(node, data);
+		let props = Object.keys(style);
+		let hasLineStyleProps = false;
+		props.forEach((key) => {
+			if (lineStyleProps.includes(key)) hasLineStyleProps = true;
+		});
+		if (hasLineStyleProps) (node.parent || node).renderLine(true);
+	}
+	setNodeActive(node, active) {
+		this.mindMap.execCommand("SET_NODE_DATA", node, { isActive: active });
+		node.updateNodeByActive(active);
+	}
+	setNodeExpand(node, expand) {
+		this.mindMap.execCommand("SET_NODE_DATA", node, { expand });
+		this.mindMap.render();
+	}
+	expandAllNode(uid = "") {
+		if (!this.renderTree) return;
+		const _walk = (node, enableExpand) => {
+			if (!enableExpand && node.data.uid === uid) enableExpand = true;
+			if (enableExpand && !node.data.expand) node.data.expand = true;
+			if (node.children && node.children.length > 0) node.children.forEach((child) => {
+				_walk(child, enableExpand);
+			});
+		};
+		_walk(this.renderTree, !uid);
+		this.mindMap.render();
+	}
+	unexpandAllNode(isSetRootNodeCenter = true, uid = "") {
+		if (!this.renderTree) return;
+		const _walk = (node, isRoot, enableUnExpand) => {
+			if (!enableUnExpand && node.data.uid === uid) enableUnExpand = true;
+			if (enableUnExpand && !isRoot && node.children && node.children.length > 0) node.data.expand = false;
+			if (node.children && node.children.length > 0) node.children.forEach((child) => {
+				_walk(child, false, enableUnExpand);
+			});
+		};
+		_walk(this.renderTree, true, !uid);
+		this.mindMap.render(() => {
+			if (isSetRootNodeCenter) this.setRootNodeCenter();
+		});
+	}
+	expandToLevel(level) {
+		if (!this.renderTree) return;
+		walk(this.renderTree, null, (node, parent, isRoot, layerIndex) => {
+			if (layerIndex < level) node.data.expand = true;
+			else if (!isRoot && node.children && node.children.length > 0) node.data.expand = false;
+		}, null, true, 0, 0);
+		this.mindMap.render();
+	}
+	toggleActiveExpand() {
+		this.activeNodeList.forEach((node) => {
+			if (node.nodeData.children.length <= 0 || node.isRoot) return;
+			this.toggleNodeExpand(node);
+		});
+	}
+	toggleNodeExpand(node) {
+		this.mindMap.execCommand("SET_NODE_EXPAND", node, !node.getData("expand"));
+	}
+	setNodeText(node, text, richText, resetRichText) {
+		richText = richText === void 0 ? node.getData("richText") : richText;
+		this.setNodeDataRender(node, {
+			text,
+			richText,
+			resetRichText
+		});
+	}
+	setNodeImage(node, data) {
+		const { url, title, width, height, custom = false } = data || {
+			url: "",
+			title: "",
+			width: 0,
+			height: 0,
+			custom: false
+		};
+		this.setNodeDataRender(node, {
+			image: url,
+			imageTitle: title || "",
+			imageSize: {
+				width,
+				height,
+				custom
+			}
+		});
+	}
+	setNodeIcon(node, icons) {
+		this.setNodeDataRender(node, { icon: icons });
+	}
+	setNodeHyperlink(node, link, title = "") {
+		this.setNodeDataRender(node, {
+			hyperlink: link,
+			hyperlinkTitle: title
+		});
+	}
+	setNodeNote(node, note) {
+		this.setNodeDataRender(node, { note });
+	}
+	setNodeAttachment(node, url, name = "") {
+		this.setNodeDataRender(node, {
+			attachmentUrl: url,
+			attachmentName: name
+		});
+	}
+	setNodeTag(node, tag) {
+		this.setNodeDataRender(node, { tag });
+	}
+	insertFormula(formula, appointNodes = []) {
+		if (!this.hasRichTextPlugin() || !this.mindMap.formula) return;
+		appointNodes = formatDataToArray(appointNodes);
+		(appointNodes.length > 0 ? appointNodes : this.activeNodeList).forEach((node) => {
+			this.mindMap.formula.insertFormulaToNode(node, formula);
+		});
+	}
+	addGeneralization(data, openEdit = true) {
+		if (this.activeNodeList.length <= 0) return;
+		const list = parseAddGeneralizationNodeList(this.activeNodeList.filter((node) => {
+			return !node.isRoot && !node.isGeneralization && !node.checkHasSelfGeneralization();
+		}));
+		if (list.length <= 0) return;
+		const isRichText = this.hasRichTextPlugin();
+		const { focusNewNode, inserting } = this.getNewNodeBehavior(openEdit, list.length > 1);
+		let needRender = false;
+		const alreadyIsRichText = data && data.richText;
+		list.forEach((item) => {
+			const newData = {
+				inserting,
+				...data || { text: this.mindMap.opt.defaultGeneralizationText },
+				range: item.range || null,
+				uid: createUid(),
+				richText: isRichText,
+				isActive: focusNewNode
+			};
+			if (isRichText && !alreadyIsRichText) newData.resetRichText = isRichText;
+			let generalization = item.node.getData("generalization");
+			generalization = generalization ? Array.isArray(generalization) ? generalization : [generalization] : [];
+			if (item.range) {
+				if (!!generalization.find((item2) => {
+					return item2.range && item2.range[0] === item.range[0] && item2.range[1] === item.range[1];
+				})) return;
+				generalization.push(newData);
+			} else generalization.push(newData);
+			needRender = true;
+			this.mindMap.execCommand("SET_NODE_DATA", item.node, { generalization });
+			item.node.setData({ expand: true });
+		});
+		if (!needRender) return;
+		if (focusNewNode) this.clearActiveNodeList();
+		this.mindMap.render(() => {
+			this.mindMap.render();
+		});
+	}
+	removeGeneralization() {
+		if (this.activeNodeList.length <= 0) return;
+		this.activeNodeList.forEach((node) => {
+			if (!node.checkHasGeneralization()) return;
+			this.mindMap.execCommand("SET_NODE_DATA", node, { generalization: null });
+		});
+		this.mindMap.render();
+		this.closeHighlightNode();
+	}
+	setNodeCustomPosition(node, left = void 0, top = void 0) {
+		[node].forEach((item) => {
+			this.mindMap.execCommand("SET_NODE_DATA", item, {
+				customLeft: left,
+				customTop: top
+			});
+		});
+	}
+	resetLayout() {
+		walk(this.root, null, (node) => {
+			node.customLeft = void 0;
+			node.customTop = void 0;
+			this.mindMap.execCommand("SET_NODE_DATA", node, {
+				customLeft: void 0,
+				customTop: void 0
+			});
+			this.mindMap.render();
+		}, null, true, 0, 0);
+	}
+	setNodeShape(node, shape) {
+		if (!shape || !shapeList.includes(shape)) return;
+		[node].forEach((item) => {
+			this.setNodeStyle(item, "shape", shape);
+		});
+	}
+	goTargetNode(node, callback = () => {}) {
+		let uid = typeof node === "string" ? node : node.getData("uid");
+		if (!uid) return;
+		this.expandToNodeUid(uid, () => {
+			let targetNode = this.findNodeByUid(uid);
+			if (targetNode) {
+				targetNode.active();
+				this.moveNodeToCenter(targetNode);
+				callback(targetNode);
+			}
+		});
+	}
+	setNodeData(node, data) {
+		Object.keys(data).forEach((key) => {
+			node.nodeData.data[key] = data[key];
+		});
+	}
+	setNodeDataRender(node, data, notRender = false) {
+		this.mindMap.execCommand("SET_NODE_DATA", node, data);
+		if (isNodeNotNeedRenderData(data)) {
+			this.mindMap.emit("node_tree_render_end");
+			return;
+		}
+		this.reRenderNodeCheckChange(node, notRender);
+	}
+	reRenderNodeCheckChange(node, notRender) {
+		if (node.reRender()) {
+			if (!notRender) this.mindMap.render();
+		} else this.mindMap.emit("node_tree_render_end");
+	}
+	moveNodeToCenter(node, resetScale) {
+		let { resetScaleOnMoveNodeToCenter } = this.mindMap.opt;
+		if (resetScale !== void 0) resetScaleOnMoveNodeToCenter = resetScale;
+		let { transform, state } = this.mindMap.view.getTransformData();
+		let { left, top, width, height } = node;
+		if (!resetScaleOnMoveNodeToCenter) {
+			left *= transform.scaleX;
+			top *= transform.scaleY;
+			width *= transform.scaleX;
+			height *= transform.scaleY;
+		}
+		let halfWidth = this.mindMap.width / 2;
+		let halfHeight = this.mindMap.height / 2;
+		let nodeCenterX = left + width / 2;
+		let nodeCenterY = top + height / 2;
+		let targetX = halfWidth - state.x;
+		let targetY = halfHeight - state.y;
+		let offsetX = targetX - nodeCenterX;
+		let offsetY = targetY - nodeCenterY;
+		this.mindMap.view.translateX(offsetX);
+		this.mindMap.view.translateY(offsetY);
+		if (resetScaleOnMoveNodeToCenter) this.mindMap.view.setScale(1);
+	}
+	setRootNodeCenter() {
+		this.moveNodeToCenter(this.root);
+	}
+	expandToNodeUid(uid, callback = () => {}) {
+		if (!this.renderTree) {
+			callback();
+			return;
+		}
+		let parentsList = [];
+		let isGeneralization = false;
+		const cache = {};
+		bfsWalk(this.renderTree, (node, parent) => {
+			if (node.data.uid === uid) {
+				parentsList = parent ? [...cache[parent.data.uid], parent] : [];
+				return "stop";
+			}
+			formatGetNodeGeneralization(node.data).forEach((item) => {
+				if (item.uid === uid) {
+					parentsList = parent ? [
+						...cache[parent.data.uid],
+						parent,
+						node
+					] : [];
+					isGeneralization = true;
+				}
+			});
+			if (isGeneralization) return "stop";
+			cache[node.data.uid] = parent ? [...cache[parent.data.uid], parent] : [];
+		});
+		let needRender = false;
+		parentsList.forEach((node) => {
+			if (!node.data.expand) {
+				needRender = true;
+				node.data.expand = true;
+			}
+		});
+		if (isGeneralization) {
+			const lastNode = parentsList[parentsList.length - 1];
+			if (lastNode) walk(lastNode, null, (node) => {
+				if (!node.data.expand) {
+					needRender = true;
+					node.data.expand = true;
+				}
+			});
+		}
+		if (needRender) this.mindMap.render(callback);
+		else callback();
+	}
+	findNodeByUid(uid) {
+		if (!this.root) return;
+		let res = null;
+		walk(this.root, null, (node) => {
+			if (node.getData("uid") === uid) {
+				res = node;
+				return true;
+			}
+			let isGeneralization = false;
+			(node._generalizationList || []).forEach((item) => {
+				if (item.generalizationNode.getData("uid") === uid) {
+					res = item.generalizationNode;
+					isGeneralization = true;
+				}
+			});
+			if (isGeneralization) return true;
+		});
+		return res;
+	}
+	highlightNode(node, range, style) {
+		if (this.isRendering) return;
+		style = {
+			stroke: "rgb(94, 200, 248)",
+			fill: "transparent",
+			...style || {}
+		};
+		if (!this.highlightBoxNode) this.highlightBoxNode = new Polygon().stroke({ color: style.stroke || "transparent" }).fill({ color: style.fill || "transparent" });
+		else if (this.highlightBoxNodeStyle) {
+			if (this.highlightBoxNodeStyle.stroke !== style.stroke || this.highlightBoxNodeStyle.fill !== style.fill) this.highlightBoxNode.stroke({ color: style.stroke || "transparent" }).fill({ color: style.fill || "transparent" });
+		}
+		this.highlightBoxNodeStyle = { ...style };
+		let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+		if (range) node.children.slice(range[0], range[1] + 1).forEach((child) => {
+			if (child.left < minx) minx = child.left;
+			if (child.top < miny) miny = child.top;
+			const right = child.left + child.width;
+			const bottom = child.top + child.height;
+			if (right > maxx) maxx = right;
+			if (bottom > maxy) maxy = bottom;
+		});
+		else {
+			minx = node.left;
+			miny = node.top;
+			maxx = node.left + node.width;
+			maxy = node.top + node.height;
+		}
+		this.highlightBoxNode.plot([
+			[minx, miny],
+			[maxx, miny],
+			[maxx, maxy],
+			[minx, maxy]
+		]);
+		this.mindMap.otherDraw.add(this.highlightBoxNode);
+	}
+	closeHighlightNode() {
+		if (!this.highlightBoxNode) return;
+		this.highlightBoxNode.remove();
+	}
+	hasRichTextPlugin() {
+		return !!this.mindMap.richText;
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/theme/index.js
+var theme_default = { default: default_default };
+//#endregion
+//#region node_modules/simple-mind-map/src/core/command/keyMap.js
+var map = {
+	Backspace: 8,
+	Tab: 9,
+	Enter: 13,
+	Shift: 16,
+	Control: 17,
+	Alt: 18,
+	CapsLock: 20,
+	Esc: 27,
+	Spacebar: 32,
+	PageUp: 33,
+	PageDown: 34,
+	End: 35,
+	Home: 36,
+	Insert: 45,
+	Left: 37,
+	Up: 38,
+	Right: 39,
+	Down: 40,
+	Del: 46,
+	NumLock: 144,
+	Cmd: 91,
+	CmdFF: 224,
+	F1: 112,
+	F2: 113,
+	F3: 114,
+	F4: 115,
+	F5: 116,
+	F6: 117,
+	F7: 118,
+	F8: 119,
+	F9: 120,
+	F10: 121,
+	F11: 122,
+	F12: 123,
+	"`": 192,
+	"=": 187,
+	"-": 189,
+	"/": 191,
+	".": 190
+};
+for (let i = 0; i <= 9; i++) map[i] = i + 48;
+"abcdefghijklmnopqrstuvwxyz".split("").forEach((n, index) => {
+	map[n] = index + 65;
+});
+var keyMap = map;
+//#endregion
+//#region node_modules/simple-mind-map/src/core/command/KeyCommand.js
+var KeyCommand = class {
+	constructor(opt) {
+		this.opt = opt;
+		this.mindMap = opt.mindMap;
+		this.shortcutMap = {};
+		this.shortcutMapCache = {};
+		this.isPause = false;
+		this.isInSvg = false;
+		this.isStopCheckInSvg = false;
+		this.defaultEnableCheck = this.defaultEnableCheck.bind(this);
+		this.bindEvent();
+	}
+	extendKeyMap(key, code) {
+		keyMap[key] = code;
+	}
+	removeKeyMap(key) {
+		if (typeof keyMap[key] !== "undefined") delete keyMap[key];
+	}
+	pause() {
+		this.isPause = true;
+	}
+	recovery() {
+		this.isPause = false;
+	}
+	save() {
+		if (Object.keys(this.shortcutMapCache).length > 0) return;
+		this.shortcutMapCache = this.shortcutMap;
+		this.shortcutMap = {};
+	}
+	restore() {
+		if (Object.keys(this.shortcutMapCache).length <= 0) return;
+		this.shortcutMap = this.shortcutMapCache;
+		this.shortcutMapCache = {};
+	}
+	stopCheckInSvg() {
+		const { enableShortcutOnlyWhenMouseInSvg } = this.mindMap.opt;
+		if (!enableShortcutOnlyWhenMouseInSvg) return;
+		this.isStopCheckInSvg = true;
+	}
+	recoveryCheckInSvg() {
+		const { enableShortcutOnlyWhenMouseInSvg } = this.mindMap.opt;
+		if (!enableShortcutOnlyWhenMouseInSvg) return;
+		this.isStopCheckInSvg = true;
+	}
+	bindEvent() {
+		this.onKeydown = this.onKeydown.bind(this);
+		this.mindMap.on("svg_mouseenter", () => {
+			this.isInSvg = true;
+		});
+		this.mindMap.on("svg_mouseleave", () => {
+			this.isInSvg = false;
+		});
+		window.addEventListener("keydown", this.onKeydown);
+		this.mindMap.on("beforeDestroy", () => {
+			this.unBindEvent();
+		});
+	}
+	unBindEvent() {
+		window.removeEventListener("keydown", this.onKeydown);
+	}
+	defaultEnableCheck(e) {
+		const target = e.target;
+		if (target === document.body) return true;
+		for (let i = 0; i < this.mindMap.editNodeClassList.length; i++) {
+			const cur = this.mindMap.editNodeClassList[i];
+			if (target.classList.contains(cur)) return true;
+		}
+		return false;
+	}
+	onKeydown(e) {
+		const { enableShortcutOnlyWhenMouseInSvg, beforeShortcutRun, customCheckEnableShortcut } = this.mindMap.opt;
+		if (!(typeof customCheckEnableShortcut === "function" ? customCheckEnableShortcut : this.defaultEnableCheck)(e)) return;
+		if (this.isPause || enableShortcutOnlyWhenMouseInSvg && !this.isStopCheckInSvg && !this.isInSvg) return;
+		Object.keys(this.shortcutMap).forEach((key) => {
+			if (this.checkKey(e, key)) {
+				if (!this.checkKey(e, "Control+v")) {
+					e.stopPropagation();
+					e.preventDefault();
+				}
+				if (typeof beforeShortcutRun === "function") {
+					if (beforeShortcutRun(key, [...this.mindMap.renderer.activeNodeList])) return;
+				}
+				this.shortcutMap[key].forEach((fn) => {
+					fn();
+				});
+			}
+		});
+	}
+	checkKey(e, key) {
+		let o = this.getOriginEventCodeArr(e);
+		let k = this.getKeyCodeArr(key);
+		if (o.length !== k.length) return false;
+		for (let i = 0; i < o.length; i++) {
+			let index = k.findIndex((item) => {
+				return item === o[i];
+			});
+			if (index === -1) return false;
+			else k.splice(index, 1);
+		}
+		return true;
+	}
+	getOriginEventCodeArr(e) {
+		let arr = [];
+		if (e.ctrlKey || e.metaKey) arr.push(keyMap["Control"]);
+		if (e.altKey) arr.push(keyMap["Alt"]);
+		if (e.shiftKey) arr.push(keyMap["Shift"]);
+		if (!arr.includes(e.keyCode)) arr.push(e.keyCode);
+		return arr;
+	}
+	hasCombinationKey(e) {
+		return e.ctrlKey || e.metaKey || e.altKey || e.shiftKey;
+	}
+	getKeyCodeArr(key) {
+		let keyArr = key.split(/\s*\+\s*/);
+		let arr = [];
+		keyArr.forEach((item) => {
+			arr.push(keyMap[item]);
+		});
+		return arr;
+	}
+	/**
+	* Enter
+	* Tab | Insert
+	* Shift + a
+	*/
+	addShortcut(key, fn) {
+		key.split(/\s*\|\s*/).forEach((item) => {
+			if (this.shortcutMap[item]) this.shortcutMap[item].push(fn);
+			else this.shortcutMap[item] = [fn];
+		});
+	}
+	removeShortcut(key, fn) {
+		key.split(/\s*\|\s*/).forEach((item) => {
+			if (this.shortcutMap[item]) if (fn) {
+				let index = this.shortcutMap[item].findIndex((f) => {
+					return f === fn;
+				});
+				if (index !== -1) this.shortcutMap[item].splice(index, 1);
+			} else {
+				this.shortcutMap[item] = [];
+				delete this.shortcutMap[item];
+			}
+		});
+	}
+	getShortcutFn(key) {
+		let res = [];
+		key.split(/\s*\|\s*/).forEach((item) => {
+			res = this.shortcutMap[item] || [];
+		});
+		return res;
+	}
+};
+var package_default = {
+	name: "simple-mind-map",
+	version: "0.14.0-fix.2",
+	description: "一个简单的web在线思维导图",
+	authors: [{
+		"name": "街角小林",
+		"email": "1013335014@qq.com"
+	}, {
+		"name": "理想青年实验室",
+		"url": "http://lxqnsys.com/"
+	}],
+	types: "./types/index.d.ts",
+	typings: "./types/index.d.ts",
+	license: "MIT",
+	repository: {
+		"type": "git",
+		"url": "https://github.com/wanglin2/mind-map"
+	},
+	scripts: {
+		"lint": "eslint src/",
+		"format": "prettier --write .",
+		"types": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir types --target es2017 --skipLibCheck & node ./bin/createPluginsTypeFiles.js",
+		"wsServe": "node ./bin/wsServer.mjs"
+	},
+	module: "index.js",
+	main: "./dist/simpleMindMap.umd.min.js",
+	dependencies: {
+		"@svgdotjs/svg.js": "3.2.0",
+		"deepmerge": "^1.5.2",
+		"eventemitter3": "^4.0.7",
+		"jszip": "^3.10.1",
+		"katex": "^0.16.8",
+		"mdast-util-from-markdown": "^1.3.0",
+		"pdf-lib": "^1.17.1",
+		"quill": "^2.0.3",
+		"tern": "^0.24.3",
+		"uuid": "^9.0.0",
+		"ws": "^7.5.9",
+		"xml-js": "^1.6.11",
+		"y-webrtc": "^10.2.5",
+		"yjs": "^13.6.8"
+	},
+	keywords: [
+		"javascript",
+		"svg",
+		"mind-map",
+		"mindMap",
+		"MindMap"
+	],
+	devDependencies: {
+		"eslint": "^8.25.0",
+		"prettier": "^2.7.1"
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/core/command/Command.js
+var Command = class {
+	constructor(opt = {}) {
+		this.opt = opt;
+		this.mindMap = opt.mindMap;
+		this.commands = {};
+		this.history = [];
+		this.activeHistoryIndex = 0;
+		this.registerShortcutKeys();
+		this.originAddHistory = this.addHistory.bind(this);
+		this.addHistory = throttle(this.addHistory, this.mindMap.opt.addHistoryTime, this);
+		this.isPause = false;
+	}
+	pause() {
+		this.isPause = true;
+	}
+	recovery() {
+		this.isPause = false;
+	}
+	clearHistory() {
+		this.history = [];
+		this.activeHistoryIndex = 0;
+		this.mindMap.emit("back_forward", 0, 0);
+	}
+	registerShortcutKeys() {
+		this.mindMap.keyCommand.addShortcut("Control+z", () => {
+			this.mindMap.execCommand("BACK");
+		});
+		this.mindMap.keyCommand.addShortcut("Control+y", () => {
+			this.mindMap.execCommand("FORWARD");
+		});
+	}
+	exec(name, ...args) {
+		if (this.commands[name]) {
+			this.commands[name].forEach((fn) => {
+				fn(...args);
+			});
+			this.mindMap.emit("afterExecCommand", name, ...args);
+			if ([
+				"BACK",
+				"FORWARD",
+				"SET_NODE_ACTIVE",
+				"CLEAR_ACTIVE_NODE"
+			].includes(name)) return;
+			this.addHistory();
+		}
+	}
+	add(name, fn) {
+		if (this.commands[name]) this.commands[name].push(fn);
+		else this.commands[name] = [fn];
+	}
+	remove(name, fn) {
+		if (!this.commands[name]) return;
+		if (!fn) {
+			this.commands[name] = [];
+			delete this.commands[name];
+		} else {
+			let index = this.commands[name].find((item) => {
+				return item === fn;
+			});
+			if (index !== -1) this.commands[name].splice(index, 1);
+		}
+	}
+	addHistory() {
+		if (this.mindMap.opt.readonly || this.isPause) return;
+		this.mindMap.emit("beforeAddHistory");
+		const lastDataStr = this.history.length > 0 ? this.history[this.activeHistoryIndex] : null;
+		const data = this.getCopyData();
+		const dataStr = JSON.stringify(data);
+		if (lastDataStr && lastDataStr === dataStr) return;
+		this.emitDataUpdatesEvent(lastDataStr, dataStr);
+		this.history = this.history.slice(0, this.activeHistoryIndex + 1);
+		this.history.push(dataStr);
+		if (this.history.length > this.mindMap.opt.maxHistoryCount) this.history.shift();
+		this.activeHistoryIndex = this.history.length - 1;
+		this.mindMap.emit("data_change", data);
+		this.mindMap.emit("back_forward", this.activeHistoryIndex, this.history.length);
+	}
+	back(step = 1) {
+		if (this.mindMap.opt.readonly) return;
+		if (this.activeHistoryIndex - step >= 0) {
+			const lastDataStr = this.history[this.activeHistoryIndex];
+			this.activeHistoryIndex -= step;
+			this.mindMap.emit("back_forward", this.activeHistoryIndex, this.history.length);
+			const dataStr = this.history[this.activeHistoryIndex];
+			const data = JSON.parse(dataStr);
+			this.emitDataUpdatesEvent(lastDataStr, dataStr);
+			return data;
+		}
+	}
+	forward(step = 1) {
+		if (this.mindMap.opt.readonly) return;
+		let len = this.history.length;
+		if (this.activeHistoryIndex + step <= len - 1) {
+			const lastDataStr = this.history[this.activeHistoryIndex];
+			this.activeHistoryIndex += step;
+			this.mindMap.emit("back_forward", this.activeHistoryIndex, this.history.length);
+			const dataStr = this.history[this.activeHistoryIndex];
+			const data = JSON.parse(dataStr);
+			this.emitDataUpdatesEvent(lastDataStr, dataStr);
+			return data;
+		}
+	}
+	getCopyData() {
+		if (!this.mindMap.renderer.renderTree) return null;
+		const res = copyRenderTree({}, this.mindMap.renderer.renderTree, true);
+		res.smmVersion = package_default.version;
+		return res;
+	}
+	removeDataUid(data) {
+		data = simpleDeepClone(data);
+		let walk = (root) => {
+			delete root.data.uid;
+			if (root.children && root.children.length > 0) root.children.forEach((item) => {
+				walk(item);
+			});
+		};
+		walk(data);
+		return data;
+	}
+	emitDataUpdatesEvent(lastDataStr, dataStr) {
+		try {
+			const eventName = "data_change_detail";
+			if (this.mindMap.event.listenerCount(eventName) > 0 && lastDataStr && dataStr) {
+				const lastData = JSON.parse(lastDataStr);
+				const data = JSON.parse(dataStr);
+				const lastDataObj = simpleDeepClone(transformTreeDataToObject(lastData));
+				const dataObj = simpleDeepClone(transformTreeDataToObject(data));
+				const res = [];
+				const walkReplace = (root, obj) => {
+					if (root.children && root.children.length > 0) root.children.forEach((childUid, index) => {
+						root.children[index] = typeof childUid === "string" ? obj[childUid] : obj[childUid.data.uid];
+						walkReplace(root.children[index], obj);
+					});
+					return root;
+				};
+				Object.keys(dataObj).forEach((uid) => {
+					if (!lastDataObj[uid]) res.push({
+						action: "create",
+						data: walkReplace(dataObj[uid], dataObj)
+					});
+					else if (!isSameObject(lastDataObj[uid], dataObj[uid])) res.push({
+						action: "update",
+						oldData: walkReplace(lastDataObj[uid], lastDataObj),
+						data: walkReplace(dataObj[uid], dataObj)
+					});
+				});
+				Object.keys(lastDataObj).forEach((uid) => {
+					if (!dataObj[uid]) res.push({
+						action: "delete",
+						data: walkReplace(lastDataObj[uid], lastDataObj)
+					});
+				});
+				this.mindMap.emit(eventName, res);
+			}
+		} catch (error) {
+			this.mindMap.opt.errorHandler(ERROR_TYPES.DATA_CHANGE_DETAIL_EVENT_ERROR, error);
+		}
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/utils/BatchExecution.js
+var BatchExecution = class {
+	constructor() {
+		this.has = {};
+		this.queue = [];
+		this.nextTick = nextTick(this.flush, this);
+	}
+	push(name, fn) {
+		if (this.has[name]) {
+			this.replaceTask(name, fn);
+			return;
+		}
+		this.has[name] = true;
+		this.queue.push({
+			name,
+			fn
+		});
+		this.nextTick();
+	}
+	replaceTask(name, fn) {
+		const index = this.queue.findIndex((item) => {
+			return item.name === name;
+		});
+		if (index !== -1) this.queue[index] = {
+			name,
+			fn
+		};
+	}
+	flush() {
+		let fns = this.queue.slice(0);
+		this.queue = [];
+		fns.forEach(({ name, fn }) => {
+			this.has[name] = false;
+			fn();
+		});
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/constants/defaultOptions.js
+var defaultOpt = {
+	el: null,
+	data: null,
+	viewData: null,
+	readonly: false,
+	layout: CONSTANTS.LAYOUT.LOGICAL_STRUCTURE,
+	fishboneDeg: 45,
+	theme: "default",
+	themeConfig: {},
+	scaleRatio: .2,
+	translateRatio: 1,
+	minZoomRatio: 20,
+	maxZoomRatio: 400,
+	customCheckIsTouchPad: null,
+	mouseScaleCenterUseMousePosition: true,
+	maxTag: 5,
+	expandBtnSize: 20,
+	imgTextMargin: 5,
+	textContentMargin: 2,
+	customNoteContentShow: null,
+	textAutoWrapWidth: 500,
+	customHandleMousewheel: null,
+	mousewheelAction: CONSTANTS.MOUSE_WHEEL_ACTION.MOVE,
+	mousewheelMoveStep: 100,
+	mousewheelZoomActionReverse: true,
+	defaultInsertSecondLevelNodeText: "二级节点",
+	defaultInsertBelowSecondLevelNodeText: "分支主题",
+	expandBtnStyle: {
+		color: "#808080",
+		fill: "#fff",
+		fontSize: 13,
+		strokeColor: "#333333"
+	},
+	expandBtnIcon: {
+		open: "",
+		close: ""
+	},
+	expandBtnNumHandler: null,
+	isShowExpandNum: true,
+	enableShortcutOnlyWhenMouseInSvg: true,
+	customCheckEnableShortcut: null,
+	initRootNodePosition: null,
+	nodeTextEditZIndex: 3e3,
+	nodeNoteTooltipZIndex: 3e3,
+	isEndNodeTextEditOnClickOuter: true,
+	maxHistoryCount: 500,
+	alwaysShowExpandBtn: false,
+	notShowExpandBtn: false,
+	iconList: [],
+	maxNodeCacheCount: 1e3,
+	fitPadding: 50,
+	enableCtrlKeyNodeSelection: true,
+	useLeftKeySelectionRightKeyDrag: false,
+	beforeTextEdit: null,
+	isUseCustomNodeContent: false,
+	customCreateNodeContent: null,
+	customInnerElsAppendTo: null,
+	enableAutoEnterTextEditWhenKeydown: false,
+	autoEmptyTextWhenKeydownEnterEdit: false,
+	customHandleClipboardText: null,
+	disableMouseWheelZoom: false,
+	errorHandler: (code, error) => {
+		console.error(code, error);
+	},
+	enableDblclickBackToRootNode: false,
+	hoverRectColor: "rgb(94, 200, 248)",
+	hoverRectPadding: 2,
+	selectTextOnEnterEditText: false,
+	deleteNodeActive: true,
+	fit: false,
+	tagsColorMap: {},
+	cooperateStyle: {
+		avatarSize: 22,
+		fontSize: 12
+	},
+	onlyOneEnableActiveNodeOnCooperate: false,
+	defaultGeneralizationText: "概要",
+	handleIsSplitByWrapOnPasteCreateNewNode: null,
+	addHistoryTime: 100,
+	isDisableDrag: false,
+	createNewNodeBehavior: CONSTANTS.CREATE_NEW_NODE_BEHAVIOR.DEFAULT,
+	defaultNodeImage: "",
+	isLimitMindMapInCanvas: false,
+	handleNodePasteImg: null,
+	customCreateNodePath: null,
+	customCreateNodePolygon: null,
+	customTransformNodeLinePath: null,
+	beforeShortcutRun: null,
+	resetScaleOnMoveNodeToCenter: false,
+	createNodePrefixContent: null,
+	createNodePostfixContent: null,
+	disabledClipboard: false,
+	customHyperlinkJump: null,
+	openPerformance: false,
+	performanceConfig: {
+		time: 250,
+		padding: 100,
+		removeNodeWhenOutCanvas: true
+	},
+	emptyTextMeasureHeightText: "abc123我和你",
+	openRealtimeRenderOnNodeTextEdit: false,
+	mousedownEventPreventDefault: false,
+	onlyPasteTextWhenHasImgAndText: true,
+	enableDragModifyNodeWidth: true,
+	minNodeTextModifyWidth: 20,
+	maxNodeTextModifyWidth: -1,
+	customHandleLine: null,
+	addHistoryOnInit: true,
+	noteIcon: {
+		icon: "",
+		style: {}
+	},
+	hyperlinkIcon: {
+		icon: "",
+		style: {}
+	},
+	attachmentIcon: {
+		icon: "",
+		style: {}
+	},
+	isShowCreateChildBtnIcon: true,
+	quickCreateChildBtnIcon: {
+		icon: "",
+		style: {}
+	},
+	customQuickCreateChildBtnClick: null,
+	addCustomContentToNode: null,
+	enableInheritAncestorLineStyle: true,
+	selectTranslateStep: 3,
+	selectTranslateLimit: 20,
+	enableFreeDrag: false,
+	autoMoveWhenMouseInEdgeOnDrag: true,
+	dragMultiNodeRectConfig: {
+		width: 40,
+		height: 20,
+		fill: "rgb(94, 200, 248)"
+	},
+	dragPlaceholderRectFill: "rgb(94, 200, 248)",
+	dragPlaceholderLineConfig: {
+		color: "rgb(94, 200, 248)",
+		width: 2
+	},
+	dragOpacityConfig: {
+		cloneNodeOpacity: .5,
+		beingDragNodeOpacity: .3
+	},
+	handleDragCloneNode: null,
+	beforeDragEnd: null,
+	beforeDragStart: null,
+	watermarkConfig: {
+		onlyExport: false,
+		text: "",
+		lineSpacing: 100,
+		textSpacing: 100,
+		angle: 30,
+		textStyle: {
+			color: "#999",
+			opacity: .5,
+			fontSize: 14
+		},
+		belowNode: false
+	},
+	exportPaddingX: 10,
+	exportPaddingY: 10,
+	resetCss: `
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  `,
+	minExportImgCanvasScale: 2,
+	addContentToHeader: null,
+	addContentToFooter: null,
+	handleBeingExportSvg: null,
+	maxCanvasSize: 16384,
+	defaultAssociativeLineText: "关联",
+	associativeLineIsAlwaysAboveNode: true,
+	associativeLineInitPointsPosition: {
+		from: "",
+		to: ""
+	},
+	enableAdjustAssociativeLinePoints: true,
+	beforeAssociativeLineConnection: null,
+	disableTouchZoom: false,
+	minTouchZoomScale: 20,
+	maxTouchZoomScale: -1,
+	isLimitMindMapInCanvasWhenHasScrollbar: true,
+	isOnlySearchCurrentRenderNodes: false,
+	beforeCooperateUpdate: null,
+	rainbowLinesConfig: {
+		open: false,
+		colorsList: []
+	},
+	demonstrateConfig: null,
+	enableEditFormulaInRichTextEdit: true,
+	katexFontPath: "https://unpkg.com/katex@0.16.11/dist/",
+	getKatexOutputType: null,
+	transformRichTextOnEnterEdit: null,
+	beforeHideRichTextEdit: null,
+	outerFramePaddingX: 10,
+	outerFramePaddingY: 10,
+	defaultOuterFrameText: "外框",
+	onlyPainterNodeCustomStyles: false,
+	beforeDeleteNodeImg: null,
+	imgResizeBtnSize: 25,
+	minImgResizeWidth: 50,
+	minImgResizeHeight: 50,
+	maxImgResizeWidthInheritTheme: false,
+	maxImgResizeWidth: Infinity,
+	maxImgResizeHeight: Infinity,
+	customDeleteBtnInnerHTML: "",
+	customResizeBtnInnerHTML: ""
+};
+//#endregion
+//#region node_modules/simple-mind-map/index.js
+var MindMap = class MindMap {
+	/**
+	*
+	* @param {defaultOpt} opt
+	*/
+	constructor(opt = {}) {
+		MindMap.instanceCount++;
+		this.opt = this.handleOpt((0, import_cjs.default)(defaultOpt, opt));
+		this.opt.data = this.handleData(this.opt.data);
+		this.el = this.opt.el;
+		if (!this.el) throw new Error("缺少容器元素el");
+		this.getElRectInfo();
+		this.initWidth = this.width;
+		this.initHeight = this.height;
+		this.cssEl = null;
+		this.cssTextMap = {};
+		this.nodeInnerPrefixList = [];
+		this.nodeInnerPostfixList = [];
+		this.editNodeClassList = [];
+		this.extendShapeList = [];
+		this.initContainer();
+		this.initTheme();
+		this.initCache();
+		MindMap.pluginList.filter((plugin) => {
+			return plugin.preload;
+		}).forEach((plugin) => {
+			this.initPlugin(plugin);
+		});
+		this.event = new Event$1({ mindMap: this });
+		this.keyCommand = new KeyCommand({ mindMap: this });
+		this.command = new Command({ mindMap: this });
+		this.renderer = new Render({ mindMap: this });
+		this.view = new View({ mindMap: this });
+		this.batchExecution = new BatchExecution();
+		MindMap.pluginList.filter((plugin) => {
+			return !plugin.preload;
+		}).forEach((plugin) => {
+			this.initPlugin(plugin);
+		});
+		this.addCss();
+		this.render(this.opt.fit ? () => this.view.fit() : () => {});
+		if (this.opt.addHistoryOnInit && this.opt.data) this.command.addHistory();
+	}
+	handleOpt(opt) {
+		if (!layoutValueList.includes(opt.layout)) opt.layout = CONSTANTS.LAYOUT.LOGICAL_STRUCTURE;
+		opt.theme = opt.theme && theme_default[opt.theme] ? opt.theme : "default";
+		return opt;
+	}
+	handleData(data) {
+		if (isUndef(data) || Object.keys(data).length <= 0) return null;
+		data = simpleDeepClone(data || {});
+		if (data.data && !data.data.expand) data.data.expand = true;
+		createUidForAppointNodes([data], false, null, true);
+		return data;
+	}
+	initContainer() {
+		const { associativeLineIsAlwaysAboveNode } = this.opt;
+		this.el.classList.add("smm-mind-map-container");
+		const createAssociativeLineDraw = () => {
+			this.associativeLineDraw = this.draw.group();
+			this.associativeLineDraw.addClass("smm-associative-line-container");
+		};
+		this.svg = SVG().addTo(this.el).size(this.width, this.height);
+		this.draw = this.svg.group();
+		this.draw.addClass("smm-container");
+		this.lineDraw = this.draw.group();
+		this.lineDraw.addClass("smm-line-container");
+		if (!associativeLineIsAlwaysAboveNode) createAssociativeLineDraw();
+		this.nodeDraw = this.draw.group();
+		this.nodeDraw.addClass("smm-node-container");
+		if (associativeLineIsAlwaysAboveNode) createAssociativeLineDraw();
+		this.otherDraw = this.draw.group();
+		this.otherDraw.addClass("smm-other-container");
+	}
+	clearDraw() {
+		this.lineDraw.clear();
+		this.associativeLineDraw.clear();
+		this.nodeDraw.clear();
+		this.otherDraw.clear();
+	}
+	appendCss(key, str) {
+		this.cssTextMap[key] = str;
+		this.removeCss();
+		this.addCss();
+	}
+	removeAppendCss(key) {
+		if (this.cssTextMap[key]) {
+			delete this.cssTextMap[key];
+			this.removeCss();
+			this.addCss();
+		}
+	}
+	joinCss() {
+		return cssContent + Object.keys(this.cssTextMap).map((key) => {
+			return this.cssTextMap[key];
+		}).join("\n");
+	}
+	addCss() {
+		this.cssEl = document.createElement("style");
+		this.cssEl.type = "text/css";
+		this.cssEl.innerHTML = this.joinCss();
+		document.head.appendChild(this.cssEl);
+	}
+	removeCss() {
+		if (this.cssEl) document.head.removeChild(this.cssEl);
+	}
+	checkEditNodeClassIndex(className) {
+		return this.editNodeClassList.findIndex((item) => {
+			return item === className;
+		});
+	}
+	addEditNodeClass(className) {
+		if (this.checkEditNodeClassIndex(className) === -1) this.editNodeClassList.push(className);
+	}
+	deleteEditNodeClass(className) {
+		const index = this.checkEditNodeClassIndex(className);
+		if (index !== -1) this.editNodeClassList.splice(index, 1);
+	}
+	render(callback, source = "") {
+		this.initTheme();
+		this.renderer.render(callback, source);
+	}
+	reRender(callback, source = "") {
+		this.renderer.reRender = true;
+		this.renderer.clearCache();
+		this.clearDraw();
+		this.render(callback, source);
+	}
+	getElRectInfo() {
+		this.elRect = this.el.getBoundingClientRect();
+		this.width = this.elRect.width;
+		this.height = this.elRect.height;
+		if (this.width <= 0 || this.height <= 0) throw new Error("容器元素el的宽高不能为0");
+	}
+	resize() {
+		const oldWidth = this.width;
+		const oldHeight = this.height;
+		this.getElRectInfo();
+		this.svg.size(this.width, this.height);
+		if (oldWidth !== this.width || oldHeight !== this.height) if (this.demonstrate) {
+			if (!this.demonstrate.isInDemonstrate) this.render();
+		} else this.render();
+		this.emit("resize");
+	}
+	on(event, fn) {
+		this.event.on(event, fn);
+	}
+	emit(event, ...args) {
+		this.event.emit(event, ...args);
+	}
+	off(event, fn) {
+		this.event.off(event, fn);
+	}
+	initCache() {
+		this.commonCaches = {
+			measureCustomNodeContentSizeEl: null,
+			measureRichtextNodeTextSizeEl: null
+		};
+	}
+	initTheme() {
+		this.themeConfig = mergeTheme(theme_default[this.opt.theme] || theme_default.default, this.opt.themeConfig);
+		Style.setBackgroundStyle(this.el, this.themeConfig);
+	}
+	setTheme(theme, notRender = false) {
+		this.execCommand("CLEAR_ACTIVE_NODE");
+		this.opt.theme = theme;
+		if (!notRender) this.render(null, CONSTANTS.CHANGE_THEME);
+		this.emit("view_theme_change", theme);
+	}
+	getTheme() {
+		return this.opt.theme;
+	}
+	setThemeConfig(config, notRender = false) {
+		const changedConfig = getObjectChangedProps(this.themeConfig, config);
+		this.opt.themeConfig = config;
+		if (!notRender) {
+			const res = checkIsNodeSizeIndependenceConfig(changedConfig);
+			this.render(null, res ? "" : CONSTANTS.CHANGE_THEME);
+		}
+	}
+	getCustomThemeConfig() {
+		return this.opt.themeConfig;
+	}
+	getThemeConfig(prop) {
+		return prop === void 0 ? this.themeConfig : this.themeConfig[prop];
+	}
+	getConfig(prop) {
+		return prop === void 0 ? this.opt : this.opt[prop];
+	}
+	updateConfig(opt = {}) {
+		this.emit("before_update_config", this.opt);
+		const lastOpt = { ...this.opt };
+		this.opt = this.handleOpt(import_cjs.default.all([
+			defaultOpt,
+			this.opt,
+			opt
+		]));
+		this.emit("after_update_config", this.opt, lastOpt);
+	}
+	getLayout() {
+		return this.opt.layout;
+	}
+	setLayout(layout, notRender = false) {
+		if (!layoutValueList.includes(layout)) layout = CONSTANTS.LAYOUT.LOGICAL_STRUCTURE;
+		this.opt.layout = layout;
+		this.view.reset();
+		this.renderer.setLayout();
+		if (!notRender) this.render(null, CONSTANTS.CHANGE_LAYOUT);
+		this.emit("layout_change", layout);
+	}
+	execCommand(...args) {
+		this.command.exec(...args);
+	}
+	updateData(data) {
+		data = this.handleData(data);
+		this.emit("before_update_data", data);
+		this.renderer.setData(data);
+		this.render();
+		this.command.addHistory();
+		this.emit("update_data", data);
+	}
+	setData(data) {
+		data = this.handleData(data);
+		this.emit("before_set_data", data);
+		this.opt.data = data;
+		this.execCommand("CLEAR_ACTIVE_NODE");
+		this.command.clearHistory();
+		this.command.addHistory();
+		this.renderer.setData(data);
+		this.reRender();
+		this.emit("set_data", data);
+	}
+	setFullData(data) {
+		if (data.root) this.setData(data.root);
+		if (data.layout) this.setLayout(data.layout);
+		if (data.theme) {
+			if (data.theme.template) this.setTheme(data.theme.template);
+			if (data.theme.config) this.setThemeConfig(data.theme.config);
+		}
+		if (data.view) this.view.setTransformData(data.view);
+	}
+	getData(withConfig) {
+		let nodeData = this.command.getCopyData();
+		let data = {};
+		if (withConfig) data = {
+			layout: this.getLayout(),
+			root: nodeData,
+			theme: {
+				template: this.getTheme(),
+				config: this.getCustomThemeConfig()
+			},
+			view: this.view.getTransformData()
+		};
+		else data = nodeData;
+		return simpleDeepClone(data);
+	}
+	async export(...args) {
+		try {
+			if (!this.doExport) throw new Error("请注册Export插件！");
+			return await this.doExport.export(...args);
+		} catch (error) {
+			this.opt.errorHandler(ERROR_TYPES.EXPORT_ERROR, error);
+		}
+	}
+	toPos(x, y) {
+		return {
+			x: x - this.elRect.left,
+			y: y - this.elRect.top
+		};
+	}
+	setMode(mode) {
+		if (![CONSTANTS.MODE.READONLY, CONSTANTS.MODE.EDIT].includes(mode)) return;
+		const isReadonly = mode === CONSTANTS.MODE.READONLY;
+		if (isReadonly === this.opt.readonly) return;
+		if (isReadonly) {
+			if (this.renderer.textEdit.isShowTextEdit()) {
+				this.renderer.textEdit.hideEditTextBox();
+				this.command.originAddHistory();
+			}
+			this.execCommand("CLEAR_ACTIVE_NODE");
+		}
+		this.opt.readonly = isReadonly;
+		if (!isReadonly && this.command.history.length <= 0) this.command.originAddHistory();
+		this.emit("mode_change", mode);
+	}
+	getSvgData({ paddingX = 0, paddingY = 0, ignoreWatermark = false, addContentToHeader, addContentToFooter, node } = {}) {
+		const { watermarkConfig, openPerformance } = this.opt;
+		if (openPerformance) this.renderer.forceLoadNode(node);
+		const { cssTextList, header, headerHeight, footer, footerHeight } = handleGetSvgDataExtraContent({
+			addContentToHeader,
+			addContentToFooter
+		});
+		const svg = this.svg;
+		const draw = this.draw;
+		const origWidth = svg.width();
+		const origHeight = svg.height();
+		const origTransform = draw.transform();
+		const elRect = this.elRect;
+		draw.scale(1 / origTransform.scaleX, 1 / origTransform.scaleY);
+		const rect = draw.rbox();
+		let clipData = null;
+		if (node) clipData = getNodeTreeBoundingRect(node, rect.x, rect.y, paddingX, paddingY);
+		const fixHeight = 0;
+		rect.width += paddingX * 2;
+		rect.height += paddingY * 2 + fixHeight + headerHeight + footerHeight;
+		draw.translate(paddingX, paddingY);
+		svg.size(rect.width, rect.height);
+		draw.translate(-rect.x + elRect.left, -rect.y + elRect.top);
+		let clone = svg.clone();
+		const hasWatermark = this.watermark && this.watermark.hasWatermark();
+		if (!ignoreWatermark && hasWatermark) {
+			this.watermark.isInExport = true;
+			const { onlyExport } = watermarkConfig;
+			if (rect.width > origWidth || rect.height > origHeight) {
+				this.width = rect.width;
+				this.height = rect.height;
+				this.watermark.onResize();
+				clone = svg.clone();
+				this.width = origWidth;
+				this.height = origHeight;
+				this.watermark.onResize();
+			} else if (onlyExport) {
+				this.watermark.onResize();
+				clone = svg.clone();
+			}
+			if (onlyExport) this.watermark.clear();
+			this.watermark.isInExport = false;
+		}
+		[this.joinCss(), ...cssTextList].forEach((s) => {
+			clone.add(SVG(`<style>${s}</style>`));
+		});
+		if (header && headerHeight > 0) {
+			clone.findOne(".smm-container").translate(0, headerHeight);
+			header.width(rect.width);
+			header.y(paddingY);
+			clone.add(header, 0);
+		}
+		if (footer && footerHeight > 0) {
+			footer.width(rect.width);
+			footer.y(rect.height - paddingY - footerHeight);
+			clone.add(footer);
+		}
+		const defs = svg.find("defs");
+		const defs2 = clone.find("defs");
+		defs.forEach((def, defIndex) => {
+			const def2 = defs2[defIndex];
+			if (!def2) return;
+			const children = def.children();
+			const children2 = def2.children();
+			for (let i = 0; i < children.length; i++) {
+				const child = children[i];
+				const child2 = children2[i];
+				if (child && child2) child2.attr("id", child.attr("id"));
+			}
+		});
+		svg.size(origWidth, origHeight);
+		draw.transform(origTransform);
+		return {
+			svg: clone,
+			svgHTML: clone.svg(),
+			clipData,
+			rect: {
+				...rect,
+				ratio: rect.width / rect.height
+			},
+			origWidth,
+			origHeight,
+			scaleX: origTransform.scaleX,
+			scaleY: origTransform.scaleY
+		};
+	}
+	addShape(shape) {
+		if (!shape) return;
+		if (this.extendShapeList.find((item) => {
+			return item.name === shape.name;
+		})) return;
+		this.extendShapeList.push(shape);
+	}
+	removeShape(name) {
+		const index = this.extendShapeList.findIndex((item) => {
+			return item.name === name;
+		});
+		if (index !== -1) this.extendShapeList.splice(index, 1);
+	}
+	getSvgObjects() {
+		return {
+			SVG,
+			G,
+			Rect
+		};
+	}
+	addPlugin(plugin, opt) {
+		if (MindMap.hasPlugin(plugin) === -1) MindMap.usePlugin(plugin, opt);
+		this.initPlugin(plugin);
+	}
+	removePlugin(plugin) {
+		let index = MindMap.hasPlugin(plugin);
+		if (index !== -1) {
+			MindMap.pluginList.splice(index, 1);
+			if (this[plugin.instanceName]) {
+				if (this[plugin.instanceName].beforePluginRemove) this[plugin.instanceName].beforePluginRemove();
+				delete this[plugin.instanceName];
+			}
+		}
+	}
+	initPlugin(plugin) {
+		if (this[plugin.instanceName]) return;
+		this[plugin.instanceName] = new plugin({
+			mindMap: this,
+			pluginOpt: plugin.pluginOpt
+		});
+	}
+	destroy() {
+		this.emit("beforeDestroy");
+		this.renderer.textEdit.hideEditTextBox();
+		this.renderer.textEdit.removeTextEditEl();
+		[...MindMap.pluginList].forEach((plugin) => {
+			if (this[plugin.instanceName] && this[plugin.instanceName].beforePluginDestroy) this[plugin.instanceName].beforePluginDestroy();
+			this[plugin.instanceName] = null;
+		});
+		this.event.unbind();
+		this.svg.remove();
+		Style.removeBackgroundStyle(this.el);
+		this.el.classList.remove("smm-mind-map-container");
+		this.el.innerHTML = "";
+		this.el = null;
+		this.removeCss();
+		MindMap.instanceCount--;
+	}
+};
+var _extendNodeDataNoStylePropList = [];
+MindMap.extendNodeDataNoStylePropList = (list = []) => {
+	_extendNodeDataNoStylePropList.push(...list);
+	nodeDataNoStylePropList.push(...list);
+};
+MindMap.resetNodeDataNoStylePropList = () => {
+	_extendNodeDataNoStylePropList.forEach((item) => {
+		const index = nodeDataNoStylePropList.findIndex((item2) => {
+			return item2 === item;
+		});
+		if (index !== -1) nodeDataNoStylePropList.splice(index, 1);
+	});
+	_extendNodeDataNoStylePropList = [];
+};
+MindMap.pluginList = [];
+MindMap.usePlugin = (plugin, opt = {}) => {
+	if (MindMap.hasPlugin(plugin) !== -1) return MindMap;
+	plugin.pluginOpt = opt;
+	MindMap.pluginList.push(plugin);
+	return MindMap;
+};
+MindMap.hasPlugin = (plugin) => {
+	return MindMap.pluginList.findIndex((item) => {
+		return item === plugin;
+	});
+};
+MindMap.instanceCount = 0;
+MindMap.defineTheme = (name, config = {}) => {
+	if (theme_default[name]) return /* @__PURE__ */ new Error("该主题名称已存在");
+	theme_default[name] = mergeTheme(default_default, config);
+};
+MindMap.removeTheme = (name) => {
+	if (theme_default[name]) theme_default[name] = null;
+};
+//#endregion
+//#region src/utils/imageUtils.js
+/**
+* 图片处理工具函数
+* 提供图片压缩、Base64转换、URL验证等功能
+*/
+/**
+* 将 File 对象转换为 Base64
+* @param {File} file - 图片文件
+* @returns {Promise<string>} Base64 字符串
+*/
+var fileToBase64 = (file) => {
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onload = () => resolve(reader.result);
+		reader.onerror = reject;
+		reader.readAsDataURL(file);
+	});
+};
+/**
+* 压缩图片
+* @param {File} file - 原始图片文件
+* @param {Object} options - 压缩选项
+* @param {number} options.maxWidth - 最大宽度（默认 1920）
+* @param {number} options.maxHeight - 最大高度（默认 1080）
+* @param {number} options.quality - 压缩质量 0-1（默认 0.8）
+* @param {string} options.format - 输出格式 'image/jpeg' | 'image/png' | 'image/webp'（默认 'image/jpeg'）
+* @returns {Promise<string>} 压缩后的 Base64 字符串
+*/
+var compressImage = (file, options = {}) => {
+	const { maxWidth = 1920, maxHeight = 1080, quality = .8, format = "image/jpeg" } = options;
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+			let width = img.width;
+			let height = img.height;
+			if (width > maxWidth || height > maxHeight) {
+				const ratio = Math.min(maxWidth / width, maxHeight / height);
+				width = Math.floor(width * ratio);
+				height = Math.floor(height * ratio);
+			}
+			const canvas = document.createElement("canvas");
+			canvas.width = width;
+			canvas.height = height;
+			canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+			resolve(canvas.toDataURL(format, quality));
+		};
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(/* @__PURE__ */ new Error("图片加载失败"));
+		};
+		img.src = url;
+	});
+};
+/**
+* 获取文件大小信息
+* @param {string} base64 - Base64 字符串
+* @returns {Object} 包含字节数和 KB 数
+*/
+var getBase64Size = (base64) => {
+	const bytes = Math.ceil(base64.length * 3 / 4);
+	return {
+		bytes,
+		kb: (bytes / 1024).toFixed(2)
+	};
+};
+/**
+* 验证图片 URL
+* @param {string} url - 图片 URL
+* @returns {boolean} 是否有效
+*/
+var isValidImageUrl = (url) => {
+	try {
+		const parsed = new URL(url);
+		return ["http:", "https:"].includes(parsed.protocol);
+	} catch {
+		return false;
+	}
+};
+/**
+* 从 URL 加载图片并转换为 Base64
+* @param {string} url - 图片 URL
+* @param {Object} options - 压缩选项（同 compressImage）
+* @returns {Promise<string>} Base64 字符串
+*/
+var imageUrlToBase64 = async (url, options = {}) => {
+	if (!isValidImageUrl(url)) throw new Error("无效的图片 URL");
+	try {
+		const response = await fetch(url, {
+			mode: "cors",
+			credentials: "omit"
+		});
+		if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		const blob = await response.blob();
+		if (!blob.type.startsWith("image/")) throw new Error("URL 返回的不是图片文件");
+		return await compressImage(new File([blob], "image.jpg", { type: blob.type }), options);
+	} catch (error) {
+		console.warn("Fetch 方式失败，尝试 Image 方式:", error.message);
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.crossOrigin = "anonymous";
+			img.onload = () => {
+				try {
+					const canvas = document.createElement("canvas");
+					canvas.width = img.width;
+					canvas.height = img.height;
+					canvas.getContext("2d").drawImage(img, 0, 0);
+					resolve(canvas.toDataURL(options.format || "image/jpeg", options.quality || .8));
+				} catch (err) {
+					reject(/* @__PURE__ */ new Error(`Canvas 转换失败: ${err.message}`));
+				}
+			};
+			img.onerror = () => {
+				reject(/* @__PURE__ */ new Error("无法加载图片。可能原因：\n1. URL 地址不正确\n2. 图片服务器禁止跨域访问（CORS）\n3. 网络连接失败\n\n建议：尝试下载图片后使用\"本地上传\"方式插入"));
+			};
+			img.src = url;
+		});
+	}
+};
+/**
+* 根据目标大小自动选择压缩参数
+* @param {File} file - 原始图片文件
+* @param {number} targetSizeKB - 目标大小（KB，默认 500）
+* @returns {Promise<string>} 压缩后的 Base64 字符串
+*/
+var compressToTargetSize = async (file, targetSizeKB = 500) => {
+	let quality = .8;
+	let maxWidth = 1920;
+	let attempts = 0;
+	const maxAttempts = 5;
+	while (attempts < maxAttempts) {
+		const base64 = await compressImage(file, {
+			quality,
+			maxWidth,
+			maxHeight: Math.floor(maxWidth * .75)
+		});
+		const size = getBase64Size(base64);
+		if (parseFloat(size.kb) <= targetSizeKB) return base64;
+		quality *= .7;
+		maxWidth = Math.floor(maxWidth * .8);
+		attempts++;
+	}
+	return await compressImage(file, {
+		quality: .5,
+		maxWidth: 800,
+		maxHeight: 600
+	});
+};
+//#endregion
+//#region src/components/ImageCompressor.vue
+var _hoisted_1$3 = { class: "image-compressor" };
+var _hoisted_2$3 = { class: "source-tabs" };
+var _hoisted_3$3 = {
+	key: 0,
+	class: "upload-area"
+};
+var _hoisted_4$3 = ["src"];
+var _hoisted_5$3 = {
+	key: 1,
+	class: "upload-placeholder"
+};
+var _hoisted_6$3 = {
+	key: 0,
+	class: "file-info"
+};
+var _hoisted_7$3 = { class: "file-name" };
+var _hoisted_8$2 = { class: "file-size" };
+var _hoisted_9$2 = {
+	key: 1,
+	class: "url-input-area"
+};
+var _hoisted_10$2 = { class: "input-group" };
+var _hoisted_11$2 = ["disabled"];
+var _hoisted_12$2 = {
+	key: 0,
+	class: "fa-solid fa-spinner fa-spin"
+};
+var _hoisted_13$1 = {
+	key: 1,
+	class: "fa-solid fa-download"
+};
+var _hoisted_14$1 = {
+	key: 0,
+	class: "url-preview"
+};
+var _hoisted_15$1 = ["src"];
+var _hoisted_16$1 = {
+	key: 2,
+	class: "compression-options"
+};
+var _hoisted_17$1 = { class: "compression-modes" };
+var _hoisted_18$1 = { class: "mode-option" };
+var _hoisted_19$1 = { class: "mode-option" };
+var _hoisted_20$1 = { class: "mode-option" };
+var _hoisted_21$1 = { class: "mode-content" };
+var _hoisted_22 = { class: "custom-controls" };
+var _hoisted_23 = { class: "quality-value" };
+var _hoisted_24 = {
+	key: 0,
+	class: "size-comparison"
+};
+var _hoisted_25 = { class: "size-item" };
+var _hoisted_26 = { class: "size-value" };
+var _hoisted_27 = { class: "size-item" };
+var _hoisted_28 = { class: "size-value highlight" };
+var _hoisted_29 = {
+	key: 0,
+	class: "size-item"
+};
+var _hoisted_30 = { class: "size-value success" };
+var _hoisted_31 = { class: "modal-actions" };
+var _hoisted_32 = ["disabled"];
+var _hoisted_33 = {
+	key: 0,
+	class: "fa-solid fa-spinner fa-spin"
+};
+var _hoisted_34 = {
+	key: 1,
+	class: "fa-solid fa-check"
+};
+var ImageCompressor_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageCompressor",
+	props: { modelValue: {
+		type: Boolean,
+		default: false
+	} },
+	emits: ["update:modelValue", "confirm"],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const visible = computed({
+			get: () => props.modelValue,
+			set: (val) => emit("update:modelValue", val)
+		});
+		const sourceType = /* @__PURE__ */ ref("local");
+		const selectedFile = /* @__PURE__ */ ref(null);
+		const previewUrl = /* @__PURE__ */ ref(null);
+		const imageUrl = /* @__PURE__ */ ref("");
+		const compressionMode = /* @__PURE__ */ ref("auto");
+		const customQuality = /* @__PURE__ */ ref(80);
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const isLoading = /* @__PURE__ */ ref(false);
+		const isProcessing = /* @__PURE__ */ ref(false);
+		const fileInput = /* @__PURE__ */ ref(null);
+		const originalSize = computed(() => {
+			if (!selectedFile.value) return "-";
+			return formatFileSize(selectedFile.value.size);
+		});
+		const compressedSize = /* @__PURE__ */ ref(null);
+		const savedPercent = computed(() => {
+			if (!selectedFile.value || !compressedSize.value) return null;
+			const original = parseFloat(originalSize.value);
+			const percent = ((original - parseFloat(compressedSize.value)) / original * 100).toFixed(1);
+			return percent > 0 ? `${percent}%` : null;
+		});
+		watch(visible, (newVal) => {
+			if (!newVal) resetState();
+		});
+		watch([
+			compressionMode,
+			customQuality,
+			previewUrl
+		], async () => {
+			if (previewUrl.value && selectedFile.value) await processCompression();
+		});
+		const onFileChange = (e) => {
+			const file = e.target.files[0];
+			if (file) handleFileSelect(file);
+			e.target.value = "";
+		};
+		const onDrop = (e) => {
+			isDragOver.value = false;
+			const file = e.dataTransfer.files[0];
+			if (file && file.type.startsWith("image/")) handleFileSelect(file);
+		};
+		const handleFileSelect = async (file) => {
+			selectedFile.value = file;
+			previewUrl.value = URL.createObjectURL(file);
+		};
+		const loadImageUrl = async () => {
+			if (!imageUrl.value.trim()) return;
+			isLoading.value = true;
+			try {
+				const url = imageUrl.value.trim();
+				previewUrl.value = url;
+				try {
+					const response = await fetch(url);
+					if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+					const blob = await response.blob();
+					if (!blob.type.startsWith("image/")) throw new Error("URL 返回的不是图片文件");
+					selectedFile.value = new File([blob], "image.jpg", { type: blob.type });
+					console.log("URL 图片加载成功:", blob.type, formatFileSize(blob.size));
+				} catch (fetchError) {
+					console.warn("Fetch 失败（可能是 CORS 限制）:", fetchError.message);
+					selectedFile.value = null;
+					showToast("注意：由于浏览器安全限制，将直接使用URL加载图片", "warning");
+				}
+			} catch (error) {
+				console.error("URL 加载错误:", error);
+				showToast("无法加载图片：" + error.message, "error");
+				previewUrl.value = null;
+			} finally {
+				isLoading.value = false;
+			}
+		};
+		const processCompression = async () => {
+			if (!selectedFile.value) return;
+			isProcessing.value = true;
+			try {
+				let base64;
+				switch (compressionMode.value) {
+					case "original":
+						base64 = await fileToBase64(selectedFile.value);
+						break;
+					case "auto":
+						base64 = await compressToTargetSize(selectedFile.value, 500);
+						break;
+					case "custom":
+						base64 = await compressImage(selectedFile.value, {
+							quality: customQuality.value / 100,
+							maxWidth: 1920,
+							maxHeight: 1080
+						});
+						break;
+				}
+				compressedSize.value = getBase64Size(base64).kb + " KB";
+			} catch (error) {
+				console.error("压缩失败:", error);
+				alert("图片处理失败，请重试");
+			} finally {
+				isProcessing.value = false;
+			}
+		};
+		const handleConfirm = async () => {
+			if (!previewUrl.value) return;
+			isProcessing.value = true;
+			try {
+				let base64;
+				switch (compressionMode.value) {
+					case "original":
+						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, { quality: 1 });
+						else base64 = await fileToBase64(selectedFile.value);
+						break;
+					case "auto":
+						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, {});
+						else base64 = await compressToTargetSize(selectedFile.value, 500);
+						break;
+					case "custom":
+						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, { quality: customQuality.value / 100 });
+						else base64 = await compressImage(selectedFile.value, {
+							quality: customQuality.value / 100,
+							maxWidth: 1920,
+							maxHeight: 1080
+						});
+						break;
+				}
+				emit("confirm", {
+					base64,
+					size: getBase64Size(base64),
+					mode: compressionMode.value
+				});
+				visible.value = false;
+			} catch (error) {
+				console.error("处理失败:", error);
+				alert("图片处理失败，请重试");
+			} finally {
+				isProcessing.value = false;
+			}
+		};
+		const handleCancel = () => {
+			visible.value = false;
+		};
+		const resetState = () => {
+			sourceType.value = "local";
+			selectedFile.value = null;
+			previewUrl.value = null;
+			imageUrl.value = "";
+			compressionMode.value = "auto";
+			customQuality.value = 80;
+			compressedSize.value = null;
+			isDragOver.value = false;
+		};
+		const formatFileSize = (bytes) => {
+			if (bytes < 1024) return bytes + " B";
+			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / 1048576).toFixed(2) + " MB";
+		};
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(AppModal_default, {
+				modelValue: visible.value,
+				"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => visible.value = $event),
+				title: "插入图片",
+				icon: "fa-solid fa-image",
+				size: "medium"
+			}, {
+				default: withCtx(() => [createBaseVNode("div", _hoisted_1$3, [
+					createBaseVNode("div", _hoisted_2$3, [createBaseVNode("button", {
+						class: normalizeClass(["tab-btn", { active: sourceType.value === "local" }]),
+						onClick: _cache[0] || (_cache[0] = ($event) => sourceType.value = "local")
+					}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-upload" }, null, -1), createTextVNode(" 本地上传 ", -1)])], 2), createBaseVNode("button", {
+						class: normalizeClass(["tab-btn", { active: sourceType.value === "url" }]),
+						onClick: _cache[1] || (_cache[1] = ($event) => sourceType.value = "url")
+					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-link" }, null, -1), createTextVNode(" URL 链接 ", -1)])], 2)]),
+					sourceType.value === "local" ? (openBlock(), createElementBlock("div", _hoisted_3$3, [createBaseVNode("div", {
+						class: normalizeClass(["drop-zone", {
+							"has-file": previewUrl.value,
+							"drag-over": isDragOver.value
+						}]),
+						onClick: _cache[2] || (_cache[2] = ($event) => fileInput.value.click()),
+						onDragover: _cache[3] || (_cache[3] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[4] || (_cache[4] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(onDrop, ["prevent"])
+					}, [previewUrl.value ? (openBlock(), createElementBlock("img", {
+						key: 0,
+						src: previewUrl.value,
+						class: "preview-img",
+						alt: "预览"
+					}, null, 8, _hoisted_4$3)) : (openBlock(), createElementBlock("div", _hoisted_5$3, [..._cache[13] || (_cache[13] = [
+						createBaseVNode("i", { class: "fa-solid fa-cloud-arrow-up" }, null, -1),
+						createBaseVNode("p", null, "点击或拖拽图片到此处", -1),
+						createBaseVNode("span", { class: "hint" }, "支持 JPG、PNG、WebP 格式", -1)
+					])])), createBaseVNode("input", {
+						ref_key: "fileInput",
+						ref: fileInput,
+						type: "file",
+						accept: "image/jpeg,image/png,image/webp",
+						class: "hidden-input",
+						onChange: onFileChange
+					}, null, 544)], 34), selectedFile.value ? (openBlock(), createElementBlock("div", _hoisted_6$3, [createBaseVNode("span", _hoisted_7$3, toDisplayString(selectedFile.value.name), 1), createBaseVNode("span", _hoisted_8$2, toDisplayString(formatFileSize(selectedFile.value.size)), 1)])) : createCommentVNode("", true)])) : (openBlock(), createElementBlock("div", _hoisted_9$2, [createBaseVNode("div", _hoisted_10$2, [withDirectives(createBaseVNode("input", {
+						"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => imageUrl.value = $event),
+						type: "text",
+						placeholder: "请输入图片 URL（http:// 或 https://）",
+						class: "url-input",
+						onKeyup: withKeys(loadImageUrl, ["enter"])
+					}, null, 544), [[vModelText, imageUrl.value]]), createBaseVNode("button", {
+						class: "btn btn-primary",
+						disabled: !imageUrl.value || isLoading.value,
+						onClick: loadImageUrl
+					}, [isLoading.value ? (openBlock(), createElementBlock("i", _hoisted_12$2)) : (openBlock(), createElementBlock("i", _hoisted_13$1)), createTextVNode(" " + toDisplayString(isLoading.value ? "加载中..." : "加载"), 1)], 8, _hoisted_11$2)]), previewUrl.value ? (openBlock(), createElementBlock("div", _hoisted_14$1, [createBaseVNode("img", {
+						src: previewUrl.value,
+						class: "preview-img",
+						alt: "预览"
+					}, null, 8, _hoisted_15$1)])) : createCommentVNode("", true)])),
+					previewUrl.value ? (openBlock(), createElementBlock("div", _hoisted_16$1, [
+						_cache[20] || (_cache[20] = createBaseVNode("h4", { class: "section-title" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 压缩设置 ")], -1)),
+						createBaseVNode("div", _hoisted_17$1, [
+							createBaseVNode("label", _hoisted_18$1, [withDirectives(createBaseVNode("input", {
+								"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => compressionMode.value = $event),
+								type: "radio",
+								value: "original",
+								name: "compression"
+							}, null, 512), [[vModelRadio, compressionMode.value]]), _cache[14] || (_cache[14] = createBaseVNode("div", { class: "mode-content" }, [createBaseVNode("span", { class: "mode-label" }, "保持原图"), createBaseVNode("span", { class: "mode-desc" }, "不压缩，直接使用原始图片")], -1))]),
+							createBaseVNode("label", _hoisted_19$1, [withDirectives(createBaseVNode("input", {
+								"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => compressionMode.value = $event),
+								type: "radio",
+								value: "auto",
+								name: "compression"
+							}, null, 512), [[vModelRadio, compressionMode.value]]), _cache[15] || (_cache[15] = createBaseVNode("div", { class: "mode-content" }, [createBaseVNode("span", { class: "mode-label" }, "自动压缩"), createBaseVNode("span", { class: "mode-desc" }, "压缩到 500KB 以内（推荐）")], -1))]),
+							createBaseVNode("label", _hoisted_20$1, [withDirectives(createBaseVNode("input", {
+								"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => compressionMode.value = $event),
+								type: "radio",
+								value: "custom",
+								name: "compression"
+							}, null, 512), [[vModelRadio, compressionMode.value]]), createBaseVNode("div", _hoisted_21$1, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "mode-label" }, "自定义质量", -1)), createBaseVNode("div", _hoisted_22, [withDirectives(createBaseVNode("input", {
+								"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => customQuality.value = $event),
+								type: "range",
+								min: "10",
+								max: "100",
+								step: "5",
+								class: "quality-slider"
+							}, null, 512), [[
+								vModelText,
+								customQuality.value,
+								void 0,
+								{ number: true }
+							]]), createBaseVNode("span", _hoisted_23, toDisplayString(customQuality.value) + "%", 1)])])])
+						]),
+						compressedSize.value ? (openBlock(), createElementBlock("div", _hoisted_24, [
+							createBaseVNode("div", _hoisted_25, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "size-label" }, "原始大小：", -1)), createBaseVNode("span", _hoisted_26, toDisplayString(originalSize.value), 1)]),
+							createBaseVNode("div", _hoisted_27, [_cache[18] || (_cache[18] = createBaseVNode("span", { class: "size-label" }, "压缩后：", -1)), createBaseVNode("span", _hoisted_28, toDisplayString(compressedSize.value), 1)]),
+							savedPercent.value ? (openBlock(), createElementBlock("div", _hoisted_29, [_cache[19] || (_cache[19] = createBaseVNode("span", { class: "size-label" }, "节省：", -1)), createBaseVNode("span", _hoisted_30, toDisplayString(savedPercent.value), 1)])) : createCommentVNode("", true)
+						])) : createCommentVNode("", true)
+					])) : createCommentVNode("", true),
+					createBaseVNode("div", _hoisted_31, [createBaseVNode("button", {
+						class: "btn",
+						onClick: handleCancel
+					}, "取消"), createBaseVNode("button", {
+						class: "btn btn-primary",
+						disabled: !previewUrl.value || isProcessing.value,
+						onClick: handleConfirm
+					}, [isProcessing.value ? (openBlock(), createElementBlock("i", _hoisted_33)) : (openBlock(), createElementBlock("i", _hoisted_34)), createTextVNode(" " + toDisplayString(isProcessing.value ? "处理中..." : "确认插入"), 1)], 8, _hoisted_32)])
+				])]),
+				_: 1
+			}, 8, ["modelValue"]);
+		};
+	}
+}, [["__scopeId", "data-v-82b8ee30"]]);
+//#endregion
+//#region src/components/ImageViewer.vue
+var _hoisted_1$2 = ["disabled"];
+var _hoisted_2$2 = ["disabled"];
+var _hoisted_3$2 = ["src"];
+var _hoisted_4$2 = { class: "toolbar-left" };
+var _hoisted_5$2 = { class: "image-counter" };
+var _hoisted_6$2 = { class: "toolbar-center" };
+var _hoisted_7$2 = { class: "zoom-level" };
+var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageViewer",
+	props: {
+		modelValue: {
+			type: Boolean,
+			default: false
+		},
+		images: {
+			type: Array,
+			default: () => []
+		},
+		initialIndex: {
+			type: Number,
+			default: 0
+		}
+	},
+	emits: ["update:modelValue", "close"],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const visible = computed({
+			get: () => props.modelValue,
+			set: (val) => emit("update:modelValue", val)
+		});
+		const currentIndex = /* @__PURE__ */ ref(props.initialIndex);
+		const currentImage = computed(() => props.images[currentIndex.value] || "");
+		const scale = /* @__PURE__ */ ref(1);
+		const rotation = /* @__PURE__ */ ref(0);
+		const translateX = /* @__PURE__ */ ref(0);
+		const translateY = /* @__PURE__ */ ref(0);
+		const isDragging = /* @__PURE__ */ ref(false);
+		const dragStartX = /* @__PURE__ */ ref(0);
+		const dragStartY = /* @__PURE__ */ ref(0);
+		const transformStyle = computed(() => ({ transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotation.value}deg)` }));
+		watch(() => props.initialIndex, (newIndex) => {
+			currentIndex.value = newIndex;
+			resetZoom();
+		});
+		watch(visible, (isVisible) => {
+			if (isVisible) {
+				resetZoom();
+				document.body.style.overflow = "hidden";
+			} else document.body.style.overflow = "";
+		});
+		const close = () => {
+			visible.value = false;
+			emit("close");
+		};
+		const handleClose = () => {
+			close();
+		};
+		const prevImage = () => {
+			if (currentIndex.value > 0) {
+				currentIndex.value--;
+				resetZoom();
+			}
+		};
+		const nextImage = () => {
+			if (currentIndex.value < props.images.length - 1) {
+				currentIndex.value++;
+				resetZoom();
+			}
+		};
+		const zoomIn = () => {
+			scale.value = Math.min(scale.value + .25, 5);
+		};
+		const zoomOut = () => {
+			scale.value = Math.max(scale.value - .25, .25);
+		};
+		const resetZoom = () => {
+			scale.value = 1;
+			rotation.value = 0;
+			translateX.value = 0;
+			translateY.value = 0;
+		};
+		const handleWheel = (e) => {
+			e.preventDefault();
+			if (e.deltaY < 0) zoomIn();
+			else zoomOut();
+		};
+		const rotateLeft = () => {
+			rotation.value -= 90;
+		};
+		const rotateRight = () => {
+			rotation.value += 90;
+		};
+		const startDrag = (e) => {
+			if (scale.value > 1) {
+				isDragging.value = true;
+				dragStartX.value = e.clientX - translateX.value;
+				dragStartY.value = e.clientY - translateY.value;
+				document.addEventListener("mousemove", onDrag);
+				document.addEventListener("mouseup", stopDrag);
+			}
+		};
+		const onDrag = (e) => {
+			if (isDragging.value) {
+				translateX.value = e.clientX - dragStartX.value;
+				translateY.value = e.clientY - dragStartY.value;
+			}
+		};
+		const stopDrag = () => {
+			isDragging.value = false;
+			document.removeEventListener("mousemove", onDrag);
+			document.removeEventListener("mouseup", stopDrag);
+		};
+		const downloadImage = () => {
+			if (!currentImage.value) return;
+			const link = document.createElement("a");
+			link.href = currentImage.value;
+			link.download = `image_${Date.now()}.png`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		};
+		const handleKeydown = (e) => {
+			if (!visible.value) return;
+			switch (e.key) {
+				case "Escape":
+					close();
+					break;
+				case "ArrowLeft":
+					prevImage();
+					break;
+				case "ArrowRight":
+					nextImage();
+					break;
+				case "+":
+				case "=":
+					zoomIn();
+					break;
+				case "-":
+					zoomOut();
+					break;
+				case "0":
+					resetZoom();
+					break;
+				case "d":
+				case "D":
+					downloadImage();
+					break;
+			}
+		};
+		onMounted(() => {
+			document.addEventListener("keydown", handleKeydown);
+		});
+		onUnmounted(() => {
+			document.removeEventListener("keydown", handleKeydown);
+			document.body.style.overflow = "";
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(Teleport, { to: "body" }, [createVNode(Transition, { name: "viewer-fade" }, {
+				default: withCtx(() => [visible.value ? (openBlock(), createElementBlock("div", {
+					key: 0,
+					class: "image-viewer",
+					onClick: handleClose
+				}, [
+					_cache[12] || (_cache[12] = createBaseVNode("div", { class: "viewer-overlay" }, null, -1)),
+					createBaseVNode("button", {
+						class: "viewer-close",
+						onClick: withModifiers(close, ["stop"]),
+						title: "关闭 (Esc)"
+					}, [..._cache[3] || (_cache[3] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])]),
+					__props.images.length > 1 ? (openBlock(), createElementBlock("button", {
+						key: 0,
+						class: "viewer-nav viewer-prev",
+						onClick: withModifiers(prevImage, ["stop"]),
+						disabled: currentIndex.value === 0,
+						title: "上一张 (←)"
+					}, [..._cache[4] || (_cache[4] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])], 8, _hoisted_1$2)) : createCommentVNode("", true),
+					__props.images.length > 1 ? (openBlock(), createElementBlock("button", {
+						key: 1,
+						class: "viewer-nav viewer-next",
+						onClick: withModifiers(nextImage, ["stop"]),
+						disabled: currentIndex.value === __props.images.length - 1,
+						title: "下一张 (→)"
+					}, [..._cache[5] || (_cache[5] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])], 8, _hoisted_2$2)) : createCommentVNode("", true),
+					createBaseVNode("div", {
+						class: "viewer-content",
+						onClick: _cache[1] || (_cache[1] = withModifiers(() => {}, ["stop"]))
+					}, [createBaseVNode("div", {
+						class: "image-wrapper",
+						style: normalizeStyle(transformStyle.value)
+					}, [createBaseVNode("img", {
+						src: currentImage.value,
+						class: "viewer-image",
+						onWheel: handleWheel,
+						onMousedown: startDrag,
+						onDragstart: _cache[0] || (_cache[0] = withModifiers(() => {}, ["prevent"]))
+					}, null, 40, _hoisted_3$2)], 4)]),
+					createBaseVNode("div", {
+						class: "viewer-toolbar",
+						onClick: _cache[2] || (_cache[2] = withModifiers(() => {}, ["stop"]))
+					}, [
+						createBaseVNode("div", _hoisted_4$2, [createBaseVNode("span", _hoisted_5$2, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(__props.images.length), 1)]),
+						createBaseVNode("div", _hoisted_6$2, [
+							createBaseVNode("button", {
+								class: "tool-btn",
+								onClick: zoomOut,
+								title: "缩小 (-)"
+							}, [..._cache[6] || (_cache[6] = [createBaseVNode("i", { class: "fa-solid fa-magnifying-glass-minus" }, null, -1)])]),
+							createBaseVNode("span", _hoisted_7$2, toDisplayString(Math.round(scale.value * 100)) + "%", 1),
+							createBaseVNode("button", {
+								class: "tool-btn",
+								onClick: zoomIn,
+								title: "放大 (+)"
+							}, [..._cache[7] || (_cache[7] = [createBaseVNode("i", { class: "fa-solid fa-magnifying-glass-plus" }, null, -1)])]),
+							createBaseVNode("button", {
+								class: "tool-btn",
+								onClick: resetZoom,
+								title: "重置大小 (0)"
+							}, [..._cache[8] || (_cache[8] = [createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)])]),
+							createBaseVNode("button", {
+								class: "tool-btn",
+								onClick: rotateLeft,
+								title: "向左旋转"
+							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1)])]),
+							createBaseVNode("button", {
+								class: "tool-btn",
+								onClick: rotateRight,
+								title: "向右旋转"
+							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])])
+						]),
+						createBaseVNode("div", { class: "toolbar-right" }, [createBaseVNode("button", {
+							class: "tool-btn primary",
+							onClick: downloadImage,
+							title: "下载 (D)"
+						}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1), createBaseVNode("span", null, "下载", -1)])])])
+					])
+				])) : createCommentVNode("", true)]),
+				_: 1
+			})]);
+		};
+	}
+}, [["__scopeId", "data-v-350cd48f"]]);
+//#endregion
+//#region src/views/MindMap.vue
+var _hoisted_1$1 = { class: "mindmap-container" };
+var _hoisted_2$1 = { class: "toolbar" };
+var _hoisted_3$1 = { class: "toolbar-left" };
+var _hoisted_4$1 = { class: "layout-selector" };
+var _hoisted_5$1 = { class: "toolbar-right" };
+var _hoisted_6$1 = {
+	key: 0,
+	class: "style-panel"
+};
+var _hoisted_7$1 = { class: "panel-header" };
+var _hoisted_8$1 = { class: "panel-content" };
+var _hoisted_9$1 = { class: "style-group" };
+var _hoisted_10$1 = { class: "color-picker-wrapper" };
+var _hoisted_11$1 = { class: "color-value" };
+var _hoisted_12$1 = { class: "style-group" };
+var _hoisted_13 = { class: "color-picker-wrapper" };
+var _hoisted_14 = { class: "color-value" };
+var _hoisted_15 = { class: "style-group" };
+var _hoisted_16 = { class: "color-picker-wrapper" };
+var _hoisted_17 = { class: "color-value" };
+var _hoisted_18 = { class: "style-group" };
+var _hoisted_19 = { class: "range-value" };
+var _hoisted_20 = { class: "style-group" };
+var _hoisted_21 = { class: "range-value" };
+var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "MindMap",
+	setup(__props) {
+		const { showToast } = useToast();
+		const canvasWrapper = /* @__PURE__ */ ref(null);
+		const mindMapInstance = /* @__PURE__ */ ref(null);
+		const currentLayout = /* @__PURE__ */ ref("logicalStructure");
+		const showStylePanel = /* @__PURE__ */ ref(false);
+		const showImageCompressor = /* @__PURE__ */ ref(false);
+		const fileInput = /* @__PURE__ */ ref(null);
+		const selectedNode = /* @__PURE__ */ ref(null);
+		const showImageViewer = /* @__PURE__ */ ref(false);
+		const viewerImages = /* @__PURE__ */ ref([]);
+		const viewerInitialIndex = /* @__PURE__ */ ref(0);
+		const nodeStyle = /* @__PURE__ */ ref({
+			fillColor: "#ffffff",
+			textColor: "#333333",
+			borderColor: "#4a90e2",
+			borderWidth: 2,
+			borderRadius: 5
+		});
+		onMounted(async () => {
+			await nextTick$1();
+			initMindMap();
+		});
+		onUnmounted(() => {
+			if (mindMapInstance.value) mindMapInstance.value.destroy();
+		});
+		const initMindMap = () => {
+			const container = document.getElementById("mindMapContainer");
+			if (!container) return;
+			mindMapInstance.value = new MindMap({
+				el: container,
+				data: {
+					data: {
+						text: "中心主题",
+						image: "",
+						expand: true
+					},
+					children: [{
+						data: {
+							text: "分支 1",
+							image: ""
+						},
+						children: []
+					}, {
+						data: {
+							text: "分支 2",
+							image: ""
+						},
+						children: []
+					}]
+				},
+				theme: "default",
+				layout: currentLayout.value,
+				enableFreeDrag: true,
+				enableDblclickResetTransform: true,
+				mousewheelAction: "zoom",
+				customNoteContentShow: null,
+				fitPadding: 50
+			});
+			mindMapInstance.value.on("keydown", handleKeydown);
+			mindMapInstance.value.on("node_click", handleNodeClick);
+			mindMapInstance.value.on("node_img_dblclick", handleImageClick);
+			mindMapInstance.value.on("svg_mousedown", () => {
+				selectedNode.value = null;
+			});
+			showToast("思维导图已就绪", "success");
+		};
+		/**
+		* 收集所有节点的图片
+		*/
+		const collectAllImages = () => {
+			const images = [];
+			if (!mindMapInstance.value) return images;
+			const traverse = (node) => {
+				const data = node.getData();
+				if (data && data.image) images.push(data.image);
+				if (node.children && node.children.length > 0) node.children.forEach((child) => traverse(child));
+			};
+			const root = mindMapInstance.value.renderer.root;
+			if (root) traverse(root);
+			return images;
+		};
+		/**
+		* 处理图片点击事件
+		*/
+		const handleImageClick = (node, e) => {
+			console.log("图片被点击:", node);
+			const allImages = collectAllImages();
+			if (allImages.length === 0) {
+				showToast("没有找到图片", "warning");
+				return;
+			}
+			const currentImage = node.getData()?.image;
+			let initialIndex = 0;
+			if (currentImage) {
+				initialIndex = allImages.indexOf(currentImage);
+				if (initialIndex === -1) initialIndex = 0;
+			}
+			viewerImages.value = allImages;
+			viewerInitialIndex.value = initialIndex;
+			showImageViewer.value = true;
+		};
+		const handleViewerClose = () => {
+			console.log("图片查看器关闭");
+		};
+		const addNode = () => {
+			if (!mindMapInstance.value) return;
+			try {
+				mindMapInstance.value.execCommand("INSERT_CHILD_NODE");
+				showToast("已添加子节点", "success");
+			} catch (error) {
+				console.error("添加节点失败:", error);
+				showToast("添加节点失败：" + error.message, "error");
+			}
+		};
+		const deleteNode = () => {
+			if (!mindMapInstance.value) return;
+			const node = selectedNode.value;
+			if (node) {
+				if (node.isRoot) {
+					showToast("不能删除根节点", "warning");
+					return;
+				}
+				node.remove();
+				selectedNode.value = null;
+				showToast("已删除节点", "success");
+			} else showToast("请先选择一个节点", "warning");
+		};
+		const handleNodeClick = (node, e) => {
+			console.log("节点点击:", node);
+			selectedNode.value = node;
+			showToast("已选中节点", "success");
+		};
+		const handleKeydown = (e) => {
+			if (e.key === "Tab") {
+				e.preventDefault();
+				addNode();
+			}
+			if (e.key === "Delete" || e.key === "Backspace") {
+				if (selectedNode.value && !selectedNode.value.isRoot) {
+					e.preventDefault();
+					deleteNode();
+				}
+			}
+			if (e.key === "Enter") {
+				if (selectedNode.value) {
+					e.preventDefault();
+					selectedNode.value.beginTextEdit();
+				}
+			}
+		};
+		const changeLayout = () => {
+			if (!mindMapInstance.value) return;
+			mindMapInstance.value.setLayout(currentLayout.value);
+			showToast(`已切换到${getLayoutName(currentLayout.value)}`, "success");
+		};
+		const getLayoutName = (layout) => {
+			return {
+				logicalStructure: "逻辑结构图",
+				mindMap: "思维导图",
+				organizationStructure: "组织结构图",
+				verticalTimeline: "垂直时间轴",
+				horizontalTimeline: "水平时间轴"
+			}[layout] || layout;
+		};
+		const showImageDialog = () => {
+			if (!selectedNode.value) {
+				showToast("请先点击选择一个节点", "warning");
+				return;
+			}
+			showImageCompressor.value = true;
+		};
+		const handleImageConfirm = ({ base64, size }) => {
+			if (!mindMapInstance.value || !selectedNode.value) {
+				showToast("请先选择一个节点", "warning");
+				return;
+			}
+			try {
+				console.log("开始插入图片...");
+				const imgData = {
+					url: base64,
+					width: 200,
+					height: 150
+				};
+				console.log("准备插入的图片数据:", imgData);
+				mindMapInstance.value.execCommand("SET_NODE_IMAGE", selectedNode.value, imgData);
+				console.log("SET_NODE_IMAGE 命令执行成功");
+				showToast(`图片已插入 (${size})`, "success");
+			} catch (error) {
+				console.error("插入图片失败:", error);
+				showToast("插入图片失败：" + error.message, "error");
+			}
+		};
+		const applyNodeStyle = () => {
+			if (!mindMapInstance.value || !selectedNode.value) {
+				showToast("请先选择一个节点", "warning");
+				return;
+			}
+			selectedNode.value.setStyle({
+				fill: nodeStyle.value.fillColor,
+				color: nodeStyle.value.textColor,
+				borderColor: nodeStyle.value.borderColor,
+				borderWidth: nodeStyle.value.borderWidth,
+				borderRadius: nodeStyle.value.borderRadius
+			});
+		};
+		const resetStyle = () => {
+			nodeStyle.value = {
+				fillColor: "#ffffff",
+				textColor: "#333333",
+				borderColor: "#4a90e2",
+				borderWidth: 2,
+				borderRadius: 5
+			};
+			if (mindMapInstance.value && selectedNode.value) {
+				selectedNode.value.setStyle({});
+				showToast("样式已重置", "success");
+			}
+		};
+		const exportJSON = () => {
+			if (!mindMapInstance.value) return;
+			const data = mindMapInstance.value.getData();
+			const jsonStr = JSON.stringify(data, null, 2);
+			const blob = new Blob([jsonStr], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `mindmap_${Date.now()}.json`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			showToast("已导出 JSON 文件", "success");
+		};
+		const importJSON = () => {
+			if (fileInput.value) fileInput.value.click();
+		};
+		const handleFileImport = (e) => {
+			const file = e.target.files[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = (event) => {
+				try {
+					const data = JSON.parse(event.target.result);
+					if (!data.data || !data.data.text) throw new Error("无效的思维导图数据");
+					if (mindMapInstance.value) {
+						mindMapInstance.value.setData(data);
+						showToast("已导入思维导图", "success");
+					}
+				} catch (error) {
+					console.error("导入失败:", error);
+					showToast("导入失败：" + error.message, "error");
+				}
+			};
+			reader.readAsText(file);
+			e.target.value = "";
+		};
+		const exportImage = async () => {
+			if (!mindMapInstance.value) return;
+			try {
+				const result = await mindMapInstance.value.export("png", {
+					padding: 20,
+					bg: "#ffffff"
+				});
+				console.log("导出结果类型:", typeof result);
+				console.log("导出结果:", result);
+				let blob;
+				let url;
+				if (typeof result === "string") {
+					blob = await (await fetch(result)).blob();
+					url = URL.createObjectURL(blob);
+				} else if (result instanceof Blob) url = URL.createObjectURL(result);
+				else if (result && result.data) if (typeof result.data === "string") {
+					blob = await (await fetch(result.data)).blob();
+					url = URL.createObjectURL(blob);
+				} else throw new Error("不支持的导出格式");
+				else throw new Error("未知的导出结果格式");
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `mindmap_${Date.now()}.png`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				showToast("已导出 PNG 图片", "success");
+			} catch (error) {
+				console.error("导出失败:", error);
+				showToast("导出失败：" + error.message, "error");
+			}
+		};
+		const goBack = () => {
+			window.location.hash = "#";
+		};
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$1, [
+				createBaseVNode("div", _hoisted_2$1, [createBaseVNode("div", _hoisted_3$1, [
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: goBack,
+						title: "返回主页"
+					}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-arrow-left" }, null, -1)])]),
+					_cache[16] || (_cache[16] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: addNode,
+						title: "添加子节点 (Tab)"
+					}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-plus" }, null, -1), createBaseVNode("span", null, "添加节点", -1)])]),
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: deleteNode,
+						title: "删除节点 (Delete)"
+					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createBaseVNode("span", null, "删除", -1)])]),
+					_cache[17] || (_cache[17] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					createBaseVNode("div", _hoisted_4$1, [_cache[14] || (_cache[14] = createBaseVNode("label", { class: "label" }, "布局：", -1)), withDirectives(createBaseVNode("select", {
+						"onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => currentLayout.value = $event),
+						onChange: changeLayout,
+						class: "select-input"
+					}, [..._cache[13] || (_cache[13] = [createStaticVNode("<option value=\"logicalStructure\" data-v-ef1bbe61>逻辑结构图</option><option value=\"mindMap\" data-v-ef1bbe61>思维导图</option><option value=\"organizationStructure\" data-v-ef1bbe61>组织结构图</option><option value=\"verticalTimeline\" data-v-ef1bbe61>垂直时间轴</option><option value=\"horizontalTimeline\" data-v-ef1bbe61>水平时间轴</option>", 5)])], 544), [[vModelSelect, currentLayout.value]])]),
+					createBaseVNode("div", { class: normalizeClass(["selection-indicator", { active: selectedNode.value }]) }, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-circle-check" }, null, -1)), createBaseVNode("span", null, toDisplayString(selectedNode.value ? "已选中节点" : "未选择节点"), 1)], 2)
+				]), createBaseVNode("div", _hoisted_5$1, [
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: showImageDialog,
+						title: "插入图片"
+					}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1), createBaseVNode("span", null, "插入图片", -1)])]),
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: _cache[1] || (_cache[1] = ($event) => showStylePanel.value = !showStylePanel.value),
+						title: "节点样式"
+					}, [..._cache[19] || (_cache[19] = [createBaseVNode("i", { class: "fa-solid fa-palette" }, null, -1), createBaseVNode("span", null, "样式", -1)])]),
+					_cache[23] || (_cache[23] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: exportJSON,
+						title: "导出 JSON"
+					}, [..._cache[20] || (_cache[20] = [createBaseVNode("i", { class: "fa-solid fa-file-export" }, null, -1), createBaseVNode("span", null, "导出 JSON", -1)])]),
+					createBaseVNode("button", {
+						class: "tool-btn",
+						onClick: importJSON,
+						title: "导入 JSON"
+					}, [..._cache[21] || (_cache[21] = [createBaseVNode("i", { class: "fa-solid fa-file-import" }, null, -1), createBaseVNode("span", null, "导入 JSON", -1)])]),
+					createBaseVNode("button", {
+						class: "tool-btn btn-primary",
+						onClick: exportImage,
+						title: "导出为图片"
+					}, [..._cache[22] || (_cache[22] = [createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1), createBaseVNode("span", null, "导出 PNG", -1)])])
+				])]),
+				createBaseVNode("div", {
+					class: "canvas-wrapper",
+					ref_key: "canvasWrapper",
+					ref: canvasWrapper
+				}, [..._cache[24] || (_cache[24] = [createBaseVNode("div", {
+					id: "mindMapContainer",
+					class: "mindmap-canvas"
+				}, null, -1)])], 512),
+				showStylePanel.value ? (openBlock(), createElementBlock("div", _hoisted_6$1, [createBaseVNode("div", _hoisted_7$1, [_cache[26] || (_cache[26] = createBaseVNode("h3", null, [createBaseVNode("i", { class: "fa-solid fa-palette" }), createTextVNode(" 节点样式")], -1)), createBaseVNode("button", {
+					class: "close-btn",
+					onClick: _cache[2] || (_cache[2] = ($event) => showStylePanel.value = false)
+				}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_8$1, [
+					createBaseVNode("div", _hoisted_9$1, [_cache[27] || (_cache[27] = createBaseVNode("label", { class: "style-label" }, "背景颜色", -1)), createBaseVNode("div", _hoisted_10$1, [withDirectives(createBaseVNode("input", {
+						"onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => nodeStyle.value.fillColor = $event),
+						type: "color",
+						class: "color-input",
+						onChange: applyNodeStyle
+					}, null, 544), [[vModelText, nodeStyle.value.fillColor]]), createBaseVNode("span", _hoisted_11$1, toDisplayString(nodeStyle.value.fillColor), 1)])]),
+					createBaseVNode("div", _hoisted_12$1, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "style-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_13, [withDirectives(createBaseVNode("input", {
+						"onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => nodeStyle.value.textColor = $event),
+						type: "color",
+						class: "color-input",
+						onChange: applyNodeStyle
+					}, null, 544), [[vModelText, nodeStyle.value.textColor]]), createBaseVNode("span", _hoisted_14, toDisplayString(nodeStyle.value.textColor), 1)])]),
+					createBaseVNode("div", _hoisted_15, [_cache[29] || (_cache[29] = createBaseVNode("label", { class: "style-label" }, "边框颜色", -1)), createBaseVNode("div", _hoisted_16, [withDirectives(createBaseVNode("input", {
+						"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => nodeStyle.value.borderColor = $event),
+						type: "color",
+						class: "color-input",
+						onChange: applyNodeStyle
+					}, null, 544), [[vModelText, nodeStyle.value.borderColor]]), createBaseVNode("span", _hoisted_17, toDisplayString(nodeStyle.value.borderColor), 1)])]),
+					createBaseVNode("div", _hoisted_18, [
+						_cache[30] || (_cache[30] = createBaseVNode("label", { class: "style-label" }, "边框宽度", -1)),
+						withDirectives(createBaseVNode("input", {
+							"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => nodeStyle.value.borderWidth = $event),
+							type: "range",
+							min: "0",
+							max: "10",
+							step: "1",
+							class: "range-input",
+							onInput: applyNodeStyle
+						}, null, 544), [[
+							vModelText,
+							nodeStyle.value.borderWidth,
+							void 0,
+							{ number: true }
+						]]),
+						createBaseVNode("span", _hoisted_19, toDisplayString(nodeStyle.value.borderWidth) + "px", 1)
+					]),
+					createBaseVNode("div", _hoisted_20, [
+						_cache[31] || (_cache[31] = createBaseVNode("label", { class: "style-label" }, "圆角半径", -1)),
+						withDirectives(createBaseVNode("input", {
+							"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => nodeStyle.value.borderRadius = $event),
+							type: "range",
+							min: "0",
+							max: "20",
+							step: "2",
+							class: "range-input",
+							onInput: applyNodeStyle
+						}, null, 544), [[
+							vModelText,
+							nodeStyle.value.borderRadius,
+							void 0,
+							{ number: true }
+						]]),
+						createBaseVNode("span", _hoisted_21, toDisplayString(nodeStyle.value.borderRadius) + "px", 1)
+					]),
+					createBaseVNode("button", {
+						class: "btn btn-block",
+						onClick: resetStyle
+					}, [..._cache[32] || (_cache[32] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 重置样式 ", -1)])])
+				])])) : createCommentVNode("", true),
+				createVNode(ImageCompressor_default, {
+					modelValue: showImageCompressor.value,
+					"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => showImageCompressor.value = $event),
+					onConfirm: handleImageConfirm
+				}, null, 8, ["modelValue"]),
+				createVNode(ImageViewer_default, {
+					modelValue: showImageViewer.value,
+					"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => showImageViewer.value = $event),
+					images: viewerImages.value,
+					"initial-index": viewerInitialIndex.value,
+					onClose: handleViewerClose
+				}, null, 8, [
+					"modelValue",
+					"images",
+					"initial-index"
+				]),
+				createBaseVNode("input", {
+					ref_key: "fileInput",
+					ref: fileInput,
+					type: "file",
+					accept: ".json",
+					class: "hidden-input",
+					onChange: handleFileImport
+				}, null, 544)
+			]);
+		};
+	}
+}, [["__scopeId", "data-v-ef1bbe61"]]);
+//#endregion
+//#region src/composables/useTheme.js
+var THEME_KEY = "subtitle-extractor-theme";
+var currentTheme = /* @__PURE__ */ ref("dark");
+/**
+* 主题切换组合式函数
+* 支持暗色/亮色主题切换，持久化到 localStorage
+*/
+function useTheme() {
+	const initTheme = () => {
+		const savedTheme = localStorage.getItem(THEME_KEY);
+		if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) currentTheme.value = savedTheme;
+		else currentTheme.value = "dark";
+		applyTheme(currentTheme.value);
+	};
+	const applyTheme = (theme) => {
+		if (theme === "light") document.documentElement.setAttribute("data-theme", "light");
+		else document.documentElement.removeAttribute("data-theme");
+	};
+	const toggleTheme = () => {
+		currentTheme.value = currentTheme.value === "dark" ? "light" : "dark";
+		applyTheme(currentTheme.value);
+		localStorage.setItem(THEME_KEY, currentTheme.value);
+	};
+	const isLight = () => currentTheme.value === "light";
+	const getTheme = () => currentTheme.value;
+	return {
+		currentTheme,
+		initTheme,
+		toggleTheme,
+		isLight,
+		getTheme
+	};
+}
+//#endregion
+//#region src/App.vue
+var _hoisted_1 = { class: "page-content" };
+var _hoisted_2 = { class: "entry-container" };
+var _hoisted_3 = { class: "feature-group" };
+var _hoisted_4 = { class: "entry-grid" };
+var _hoisted_5 = { class: "feature-group" };
+var _hoisted_6 = { class: "entry-grid" };
+var _hoisted_7 = { class: "feature-group" };
+var _hoisted_8 = { class: "entry-grid" };
+var _hoisted_9 = { class: "feature-group" };
+var _hoisted_10 = { class: "entry-grid" };
+var _hoisted_11 = ["title"];
+var _hoisted_12 = { class: "toast-container" };
+//#endregion
+//#region src/main.js
+createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "App",
+	setup(__props) {
+		const showVideo = /* @__PURE__ */ ref(false);
+		const showImageSub = /* @__PURE__ */ ref(false);
+		const showStitch = /* @__PURE__ */ ref(false);
+		const showSeg = /* @__PURE__ */ ref(false);
+		const showGif = /* @__PURE__ */ ref(false);
+		const showMindMap = /* @__PURE__ */ ref(false);
+		const { toasts, showToast } = useToast();
+		const toastIcon = (type) => {
+			if (type === "success") return "fa-solid fa-circle-check";
+			if (type === "error") return "fa-solid fa-circle-exclamation";
+			return "fa-solid fa-circle-info";
+		};
+		const { initTheme, toggleTheme, isLight } = useTheme();
+		const goGithub = () => {
+			window.open("https://github.com/lovemyFamilyFovever/subtitle_extractor", "_blank");
+		};
+		onMounted(() => {
+			initTheme();
+			document.addEventListener("keydown", handleGlobalKeydown);
+		});
+		onUnmounted(() => {
+			document.removeEventListener("keydown", handleGlobalKeydown);
+		});
+		const handleGlobalKeydown = (e) => {
+			if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+				e.preventDefault();
+				const saveBtn = document.querySelector(".modal .btn-primary");
+				if (saveBtn && !saveBtn.disabled) saveBtn.click();
+			}
+		};
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", null, [_cache[27] || (_cache[27] = createBaseVNode("div", { class: "page-bg" }, null, -1)), createBaseVNode("main", _hoisted_1, [
+				_cache[24] || (_cache[24] = createBaseVNode("h1", { class: "page-title" }, "工具箱", -1)),
+				_cache[25] || (_cache[25] = createBaseVNode("p", { class: "page-desc" }, "视频字幕提取 · 动图剪辑 · 图片处理 · 思维导图", -1)),
+				_cache[26] || (_cache[26] = createBaseVNode("a", {
+					href: "https://github.com/lovemyFamilyFovever/subtitle_extractor",
+					target: "_blank",
+					rel: "noopener noreferrer",
+					class: "github-star-btn",
+					title: "在 GitHub 上查看项目"
+				}, [createBaseVNode("i", { class: "fa-brands fa-github" }), createBaseVNode("span", null, "Star on GitHub")], -1)),
+				createBaseVNode("div", _hoisted_2, [
+					createBaseVNode("div", _hoisted_3, [_cache[15] || (_cache[15] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-closed-captioning" }), createTextVNode(" 字幕处理 ")], -1)), createBaseVNode("div", _hoisted_4, [createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
+					}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-film\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>视频字幕提取</span><span class=\"entry-desc\" data-v-3bf1d84a>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])]), createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
+					}, [..._cache[14] || (_cache[14] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-scissors\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>图片截取字幕</span><span class=\"entry-desc\" data-v-3bf1d84a>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
+					createBaseVNode("div", _hoisted_5, [_cache[18] || (_cache[18] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-image" }), createTextVNode(" 图片处理 ")], -1)), createBaseVNode("div", _hoisted_6, [createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
+					}, [..._cache[16] || (_cache[16] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-table-cells\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>图片拼接</span><span class=\"entry-desc\" data-v-3bf1d84a>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])]), createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
+					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-grip\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-3bf1d84a>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
+					createBaseVNode("div", _hoisted_7, [_cache[20] || (_cache[20] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-clapperboard" }), createTextVNode(" 动图剪辑 ")], -1)), createBaseVNode("div", _hoisted_8, [createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[4] || (_cache[4] = ($event) => showGif.value = true)
+					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-film\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>视频剪辑转GIF</span><span class=\"entry-desc\" data-v-3bf1d84a>选择视频片段，自定义参数，生成高质量GIF动图</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
+					createBaseVNode("div", _hoisted_9, [_cache[22] || (_cache[22] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-diagram-project" }), createTextVNode(" 思维导图 ")], -1)), createBaseVNode("div", _hoisted_10, [createBaseVNode("button", {
+						class: "entry-card",
+						onClick: _cache[5] || (_cache[5] = ($event) => showMindMap.value = true)
+					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-brain\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>思维导图</span><span class=\"entry-desc\" data-v-3bf1d84a>创建和编辑思维导图，支持插入图片、导出 PNG/SVG</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])])
+				]),
+				createBaseVNode("button", {
+					class: "theme-toggle",
+					onClick: _cache[6] || (_cache[6] = (...args) => unref(toggleTheme) && unref(toggleTheme)(...args)),
+					title: unref(isLight)() ? "切换到暗色主题" : "切换到亮色主题",
+					"aria-label": "切换主题"
+				}, [createBaseVNode("i", { class: normalizeClass(unref(isLight)() ? "fa-solid fa-sun" : "fa-solid fa-moon") }, null, 2)], 8, _hoisted_11),
+				createBaseVNode("button", {
+					class: "go-github",
+					onClick: goGithub,
+					title: "访问github主页"
+				}, [..._cache[23] || (_cache[23] = [createBaseVNode("svg", {
+					role: "img",
+					viewBox: "0 0 24 24",
+					xmlns: "http://www.w3.org/2000/svg"
+				}, [createBaseVNode("title", null, "GitHub"), createBaseVNode("path", { d: "M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" })], -1)])]),
+				(openBlock(), createBlock(Teleport, { to: "body" }, [createBaseVNode("div", _hoisted_12, [createVNode(TransitionGroup, { name: "toast" }, {
+					default: withCtx(() => [(openBlock(true), createElementBlock(Fragment$1, null, renderList(unref(toasts), (toast) => {
+						return openBlock(), createElementBlock("div", {
+							key: toast.id,
+							class: normalizeClass(["toast", [toast.type, { leaving: toast.leaving }]])
+						}, [createBaseVNode("i", { class: normalizeClass(toastIcon(toast.type)) }, null, 2), createTextVNode(" " + toDisplayString(toast.message), 1)], 2);
+					}), 128))]),
+					_: 1
+				})])])),
+				createVNode(AppModal_default, {
+					modelValue: showVideo.value,
+					"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => showVideo.value = $event),
+					title: "视频字幕提取",
+					icon: "fa-solid fa-film"
+				}, {
+					default: withCtx(() => [showVideo.value ? (openBlock(), createBlock(VideoSubtitle_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"]),
+				createVNode(AppModal_default, {
+					modelValue: showImageSub.value,
+					"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => showImageSub.value = $event),
+					title: "图片截取字幕",
+					icon: "fa-solid fa-scissors"
+				}, {
+					default: withCtx(() => [showImageSub.value ? (openBlock(), createBlock(ImageSubtitle_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"]),
+				createVNode(AppModal_default, {
+					modelValue: showStitch.value,
+					"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => showStitch.value = $event),
+					title: "图片拼接",
+					icon: "fa-solid fa-table-cells"
+				}, {
+					default: withCtx(() => [showStitch.value ? (openBlock(), createBlock(ImageStitch_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"]),
+				createVNode(AppModal_default, {
+					modelValue: showSeg.value,
+					"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => showSeg.value = $event),
+					title: "智能切片",
+					icon: "fa-solid fa-grip"
+				}, {
+					default: withCtx(() => [showSeg.value ? (openBlock(), createBlock(ImageSegmentation_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"]),
+				createVNode(AppModal_default, {
+					modelValue: showGif.value,
+					"onUpdate:modelValue": _cache[11] || (_cache[11] = ($event) => showGif.value = $event),
+					title: "视频剪辑转GIF",
+					icon: "fa-solid fa-clapperboard"
+				}, {
+					default: withCtx(() => [showGif.value ? (openBlock(), createBlock(VideoToGif_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"]),
+				createVNode(AppModal_default, {
+					modelValue: showMindMap.value,
+					"onUpdate:modelValue": _cache[12] || (_cache[12] = ($event) => showMindMap.value = $event),
+					title: "思维导图",
+					icon: "fa-solid fa-brain",
+					"full-screen": true
+				}, {
+					default: withCtx(() => [showMindMap.value ? (openBlock(), createBlock(MindMap_default, { key: 0 })) : createCommentVNode("", true)]),
+					_: 1
+				}, 8, ["modelValue"])
+			])]);
+		};
+	}
+}, [["__scopeId", "data-v-3bf1d84a"]])).mount("#app");
+//#endregion
+export { __require as n, __commonJSMin as t };
