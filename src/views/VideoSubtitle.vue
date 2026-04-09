@@ -46,21 +46,30 @@
             @click="toggleCoverOptions" @mouseenter="showCoverTip = true" @mouseleave="showCoverTip = false"
             title="设置封面">
             <i class="fa-solid fa-image"></i>
-            {{ customCoverImage ? '本地封面' : coverTimeSec !== null ? '当前封面' : '封面设置' }}
-            <i class="fa-solid fa-circle-question cover-tip-icon"></i>
+            {{ customCoverImage ? '本地封面' : coverTimeSec !== null ? '当前封面' : '自动封面' }}
           </button>
 
           <div v-if="showCoverOptions" class="cover-options">
-            <button class="btn" @click="setCoverFrameFromVideo">当前封面</button>
-            <button class="btn" @click="coverFileInput.click()">本地封面</button>
-            <button class="btn" @click="clearCoverFrame" title="清除封面帧设置">
-              <i class="fa-solid fa-rotate-left"></i> 自动封面
+            <button class="btn" @click="setCoverFrameFromVideo">
+              <i class="fa-solid fa-image"></i>
+              当前封面</button>
+            <button class="btn" @click="coverFileInput.click()">
+              <i class="fa-solid fa-map-marker" />
+              本地封面</button>
+            <button class="btn" @click="clearCoverFrame">
+              <i class="fa-solid fa-check-square" />
+              自动封面
             </button>
             <input ref="coverFileInput" type="file" accept="image/*" @change="onCoverFileChange" class="hidden-input" />
           </div>
         </div>
 
-        <button class="btn" :disabled="!videoUrl" @click="markCurrentTime" style="margin-left: auto;">
+        <button class="btn" :disabled="!videoUrl" @click="togglePlayPause">
+          <i class="fa-solid fa-play" v-show="!isPlaying"></i>
+          <i class="fa-solid fa-pause" v-show="isPlaying"></i> {{ isPlaying ? '暂停' : '播放' }}
+        </button>
+
+        <button class="btn" :disabled="!videoUrl" @click="markCurrentTime">
           <i class="fa-solid fa-circle-dot"></i> 标记当前帧
         </button>
 
@@ -122,32 +131,31 @@
           <span class="panel-hint">Enter 添加帧 · Space 播放/暂停</span>
         </div>
 
-        <div class="time-wrapper">
-
-          <div class="time-item" v-for="(time, index) in timePoints" :key="index" @click="goToTime(time.timeSec)">
+        <div class="time-wrapper" ref="timeWrapperRef">
+          <div class="time-item" v-for="(time, index) in timePoints" :key="index"
+            :class="{ active: activeTimeIndex === index }" @click="goToTime(time.timeSec)">
             <span class="time-item-text">{{ formatTime(time.timeSec) }}</span>
 
-            <button class="time-item-btn" @click="removeTimePoint(time)">
+            <button class="time-item-btn" @click.stop="removeTimePoint(time)">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
-
         </div>
 
 
         <div class="action-row">
           <!-- 撤销/重做按钮 -->
           <button class="btn" :disabled="!canUndo()" @click="handleUndo" title="撤销 (Ctrl+Z)"
-            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;">
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;width:20%;">
             <i class="fa-solid fa-undo"></i>
           </button>
 
           <button class="btn" :disabled="!canRedo()" @click="handleRedo" title="重做 (Ctrl+Y)"
-            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;">
+            style="flex: 0 0 auto; padding: 0.6rem 0.8rem;width:20%;">
             <i class="fa-solid fa-redo"></i>
           </button>
 
-          <button class="btn btn-danger" :disabled="timePoints.length === 0" @click="clearMarks">
+          <button class="btn btn-danger" :disabled="timePoints.length === 0" @click="clearMarks" style="width:50%;">
             <i class="fa-solid fa-trash"></i> 清空标记
           </button>
 
@@ -250,10 +258,11 @@ const isDragOver = ref(false)
 const videoInfo = ref(null)
 const videoNativeW = ref(0)
 const videoNativeH = ref(0)
+const isPlaying = ref(false)
 
 // ==================== 裁剪线状态 ====================
 const topCutRatio = ref(0.75)
-const bottomCutRatio = ref(0.83)
+const bottomCutRatio = ref(0.81)
 
 // ==================== 封面帧 ====================
 const coverTimeSec = ref(null)
@@ -264,6 +273,7 @@ const coverFileInput = ref(null)
 
 // ==================== 时间标记 ====================
 const timePoints = ref([])
+const activeTimeIndex = ref(-1) // 当前激活的时间点索引
 const fps = ref(30)
 
 // 监听时间点变化，保存到历史（用于撤销/重做）
@@ -408,7 +418,7 @@ const loadVideo = (file) => {
   }
 
   topCutRatio.value = 0.75
-  bottomCutRatio.value = 0.83
+  bottomCutRatio.value = 0.81
   coverTimeSec.value = null
   showCoverTip.value = false
   showCoverOptions.value = false
@@ -425,8 +435,8 @@ const removeVideo = () => {
   videoInfo.value = null
   resultCanvas.value = null
 
-  topCutRatio.value = 0.88
-  bottomCutRatio.value = 1
+  topCutRatio.value = 0.75
+  bottomCutRatio.value = 0.81
   coverTimeSec.value = null
   showCoverTip.value = false
   showCoverOptions.value = false
@@ -650,6 +660,20 @@ const clearCoverFrame = () => {
   showCoverOptions.value = false
 }
 
+// ==================== 播放暂停 ====================
+const togglePlayPause = () => {
+  const video = videoEl.value
+  console.log(video);
+  if (!video) return
+  if (video.paused) {
+    video.play()
+    isPlaying.value = true
+  } else {
+    video.pause()
+    isPlaying.value = false
+  }
+}
+
 // ==================== 时间标记 ====================
 
 const markCurrentTime = () => {
@@ -663,6 +687,7 @@ const markCurrentTime = () => {
 
 const clearMarks = () => {
   timePoints.value = []
+  activeTimeIndex.value = -1
 }
 
 //删除时间点
@@ -670,6 +695,15 @@ const removeTimePoint = (timePoint) => {
   const index = timePoints.value.indexOf(timePoint)
   if (index !== -1) {
     timePoints.value.splice(index, 1)
+
+    // 如果删除的是当前激活的时间点，重置激活索引
+    if (activeTimeIndex.value === index) {
+      activeTimeIndex.value = -1
+    } else if (activeTimeIndex.value > index) {
+      // 如果删除的索引在激活索引之前，需要调整激活索引
+      activeTimeIndex.value--
+    }
+
     setStatus('已删除 ' + timePoint.timeSec + ' 的时间点')
   }
 }
@@ -678,7 +712,16 @@ const removeTimePoint = (timePoint) => {
 const goToTime = (timeSec) => {
   const video = videoEl.value
   if (!video) return
+
+  // 查找并设置激活的时间点索引
+  const index = timePoints.value.findIndex(p => p.timeSec === timeSec)
+  if (activeTimeIndex.value !== index)
+    activeTimeIndex.value = index
+  else
+    activeTimeIndex.value = -1
+
   video.currentTime = timeSec
+  setStatus('跳转到 ' + formatTime(timeSec))
 }
 
 // ==================== 视频播放 ====================
@@ -1373,7 +1416,7 @@ onUnmounted(function () {
 .result-canvas-container {
   overflow: hidden;
   overflow-y: scroll;
-  height: 665px;
+  height: 610px;
 }
 
 .result-canvas {
@@ -1420,13 +1463,12 @@ onUnmounted(function () {
   margin-left: auto;
 }
 
-
 .time-wrapper {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1rem;
   min-height: 200px;
-  height: 270px;
+  height: 225px;
   overflow-y: scroll;
 }
 
@@ -1446,6 +1488,13 @@ onUnmounted(function () {
   transform: translateX(10px);
   background: var(--accent);
   color: var(--bg);
+}
+
+.time-item.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  transform: translateX(10px);
 }
 
 .time-item-btn {

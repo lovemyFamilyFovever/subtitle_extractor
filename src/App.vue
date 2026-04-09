@@ -7,19 +7,16 @@
     <main class="page-content">
       <!-- 标题区 -->
       <h1 class="page-title">工具箱</h1>
-      <p class="page-desc">视频字幕提取 · 图片字幕裁切 · 自由拼接</p>
+      <p class="page-desc">视频字幕提取 · 动图剪辑 · 图片处理</p>
 
       <!-- GitHub Star 按钮 -->
-      <a href="https://github.com/lovemyFamilyFovever/subtitle_extractor" 
-         target="_blank" 
-         rel="noopener noreferrer"
-         class="github-star-btn"
-         title="在 GitHub 上查看项目">
+      <a href="https://github.com/lovemyFamilyFovever/subtitle_extractor" target="_blank" rel="noopener noreferrer"
+        class="github-star-btn" title="在 GitHub 上查看项目">
         <i class="fa-brands fa-github"></i>
         <span>Star on GitHub</span>
       </a>
 
-      <!-- ===== 功能入口按钮 ===== -->
+      <!-- ===== 功能入口按钮（三栏布局）===== -->
       <div class="entry-container">
 
         <!-- 分组一：字幕处理 -->
@@ -84,11 +81,41 @@
           </div>
         </div>
 
+        <!-- 分组三：动图剪辑 -->
+        <div class="feature-group">
+          <h2 class="group-title">
+            <i class="fa-solid fa-clapperboard"></i>
+            动图剪辑
+          </h2>
+          <div class="entry-grid">
+
+            <!-- 功能五：视频转GIF -->
+            <button class="entry-card" @click="showGif = true">
+              <div class="entry-icon"><i class="fa-solid fa-film"></i></div>
+              <div class="entry-info">
+                <span class="entry-title">视频剪辑转GIF</span>
+                <span class="entry-desc">选择视频片段，自定义参数，生成高质量GIF动图</span>
+              </div>
+              <i class="fa-solid fa-arrow-right entry-arrow"></i>
+            </button>
+
+          </div>
+        </div>
       </div>
 
       <!-- ===== 主题切换按钮 ===== -->
       <button class="theme-toggle" @click="toggleTheme" :title="isLight() ? '切换到暗色主题' : '切换到亮色主题'" aria-label="切换主题">
         <i :class="isLight() ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
+      </button>
+
+      <!-- ===== 访问github主页 ===== -->
+      <button class="go-github" @click="goGithub" title="访问github主页">
+        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <title>GitHub</title>
+          <path
+            d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12">
+          </path>
+        </svg>
       </button>
 
       <!-- ===== Toast 通知容器（全局） ===== -->
@@ -136,6 +163,10 @@
         <ImageSegmentation v-if="showSeg" />
       </AppModal>
 
+      <AppModal v-model="showGif" title="视频剪辑转GIF" icon="fa-solid fa-clapperboard">
+        <VideoToGif v-if="showGif" />
+      </AppModal>
+
     </main>
   </div>
 </template>
@@ -156,6 +187,7 @@ import VideoSubtitle from './views/VideoSubtitle.vue'
 import ImageSubtitle from './views/ImageSubtitle.vue'
 import ImageStitch from './views/ImageStitch.vue'
 import ImageSegmentation from './views/ImageSegmentation.vue'
+import VideoToGif from './views/VideoToGif.vue'
 
 // 导入 Toast composable
 import { useToast } from './composables/useToast.js'
@@ -169,6 +201,7 @@ const showVideo = ref(false)
 const showImageSub = ref(false)
 const showStitch = ref(false)
 const showSeg = ref(false)
+const showGif = ref(false)
 
 // ===== Toast =====
 const { toasts, showToast } = useToast()
@@ -183,10 +216,15 @@ const toastIcon = (type) => {
 // ===== 主题切换 =====
 const { initTheme, toggleTheme, isLight } = useTheme()
 
+
+const goGithub = () => {
+  window.open('https://github.com/lovemyFamilyFovever/subtitle_extractor', '_blank')
+}
+
 // 组件挂载时初始化
 onMounted(() => {
   initTheme()
-  
+
   // 添加全局键盘快捷键
   document.addEventListener('keydown', handleGlobalKeydown)
 })
@@ -281,13 +319,13 @@ const handleGlobalKeydown = (e) => {
   font-size: 1.1rem;
 }
 
-/* ===== 功能容器 ===== */
+/* ===== 功能容器（三栏布局）===== */
 .entry-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   width: 100%;
-  max-width: 520px;
+  max-width: 1200px;
 }
 
 /* ===== 功能分组 ===== */
@@ -295,6 +333,14 @@ const handleGlobalKeydown = (e) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* ===== 移动端响应式：单栏布局 ===== */
+@media (max-width: 900px) {
+  .entry-container {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
 }
 
 /* ===== 分组标题 ===== */

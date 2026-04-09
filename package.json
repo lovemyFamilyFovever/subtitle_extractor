@@ -10,6 +10,7 @@
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "dependencies": {
+    "gif.js": "^0.2.0",
     "jszip": "^3.10.1",
     "vue": "^3.5.30"
   },
