@@ -146,6 +146,16 @@ export function useMindMap() {
       themeConfig: {
         lineStyle: 'curve',
         background: '#f0f2f5',
+        // 二级节点样式
+        second: {
+          marginX: 130,
+          marginY: 20
+        },
+        // 三级及以下节点样式
+        node: {
+          marginX: 100,
+          marginY: 80
+        }
       },
       openRealtimeRenderOnNodeTextEdit: true,
       defaultInsertSecondLevelNodeText: '分支主题',
