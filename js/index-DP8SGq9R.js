@@ -762,7 +762,7 @@ function shallowReadArray(arr) {
 	return arr;
 }
 function toWrapped(target, item) {
-	if (/* @__PURE__ */ isReadonly(target)) return /* @__PURE__ */ isReactive(target) ? toReadonly(toReactive(item)) : toReadonly(item);
+	if (/* @__PURE__ */ isReadonly$1(target)) return /* @__PURE__ */ isReactive(target) ? toReadonly(toReactive(item)) : toReadonly(item);
 	return toReactive(item);
 }
 var arrayInstrumentations = {
@@ -975,8 +975,8 @@ var MutableReactiveHandler = class extends BaseReactiveHandler {
 		let oldValue = target[key];
 		const isArrayWithIntegerKey = isArray(target) && isIntegerKey(key);
 		if (!this._isShallow) {
-			const isOldValueReadonly = /* @__PURE__ */ isReadonly(oldValue);
-			if (!/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value)) {
+			const isOldValueReadonly = /* @__PURE__ */ isReadonly$1(oldValue);
+			if (!/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly$1(value)) {
 				oldValue = /* @__PURE__ */ toRaw(oldValue);
 				value = /* @__PURE__ */ toRaw(value);
 			}
@@ -1106,7 +1106,7 @@ function createInstrumentations(readonly, shallow) {
 			const target = /* @__PURE__ */ toRaw(this);
 			const proto = getProto(target);
 			const rawValue = /* @__PURE__ */ toRaw(value);
-			const valueToAdd = !shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value) ? rawValue : value;
+			const valueToAdd = !shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly$1(value) ? rawValue : value;
 			if (!(proto.has.call(target, valueToAdd) || hasChanged(value, valueToAdd) && proto.has.call(target, value) || hasChanged(rawValue, valueToAdd) && proto.has.call(target, rawValue))) {
 				target.add(valueToAdd);
 				trigger(target, "add", valueToAdd, valueToAdd);
@@ -1114,7 +1114,7 @@ function createInstrumentations(readonly, shallow) {
 			return this;
 		},
 		set(key, value) {
-			if (!shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly(value)) value = /* @__PURE__ */ toRaw(value);
+			if (!shallow && !/* @__PURE__ */ isShallow(value) && !/* @__PURE__ */ isReadonly$1(value)) value = /* @__PURE__ */ toRaw(value);
 			const target = /* @__PURE__ */ toRaw(this);
 			const { has, get } = getProto(target);
 			let hadKey = has.call(target, key);
@@ -1192,7 +1192,7 @@ function getTargetType(value) {
 }
 /* @__NO_SIDE_EFFECTS__ */
 function reactive(target) {
-	if (/* @__PURE__ */ isReadonly(target)) return target;
+	if (/* @__PURE__ */ isReadonly$1(target)) return target;
 	return createReactiveObject(target, false, mutableHandlers, mutableCollectionHandlers, reactiveMap);
 }
 /* @__NO_SIDE_EFFECTS__ */
@@ -1216,11 +1216,11 @@ function createReactiveObject(target, isReadonly2, baseHandlers, collectionHandl
 }
 /* @__NO_SIDE_EFFECTS__ */
 function isReactive(value) {
-	if (/* @__PURE__ */ isReadonly(value)) return /* @__PURE__ */ isReactive(value["__v_raw"]);
+	if (/* @__PURE__ */ isReadonly$1(value)) return /* @__PURE__ */ isReactive(value["__v_raw"]);
 	return !!(value && value["__v_isReactive"]);
 }
 /* @__NO_SIDE_EFFECTS__ */
-function isReadonly(value) {
+function isReadonly$1(value) {
 	return !!(value && value["__v_isReadonly"]);
 }
 /* @__NO_SIDE_EFFECTS__ */
@@ -1269,7 +1269,7 @@ var RefImpl = class {
 	}
 	set value(newValue) {
 		const oldValue = this._rawValue;
-		const useDirectValue = this["__v_isShallow"] || /* @__PURE__ */ isShallow(newValue) || /* @__PURE__ */ isReadonly(newValue);
+		const useDirectValue = this["__v_isShallow"] || /* @__PURE__ */ isShallow(newValue) || /* @__PURE__ */ isReadonly$1(newValue);
 		newValue = useDirectValue ? newValue : /* @__PURE__ */ toRaw(newValue);
 		if (hasChanged(newValue, oldValue)) {
 			this._rawValue = newValue;
@@ -2043,72 +2043,6 @@ var BaseTransitionPropsValidators = {
 	onAfterAppear: TransitionHookValidator,
 	onAppearCancelled: TransitionHookValidator
 };
-var recursiveGetSubtree = (instance) => {
-	const subTree = instance.subTree;
-	return subTree.component ? recursiveGetSubtree(subTree.component) : subTree;
-};
-var BaseTransitionImpl = {
-	name: `BaseTransition`,
-	props: BaseTransitionPropsValidators,
-	setup(props, { slots }) {
-		const instance = getCurrentInstance();
-		const state = useTransitionState();
-		return () => {
-			const children = slots.default && getTransitionRawChildren(slots.default(), true);
-			if (!children || !children.length) return;
-			const child = findNonCommentChild(children);
-			const rawProps = /* @__PURE__ */ toRaw(props);
-			const { mode } = rawProps;
-			if (state.isLeaving) return emptyPlaceholder(child);
-			const innerChild = getInnerChild$1(child);
-			if (!innerChild) return emptyPlaceholder(child);
-			let enterHooks = resolveTransitionHooks(innerChild, rawProps, state, instance, (hooks) => enterHooks = hooks);
-			if (innerChild.type !== Comment) setTransitionHooks(innerChild, enterHooks);
-			let oldInnerChild = instance.subTree && getInnerChild$1(instance.subTree);
-			if (oldInnerChild && oldInnerChild.type !== Comment && !isSameVNodeType(oldInnerChild, innerChild) && recursiveGetSubtree(instance).type !== Comment) {
-				let leavingHooks = resolveTransitionHooks(oldInnerChild, rawProps, state, instance);
-				setTransitionHooks(oldInnerChild, leavingHooks);
-				if (mode === "out-in" && innerChild.type !== Comment) {
-					state.isLeaving = true;
-					leavingHooks.afterLeave = () => {
-						state.isLeaving = false;
-						if (!(instance.job.flags & 8)) instance.update();
-						delete leavingHooks.afterLeave;
-						oldInnerChild = void 0;
-					};
-					return emptyPlaceholder(child);
-				} else if (mode === "in-out" && innerChild.type !== Comment) leavingHooks.delayLeave = (el, earlyRemove, delayedLeave) => {
-					const leavingVNodesCache = getLeavingNodesForType(state, oldInnerChild);
-					leavingVNodesCache[String(oldInnerChild.key)] = oldInnerChild;
-					el[leaveCbKey] = () => {
-						earlyRemove();
-						el[leaveCbKey] = void 0;
-						delete enterHooks.delayedLeave;
-						oldInnerChild = void 0;
-					};
-					enterHooks.delayedLeave = () => {
-						delayedLeave();
-						delete enterHooks.delayedLeave;
-						oldInnerChild = void 0;
-					};
-				};
-				else oldInnerChild = void 0;
-			} else if (oldInnerChild) oldInnerChild = void 0;
-			return child;
-		};
-	}
-};
-function findNonCommentChild(children) {
-	let child = children[0];
-	if (children.length > 1) {
-		for (const c of children) if (c.type !== Comment) {
-			child = c;
-			break;
-		}
-	}
-	return child;
-}
-var BaseTransition = BaseTransitionImpl;
 function getLeavingNodesForType(state, vnode) {
 	const { leavingVNodes } = state;
 	let leavingVNodesCache = leavingVNodes.get(vnode.type);
@@ -2194,25 +2128,6 @@ function resolveTransitionHooks(vnode, props, state, instance, postClone) {
 		}
 	};
 	return hooks;
-}
-function emptyPlaceholder(vnode) {
-	if (isKeepAlive(vnode)) {
-		vnode = cloneVNode(vnode);
-		vnode.children = null;
-		return vnode;
-	}
-}
-function getInnerChild$1(vnode) {
-	if (!isKeepAlive(vnode)) {
-		if (isTeleport(vnode.type) && vnode.children) return findNonCommentChild(vnode.children);
-		return vnode;
-	}
-	if (vnode.component) return vnode.component.subTree;
-	const { shapeFlag, children } = vnode;
-	if (children) {
-		if (shapeFlag & 16) return children[0];
-		if (shapeFlag & 32 && isFunction(children.default)) return children.default();
-	}
 }
 function setTransitionHooks(vnode, hooks) {
 	if (vnode.shapeFlag & 6 && vnode.component) {
@@ -2397,7 +2312,27 @@ var onRenderTracked = createHook("rtc");
 function onErrorCaptured(hook, target = currentInstance) {
 	injectHook("ec", hook, target);
 }
+var COMPONENTS = "components";
+function resolveComponent(name, maybeSelfReference) {
+	return resolveAsset(COMPONENTS, name, true, maybeSelfReference) || name;
+}
 var NULL_DYNAMIC_COMPONENT = /* @__PURE__ */ Symbol.for("v-ndc");
+function resolveAsset(type, name, warnMissing = true, maybeSelfReference = false) {
+	const instance = currentRenderingInstance || currentInstance;
+	if (instance) {
+		const Component = instance.type;
+		if (type === COMPONENTS) {
+			const selfName = getComponentName(Component, false);
+			if (selfName && (selfName === name || selfName === camelize(name) || selfName === capitalize$1(camelize(name)))) return Component;
+		}
+		const res = resolve(instance[type] || Component[type], name) || resolve(instance.appContext[type], name);
+		if (!res && maybeSelfReference) return Component;
+		return res;
+	}
+}
+function resolve(registry, name) {
+	return registry && (registry[name] || registry[camelize(name)] || registry[capitalize$1(camelize(name))]);
+}
 function renderList(source, renderItem, cache, index) {
 	let ret;
 	const cached = cache && cache[index];
@@ -2408,7 +2343,7 @@ function renderList(source, renderItem, cache, index) {
 		let isReadonlySource = false;
 		if (sourceIsReactiveArray) {
 			needsWrap = !/* @__PURE__ */ isShallow(source);
-			isReadonlySource = /* @__PURE__ */ isReadonly(source);
+			isReadonlySource = /* @__PURE__ */ isReadonly$1(source);
 			source = shallowReadArray(source);
 		}
 		ret = new Array(source.length);
@@ -4387,29 +4322,15 @@ function getComponentPublicInstance(instance) {
 	}));
 	else return instance.proxy;
 }
+function getComponentName(Component, includeInferred = true) {
+	return isFunction(Component) ? Component.displayName || Component.name : Component.name || includeInferred && Component.__name;
+}
 function isClassComponent(value) {
 	return isFunction(value) && "__vccOpts" in value;
 }
 var computed = (getterOrOptions, debugOptions) => {
 	return /* @__PURE__ */ computed$1(getterOrOptions, debugOptions, isInSSRComponentSetup);
 };
-function h(type, propsOrChildren, children) {
-	try {
-		setBlockTracking(-1);
-		const l = arguments.length;
-		if (l === 2) if (isObject(propsOrChildren) && !isArray(propsOrChildren)) {
-			if (isVNode(propsOrChildren)) return createVNode(type, null, [propsOrChildren]);
-			return createVNode(type, propsOrChildren);
-		} else return createVNode(type, null, propsOrChildren);
-		else {
-			if (l > 3) children = Array.prototype.slice.call(arguments, 2);
-			else if (l === 3 && isVNode(children)) children = [children];
-			return createVNode(type, propsOrChildren, children);
-		}
-	} finally {
-		setBlockTracking(1);
-	}
-}
 var version$1 = "3.5.31";
 //#endregion
 //#region node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js
@@ -4500,12 +4421,6 @@ var DOMTransitionPropsValidators = {
 	leaveToClass: String
 };
 var TransitionPropsValidators = /* @__PURE__ */ extend$1({}, BaseTransitionPropsValidators, DOMTransitionPropsValidators);
-var decorate$1 = (t) => {
-	t.displayName = "Transition";
-	t.props = TransitionPropsValidators;
-	return t;
-};
-var Transition = /* @__PURE__ */ decorate$1((props, { slots }) => h(BaseTransition, resolveTransitionProps(props), slots));
 var callHook = (hook, args = []) => {
 	if (isArray(hook)) hook.forEach((h2) => h2(...args));
 	else if (hook) hook(...args);
@@ -5295,10 +5210,10 @@ var _plugin_vue_export_helper_default = (sfc, props) => {
 };
 //#endregion
 //#region src/components/AppModal.vue
-var _hoisted_1$10 = ["aria-labelledby"];
-var _hoisted_2$10 = { class: "modal-header" };
-var _hoisted_3$10 = ["id"];
-var _hoisted_4$10 = ["aria-label"];
+var _hoisted_1$13 = ["aria-labelledby"];
+var _hoisted_2$12 = { class: "modal-header" };
+var _hoisted_3$12 = ["id"];
+var _hoisted_4$12 = ["aria-label"];
 var _hoisted_5$10 = { class: "modal-body" };
 var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "AppModal",
@@ -5318,16 +5233,6 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		fullScreen: {
 			type: Boolean,
 			default: false
-		},
-		size: {
-			type: String,
-			default: "medium",
-			validator: (value) => [
-				"small",
-				"medium",
-				"large",
-				"full"
-			].includes(value)
 		}
 	},
 	emits: ["update:modelValue"],
@@ -5353,24 +5258,21 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		return (_ctx, _cache) => {
 			return openBlock(), createElementBlock("div", {
 				class: normalizeClass(["modal-overlay", {
-					active: __props.modelValue,
-					"full-screen": __props.fullScreen,
-					"size-small": __props.size === "small",
-					"size-medium": __props.size === "medium",
-					"size-large": __props.size === "large"
+					"active": __props.modelValue,
+					"full-screen": __props.fullScreen
 				}]),
 				role: "presentation"
 			}, [createBaseVNode("div", {
-				class: normalizeClass(["modal add-image-modal", { "full-screen-modal": __props.fullScreen }]),
+				class: "modal",
 				role: "dialog",
 				"aria-modal": "true",
 				"aria-labelledby": titleId.value,
 				tabindex: "-1"
-			}, [createBaseVNode("div", _hoisted_2$10, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
+			}, [createBaseVNode("div", _hoisted_2$12, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
 				key: 0,
 				class: normalizeClass(__props.icon),
 				"aria-hidden": "true"
-			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$10), createBaseVNode("button", {
+			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$12), createBaseVNode("button", {
 				class: "close-btn",
 				onClick: close,
 				"aria-label": `关闭${__props.title ? " " + __props.title : ""}对话框`,
@@ -5378,21 +5280,21 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			}, [..._cache[0] || (_cache[0] = [createBaseVNode("i", {
 				class: "fa-solid fa-xmark",
 				"aria-hidden": "true"
-			}, null, -1)])], 8, _hoisted_4$10)]), createBaseVNode("div", _hoisted_5$10, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 10, _hoisted_1$10)], 2);
+			}, null, -1)])], 8, _hoisted_4$12)]), createBaseVNode("div", _hoisted_5$10, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 8, _hoisted_1$13)], 2);
 		};
 	}
-}, [["__scopeId", "data-v-3eb87205"]]);
+}, [["__scopeId", "data-v-19e91e3b"]]);
 //#endregion
 //#region src/components/SliderInput.vue
-var _hoisted_1$9 = { class: "slider-input" };
-var _hoisted_2$9 = [
+var _hoisted_1$12 = { class: "slider-input" };
+var _hoisted_2$11 = [
 	"min",
 	"max",
 	"step",
 	"value"
 ];
-var _hoisted_3$9 = { class: "slider-header" };
-var _hoisted_4$9 = { class: "form-label" };
+var _hoisted_3$11 = { class: "slider-header" };
+var _hoisted_4$11 = { class: "form-label" };
 var _hoisted_5$9 = ["value"];
 var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "SliderInput",
@@ -5469,7 +5371,7 @@ var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			};
 		};
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$9, [createBaseVNode("input", {
+			return openBlock(), createElementBlock("div", _hoisted_1$12, [createBaseVNode("input", {
 				type: "range",
 				min: __props.min,
 				max: __props.max,
@@ -5478,8 +5380,8 @@ var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				style: normalizeStyle({ "--pct": pct.value }),
 				onInput,
 				class: "slider"
-			}, null, 44, _hoisted_2$9), createBaseVNode("div", _hoisted_3$9, [
-				createBaseVNode("span", _hoisted_4$9, toDisplayString(__props.label), 1),
+			}, null, 44, _hoisted_2$11), createBaseVNode("div", _hoisted_3$11, [
+				createBaseVNode("span", _hoisted_4$11, toDisplayString(__props.label), 1),
 				createBaseVNode("input", {
 					class: "form-input",
 					type: "text",
@@ -5502,7 +5404,7 @@ var idCounter = 0;
 * @param {'info'|'success'|'error'} type - 类型
 * @param {number} duration - 显示时长（毫秒）
 */
-var showToast$1 = (message, type = "info", duration = 2500) => {
+var showToast = (message, type = "info", duration = 2500) => {
 	const id = ++idCounter;
 	toasts.value.push({
 		id,
@@ -5528,7 +5430,7 @@ var showToast$1 = (message, type = "info", duration = 2500) => {
 function useToast() {
 	return {
 		toasts,
-		showToast: showToast$1
+		showToast
 	};
 }
 //#endregion
@@ -5600,10 +5502,10 @@ function useUndoRedo(maxHistory = 20) {
 }
 //#endregion
 //#region src/views/VideoSubtitle.vue
-var _hoisted_1$8 = { class: "app-layout" };
-var _hoisted_2$8 = { class: "app-left" };
-var _hoisted_3$8 = { class: "upload-text" };
-var _hoisted_4$8 = ["src"];
+var _hoisted_1$11 = { class: "app-layout" };
+var _hoisted_2$10 = { class: "app-left" };
+var _hoisted_3$10 = { class: "upload-text" };
+var _hoisted_4$10 = ["src"];
 var _hoisted_5$8 = {
 	key: 1,
 	class: "video-info-bar"
@@ -5613,46 +5515,46 @@ var _hoisted_6$8 = {
 	class: "toolbar"
 };
 var _hoisted_7$8 = { class: "cover-btn-container" };
-var _hoisted_8$7 = {
+var _hoisted_8$8 = {
 	key: 0,
 	class: "cover-options"
 };
-var _hoisted_9$7 = ["disabled"];
-var _hoisted_10$7 = { class: "fa-solid fa-play" };
-var _hoisted_11$7 = { class: "fa-solid fa-pause" };
-var _hoisted_12$7 = ["disabled"];
-var _hoisted_13$6 = { class: "app-middle" };
-var _hoisted_14$6 = { class: "settings-panel" };
-var _hoisted_15$6 = { class: "setting-item" };
-var _hoisted_16$6 = { class: "setting-item" };
-var _hoisted_17$6 = { class: "setting-item" };
-var _hoisted_18$6 = { class: "seg-control" };
-var _hoisted_19$6 = ["onClick"];
+var _hoisted_9$8 = ["disabled"];
+var _hoisted_10$8 = { class: "fa-solid fa-play" };
+var _hoisted_11$8 = { class: "fa-solid fa-pause" };
+var _hoisted_12$8 = ["disabled"];
+var _hoisted_13$7 = { class: "app-middle" };
+var _hoisted_14$7 = { class: "settings-panel" };
+var _hoisted_15$7 = { class: "setting-item" };
+var _hoisted_16$7 = { class: "setting-item" };
+var _hoisted_17$7 = { class: "setting-item" };
+var _hoisted_18$7 = { class: "seg-control" };
+var _hoisted_19$7 = ["onClick"];
 var _hoisted_20$6 = { class: "setting-item" };
 var _hoisted_21$6 = { class: "form-label" };
-var _hoisted_22$5 = {
+var _hoisted_22$6 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_23$5 = { class: "seg-control" };
-var _hoisted_24$5 = ["disabled", "onClick"];
-var _hoisted_25$5 = {
+var _hoisted_23$6 = { class: "seg-control" };
+var _hoisted_24$6 = ["disabled", "onClick"];
+var _hoisted_25$6 = {
 	class: "time-wrapper",
 	ref: "timeWrapperRef"
 };
-var _hoisted_26$5 = ["onClick"];
-var _hoisted_27$5 = { class: "time-item-text" };
-var _hoisted_28$5 = ["onClick"];
-var _hoisted_29$5 = { class: "action-row" };
-var _hoisted_30$5 = ["disabled"];
-var _hoisted_31$5 = ["disabled"];
+var _hoisted_26$6 = ["onClick"];
+var _hoisted_27$6 = { class: "time-item-text" };
+var _hoisted_28$6 = ["onClick"];
+var _hoisted_29$6 = { class: "action-row" };
+var _hoisted_30$6 = ["disabled"];
+var _hoisted_31$6 = ["disabled"];
 var _hoisted_32$5 = ["disabled"];
 var _hoisted_33$5 = ["disabled"];
 var _hoisted_34$5 = {
 	key: 0,
 	class: "progress-container"
 };
-var _hoisted_35$4 = { class: "progress-header" };
+var _hoisted_35$5 = { class: "progress-header" };
 var _hoisted_36$3 = { class: "progress-text" };
 var _hoisted_37$3 = { class: "progress-percent" };
 var _hoisted_38$2 = { class: "progress-bar" };
@@ -6332,8 +6234,8 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (resizeObserver) resizeObserver.disconnect();
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$8, [
-				createBaseVNode("div", _hoisted_2$8, [
+			return openBlock(), createElementBlock("div", _hoisted_1$11, [
+				createBaseVNode("div", _hoisted_2$10, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -6345,7 +6247,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[8] || (_cache[8] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$8, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						createBaseVNode("p", _hoisted_3$10, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
 						_cache[9] || (_cache[9] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
@@ -6376,7 +6278,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "video-player",
 							onLoadedmetadata: onVideoLoaded,
 							onError: onVideoError
-						}, null, 40, _hoisted_4$8),
+						}, null, 40, _hoisted_4$10),
 						createBaseVNode("canvas", {
 							ref_key: "overlayCanvas",
 							ref: overlayCanvas,
@@ -6395,7 +6297,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onMouseenter: _cache[3] || (_cache[3] = ($event) => showCoverTip.value = true),
 							onMouseleave: _cache[4] || (_cache[4] = ($event) => showCoverTip.value = false),
 							title: "设置封面"
-						}, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "自动封面"), 1)], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$7, [
+						}, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "自动封面"), 1)], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$8, [
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: setCoverFrameFromVideo
@@ -6422,24 +6324,24 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							disabled: !videoUrl.value,
 							onClick: togglePlayPause
 						}, [
-							withDirectives(createBaseVNode("i", _hoisted_10$7, null, 512), [[vShow, !isPlaying.value]]),
-							withDirectives(createBaseVNode("i", _hoisted_11$7, null, 512), [[vShow, isPlaying.value]]),
+							withDirectives(createBaseVNode("i", _hoisted_10$8, null, 512), [[vShow, !isPlaying.value]]),
+							withDirectives(createBaseVNode("i", _hoisted_11$8, null, 512), [[vShow, isPlaying.value]]),
 							createTextVNode(" " + toDisplayString(isPlaying.value ? "暂停" : "播放"), 1)
-						], 8, _hoisted_9$7),
+						], 8, _hoisted_9$8),
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !videoUrl.value,
 							onClick: markCurrentTime
-						}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-circle-dot" }, null, -1), createTextVNode(" 标记当前帧 ", -1)])], 8, _hoisted_12$7)
+						}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-circle-dot" }, null, -1), createTextVNode(" 标记当前帧 ", -1)])], 8, _hoisted_12$8)
 					])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_13$6, [createBaseVNode("div", _hoisted_14$6, [
+				createBaseVNode("div", _hoisted_13$7, [createBaseVNode("div", _hoisted_14$7, [
 					_cache[30] || (_cache[30] = createBaseVNode("div", { class: "panel-title" }, [
 						createBaseVNode("i", { class: "fa-solid fa-sliders" }),
 						createTextVNode(" 拼接设置 "),
 						createBaseVNode("span", { class: "panel-hint" }, "输入框支持滚轮和键盘上下键调整")
 					], -1)),
-					createBaseVNode("div", _hoisted_15$6, [_cache[19] || (_cache[19] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-red" }), createTextVNode(" 红线位置（字幕上边界） ")], -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_15$7, [_cache[19] || (_cache[19] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-red" }), createTextVNode(" 红线位置（字幕上边界） ")], -1)), createVNode(SliderInput_default, {
 						"model-value": Math.round(topCutRatio.value * 100),
 						label: "",
 						unit: "%",
@@ -6448,7 +6350,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onUpdate:modelValue": _cache[6] || (_cache[6] = (val) => topCutRatio.value = val / 100),
 						step: "1"
 					}, null, 8, ["model-value"])]),
-					createBaseVNode("div", _hoisted_16$6, [_cache[20] || (_cache[20] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-blue" }), createTextVNode(" 蓝线位置（字幕下边界） ")], -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_16$7, [_cache[20] || (_cache[20] = createBaseVNode("label", { class: "form-label" }, [createBaseVNode("span", { class: "line-dot line-dot-blue" }), createTextVNode(" 蓝线位置（字幕下边界） ")], -1)), createVNode(SliderInput_default, {
 						"model-value": Math.round(bottomCutRatio.value * 100),
 						label: "",
 						unit: "%",
@@ -6457,7 +6359,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onUpdate:modelValue": _cache[7] || (_cache[7] = (val) => bottomCutRatio.value = val / 100),
 						step: "1"
 					}, null, 8, ["model-value"])]),
-					createBaseVNode("div", _hoisted_17$6, [_cache[21] || (_cache[21] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_18$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_17$7, [_cache[21] || (_cache[21] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_18$7, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -6466,35 +6368,35 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_19$6);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_19$7);
 					}), 64))])]),
 					createBaseVNode("div", _hoisted_20$6, [createBaseVNode("label", _hoisted_21$6, [_cache[22] || (_cache[22] = createBaseVNode("label", {
 						class: "form-label",
 						style: { "display": "inline-block" }
-					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_22$5, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_23$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_22$6, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_23$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
 							disabled: format.value === "png",
 							onClick: ($event) => compression.value = opt.value
-						}, toDisplayString(opt.label), 11, _hoisted_24$5);
+						}, toDisplayString(opt.label), 11, _hoisted_24$6);
 					}), 64))])]),
 					_cache[31] || (_cache[31] = createBaseVNode("div", { class: "panel-title" }, [
 						createBaseVNode("i", { class: "fa-solid fa-clock" }),
 						createTextVNode(" 时间标记 "),
 						createBaseVNode("span", { class: "panel-hint" }, "Enter 添加帧 · Space 播放/暂停")
 					], -1)),
-					createBaseVNode("div", _hoisted_25$5, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(timePoints.value, (time, index) => {
+					createBaseVNode("div", _hoisted_25$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(timePoints.value, (time, index) => {
 						return openBlock(), createElementBlock("div", {
 							class: normalizeClass(["time-item", { active: activeTimeIndex.value === index }]),
 							key: index,
 							onClick: ($event) => goToTime(time.timeSec)
-						}, [createBaseVNode("span", _hoisted_27$5, toDisplayString(formatTime(time.timeSec)), 1), createBaseVNode("button", {
+						}, [createBaseVNode("span", _hoisted_27$6, toDisplayString(formatTime(time.timeSec)), 1), createBaseVNode("button", {
 							class: "time-item-btn",
 							onClick: withModifiers(($event) => removeTimePoint(time), ["stop"])
-						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_28$5)], 10, _hoisted_26$5);
+						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_28$6)], 10, _hoisted_26$6);
 					}), 128))], 512),
-					createBaseVNode("div", _hoisted_29$5, [
+					createBaseVNode("div", _hoisted_29$6, [
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !unref(canUndo)(),
@@ -6505,7 +6407,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								"padding": "0.6rem 0.8rem",
 								"width": "20%"
 							}
-						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_30$5),
+						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_30$6),
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !unref(canRedo)(),
@@ -6516,7 +6418,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								"padding": "0.6rem 0.8rem",
 								"width": "20%"
 							}
-						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_31$5),
+						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_31$6),
 						createBaseVNode("button", {
 							class: "btn btn-danger",
 							disabled: timePoints.value.length === 0,
@@ -6530,7 +6432,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_33$5)
 					]),
 					isExtracting.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_34$5, [
-						createBaseVNode("div", _hoisted_35$4, [createBaseVNode("span", _hoisted_36$3, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_37$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+						createBaseVNode("div", _hoisted_35$5, [createBaseVNode("span", _hoisted_36$3, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_37$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
 						createBaseVNode("div", _hoisted_38$2, [createBaseVNode("div", {
 							class: "progress-fill",
 							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
@@ -6559,10 +6461,10 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 }, [["__scopeId", "data-v-2acf98ed"]]);
 //#endregion
 //#region src/views/ImageSubtitle.vue
-var _hoisted_1$7 = { class: "app-layout" };
-var _hoisted_2$7 = { class: "app-left" };
-var _hoisted_3$7 = { class: "upload-text" };
-var _hoisted_4$7 = {
+var _hoisted_1$10 = { class: "app-layout" };
+var _hoisted_2$9 = { class: "app-left" };
+var _hoisted_3$9 = { class: "upload-text" };
+var _hoisted_4$9 = {
 	key: 0,
 	class: "upload-hint"
 };
@@ -6572,46 +6474,46 @@ var _hoisted_6$7 = {
 	class: "nav-bar"
 };
 var _hoisted_7$7 = { class: "nav-info" };
-var _hoisted_8$6 = { class: "cover-btn-container" };
-var _hoisted_9$6 = ["disabled"];
-var _hoisted_10$6 = {
+var _hoisted_8$7 = { class: "cover-btn-container" };
+var _hoisted_9$7 = ["disabled"];
+var _hoisted_10$7 = {
 	key: 0,
 	class: "cover-options"
 };
-var _hoisted_11$6 = ["disabled"];
-var _hoisted_12$6 = ["disabled"];
-var _hoisted_13$5 = ["disabled"];
-var _hoisted_14$5 = ["disabled"];
-var _hoisted_15$5 = ["disabled"];
-var _hoisted_16$5 = {
+var _hoisted_11$7 = ["disabled"];
+var _hoisted_12$7 = ["disabled"];
+var _hoisted_13$6 = ["disabled"];
+var _hoisted_14$6 = ["disabled"];
+var _hoisted_15$6 = ["disabled"];
+var _hoisted_16$6 = {
 	key: 1,
 	class: "info-bar"
 };
-var _hoisted_17$5 = { class: "nav-filename" };
-var _hoisted_18$5 = { class: "app-middle" };
-var _hoisted_19$5 = { class: "settings-panel" };
+var _hoisted_17$6 = { class: "nav-filename" };
+var _hoisted_18$6 = { class: "app-middle" };
+var _hoisted_19$6 = { class: "settings-panel" };
 var _hoisted_20$5 = { class: "setting-item" };
 var _hoisted_21$5 = { class: "setting-item" };
-var _hoisted_22$4 = { class: "setting-item" };
-var _hoisted_23$4 = { class: "seg-control" };
-var _hoisted_24$4 = ["onClick"];
-var _hoisted_25$4 = { class: "setting-item" };
-var _hoisted_26$4 = { class: "form-label" };
-var _hoisted_27$4 = {
+var _hoisted_22$5 = { class: "setting-item" };
+var _hoisted_23$5 = { class: "seg-control" };
+var _hoisted_24$5 = ["onClick"];
+var _hoisted_25$5 = { class: "setting-item" };
+var _hoisted_26$5 = { class: "form-label" };
+var _hoisted_27$5 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_28$4 = { class: "seg-control" };
-var _hoisted_29$4 = ["disabled", "onClick"];
-var _hoisted_30$4 = { class: "action-row" };
-var _hoisted_31$4 = ["disabled"];
+var _hoisted_28$5 = { class: "seg-control" };
+var _hoisted_29$5 = ["disabled", "onClick"];
+var _hoisted_30$5 = { class: "action-row" };
+var _hoisted_31$5 = ["disabled"];
 var _hoisted_32$4 = {
 	key: 0,
 	class: "app-right result-section"
 };
 var _hoisted_33$4 = { class: "result-header" };
 var _hoisted_34$4 = { class: "result-canvas-container" };
-var _hoisted_35$3 = { class: "result-actions" };
+var _hoisted_35$4 = { class: "result-actions" };
 var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "ImageSubtitle",
 	setup(__props) {
@@ -6998,8 +6900,8 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			images.value.forEach((item) => URL.revokeObjectURL(item.url));
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$7, [
-				createBaseVNode("div", _hoisted_2$7, [
+			return openBlock(), createElementBlock("div", _hoisted_1$10, [
+				createBaseVNode("div", _hoisted_2$9, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -7011,8 +6913,8 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[7] || (_cache[7] = createBaseVNode("i", { class: "fa-solid fa-image upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$7, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
-						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$7, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
+						createBaseVNode("p", _hoisted_3$9, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
+						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$9, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
 							ref: fileInput,
@@ -7045,27 +6947,27 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "btn",
 							onClick: goNext
 						}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])]),
-						createBaseVNode("div", _hoisted_8$6, [createBaseVNode("button", {
+						createBaseVNode("div", _hoisted_8$7, [createBaseVNode("button", {
 							class: normalizeClass(["btn cover-btn", { "cover-active": coverMode.value !== "auto" || customCoverImage.value !== null }]),
 							onClick: toggleCoverOptions,
 							disabled: images.value.length == 0,
 							title: "设置封面"
-						}, [_cache[10] || (_cache[10] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverMode.value === "current" ? "当前封面" : "封面设置"), 1)], 10, _hoisted_9$6), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_10$6, [
+						}, [_cache[10] || (_cache[10] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverMode.value === "current" ? "当前封面" : "封面设置"), 1)], 10, _hoisted_9$7), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_10$7, [
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: setCoverFromCurrentImage,
 								disabled: images.value.length == 0
-							}, "当前封面", 8, _hoisted_11$6),
+							}, "当前封面", 8, _hoisted_11$7),
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: _cache[3] || (_cache[3] = ($event) => coverFileInput.value.click()),
 								disabled: images.value.length == 0
-							}, "本地封面", 8, _hoisted_12$6),
+							}, "本地封面", 8, _hoisted_12$7),
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: clearCoverFrame,
 								disabled: images.value.length == 0
-							}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 自动封面 ", -1)])], 8, _hoisted_13$5),
+							}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 自动封面 ", -1)])], 8, _hoisted_13$6),
 							createBaseVNode("input", {
 								ref_key: "coverFileInput",
 								ref: coverFileInput,
@@ -7079,20 +6981,20 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "btn btn-danger",
 							onClick: deleteCurrentImage,
 							disabled: images.value.length == 0
-						}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_14$5),
+						}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_14$6),
 						createBaseVNode("button", {
 							class: "btn btn-primary",
 							onClick: clearImages,
 							disabled: images.value.length == 0
-						}, [..._cache[13] || (_cache[13] = [createBaseVNode("i", { class: "fa-solid fa-trash-alt" }, null, -1), createTextVNode(" 清空 ", -1)])], 8, _hoisted_15$5)
+						}, [..._cache[13] || (_cache[13] = [createBaseVNode("i", { class: "fa-solid fa-trash-alt" }, null, -1), createTextVNode(" 清空 ", -1)])], 8, _hoisted_15$6)
 					])) : createCommentVNode("", true),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_16$5, [
-						createBaseVNode("span", _hoisted_17$5, toDisplayString(images.value[currentIndex.value]?.name), 1),
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_16$6, [
+						createBaseVNode("span", _hoisted_17$6, toDisplayString(images.value[currentIndex.value]?.name), 1),
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(images.value[currentIndex.value]?.width) + " × " + toDisplayString(images.value[currentIndex.value]?.height), 1)]),
 						createBaseVNode("span", null, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(images.value[currentIndex.value]?.size)), 1)])
 					])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_18$5, [createBaseVNode("div", _hoisted_19$5, [
+				createBaseVNode("div", _hoisted_18$6, [createBaseVNode("div", _hoisted_19$6, [
 					_cache[20] || (_cache[20] = createBaseVNode("div", { class: "panel-title" }, [
 						createBaseVNode("i", { class: "fa-solid fa-sliders" }),
 						createTextVNode(" 拼接设置 "),
@@ -7126,7 +7028,7 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						max: 100,
 						"onUpdate:modelValue": _cache[5] || (_cache[5] = (val) => bottomCutRatio.value = val / 100)
 					}, null, 8, ["model-value"])]),
-					createBaseVNode("div", _hoisted_22$4, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_23$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_22$5, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_23$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -7135,24 +7037,24 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_24$4);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_24$5);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_25$4, [createBaseVNode("label", _hoisted_26$4, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+					createBaseVNode("div", _hoisted_25$5, [createBaseVNode("label", _hoisted_26$5, [_cache[19] || (_cache[19] = createBaseVNode("label", {
 						class: "form-label",
 						style: { "display": "inline" }
-					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_27$4, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_28$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_27$5, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_28$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
 							disabled: format.value === "png",
 							onClick: ($event) => compression.value = opt.value
-						}, toDisplayString(opt.label), 11, _hoisted_29$4);
+						}, toDisplayString(opt.label), 11, _hoisted_29$5);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_30$4, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_30$5, [createBaseVNode("button", {
 						class: "btn btn-primary btn-block",
 						disabled: images.value.length === 0 || isGenerating.value,
 						onClick: generate
-					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? "生成中..." : "生成长拼接图"), 1)], 8, _hoisted_31$4)])
+					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? "生成中..." : "生成长拼接图"), 1)], 8, _hoisted_31$5)])
 				])]),
 				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_32$4, [
 					createBaseVNode("div", _hoisted_33$4, [_cache[21] || (_cache[21] = createBaseVNode("i", {
@@ -7164,7 +7066,7 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						ref: resultCanvasEl,
 						class: "result-canvas"
 					}, null, 512)]),
-					createBaseVNode("div", _hoisted_35$3, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_35$4, [createBaseVNode("button", {
 						class: "btn btn-primary",
 						onClick: _cache[6] || (_cache[6] = ($event) => saveResult(format.value))
 					}, [_cache[22] || (_cache[22] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
@@ -7175,33 +7077,33 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 }, [["__scopeId", "data-v-0414f43e"]]);
 //#endregion
 //#region src/views/ImageStitch.vue
-var _hoisted_1$6 = { class: "app-layout" };
-var _hoisted_2$6 = { class: "app-left" };
-var _hoisted_3$6 = { key: 0 };
-var _hoisted_4$6 = { class: "form-label" };
+var _hoisted_1$9 = { class: "app-layout" };
+var _hoisted_2$8 = { class: "app-left" };
+var _hoisted_3$8 = { key: 0 };
+var _hoisted_4$8 = { class: "form-label" };
 var _hoisted_5$6 = { class: "image-list" };
 var _hoisted_6$6 = ["onDragstart", "onDragover"];
 var _hoisted_7$6 = ["src", "alt"];
-var _hoisted_8$5 = { class: "item-index" };
-var _hoisted_9$5 = ["onClick"];
-var _hoisted_10$5 = ["onClick"];
-var _hoisted_11$5 = { class: "app-middle" };
-var _hoisted_12$5 = { class: "settings-panel" };
-var _hoisted_13$4 = { class: "setting-item" };
-var _hoisted_14$4 = { class: "seg-control" };
-var _hoisted_15$4 = ["onClick"];
-var _hoisted_16$4 = {
+var _hoisted_8$6 = { class: "item-index" };
+var _hoisted_9$6 = ["onClick"];
+var _hoisted_10$6 = ["onClick"];
+var _hoisted_11$6 = { class: "app-middle" };
+var _hoisted_12$6 = { class: "settings-panel" };
+var _hoisted_13$5 = { class: "setting-item" };
+var _hoisted_14$5 = { class: "seg-control" };
+var _hoisted_15$5 = ["onClick"];
+var _hoisted_16$5 = {
 	key: 0,
 	class: "setting-item"
 };
-var _hoisted_17$4 = { class: "seg-control" };
-var _hoisted_18$4 = ["onClick"];
-var _hoisted_19$4 = { class: "setting-item" };
+var _hoisted_17$5 = { class: "seg-control" };
+var _hoisted_18$5 = ["onClick"];
+var _hoisted_19$5 = { class: "setting-item" };
 var _hoisted_20$4 = { class: "setting-item" };
 var _hoisted_21$4 = { class: "setting-item" };
-var _hoisted_22$3 = { class: "color-swatches" };
-var _hoisted_23$3 = ["title", "onClick"];
-var _hoisted_24$3 = {
+var _hoisted_22$4 = { class: "color-swatches" };
+var _hoisted_23$4 = ["title", "onClick"];
+var _hoisted_24$4 = {
 	key: 0,
 	class: "fa-solid fa-ban",
 	style: {
@@ -7209,20 +7111,20 @@ var _hoisted_24$3 = {
 		"color": "var(--muted)"
 	}
 };
-var _hoisted_25$3 = ["title"];
-var _hoisted_26$3 = { class: "setting-item" };
-var _hoisted_27$3 = { class: "seg-control" };
-var _hoisted_28$3 = ["onClick"];
-var _hoisted_29$3 = { class: "setting-item" };
-var _hoisted_30$3 = { class: "form-label" };
-var _hoisted_31$3 = {
+var _hoisted_25$4 = ["title"];
+var _hoisted_26$4 = { class: "setting-item" };
+var _hoisted_27$4 = { class: "seg-control" };
+var _hoisted_28$4 = ["onClick"];
+var _hoisted_29$4 = { class: "setting-item" };
+var _hoisted_30$4 = { class: "form-label" };
+var _hoisted_31$4 = {
 	key: 0,
 	class: "form-hint"
 };
 var _hoisted_32$3 = { class: "seg-control" };
 var _hoisted_33$3 = ["disabled", "onClick"];
 var _hoisted_34$3 = { class: "app-right" };
-var _hoisted_35$2 = { class: "preview-area" };
+var _hoisted_35$3 = { class: "preview-area" };
 var _hoisted_36$2 = {
 	key: 0,
 	class: "preview-info"
@@ -7636,8 +7538,8 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			images.value.forEach((item) => URL.revokeObjectURL(item.url));
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$6, [
-				createBaseVNode("div", _hoisted_2$6, [
+			return openBlock(), createElementBlock("div", _hoisted_1$9, [
+				createBaseVNode("div", _hoisted_2$8, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
@@ -7658,7 +7560,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$6, [createBaseVNode("span", _hoisted_4$6, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(images.value, (item, index) => {
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$8, [createBaseVNode("span", _hoisted_4$8, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(images.value, (item, index) => {
 						return openBlock(), createElementBlock("div", {
 							key: item.id,
 							class: normalizeClass(["image-item", {
@@ -7674,17 +7576,17 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								src: item.url,
 								alt: item.name
 							}, null, 8, _hoisted_7$6),
-							createBaseVNode("span", _hoisted_8$5, toDisplayString(index + 1), 1),
+							createBaseVNode("span", _hoisted_8$6, toDisplayString(index + 1), 1),
 							createBaseVNode("button", {
 								class: "item-rotate",
 								onClick: withModifiers(($event) => rotateImage(index), ["stop"]),
 								title: "旋转90°"
-							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])], 8, _hoisted_9$5),
+							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])], 8, _hoisted_9$6),
 							createBaseVNode("button", {
 								class: "item-delete",
 								onClick: withModifiers(($event) => removeImage(index), ["stop"]),
 								title: "删除"
-							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$5)
+							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$6)
 						], 42, _hoisted_6$6);
 					}), 128))])])) : createCommentVNode("", true),
 					images.value.length > 0 ? (openBlock(), createElementBlock("button", {
@@ -7693,15 +7595,15 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onClick: clearAll
 					}, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1)), createTextVNode(" 清空全部 (" + toDisplayString(images.value.length) + ") ", 1)])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_11$5, [createBaseVNode("div", _hoisted_12$5, [
-					createBaseVNode("div", _hoisted_13$4, [_cache[12] || (_cache[12] = createBaseVNode("span", { class: "form-label" }, "布局方式", -1)), createBaseVNode("div", _hoisted_14$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(layoutOptions, (opt) => {
+				createBaseVNode("div", _hoisted_11$6, [createBaseVNode("div", _hoisted_12$6, [
+					createBaseVNode("div", _hoisted_13$5, [_cache[12] || (_cache[12] = createBaseVNode("span", { class: "form-label" }, "布局方式", -1)), createBaseVNode("div", _hoisted_14$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(layoutOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: layout.value === opt.value }]),
 							onClick: ($event) => layout.value = opt.value
-						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_15$4);
+						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_15$5);
 					}), 64))])]),
-					layout.value === "grid" ? (openBlock(), createElementBlock("div", _hoisted_16$4, [_cache[13] || (_cache[13] = createBaseVNode("span", { class: "form-label" }, "网格列数", -1)), createBaseVNode("div", _hoisted_17$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					layout.value === "grid" ? (openBlock(), createElementBlock("div", _hoisted_16$5, [_cache[13] || (_cache[13] = createBaseVNode("span", { class: "form-label" }, "网格列数", -1)), createBaseVNode("div", _hoisted_17$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						2,
 						3,
 						4,
@@ -7711,9 +7613,9 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							key: n,
 							class: normalizeClass(["seg-btn", { active: gridCols.value === n }]),
 							onClick: ($event) => gridCols.value = n
-						}, toDisplayString(n), 11, _hoisted_18$4);
+						}, toDisplayString(n), 11, _hoisted_18$5);
 					}), 64))])])) : createCommentVNode("", true),
-					createBaseVNode("div", _hoisted_19$4, [_cache[14] || (_cache[14] = createBaseVNode("span", { class: "form-label" }, "间距滑块", -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_19$5, [_cache[14] || (_cache[14] = createBaseVNode("span", { class: "form-label" }, "间距滑块", -1)), createVNode(SliderInput_default, {
 						modelValue: gap.value,
 						"onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => gap.value = $event),
 						label: "",
@@ -7729,7 +7631,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						min: 0,
 						max: 80
 					}, null, 8, ["modelValue"])]),
-					createBaseVNode("div", _hoisted_21$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "form-label" }, "背景色", -1)), createBaseVNode("div", _hoisted_22$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(bgColors, (color) => {
+					createBaseVNode("div", _hoisted_21$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "form-label" }, "背景色", -1)), createBaseVNode("div", _hoisted_22$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(bgColors, (color) => {
 						return openBlock(), createElementBlock(Fragment$1, { key: color.value }, [!color.isPicker ? (openBlock(), createElementBlock("button", {
 							key: 0,
 							class: normalizeClass(["color-swatch", { active: bgColor.value === color.value }]),
@@ -7739,7 +7641,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							} : { background: color.value }),
 							title: color.label,
 							onClick: ($event) => bgColor.value = color.value
-						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_24$3)) : createCommentVNode("", true)], 14, _hoisted_23$3)) : (openBlock(), createElementBlock("label", {
+						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_24$4)) : createCommentVNode("", true)], 14, _hoisted_23$4)) : (openBlock(), createElementBlock("label", {
 							key: 1,
 							class: normalizeClass(["color-swatch", { active: bgColor.value === customBgColor.value }]),
 							style: normalizeStyle({
@@ -7758,9 +7660,9 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "palette-input",
 							"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => customBgColor.value = $event),
 							onInput: applyCustomBgColor
-						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_25$3))], 64);
+						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_25$4))], 64);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_26$3, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_27$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_26$4, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_27$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -7769,12 +7671,12 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_28$3);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_28$4);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_29$3, [createBaseVNode("label", _hoisted_30$3, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+					createBaseVNode("div", _hoisted_29$4, [createBaseVNode("label", _hoisted_30$4, [_cache[19] || (_cache[19] = createBaseVNode("label", {
 						class: "form-label",
 						style: { "display": "inline" }
-					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_31$3, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_32$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_31$4, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_32$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
@@ -7783,7 +7685,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						}, toDisplayString(opt.label), 11, _hoisted_33$3);
 					}), 64))])])
 				])]),
-				createBaseVNode("div", _hoisted_34$3, [createBaseVNode("div", _hoisted_35$2, [
+				createBaseVNode("div", _hoisted_34$3, [createBaseVNode("div", _hoisted_35$3, [
 					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_36$2, [_cache[20] || (_cache[20] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" 预览 · 输出尺寸 " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
 					images.value.length < 2 ? (openBlock(), createElementBlock("div", _hoisted_37$2, [..._cache[21] || (_cache[21] = [createBaseVNode("span", { class: "empty-icon" }, "🖼️", -1), createBaseVNode("span", null, "添加至少 2 张图片后预览", -1)])])) : createCommentVNode("", true),
 					createBaseVNode("div", {
@@ -7879,38 +7781,38 @@ var __vitePreload = function preload(baseModule, deps, importerUrl) {
 };
 //#endregion
 //#region src/views/ImageSegmentation.vue
-var _hoisted_1$5 = { class: "app-layout" };
-var _hoisted_2$5 = { class: "app-left" };
-var _hoisted_3$5 = {
+var _hoisted_1$8 = { class: "app-layout" };
+var _hoisted_2$7 = { class: "app-left" };
+var _hoisted_3$7 = {
 	key: 0,
 	class: "source-preview-wrap"
 };
-var _hoisted_4$5 = { class: "source-preview" };
+var _hoisted_4$7 = { class: "source-preview" };
 var _hoisted_5$5 = ["src", "alt"];
 var _hoisted_6$5 = {
 	key: 1,
 	class: "nav-bar"
 };
 var _hoisted_7$5 = ["disabled"];
-var _hoisted_8$4 = {
+var _hoisted_8$5 = {
 	key: 2,
 	class: "info-bar"
 };
-var _hoisted_9$4 = { class: "nav-filename" };
-var _hoisted_10$4 = { class: "app-middle" };
-var _hoisted_11$4 = { class: "settings-panel" };
-var _hoisted_12$4 = { class: "setting-item" };
-var _hoisted_13$3 = { class: "seg-control" };
-var _hoisted_14$3 = ["onClick"];
-var _hoisted_15$3 = { class: "picker-header" };
-var _hoisted_16$3 = { class: "picker-hint" };
-var _hoisted_17$3 = { class: "picker-grid" };
-var _hoisted_18$3 = ["onMouseenter", "onClick"];
-var _hoisted_19$3 = { class: "setting-item" };
+var _hoisted_9$5 = { class: "nav-filename" };
+var _hoisted_10$5 = { class: "app-middle" };
+var _hoisted_11$5 = { class: "settings-panel" };
+var _hoisted_12$5 = { class: "setting-item" };
+var _hoisted_13$4 = { class: "seg-control" };
+var _hoisted_14$4 = ["onClick"];
+var _hoisted_15$4 = { class: "picker-header" };
+var _hoisted_16$4 = { class: "picker-hint" };
+var _hoisted_17$4 = { class: "picker-grid" };
+var _hoisted_18$4 = ["onMouseenter", "onClick"];
+var _hoisted_19$4 = { class: "setting-item" };
 var _hoisted_20$3 = { class: "setting-item" };
 var _hoisted_21$3 = { class: "color-swatches" };
-var _hoisted_22$2 = ["title", "onClick"];
-var _hoisted_23$2 = {
+var _hoisted_22$3 = ["title", "onClick"];
+var _hoisted_23$3 = {
 	key: 0,
 	class: "fa-solid fa-ban",
 	style: {
@@ -7918,21 +7820,21 @@ var _hoisted_23$2 = {
 		"color": "var(--muted)"
 	}
 };
-var _hoisted_24$2 = ["title"];
-var _hoisted_25$2 = { class: "setting-item" };
-var _hoisted_26$2 = { class: "seg-control" };
-var _hoisted_27$2 = ["onClick"];
-var _hoisted_28$2 = { class: "setting-item" };
-var _hoisted_29$2 = { class: "form-label" };
-var _hoisted_30$2 = {
+var _hoisted_24$3 = ["title"];
+var _hoisted_25$3 = { class: "setting-item" };
+var _hoisted_26$3 = { class: "seg-control" };
+var _hoisted_27$3 = ["onClick"];
+var _hoisted_28$3 = { class: "setting-item" };
+var _hoisted_29$3 = { class: "form-label" };
+var _hoisted_30$3 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_31$2 = { class: "seg-control" };
+var _hoisted_31$3 = { class: "seg-control" };
 var _hoisted_32$2 = ["disabled", "onClick"];
 var _hoisted_33$2 = { class: "app-right" };
 var _hoisted_34$2 = { class: "preview-area" };
-var _hoisted_35$1 = {
+var _hoisted_35$2 = {
 	key: 0,
 	class: "preview-info"
 };
@@ -8180,7 +8082,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-DEtHb9NL.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-DFZwBf6E.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -8224,8 +8126,8 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url);
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$5, [
-				createBaseVNode("div", _hoisted_2$5, [
+			return openBlock(), createElementBlock("div", _hoisted_1$8, [
+				createBaseVNode("div", _hoisted_2$7, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
@@ -8245,7 +8147,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$5, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$5, [createBaseVNode("img", {
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$7, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$7, [createBaseVNode("img", {
 						src: sourceImage.value.url,
 						alt: sourceImage.value.name,
 						class: "source-thumb"
@@ -8255,19 +8157,19 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 						onClick: clearSource,
 						disabled: !sourceImage.value
 					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7$5)])) : createCommentVNode("", true),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$4, [
-						createBaseVNode("span", _hoisted_9$4, toDisplayString(sourceImage.value.name), 1),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$5, [
+						createBaseVNode("span", _hoisted_9$5, toDisplayString(sourceImage.value.name), 1),
 						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(sourceImage.value.img.naturalWidth) + " × " + toDisplayString(sourceImage.value.img.naturalHeight) + " px", 1)]),
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(sourceImage.value.size)), 1)])
 					])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_10$4, [createBaseVNode("div", _hoisted_11$4, [
-					createBaseVNode("div", _hoisted_12$4, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "form-label" }, "切割方式", -1)), createBaseVNode("div", _hoisted_13$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(presetOptions, (opt) => {
+				createBaseVNode("div", _hoisted_10$5, [createBaseVNode("div", _hoisted_11$5, [
+					createBaseVNode("div", _hoisted_12$5, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "form-label" }, "切割方式", -1)), createBaseVNode("div", _hoisted_13$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(presetOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: cutMode.value === opt.value }]),
 							onClick: ($event) => selectPreset(opt.value)
-						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_14$3);
+						}, [createBaseVNode("i", { class: normalizeClass(opt.icon) }, null, 2), createTextVNode(" " + toDisplayString(opt.label), 1)], 10, _hoisted_14$4);
 					}), 64)), createBaseVNode("button", {
 						class: normalizeClass(["seg-btn", { active: cutMode.value === "custom" }]),
 						onClick: openCustomPicker,
@@ -8281,14 +8183,14 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 					}, [createBaseVNode("div", {
 						class: "picker-popup",
 						style: normalizeStyle(pickerStyle.value)
-					}, [createBaseVNode("div", _hoisted_15$3, [createBaseVNode("span", _hoisted_16$3, [hoverCol.value > 0 && hoverRow.value > 0 ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
+					}, [createBaseVNode("div", _hoisted_15$4, [createBaseVNode("span", _hoisted_16$4, [hoverCol.value > 0 && hoverRow.value > 0 ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
 						_cache[17] || (_cache[17] = createTextVNode(" 选择 ", -1)),
 						createBaseVNode("strong", null, toDisplayString(hoverCol.value) + " × " + toDisplayString(hoverRow.value), 1),
 						createTextVNode("（" + toDisplayString(hoverCol.value * hoverRow.value) + " 格） ", 1)
 					], 64)) : (openBlock(), createElementBlock(Fragment$1, { key: 1 }, [createTextVNode("移到格子选择切割方案")], 64))]), createBaseVNode("button", {
 						class: "picker-close",
 						onClick: _cache[3] || (_cache[3] = ($event) => showCustomPicker.value = false)
-					}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_17$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(10, (row) => {
+					}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_17$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(10, (row) => {
 						return createBaseVNode("div", {
 							key: row,
 							class: "picker-row"
@@ -8305,10 +8207,10 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 									hoverRow.value = 0;
 								}),
 								onClick: ($event) => confirmCustom(col, row)
-							}, null, 42, _hoisted_18$3);
+							}, null, 42, _hoisted_18$4);
 						}), 64))]);
 					}), 64))])], 4)])) : createCommentVNode("", true)])),
-					createBaseVNode("div", _hoisted_19$3, [_cache[19] || (_cache[19] = createBaseVNode("span", { class: "form-label" }, "圆角", -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_19$4, [_cache[19] || (_cache[19] = createBaseVNode("span", { class: "form-label" }, "圆角", -1)), createVNode(SliderInput_default, {
 						modelValue: radius.value,
 						"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => radius.value = $event),
 						label: "",
@@ -8326,7 +8228,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							} : { background: color.value }),
 							title: color.label,
 							onClick: ($event) => bgColor.value = color.value
-						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_23$2)) : createCommentVNode("", true)], 14, _hoisted_22$2)) : (openBlock(), createElementBlock("label", {
+						}, [color.value === "transparent" ? (openBlock(), createElementBlock("i", _hoisted_23$3)) : createCommentVNode("", true)], 14, _hoisted_22$3)) : (openBlock(), createElementBlock("label", {
 							key: 1,
 							class: normalizeClass(["color-swatch", { active: bgColor.value === customBgColor.value }]),
 							style: normalizeStyle({
@@ -8345,9 +8247,9 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							class: "palette-input",
 							"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => customBgColor.value = $event),
 							onInput: applyCustomBgColor
-						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_24$2))], 64);
+						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_24$3))], 64);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_25$2, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_26$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_25$3, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_26$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -8356,9 +8258,9 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_27$2);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_27$3);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_28$2, [createBaseVNode("label", _hoisted_29$2, [_cache[23] || (_cache[23] = createTextVNode(" 图片压缩 ", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_30$2, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_31$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					createBaseVNode("div", _hoisted_28$3, [createBaseVNode("label", _hoisted_29$3, [_cache[23] || (_cache[23] = createTextVNode(" 图片压缩 ", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_30$3, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_31$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
@@ -8368,7 +8270,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 					}), 64))])])
 				])]),
 				createBaseVNode("div", _hoisted_33$2, [createBaseVNode("div", _hoisted_34$2, [
-					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_35$1, [_cache[24] || (_cache[24] = createBaseVNode("i", { class: "fa-solid fa-scissors" }, null, -1)), createTextVNode(" " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
+					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_35$2, [_cache[24] || (_cache[24] = createBaseVNode("i", { class: "fa-solid fa-scissors" }, null, -1)), createTextVNode(" " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
 					!sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_36$1, [..._cache[25] || (_cache[25] = [createBaseVNode("span", { class: "empty-icon" }, "✂️", -1), createBaseVNode("span", null, "上传图片后预览切割效果", -1)])])) : createCommentVNode("", true),
 					sourceImage.value ? (openBlock(), createElementBlock("div", {
 						key: 2,
@@ -8852,10 +8754,10 @@ var import_gif = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((export
 })))());
 //#endregion
 //#region src/views/VideoToGif.vue
-var _hoisted_1$4 = { class: "gif-converter" };
-var _hoisted_2$4 = { class: "converter-left" };
-var _hoisted_3$4 = { class: "upload-text" };
-var _hoisted_4$4 = ["src"];
+var _hoisted_1$7 = { class: "gif-converter" };
+var _hoisted_2$6 = { class: "converter-left" };
+var _hoisted_3$6 = { class: "upload-text" };
+var _hoisted_4$6 = ["src"];
 var _hoisted_5$4 = {
 	key: 1,
 	class: "video-info-bar"
@@ -8865,37 +8767,37 @@ var _hoisted_6$4 = {
 	class: "timeline-container"
 };
 var _hoisted_7$4 = { class: "timeline-header" };
-var _hoisted_8$3 = { class: "timeline-time" };
-var _hoisted_9$3 = { class: "handle-label" };
-var _hoisted_10$3 = { class: "handle-label" };
-var _hoisted_11$3 = { class: "timeline-actions" };
-var _hoisted_12$3 = ["disabled"];
-var _hoisted_13$2 = { class: "fa-solid fa-play" };
-var _hoisted_14$2 = { class: "fa-solid fa-pause" };
-var _hoisted_15$2 = ["disabled"];
-var _hoisted_16$2 = { class: "fa-solid fa-play" };
-var _hoisted_17$2 = { class: "fa-solid fa-pause" };
-var _hoisted_18$2 = { class: "converter-middle" };
-var _hoisted_19$2 = { class: "settings-panel" };
+var _hoisted_8$4 = { class: "timeline-time" };
+var _hoisted_9$4 = { class: "handle-label" };
+var _hoisted_10$4 = { class: "handle-label" };
+var _hoisted_11$4 = { class: "timeline-actions" };
+var _hoisted_12$4 = ["disabled"];
+var _hoisted_13$3 = { class: "fa-solid fa-play" };
+var _hoisted_14$3 = { class: "fa-solid fa-pause" };
+var _hoisted_15$3 = ["disabled"];
+var _hoisted_16$3 = { class: "fa-solid fa-play" };
+var _hoisted_17$3 = { class: "fa-solid fa-pause" };
+var _hoisted_18$3 = { class: "converter-middle" };
+var _hoisted_19$3 = { class: "settings-panel" };
 var _hoisted_20$2 = { class: "preset-buttons" };
 var _hoisted_21$2 = { class: "setting-item" };
-var _hoisted_22$1 = { class: "seg-control" };
-var _hoisted_23$1 = ["onClick"];
-var _hoisted_24$1 = { class: "setting-item" };
-var _hoisted_25$1 = { class: "setting-item" };
-var _hoisted_26$1 = { class: "setting-item" };
-var _hoisted_27$1 = { class: "form-label" };
-var _hoisted_28$1 = { class: "action-row" };
-var _hoisted_29$1 = ["disabled"];
-var _hoisted_30$1 = ["disabled"];
-var _hoisted_31$1 = { class: "btn-content" };
+var _hoisted_22$2 = { class: "seg-control" };
+var _hoisted_23$2 = ["onClick"];
+var _hoisted_24$2 = { class: "setting-item" };
+var _hoisted_25$2 = { class: "setting-item" };
+var _hoisted_26$2 = { class: "setting-item" };
+var _hoisted_27$2 = { class: "form-label" };
+var _hoisted_28$2 = { class: "action-row" };
+var _hoisted_29$2 = ["disabled"];
+var _hoisted_30$2 = ["disabled"];
+var _hoisted_31$2 = { class: "btn-content" };
 var _hoisted_32$1 = {
 	key: 0,
 	class: "progress-container"
 };
 var _hoisted_33$1 = { class: "progress-header" };
 var _hoisted_34$1 = { class: "progress-text" };
-var _hoisted_35 = { class: "progress-percent" };
+var _hoisted_35$1 = { class: "progress-percent" };
 var _hoisted_36 = { class: "progress-bar" };
 var _hoisted_37 = { class: "progress-footer" };
 var _hoisted_38 = {
@@ -9375,8 +9277,8 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (gifPreviewUrl.value) URL.revokeObjectURL(gifPreviewUrl.value);
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$4, [
-				createBaseVNode("div", _hoisted_2$4, [
+			return openBlock(), createElementBlock("div", _hoisted_1$7, [
+				createBaseVNode("div", _hoisted_2$6, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -9388,7 +9290,7 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$4, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						createBaseVNode("p", _hoisted_3$6, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
 						_cache[12] || (_cache[12] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
@@ -9418,14 +9320,14 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onLoadedmetadata: onVideoLoaded,
 						onError: onVideoError,
 						onTimeupdate: onTimeUpdate
-					}, null, 40, _hoisted_4$4)], 512)) : createCommentVNode("", true),
+					}, null, 40, _hoisted_4$6)], 512)) : createCommentVNode("", true),
 					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$4, [
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
 						createBaseVNode("span", null, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-clock" }, null, -1)), createTextVNode(" 时长: " + toDisplayString(formatTime(videoInfo.value.duration)), 1)]),
 						createBaseVNode("span", null, [_cache[16] || (_cache[16] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
 					])) : createCommentVNode("", true),
 					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$4, [
-						createBaseVNode("div", _hoisted_7$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "timeline-label" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 选择片段范围 ")], -1)), createBaseVNode("span", _hoisted_8$3, toDisplayString(formatTime(trimStart.value)) + " - " + toDisplayString(formatTime(trimEnd.value)) + " (" + toDisplayString(formatTime(trimEnd.value - trimStart.value)) + ")", 1)]),
+						createBaseVNode("div", _hoisted_7$4, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "timeline-label" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 选择片段范围 ")], -1)), createBaseVNode("span", _hoisted_8$4, toDisplayString(formatTime(trimStart.value)) + " - " + toDisplayString(formatTime(trimEnd.value)) + " (" + toDisplayString(formatTime(trimEnd.value - trimStart.value)) + ")", 1)]),
 						createBaseVNode("div", {
 							class: "timeline-track",
 							ref_key: "timelineTrack",
@@ -9444,36 +9346,36 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								class: "timeline-handle timeline-handle-start",
 								style: normalizeStyle(handleStartStyle.value),
 								onMousedown: _cache[3] || (_cache[3] = withModifiers(($event) => onHandleMouseDown($event, "start"), ["stop"]))
-							}, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_9$3, toDisplayString(formatTime(trimStart.value)), 1)], 36),
+							}, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_9$4, toDisplayString(formatTime(trimStart.value)), 1)], 36),
 							createBaseVNode("div", {
 								class: "timeline-handle timeline-handle-end",
 								style: normalizeStyle(handleEndStyle.value),
 								onMousedown: _cache[4] || (_cache[4] = withModifiers(($event) => onHandleMouseDown($event, "end"), ["stop"]))
-							}, [_cache[19] || (_cache[19] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_10$3, toDisplayString(formatTime(trimEnd.value)), 1)], 36),
+							}, [_cache[19] || (_cache[19] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_10$4, toDisplayString(formatTime(trimEnd.value)), 1)], 36),
 							createBaseVNode("div", {
 								class: "timeline-playhead",
 								style: normalizeStyle(playheadStyle.value)
 							}, null, 4)
 						], 544),
-						createBaseVNode("div", _hoisted_11$3, [
+						createBaseVNode("div", _hoisted_11$4, [
 							createBaseVNode("button", {
 								class: "btn btn-sm",
 								onClick: togglePlayPause,
 								disabled: !videoUrl.value
 							}, [
-								withDirectives(createBaseVNode("i", _hoisted_13$2, null, 512), [[vShow, !isPlaying.value]]),
-								withDirectives(createBaseVNode("i", _hoisted_14$2, null, 512), [[vShow, isPlaying.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_13$3, null, 512), [[vShow, !isPlaying.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_14$3, null, 512), [[vShow, isPlaying.value]]),
 								createTextVNode(" " + toDisplayString(isPlaying.value ? "暂停" : "播放"), 1)
-							], 8, _hoisted_12$3),
+							], 8, _hoisted_12$4),
 							createBaseVNode("button", {
 								class: "btn btn-sm",
 								onClick: playSegment,
 								disabled: !videoUrl.value
 							}, [
-								withDirectives(createBaseVNode("i", _hoisted_16$2, null, 512), [[vShow, !isPlayingSegment.value]]),
-								withDirectives(createBaseVNode("i", _hoisted_17$2, null, 512), [[vShow, isPlayingSegment.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_16$3, null, 512), [[vShow, !isPlayingSegment.value]]),
+								withDirectives(createBaseVNode("i", _hoisted_17$3, null, 512), [[vShow, isPlayingSegment.value]]),
 								createTextVNode(" " + toDisplayString(isPlayingSegment.value ? "暂停片段" : "播放片段"), 1)
-							], 8, _hoisted_15$2),
+							], 8, _hoisted_15$3),
 							createBaseVNode("button", {
 								class: "btn btn-sm",
 								onClick: resetTrim
@@ -9481,7 +9383,7 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						])
 					])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_18$2, [createBaseVNode("div", _hoisted_19$2, [
+				createBaseVNode("div", _hoisted_18$3, [createBaseVNode("div", _hoisted_19$3, [
 					_cache[34] || (_cache[34] = createBaseVNode("div", { class: "panel-title" }, [createBaseVNode("i", { class: "fa-solid fa-wand-magic-sparkles" }), createTextVNode(" 快速预设 ")], -1)),
 					createBaseVNode("div", _hoisted_20$2, [
 						createBaseVNode("button", {
@@ -9510,18 +9412,18 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						])], 2)
 					]),
 					_cache[35] || (_cache[35] = createBaseVNode("div", { class: "panel-title" }, [createBaseVNode("i", { class: "fa-solid fa-gear" }), createTextVNode(" GIF 设置 ")], -1)),
-					createBaseVNode("div", _hoisted_21$2, [_cache[25] || (_cache[25] = createBaseVNode("label", { class: "form-label" }, "颜色数", -1)), createBaseVNode("div", _hoisted_22$1, [(openBlock(), createElementBlock(Fragment$1, null, renderList(colorOptions, (c) => {
+					createBaseVNode("div", _hoisted_21$2, [_cache[25] || (_cache[25] = createBaseVNode("label", { class: "form-label" }, "颜色数", -1)), createBaseVNode("div", _hoisted_22$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList(colorOptions, (c) => {
 						return createBaseVNode("button", {
 							key: c.value,
 							class: normalizeClass(["seg-btn", { active: colors.value === c.value }]),
 							onClick: ($event) => colors.value = c.value
-						}, toDisplayString(c.label), 11, _hoisted_23$1);
+						}, toDisplayString(c.label), 11, _hoisted_23$2);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_24$1, [_cache[27] || (_cache[27] = createBaseVNode("label", { class: "form-label" }, "抖动算法", -1)), withDirectives(createBaseVNode("select", {
+					createBaseVNode("div", _hoisted_24$2, [_cache[27] || (_cache[27] = createBaseVNode("label", { class: "form-label" }, "抖动算法", -1)), withDirectives(createBaseVNode("select", {
 						"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => dither.value = $event),
 						class: "form-select"
 					}, [..._cache[26] || (_cache[26] = [createStaticVNode("<option value=\"none\" data-v-c08f40d2>无抖动</option><option value=\"FloydSteinberg-serpentine\" data-v-c08f40d2>Floyd-Steinberg</option><option value=\"FalseFloydSteinberg\" data-v-c08f40d2>False Floyd-Steinberg</option><option value=\"Stucki\" data-v-c08f40d2>Stucki</option><option value=\"Atkinson\" data-v-c08f40d2>Atkinson</option>", 5)])], 512), [[vModelSelect, dither.value]])]),
-					createBaseVNode("div", _hoisted_25$1, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "form-label" }, "压缩级别", -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_25$2, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "form-label" }, "压缩级别", -1)), createVNode(SliderInput_default, {
 						"model-value": compressionLevel.value,
 						label: "",
 						unit: "",
@@ -9530,25 +9432,25 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onUpdate:modelValue": _cache[9] || (_cache[9] = (val) => compressionLevel.value = val),
 						step: "1"
 					}, null, 8, ["model-value"])]),
-					createBaseVNode("div", _hoisted_26$1, [createBaseVNode("label", _hoisted_27$1, [withDirectives(createBaseVNode("input", {
+					createBaseVNode("div", _hoisted_26$2, [createBaseVNode("label", _hoisted_27$2, [withDirectives(createBaseVNode("input", {
 						type: "checkbox",
 						"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => loop.value = $event),
 						class: "checkbox-input"
 					}, null, 512), [[vModelCheckbox, loop.value]]), _cache[29] || (_cache[29] = createTextVNode(" 循环播放 ", -1))])]),
-					createBaseVNode("div", _hoisted_28$1, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_28$2, [createBaseVNode("button", {
 						class: "btn btn-danger",
 						disabled: !isGenerating.value,
 						onClick: cancelGenerate
-					}, [..._cache[30] || (_cache[30] = [createBaseVNode("i", { class: "fa-solid fa-stop" }, null, -1), createTextVNode(" 取消 ", -1)])], 8, _hoisted_29$1), createBaseVNode("button", {
+					}, [..._cache[30] || (_cache[30] = [createBaseVNode("i", { class: "fa-solid fa-stop" }, null, -1), createTextVNode(" 取消 ", -1)])], 8, _hoisted_29$2), createBaseVNode("button", {
 						class: normalizeClass(["btn btn-primary btn-block generate-btn", { generating: isGenerating.value }]),
 						disabled: !canGenerate.value && !isGenerating.value,
 						onClick: generateGif
 					}, [createBaseVNode("div", {
 						class: "btn-progress",
 						style: normalizeStyle({ width: progressInfo.value.percent + "%" })
-					}, null, 4), createBaseVNode("span", _hoisted_31$1, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-film"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? statusMsg.value : "生成 GIF"), 1)])], 10, _hoisted_30$1)]),
+					}, null, 4), createBaseVNode("span", _hoisted_31$2, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-film"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? statusMsg.value : "生成 GIF"), 1)])], 10, _hoisted_30$2)]),
 					isGenerating.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_32$1, [
-						createBaseVNode("div", _hoisted_33$1, [createBaseVNode("span", _hoisted_34$1, [_cache[31] || (_cache[31] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_35, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+						createBaseVNode("div", _hoisted_33$1, [createBaseVNode("span", _hoisted_34$1, [_cache[31] || (_cache[31] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_35$1, toDisplayString(progressInfo.value.percent) + "%", 1)]),
 						createBaseVNode("div", _hoisted_36, [createBaseVNode("div", {
 							class: "progress-fill",
 							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
@@ -9759,6 +9661,15 @@ var cssContent = `
     user-select: none;
   }
 `;
+var selfCloseTagList = [
+	"img",
+	"br",
+	"hr",
+	"input",
+	"link",
+	"meta",
+	"area"
+];
 var noneRichTextNodeLineHeight = 1.2;
 var richTextSupportStyleList = [
 	"fontFamily",
@@ -15224,7 +15135,7 @@ registerMorphableType([
 makeMorphable();
 //#endregion
 //#region node_modules/simple-mind-map/src/theme/default.js
-var default_default = {
+var default_default$1 = {
 	paddingX: 15,
 	paddingY: 5,
 	imgMaxWidth: 200,
@@ -15501,6 +15412,36 @@ var copyNodeTree = (tree, root, removeActiveState = false, removeId = true) => {
 	});
 	return tree;
 };
+var imgToDataUrl = (src, returnBlob = false) => {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		img.setAttribute("crossOrigin", "anonymous");
+		img.onload = () => {
+			try {
+				let canvas = document.createElement("canvas");
+				canvas.width = img.width;
+				canvas.height = img.height;
+				canvas.getContext("2d").drawImage(img, 0, 0, img.width, img.height);
+				if (returnBlob) canvas.toBlob((blob) => {
+					resolve(blob);
+				});
+				else resolve(canvas.toDataURL());
+			} catch (e) {
+				reject(e);
+			}
+		};
+		img.onerror = (e) => {
+			reject(e);
+		};
+		img.src = src;
+	});
+};
+var downloadFile = (file, fileName) => {
+	let a = document.createElement("a");
+	a.href = file;
+	a.download = fileName;
+	a.click();
+};
 var throttle = (fn, time = 300, ctx) => {
 	let timer = null;
 	return (...args) => {
@@ -15595,6 +15536,18 @@ var getTextFromHtml = (html) => {
 	getTextFromHtmlEl.innerHTML = html;
 	return getTextFromHtmlEl.textContent;
 };
+var readBlob = (blob) => {
+	return new Promise((resolve, reject) => {
+		let reader = new FileReader();
+		reader.onload = (evt) => {
+			resolve(evt.target.result);
+		};
+		reader.onerror = (err) => {
+			reject(err);
+		};
+		reader.readAsDataURL(blob);
+	});
+};
 var getImageSize = (src) => {
 	return new Promise((resolve) => {
 		let img = new Image();
@@ -15631,6 +15584,12 @@ var loadImage = (imgFile) => {
 			reject(error);
 		};
 	});
+};
+var removeHTMLEntities = (str) => {
+	[["&nbsp;", "&#160;"]].forEach((item) => {
+		str = str.replace(new RegExp(item[0], "g"), item[1]);
+	});
+	return str;
 };
 var getType = (data) => {
 	return Object.prototype.toString.call(data).slice(8, -1);
@@ -15677,6 +15636,31 @@ var getVisibleColorFromTheme = (themeConfig) => {
 		let color = list[i];
 		if (!isTransparent(color) && !isWhite(color)) return color;
 	}
+};
+var removeFormulaTags = (node) => {
+	const walk = (root) => {
+		root.childNodes.forEach((node) => {
+			if (node.nodeType === 1) if (node.classList.contains("ql-formula")) node.parentNode.removeChild(node);
+			else walk(node);
+		});
+	};
+	walk(node);
+};
+var nodeRichTextToTextWithWrapEl = null;
+var nodeRichTextToTextWithWrap = (html) => {
+	if (!nodeRichTextToTextWithWrapEl) nodeRichTextToTextWithWrapEl = document.createElement("div");
+	nodeRichTextToTextWithWrapEl.innerHTML = html;
+	const childNodes = nodeRichTextToTextWithWrapEl.childNodes;
+	let res = "";
+	for (let i = 0; i < childNodes.length; i++) {
+		const node = childNodes[i];
+		if (node.nodeType === 1) {
+			removeFormulaTags(node);
+			if (node.tagName.toLowerCase() === "p") res += node.textContent + "\n";
+			else res += node.textContent;
+		} else if (node.nodeType === 3) res += node.nodeValue;
+	}
+	return res.replace(/\n$/, "");
 };
 var removeRichTextStyesEl = null;
 var removeRichTextStyes = (html) => {
@@ -15921,6 +15905,12 @@ var removeFromParentNodeData = (node) => {
 	if (index === -1) return;
 	node.parent.nodeData.children.splice(index, 1);
 };
+var handleSelfCloseTags = (str) => {
+	selfCloseTagList.forEach((tagName) => {
+		str = str.replace(new RegExp(`<${tagName}([^>]*)>`, "g"), `<${tagName} $1 />`);
+	});
+	return str;
+};
 var checkNodeListIsEqual = (list1, list2) => {
 	if (list1.length !== list2.length) return false;
 	for (let i = 0; i < list1.length; i++) if (!list2.find((item) => {
@@ -15984,6 +15974,21 @@ var transformTreeDataToObject = (data) => {
 	};
 	walk(data, null);
 	return res;
+};
+var getRectRelativePosition = (rect1, rect2) => {
+	const rect1CenterX = rect1.x + rect1.width / 2;
+	const rect1CenterY = rect1.y + rect1.height / 2;
+	const rect2CenterX = rect2.x + rect2.width / 2;
+	const rect2CenterY = rect2.y + rect2.height / 2;
+	if (rect1CenterX < rect2CenterX && rect1CenterY < rect2CenterY) return "left-top";
+	else if (rect1CenterX > rect2CenterX && rect1CenterY < rect2CenterY) return "right-top";
+	else if (rect1CenterX > rect2CenterX && rect1CenterY > rect2CenterY) return "right-bottom";
+	else if (rect1CenterX < rect2CenterX && rect1CenterY > rect2CenterY) return "left-bottom";
+	else if (rect1CenterX < rect2CenterX && rect1CenterY === rect2CenterY) return "left";
+	else if (rect1CenterX > rect2CenterX && rect1CenterY === rect2CenterY) return "right";
+	else if (rect1CenterX === rect2CenterX && rect1CenterY < rect2CenterY) return "top";
+	else if (rect1CenterX === rect2CenterX && rect1CenterY > rect2CenterY) return "bottom";
+	else return "overlap";
 };
 var handleGetSvgDataExtraContent = ({ addContentToHeader, addContentToFooter }) => {
 	const cssTextList = [];
@@ -17889,7 +17894,7 @@ function getTagContentSize(space) {
 		height: maxTagHeight
 	};
 }
-function getNodeRect() {
+function getNodeRect$1() {
 	if (this.isUseCustomNodeContent()) {
 		const rect = this.measureCustomNodeContentSize(this._customNodeContent.cloneNode(true));
 		return {
@@ -18223,7 +18228,7 @@ function layout() {
 var nodeLayout_default = {
 	getImgTextMarin,
 	getTagContentSize,
-	getNodeRect,
+	getNodeRect: getNodeRect$1,
 	addHoverNode,
 	layout,
 	customNodeContentRealtimeLayout
@@ -22603,7 +22608,7 @@ var Render = class {
 };
 //#endregion
 //#region node_modules/simple-mind-map/src/theme/index.js
-var theme_default = { default: default_default };
+var theme_default = { default: default_default$1 };
 //#endregion
 //#region node_modules/simple-mind-map/src/core/command/keyMap.js
 var map = {
@@ -23736,1228 +23741,5408 @@ MindMap.hasPlugin = (plugin) => {
 MindMap.instanceCount = 0;
 MindMap.defineTheme = (name, config = {}) => {
 	if (theme_default[name]) return /* @__PURE__ */ new Error("该主题名称已存在");
-	theme_default[name] = mergeTheme(default_default, config);
+	theme_default[name] = mergeTheme(default_default$1, config);
 };
 MindMap.removeTheme = (name) => {
 	if (theme_default[name]) theme_default[name] = null;
 };
 //#endregion
-//#region src/utils/imageUtils.js
-/**
-* 图片处理工具函数
-* 提供图片压缩、Base64转换、URL验证等功能
-*/
-/**
-* 将 File 对象转换为 Base64
-* @param {File} file - 图片文件
-* @returns {Promise<string>} Base64 字符串
-*/
-var fileToBase64 = (file) => {
-	return new Promise((resolve, reject) => {
-		const reader = new FileReader();
-		reader.onload = () => resolve(reader.result);
-		reader.onerror = reject;
-		reader.readAsDataURL(file);
-	});
-};
-/**
-* 压缩图片
-* @param {File} file - 原始图片文件
-* @param {Object} options - 压缩选项
-* @param {number} options.maxWidth - 最大宽度（默认 1920）
-* @param {number} options.maxHeight - 最大高度（默认 1080）
-* @param {number} options.quality - 压缩质量 0-1（默认 0.8）
-* @param {string} options.format - 输出格式 'image/jpeg' | 'image/png' | 'image/webp'（默认 'image/jpeg'）
-* @returns {Promise<string>} 压缩后的 Base64 字符串
-*/
-var compressImage = (file, options = {}) => {
-	const { maxWidth = 1920, maxHeight = 1080, quality = .8, format = "image/jpeg" } = options;
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		const url = URL.createObjectURL(file);
-		img.onload = () => {
-			URL.revokeObjectURL(url);
-			let width = img.width;
-			let height = img.height;
-			if (width > maxWidth || height > maxHeight) {
-				const ratio = Math.min(maxWidth / width, maxHeight / height);
-				width = Math.floor(width * ratio);
-				height = Math.floor(height * ratio);
+//#region node_modules/simple-mind-map-plugin-themes/src/dark/index.js
+var dark_default$1 = [
+	{
+		name: "脑图经典",
+		value: "classic",
+		theme: {
+			lineColor: "#fff",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#fff",
+			backgroundColor: "rgb(58, 65, 68)",
+			backgroundImage: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowQzg5QTQ0NDhENzgxMUUzOENGREE4QTg0RDgzRTZDNyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDowQzg5QTQ0NThENzgxMUUzOENGREE4QTg0RDgzRTZDNyI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkMwOEQ1NDRGOEQ3NzExRTM4Q0ZEQThBODREODNFNkM3IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkMwOEQ1NDUwOEQ3NzExRTM4Q0ZEQThBODREODNFNkM3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+e9P33AAAACVJREFUeNpisXJ0YUACTAyoAMr/+eM7EGGRZ4FQ7BycEAZAgAEAHbEGtkoQm/wAAAAASUVORK5CYII=",
+			backgroundRepeat: "repeat",
+			backgroundSize: "auto",
+			root: {
+				fillColor: "rgb(233, 223, 152)",
+				color: "#333",
+				fontSize: 24,
+				borderRadius: 21
+			},
+			second: {
+				fillColor: "rgb(164, 197, 192)",
+				borderColor: "transparent",
+				color: "#333",
+				fontSize: 16,
+				borderRadius: 10
+			},
+			node: {
+				fontSize: 12,
+				color: "#fff",
+				fontWeight: "bold"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "transparent",
+				color: "#333"
 			}
-			const canvas = document.createElement("canvas");
-			canvas.width = width;
-			canvas.height = height;
-			canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-			resolve(canvas.toDataURL(format, quality));
-		};
-		img.onerror = () => {
-			URL.revokeObjectURL(url);
-			reject(/* @__PURE__ */ new Error("图片加载失败"));
-		};
-		img.src = url;
+		}
+	},
+	{
+		name: "黑色幽默",
+		value: "blackHumour",
+		theme: {
+			backgroundColor: "rgb(27, 31, 34)",
+			lineColor: "rgb(75, 81, 78)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 119, 34)",
+			root: {
+				fillColor: "rgb(36, 179, 96)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(254, 199, 13)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(204, 204, 204)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(27, 31, 34)",
+				borderColor: "rgb(255, 119, 34)",
+				borderWidth: 2,
+				color: "rgb(204, 204, 204)"
+			}
+		}
+	},
+	{
+		name: "深夜办公室",
+		value: "lateNightOffice",
+		theme: {
+			backgroundColor: "rgb(32, 37, 49)",
+			lineColor: "rgb(137, 167, 196)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 119, 34)",
+			root: {
+				fillColor: "rgb(23, 153, 243)",
+				color: "rgb(255, 255, 255)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(70, 78, 94)",
+				color: "rgb(209, 210, 210)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(204, 204, 204)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(255, 119, 34)",
+				borderColor: "",
+				borderWidth: 2,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "黑金",
+		value: "blackGold",
+		theme: {
+			backgroundColor: "rgb(18, 20, 20)",
+			lineColor: "rgb(205, 186, 156)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(245, 224, 191)",
+			root: {
+				fillColor: "rgb(255, 208, 124)",
+				color: "rgb(111, 61, 6)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(66, 57, 46)",
+				color: "rgb(225, 201, 158)",
+				borderColor: "rgb(245, 224, 191)",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(231, 203, 155)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(56, 45, 34)",
+				borderColor: "rgb(104, 84, 61)",
+				borderWidth: 2,
+				color: "rgb(242, 216, 176)"
+			}
+		}
+	},
+	{
+		name: "橙汁",
+		value: "orangeJuice",
+		theme: {
+			backgroundColor: "#070616",
+			lineColor: "#fff",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#fff",
+			root: {
+				fillColor: "#ff6811",
+				color: "#110501",
+				borderColor: "#ff6811",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#070616",
+				color: "#a9a4a9",
+				borderColor: "#ff6811",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#a9a4a9"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "",
+				borderColor: "#ff6811",
+				borderWidth: 2,
+				color: "#a9a4a9"
+			}
+		}
+	},
+	{
+		name: "霓虹灯",
+		value: "neonLamp",
+		theme: {
+			backgroundColor: "rgb(17, 17, 84)",
+			lineColor: "rgb(255, 0, 214)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 181, 0)",
+			associativeLineColor: "rgb(255, 255, 255)",
+			associativeLineTextColor: "rgb(255, 255, 255)",
+			root: {
+				fillColor: "rgb(251, 233, 248)",
+				color: "rgb(208, 5, 176)",
+				borderColor: "rgb(255, 0, 214)",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "transparent",
+				color: "rgb(248, 177, 237)",
+				borderColor: "",
+				borderWidth: 3,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#fff"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(255, 181, 0)",
+				borderWidth: 2,
+				color: "rgb(17, 17, 84)"
+			}
+		}
+	},
+	{
+		name: "暗夜冰刃",
+		value: "darkNightLceBlade",
+		theme: {
+			backgroundColor: "rgb(0, 21, 21)",
+			lineColor: "rgb(0, 139, 146)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgba(2, 167, 240, 0.5)",
+			associativeLineColor: "rgb(255, 255, 255)",
+			associativeLineTextColor: "rgb(255, 255, 255)",
+			root: {
+				fillColor: "rgb(0, 243, 255)",
+				color: "rgb(0, 21, 21)",
+				borderColor: "#fff",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "parallelogram"
+			},
+			second: {
+				fillColor: "rgb(0, 21, 21)",
+				color: "#fff",
+				borderColor: "#fff",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "diamond"
+			},
+			node: {
+				fontSize: 14,
+				color: "#fff"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(0, 117, 255)",
+				borderWidth: 2,
+				color: "rgb(0, 21, 21)"
+			}
+		}
+	},
+	{
+		name: "暗色",
+		value: "dark",
+		theme: {
+			lineColor: "rgb(17, 68, 23)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#fff",
+			backgroundColor: "rgb(15, 16, 17)",
+			root: {
+				fillColor: "rgb(28, 178, 43)",
+				color: "#fff",
+				fontSize: 24,
+				borderRadius: 10
+			},
+			second: {
+				fillColor: "rgb(55, 56, 58)",
+				color: "rgb(147,148,149)",
+				fontSize: 18,
+				borderRadius: 10,
+				borderWidth: 0
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(147, 148, 149)"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "transparent",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "暗色2",
+		value: "dark2",
+		theme: {
+			lineColor: "rgb(75, 81, 78)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 119, 34)",
+			backgroundColor: "rgb(27, 31, 34)",
+			root: {
+				fillColor: "rgb(36, 179, 96)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "rgb(254, 199, 13)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "rgb(204, 204, 204)"
+			},
+			generalization: {
+				fillColor: "transparent",
+				borderColor: "rgb(255, 119, 34)",
+				borderWidth: 2,
+				color: "rgb(204, 204, 204)"
+			}
+		}
+	},
+	{
+		name: "暗色3",
+		value: "dark3",
+		theme: {
+			backgroundColor: "rgb(0, 0, 0)",
+			lineColor: "rgb(172, 172, 172)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(172, 172, 172)",
+			associativeLineColor: "rgb(57, 130, 252)",
+			associativeLineTextColor: "rgb(68, 68, 68)",
+			root: {
+				fillColor: "#fff",
+				color: "rgb(241, 79, 81)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "rgb(241, 79, 81)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#fff"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				color: "rgb(241, 79, 81)"
+			}
+		}
+	},
+	{
+		name: "暗色4",
+		value: "dark4",
+		theme: {
+			backgroundColor: "rgb(32, 34, 43)",
+			lineColor: "rgb(90, 136, 116)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(90, 136, 116)",
+			associativeLineColor: "rgb(57, 130, 252)",
+			associativeLineTextColor: "rgb(68, 68, 68)",
+			root: {
+				fillColor: "rgb(1, 192, 116)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(48, 51, 63)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#fff"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(1, 192, 116)",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "暗色5",
+		value: "dark5",
+		theme: {
+			backgroundColor: "#16181d",
+			lineColor: "#7da578",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#7da578",
+			associativeLineColor: "#7da578",
+			associativeLineTextColor: "#9ce81d",
+			associativeLineActiveColor: "#9ce81d",
+			root: {
+				fillColor: "#9ce81d",
+				color: "#15521b",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#24272f",
+				color: "#97b65e",
+				borderColor: "#80a97a",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#789e73"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#9ce81d",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#13501b"
+			}
+		}
+	},
+	{
+		name: "暗色6",
+		value: "dark6",
+		theme: {
+			backgroundColor: "#051422",
+			lineColor: "#55dff3",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#55dff3",
+			associativeLineColor: "#55dff3",
+			associativeLineTextColor: "#78b3ff",
+			associativeLineActiveColor: "#78b3ff",
+			root: {
+				fillColor: "#55dff3",
+				color: "#0f4956",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#0b1632",
+				color: "#fff",
+				borderColor: "#78b3ff",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#78b3ff"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#55dff3",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#0f4956"
+			}
+		}
+	},
+	{
+		name: "暗色7",
+		value: "dark7",
+		theme: {
+			backgroundColor: "#192b3b",
+			lineColor: "#4986bc",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#4986bc",
+			associativeLineColor: "#4986bc",
+			associativeLineTextColor: "#679fba",
+			associativeLineActiveColor: "#679fba",
+			root: {
+				fillColor: "#3462b0",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#679fba",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#679fba"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#3462b0",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	}
+].map((item) => {
+	return {
+		...item,
+		dark: true
+	};
+});
+//#endregion
+//#region node_modules/simple-mind-map-plugin-themes/src/light/index.js
+var light_default = [
+	{
+		name: "天清绿",
+		value: "skyGreen",
+		theme: {
+			lineColor: "#fff",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#fff",
+			backgroundColor: "rgb(80, 156, 170)",
+			root: {
+				fillColor: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				color: "rgb(65, 89, 158)"
+			},
+			second: {
+				fillColor: "rgb(251, 227, 188)",
+				color: "rgb(65, 89, 158)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "rgb(65, 89, 158)"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "transparent",
+				color: "rgb(65, 89, 158)"
+			}
+		}
+	},
+	{
+		name: "经典绿",
+		value: "classicGreen",
+		theme: {
+			lineColor: "rgb(123, 199, 120)",
+			backgroundColor: "rgb(236, 245, 231)",
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(123, 199, 120)",
+			root: {
+				fillColor: "rgb(253, 244, 217)",
+				color: "#222"
+			},
+			second: {
+				fillColor: "rgb(253, 244, 217)",
+				color: "#222",
+				borderColor: "rgb(242, 200, 104)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "rgb(123, 199, 120)",
+				borderColor: "transparent",
+				borderWidth: 2,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "经典蓝",
+		value: "classicBlue",
+		theme: {
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(51, 51, 51)",
+			backgroundColor: "rgb(239, 248, 250)",
+			root: {
+				fillColor: "rgb(255, 255, 255)",
+				color: "#222"
+			},
+			second: {
+				fillColor: "rgb(255, 255, 255)",
+				color: "#222",
+				borderColor: "rgb(255, 255, 255)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "rgb(51, 51, 51)",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "天空蓝",
+		value: "blueSky",
+		theme: {
+			lineColor: "rgb(115, 161, 191)",
+			backgroundColor: "rgb(251, 251, 251)",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "rgb(115, 161, 191)" },
+			second: {
+				fillColor: "rgb(238, 243, 246)",
+				color: "#333",
+				borderColor: "rgb(115, 161, 191)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "脑残粉",
+		value: "brainImpairedPink",
+		theme: {
+			lineColor: "rgb(191, 115, 148)",
+			backgroundColor: "rgb(251, 251, 251)",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "rgb(191, 115, 148)" },
+			second: {
+				fillColor: "rgb(246, 238, 242)",
+				color: "#333",
+				borderColor: "rgb(191, 115, 148)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "泥土黄",
+		value: "earthYellow",
+		theme: {
+			lineColor: "rgb(191, 147, 115)",
+			backgroundColor: "rgb(251, 251, 251)",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "rgb(191, 147, 115)" },
+			second: {
+				fillColor: "rgb(246, 242, 238)",
+				color: "#333",
+				borderColor: "rgb(191, 147, 115)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "清新绿",
+		value: "freshGreen",
+		theme: {
+			lineColor: "#333",
+			backgroundColor: "#d1f6ec",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "#1fb27d" },
+			second: {
+				fillColor: "#fff",
+				color: "#565656",
+				borderColor: "transparent",
+				borderWidth: 0
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "清新红",
+		value: "freshRed",
+		theme: {
+			lineColor: "rgb(191, 115, 115)",
+			backgroundColor: "rgb(251, 251, 251)",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "rgb(191, 115, 115)" },
+			second: {
+				fillColor: "rgb(246, 238, 238)",
+				color: "#333",
+				borderColor: "rgb(191, 115, 115)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "浪漫紫",
+		value: "romanticPurple",
+		theme: {
+			lineColor: "rgb(123, 115, 191)",
+			backgroundColor: "rgb(251, 251, 251)",
+			generalizationLineWidth: 1,
+			generalizationLineColor: "#333",
+			root: { fillColor: "rgb(123, 115, 191)" },
+			second: {
+				fillColor: "rgb(239, 238, 246)",
+				color: "#333",
+				borderColor: "rgb(123, 115, 191)",
+				borderWidth: 1,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#333"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#333",
+				color: "#333"
+			}
+		}
+	},
+	{
+		name: "粉红葡萄",
+		value: "pinkGrape",
+		theme: {
+			lineColor: "rgb(166, 101, 106)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#fff",
+			backgroundColor: "rgb(255, 208, 211)",
+			root: {
+				fillColor: "rgb(139, 109, 225)",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "rgb(243, 104, 138)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "transparent",
+				color: "#222"
+			}
+		}
+	},
+	{
+		name: "薄荷",
+		value: "mint",
+		theme: {
+			lineColor: "rgb(104, 204, 202)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(90, 206, 241)",
+			backgroundColor: "rgb(239, 255, 255)",
+			root: {
+				fillColor: "rgb(0, 192, 184)",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "#fff",
+				color: "#222",
+				borderColor: "rgb(184, 235, 233)",
+				borderWidth: 2,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				fillColor: "rgb(90, 206, 241)",
+				borderColor: "transparent",
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "金色vip",
+		value: "gold",
+		theme: {
+			lineColor: "rgb(51, 56, 62)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(127, 93, 64)",
+			backgroundColor: "#fff",
+			root: {
+				fillColor: "rgb(51, 56, 62)",
+				color: "rgb(247, 208, 160)",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "rgb(239, 209, 176)",
+				color: "rgb(81, 58, 42)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				fillColor: "rgb(127, 93, 64)",
+				borderColor: "transparent",
+				color: "rgb(255, 214, 175)"
+			}
+		}
+	},
+	{
+		name: "活力橙",
+		value: "vitalityOrange",
+		theme: {
+			lineColor: "rgb(254, 146, 0)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 222, 69)",
+			backgroundColor: "rgb(255, 246, 243)",
+			root: {
+				fillColor: "rgb(255, 112, 52)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "#fff",
+				color: "rgb(51, 51, 51)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				fillColor: "rgb(255, 222, 69)",
+				borderColor: "transparent",
+				color: "rgb(51, 51, 51)"
+			}
+		}
+	},
+	{
+		name: "绿叶",
+		value: "greenLeaf",
+		theme: {
+			lineColor: "rgb(40, 193, 84)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(251, 158, 0)",
+			backgroundColor: "rgb(238, 255, 243)",
+			root: {
+				fillColor: "rgb(25, 193, 73)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0
+			},
+			second: {
+				fillColor: "#fff",
+				color: "rgb(69, 149, 96)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "rgb(251, 158, 0)",
+				borderWidth: 2,
+				color: "rgb(51, 51, 51)"
+			}
+		}
+	},
+	{
+		name: "小黄人",
+		value: "minions",
+		theme: {
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#222",
+			backgroundColor: "rgb(248, 215, 49)",
+			root: {
+				fillColor: "rgb(55, 165, 255)",
+				borderColor: "rgb(51, 51, 51)",
+				borderWidth: 3
+			},
+			second: {
+				fillColor: "rgb(255, 160, 36)",
+				color: "#222",
+				borderColor: "rgb(51, 51, 51)",
+				borderWidth: 3,
+				fontSize: 14
+			},
+			node: {
+				fontSize: 12,
+				color: "#222"
+			},
+			generalization: {
+				borderColor: "#222",
+				borderWidth: 3,
+				color: "#222"
+			}
+		}
+	},
+	{
+		name: "简约黑",
+		value: "simpleBlack",
+		theme: {
+			lineColor: "rgb(34, 34, 34)",
+			lineWidth: 4,
+			generalizationLineWidth: 4,
+			generalizationLineColor: "rgb(34, 34, 34)",
+			root: {
+				fillColor: "#fff",
+				color: "rgb(34, 34, 34)",
+				borderColor: "rgb(34, 34, 34)",
+				borderWidth: 3,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(241, 246, 248)",
+				color: "rgb(34, 34, 34)",
+				borderColor: "rgb(34, 34, 34)",
+				borderWidth: 3,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(34, 34, 34)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "transparent",
+				borderColor: "rgb(34, 34, 34)",
+				borderWidth: 2,
+				color: "rgb(34, 34, 34)"
+			}
+		}
+	},
+	{
+		name: "课程绿",
+		value: "courseGreen",
+		theme: {
+			lineColor: "rgb(113, 195, 169)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(113, 195, 169)",
+			root: {
+				fillColor: "rgb(16, 160, 121)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(240, 252, 249)",
+				color: "rgb(50, 113, 96)",
+				borderColor: "rgb(113, 195, 169)",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(10, 59, 43)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(246, 238, 211)",
+				borderColor: "",
+				borderWidth: 0,
+				color: "rgb(173, 91, 12)"
+			}
+		}
+	},
+	{
+		name: "咖啡",
+		value: "coffee",
+		theme: {
+			lineColor: "rgb(173, 123, 91)",
+			lineWidth: 4,
+			generalizationLineWidth: 4,
+			generalizationLineColor: "rgb(173, 123, 91)",
+			root: {
+				fillColor: "rgb(202, 117, 79)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(245, 231, 216)",
+				color: "rgb(125, 86, 42)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(96, 71, 47)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(255, 249, 239)",
+				borderColor: "rgb(173, 123, 91)",
+				borderWidth: 2,
+				color: "rgb(122, 83, 44)"
+			}
+		}
+	},
+	{
+		name: "红色精神",
+		value: "redSpirit",
+		theme: {
+			backgroundColor: "rgb(255, 238, 228)",
+			lineColor: "rgb(230, 138, 131)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(222, 101, 85)",
+			root: {
+				fillColor: "rgb(207, 44, 44)",
+				color: "rgb(255, 233, 157)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(255, 255, 255)",
+				color: "rgb(211, 58, 21)",
+				borderColor: "rgb(222, 101, 85)",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(144, 71, 43)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(255, 247, 211)",
+				borderColor: "rgb(255, 202, 162)",
+				borderWidth: 2,
+				color: "rgb(187, 101, 69)"
+			}
+		}
+	},
+	{
+		name: "牛油果",
+		value: "avocado",
+		theme: {
+			backgroundColor: "#e6f1de",
+			lineColor: "#f5ffad",
+			lineWidth: 4,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#749336",
+			root: {
+				fillColor: "#94c143",
+				color: "#fff",
+				borderColor: "#94c143",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#cee498",
+				color: "#749336",
+				borderColor: "#aec668",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#749336"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#cee498",
+				borderColor: "#aec668",
+				borderWidth: 2,
+				color: "#749336"
+			}
+		}
+	},
+	{
+		name: "秋天",
+		value: "autumn",
+		theme: {
+			backgroundColor: "#fff2df",
+			lineColor: "#b0bc47",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#b0bc47",
+			root: {
+				fillColor: "#e68112",
+				color: "#fff",
+				borderColor: "#e68112",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#ffd683",
+				color: "#8c5416",
+				borderColor: "#b0bc47",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#8c5416"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#ffd683",
+				borderColor: "#b0bc47",
+				borderWidth: 2,
+				color: "#8c5416"
+			}
+		}
+	},
+	{
+		name: "奥利奥",
+		value: "oreo",
+		theme: {
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(51, 51, 51)",
+			root: {
+				fillColor: "rgb(22, 22, 22)",
+				color: "#fff",
+				borderColor: "rgb(22, 22, 22)",
+				borderWidth: 3,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(244, 246, 253)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 0, 0)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "transparent",
+				borderColor: "rgb(34, 34, 34)",
+				borderWidth: 2,
+				color: "rgb(34, 34, 34)"
+			}
+		}
+	},
+	{
+		name: "浅海",
+		value: "shallowSea",
+		theme: {
+			backgroundColor: "rgb(187, 241, 250)",
+			lineColor: "rgb(74, 139, 170)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 168, 101)",
+			root: {
+				fillColor: "rgb(51, 149, 255)",
+				color: "#fff",
+				borderColor: "rgb(51, 149, 255)",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "rgb(74, 139, 170)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 3,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 0, 0)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(255, 168, 101)",
+				borderWidth: 2,
+				color: "#000"
+			}
+		}
+	},
+	{
+		name: "柠檬气泡",
+		value: "lemonBubbles",
+		theme: {
+			backgroundColor: "rgb(236, 254, 255)",
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(51, 51, 51)",
+			root: {
+				fillColor: "rgb(39, 222, 232)",
+				color: "rgb(26, 26, 26)",
+				borderColor: "rgb(26, 26, 26)",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "rgb(235, 255, 187)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "rgb(51, 51, 51)",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 0, 0)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(26, 26, 26)",
+				borderWidth: 2,
+				color: "rgb(26, 26, 26)"
+			}
+		}
+	},
+	{
+		name: "玫瑰",
+		value: "rose",
+		theme: {
+			backgroundColor: "rgb(255, 251, 231)",
+			lineColor: "rgb(110, 165, 79)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(136, 100, 0)",
+			root: {
+				fillColor: "rgb(254, 92, 92)",
+				color: "#fff",
+				borderColor: "rgb(18, 187, 55)",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "rgb(209, 237, 176)",
+				color: "rgb(85, 136, 55)",
+				borderColor: "",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(26, 26, 26)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(136, 100, 0)",
+				borderWidth: 2,
+				color: "rgb(136, 100, 0)"
+			}
+		}
+	},
+	{
+		name: "海蓝线",
+		value: "seaBlueLine",
+		theme: {
+			backgroundColor: "rgb(231, 245, 255)",
+			lineColor: "rgb(96, 189, 255)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(0, 155, 255)",
+			root: {
+				fillColor: "rgb(96, 189, 255)",
+				color: "#fff",
+				borderColor: "#fff",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "#fff",
+				color: "rgb(0, 149, 255)",
+				borderColor: "",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 66, 157)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "rgb(0, 155, 255)",
+				borderWidth: 2,
+				color: "rgb(0, 155, 255)"
+			}
+		}
+	},
+	{
+		name: "莫兰迪",
+		value: "morandi",
+		theme: {
+			backgroundColor: "rgb(252, 245, 241)",
+			lineColor: "rgb(144, 114, 110)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(128, 154, 151)",
+			associativeLineColor: "rgb(166, 124, 106)",
+			associativeLineTextColor: "rgb(166, 124, 106)",
+			root: {
+				fillColor: "rgb(207, 121, 105)",
+				color: "#fff",
+				borderColor: "rgb(207, 121, 105)",
+				borderWidth: 3,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "rgb(239, 210, 207)",
+				color: "rgb(144, 79, 68)",
+				borderColor: "rgb(222, 186, 183)",
+				borderWidth: 3,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(131, 90, 64)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(172, 202, 199)",
+				borderColor: "rgb(172, 202, 199)",
+				borderWidth: 2,
+				color: "rgb(91, 102, 97)"
+			}
+		}
+	},
+	{
+		name: "仙人掌",
+		value: "cactus",
+		theme: {
+			backgroundColor: "rgb(219, 255, 211)",
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 3,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(255, 127, 71)",
+			associativeLineColor: "rgb(160, 220, 63)",
+			associativeLineTextColor: "rgb(160, 220, 63)",
+			root: {
+				fillColor: "rgb(15, 198, 113)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24,
+				shape: "roundedRectangle"
+			},
+			second: {
+				fillColor: "#fff",
+				color: "rgb(26, 26, 26)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 0, 0)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(255, 127, 71)",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典2",
+		value: "classic2",
+		theme: {
+			lineColor: "rgb(51, 51, 51)",
+			lineWidth: 2,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "rgb(51, 51, 51)",
+			backgroundColor: "#fff",
+			root: {
+				fillColor: "rgb(18, 187, 55)",
+				color: "#fff",
+				fontSize: 24,
+				borderRadius: 10
+			},
+			second: {
+				fillColor: "rgb(241, 242, 241)",
+				borderColor: "transparent",
+				color: "#1a1a1a",
+				fontSize: 18,
+				borderRadius: 10
+			},
+			node: {
+				fontSize: 14,
+				color: "#1a1a1a"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "rgb(51, 51, 51)",
+				borderWidth: 2,
+				color: "#1a1a1a"
+			}
+		}
+	},
+	{
+		name: "脑图经典3",
+		value: "classic3",
+		theme: {
+			lineColor: "rgb(94, 202, 110)",
+			lineWidth: 2,
+			generalizationLineWidth: 3,
+			generalizationLineColor: "#1a1a1a",
+			backgroundColor: "rgb(241, 241, 241)",
+			root: {
+				fillColor: "rgb(255, 245, 214)",
+				color: "#1a1a1a",
+				fontSize: 24,
+				borderRadius: 10,
+				borderColor: "rgb(249, 199, 84)",
+				borderWidth: 1
+			},
+			second: {
+				fillColor: "rgb(255, 245, 214)",
+				borderColor: "rgb(249, 199, 84)",
+				borderWidth: 1,
+				color: "#1a1a1a",
+				fontSize: 18,
+				borderRadius: 10
+			},
+			node: {
+				fontSize: 14,
+				color: "#1a1a1a"
+			},
+			generalization: {
+				fillColor: "#fff",
+				borderColor: "#1a1a1a",
+				color: "#1a1a1a",
+				borderWidth: 2
+			}
+		}
+	},
+	{
+		name: "脑图经典4",
+		value: "classic4",
+		theme: {
+			lineColor: "rgb(30, 53, 86)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(56, 123, 233)",
+			backgroundColor: "rgb(241, 241, 241)",
+			root: {
+				fillColor: "rgb(30, 53, 86)",
+				color: "#fff",
+				fontSize: 24,
+				borderRadius: 10,
+				borderColor: "rgb(189, 197, 201)",
+				borderWidth: 2
+			},
+			second: {
+				fillColor: "rgb(169, 218, 218)",
+				borderColor: "rgb(30, 53, 86)",
+				borderWidth: 2,
+				color: "#fff",
+				fontSize: 18,
+				borderRadius: 10
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(30, 53, 86)",
+				borderColor: "rgb(30, 53, 86)",
+				borderWidth: 1,
+				marginY: 20
+			},
+			generalization: {
+				fillColor: "rgb(56, 123, 233)",
+				borderColor: "rgb(56, 123, 233)",
+				color: "#fff",
+				borderWidth: 0
+			}
+		}
+	},
+	{
+		name: "脑图经典5",
+		value: "classic5",
+		theme: {
+			backgroundColor: "rgb(233, 245, 241)",
+			lineColor: "rgb(34, 34, 34)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(34, 34, 34)",
+			associativeLineColor: "rgb(56, 44, 116)",
+			associativeLineTextColor: "rgb(68, 68, 68)",
+			root: {
+				fillColor: "rgb(56, 44, 116)",
+				color: "#fff",
+				borderColor: "rgb(56, 44, 116)",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(161, 213, 188)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(0, 0, 0)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "rgb(56, 44, 116)",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典6",
+		value: "classic6",
+		theme: {
+			backgroundColor: "rgb(255, 255, 255)",
+			lineColor: "rgb(0, 0, 0)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(0, 0, 0)",
+			associativeLineColor: "rgb(152, 162, 171)",
+			associativeLineTextColor: "rgb(68, 68, 68)",
+			root: {
+				fillColor: "rgb(237, 182, 72)",
+				color: "rgb(0, 0, 0)",
+				borderColor: "rgb(0, 0, 0)",
+				borderWidth: 2,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(114, 158, 28)",
+				color: "#fff",
+				borderColor: "rgb(0, 0, 0)",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(10, 2, 2)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				color: "rgb(10, 2, 2)"
+			}
+		}
+	},
+	{
+		name: "脑图经典7",
+		value: "classic7",
+		theme: {
+			backgroundColor: "rgb(255, 255, 255)",
+			lineColor: "rgb(237, 185, 81)",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "rgb(226, 90, 64)",
+			associativeLineColor: "rgb(152, 162, 171)",
+			associativeLineTextColor: "rgb(68, 68, 68)",
+			root: {
+				fillColor: "rgb(226, 90, 64)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "rgb(43, 118, 239)",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "rgb(43, 118, 239)"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				color: "rgb(43, 118, 239)"
+			}
+		}
+	},
+	{
+		name: "脑图经典8",
+		value: "classic8",
+		theme: {
+			backgroundColor: "#fff",
+			lineColor: "#36aaa9",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#36aaa9",
+			associativeLineColor: "#3e58ea",
+			associativeLineTextColor: "#679fba",
+			associativeLineActiveColor: "#50a4b4",
+			root: {
+				fillColor: "#3e58ea",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#e3fbff",
+				color: "#58aabc",
+				borderColor: "#50a4b4",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#50a4b4"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#3e58ea",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典9",
+		value: "classic9",
+		theme: {
+			backgroundColor: "#fffcf2",
+			lineColor: "#333333",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#ffda60",
+			associativeLineColor: "#ffda60",
+			associativeLineTextColor: "#333333",
+			associativeLineActiveColor: "#333333",
+			root: {
+				fillColor: "#ffda60",
+				color: "#3b3a37",
+				borderColor: "#343334",
+				borderWidth: 2,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#fff",
+				color: "#131312",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#131312"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#ffda60",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#464339"
+			}
+		}
+	},
+	{
+		name: "脑图经典10",
+		value: "classic10",
+		theme: {
+			backgroundColor: "#fffef6",
+			lineColor: "#273d62",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#273d62",
+			associativeLineColor: "#9edeee",
+			associativeLineTextColor: "#395c85",
+			associativeLineActiveColor: "#273d62",
+			root: {
+				fillColor: "#273d62",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#9edeee",
+				color: "#406080",
+				borderColor: "#395c85",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#395c85"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#273d62",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典11",
+		value: "classic11",
+		theme: {
+			backgroundColor: "#ffffff",
+			lineColor: "#333333",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#2176ef",
+			associativeLineColor: "#2176ef",
+			associativeLineTextColor: "#343433",
+			associativeLineActiveColor: "#343433",
+			root: {
+				fillColor: "#2176ef",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#fff9e4",
+				color: "#4c4b46",
+				borderColor: "#343433",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#343433"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#2176ef",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典12",
+		value: "classic12",
+		theme: {
+			backgroundColor: "#ffffff",
+			lineColor: "#35b398",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#21c384",
+			associativeLineColor: "#21c384",
+			associativeLineTextColor: "#4d754b",
+			associativeLineActiveColor: "#f5ffe6",
+			root: {
+				fillColor: "#21c384",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#f5ffe6",
+				color: "#386437",
+				borderColor: "#35b398",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#326032"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#21c384",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	},
+	{
+		name: "脑图经典13",
+		value: "classic13",
+		theme: {
+			backgroundColor: "#ffffff",
+			lineColor: "#333333",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#ffd613",
+			associativeLineColor: "#ffd613",
+			associativeLineTextColor: "#2d2b23",
+			associativeLineActiveColor: "#d1ebf8",
+			root: {
+				fillColor: "#ffd613",
+				color: "#2d2b23",
+				borderColor: "#1f2021",
+				borderWidth: 2,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#d1ebf8",
+				color: "#717b80",
+				borderColor: "#333333",
+				borderWidth: 2,
+				fontSize: 18,
+				borderRadius: 5
+			},
+			node: {
+				fontSize: 14,
+				color: "#333333"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#ffd613",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#2d2b23"
+			}
+		}
+	},
+	{
+		name: "脑图经典14",
+		value: "classic14",
+		theme: {
+			backgroundColor: "#ffeed2",
+			lineColor: "#976a43",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#19807e",
+			associativeLineColor: "#19807e",
+			associativeLineTextColor: "#764014",
+			associativeLineActiveColor: "#976a43",
+			root: {
+				fillColor: "#19807e",
+				color: "#f3f0b8",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24,
+				shape: "circle"
+			},
+			second: {
+				fillColor: "#eacdb3",
+				color: "#7f4d1f",
+				borderColor: "#764014",
+				borderWidth: 2,
+				fontSize: 18,
+				shape: "roundedRectangle"
+			},
+			node: {
+				fontSize: 14,
+				color: "#764014"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#19807e",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#f3f0b8"
+			}
+		}
+	},
+	{
+		name: "脑图经典15",
+		value: "classic15",
+		theme: {
+			backgroundColor: "#c8e4ea",
+			lineColor: "#3e416c",
+			lineWidth: 2,
+			generalizationLineWidth: 2,
+			generalizationLineColor: "#3e416c",
+			associativeLineColor: "#ffdb9c",
+			associativeLineTextColor: "#383b70",
+			associativeLineActiveColor: "#3e416c",
+			root: {
+				fillColor: "#383b70",
+				color: "#fff",
+				borderColor: "",
+				borderWidth: 0,
+				fontSize: 24
+			},
+			second: {
+				fillColor: "#ffdb9c",
+				color: "#5e5c76",
+				borderColor: "#3e416c",
+				borderWidth: 2,
+				fontSize: 18
+			},
+			node: {
+				fontSize: 14,
+				color: "#3e416c"
+			},
+			generalization: {
+				fontSize: 14,
+				fillColor: "#383b70",
+				borderColor: "",
+				borderWidth: 0,
+				color: "#fff"
+			}
+		}
+	}
+].map((item) => {
+	return {
+		...item,
+		dark: false
+	};
+});
+//#endregion
+//#region node_modules/simple-mind-map-plugin-themes/index.js
+var themeList = [...dark_default$1, ...light_default];
+var Themes = {
+	darkList: dark_default$1,
+	lightList: light_default,
+	init(MindMap) {
+		themeList.forEach((item) => {
+			MindMap.defineTheme(item.value, item.theme);
+		});
+	},
+	remove(MindMap) {
+		themeList.forEach((item) => {
+			MindMap.removeTheme(item.value);
+		});
+	}
+};
+//#endregion
+//#region node_modules/simple-mind-map-plugin-themes/themeList.js
+var themeList_default = [...dark_default$1, ...light_default];
+//#endregion
+//#region node_modules/simple-mind-map-plugin-themes/themeImgMap.js
+var themeImgMap_default = {
+	default: "/subtitle_extractor/jpg/default-CdcjhLsC.jpg",
+	dark: "/subtitle_extractor/jpg/dark-Dxf3GPtZ.jpg",
+	dark2: "/subtitle_extractor/jpg/dark2-DNKfEO89.jpg",
+	dark3: "/subtitle_extractor/jpg/dark3-D-qj7Iux.jpg",
+	dark4: "/subtitle_extractor/jpg/dark4-DPnriKQt.jpg",
+	dark5: "/subtitle_extractor/png/dark5-i8cC9JnK.png",
+	dark6: "/subtitle_extractor/png/dark6-PPLJtBI-.png",
+	dark7: "/subtitle_extractor/png/dark7-DjXzL8BR.png",
+	classic: "/subtitle_extractor/jpg/classic-BDgeiKAj.jpg",
+	classic2: "/subtitle_extractor/jpg/classic2-CdgI87Ct.jpg",
+	classic3: "/subtitle_extractor/jpg/classic3-BenLwnYH.jpg",
+	classic4: "/subtitle_extractor/jpg/classic4-Bd1kuSLd.jpg",
+	classic5: "/subtitle_extractor/jpg/classic5-ax08m0Kd.jpg",
+	classic6: "/subtitle_extractor/jpg/classic6-DopouVN3.jpg",
+	classic7: "/subtitle_extractor/jpg/classic7-BfHZ-Iq4.jpg",
+	classic8: "/subtitle_extractor/png/classic8-CTpetXsn.png",
+	classic9: "/subtitle_extractor/png/classic9-4tFc2jX0.png",
+	classic10: "/subtitle_extractor/png/classic10-CtX42kH0.png",
+	classic11: "/subtitle_extractor/png/classic11-CEJ5ztQ2.png",
+	classic12: "/subtitle_extractor/png/classic12-DPHM4fHR.png",
+	classic13: "/subtitle_extractor/png/classic13-DP1pcCVH.png",
+	classic14: "/subtitle_extractor/png/classic14-mRTmyuz3.png",
+	classic15: "/subtitle_extractor/png/classic15-CmfTqQL7.png",
+	minions: "/subtitle_extractor/jpg/minions-DAryJWrd.jpg",
+	pinkGrape: "/subtitle_extractor/jpg/pinkGrape-CCogViWc.jpg",
+	mint: "/subtitle_extractor/jpg/mint-CTvPbnWz.jpg",
+	gold: "/subtitle_extractor/jpg/gold-ZW4tnRnd.jpg",
+	vitalityOrange: "/subtitle_extractor/jpg/vitalityOrange-DE-M-umU.jpg",
+	greenLeaf: "/subtitle_extractor/jpg/greenLeaf-D_Gc7yUM.jpg",
+	skyGreen: "/subtitle_extractor/jpg/skyGreen-okwv4Tug.jpg",
+	classicGreen: "/subtitle_extractor/jpg/classicGreen-DHR9ZQbl.jpg",
+	classicBlue: "/subtitle_extractor/jpg/classicBlue-BG47bsmL.jpg",
+	blueSky: "/subtitle_extractor/jpg/blueSky-Bq_G-tlx.jpg",
+	brainImpairedPink: "/subtitle_extractor/jpg/brainImpairedPink-BBxpNqRA.jpg",
+	earthYellow: "/subtitle_extractor/jpg/earthYellow-B7Ys-N15.jpg",
+	freshGreen: "/subtitle_extractor/jpg/freshGreen-YxWywMyg.jpg",
+	freshRed: "/subtitle_extractor/jpg/freshRed-z3UzygiT.jpg",
+	romanticPurple: "/subtitle_extractor/jpg/romanticPurple-DN5NI9vQ.jpg",
+	simpleBlack: "/subtitle_extractor/jpg/simpleBlack-DEkssUlD.jpg",
+	courseGreen: "/subtitle_extractor/jpg/courseGreen-VHnuNeSe.jpg",
+	coffee: "/subtitle_extractor/jpg/coffee-DnGh3ytf.jpg",
+	redSpirit: "/subtitle_extractor/jpg/redSpirit-BNX6XN9f.jpg",
+	blackHumour: "/subtitle_extractor/jpg/blackHumour-BEgSzKXn.jpg",
+	lateNightOffice: "/subtitle_extractor/jpg/lateNightOffice-Du-qdO1c.jpg",
+	blackGold: "/subtitle_extractor/jpg/blackGold-DW1EwLyf.jpg",
+	autumn: "/subtitle_extractor/jpg/autumn-BL1sJDca.jpg",
+	avocado: "/subtitle_extractor/jpg/avocado-BcOHv9ac.jpg",
+	orangeJuice: "/subtitle_extractor/jpg/orangeJuice-C-IqWeMg.jpg",
+	oreo: "/subtitle_extractor/jpg/oreo-7YtczgUz.jpg",
+	shallowSea: "/subtitle_extractor/jpg/shallowSea-BHkEPZ8h.jpg",
+	lemonBubbles: "/subtitle_extractor/jpg/lemonBubbles-C8d2-nbh.jpg",
+	rose: "/subtitle_extractor/jpg/rose-BLqhWbtx.jpg",
+	seaBlueLine: "/subtitle_extractor/jpg/seaBlueLine-CbzB7gXw.jpg",
+	neonLamp: "/subtitle_extractor/jpg/neonLamp-DR66YpYN.jpg",
+	darkNightLceBlade: "/subtitle_extractor/jpg/darkNightLceBlade-BgOkXUIj.jpg",
+	morandi: "/subtitle_extractor/jpg/morandi-DobQ9BfS.jpg",
+	cactus: "/subtitle_extractor/jpg/cactus-CPXSx6F-.jpg"
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/utils/simulateCSSBackgroundInCanvas.js
+var getNumberValueFromStr = (value) => {
+	return String(value).split(/\s+/).map((item) => {
+		if (/^[\d.]+/.test(item)) {
+			let res = /^([\d.]+)(.*)$/.exec(item);
+			return [Number(res[1]), res[2]];
+		} else return item;
 	});
 };
-/**
-* 获取文件大小信息
-* @param {string} base64 - Base64 字符串
-* @returns {Object} 包含字节数和 KB 数
-*/
-var getBase64Size = (base64) => {
-	const bytes = Math.ceil(base64.length * 3 / 4);
-	return {
-		bytes,
-		kb: (bytes / 1024).toFixed(2)
+var zoomWidth = (ratio, height) => {
+	return ratio * height;
+};
+var zoomHeight = (ratio, width) => {
+	return width / ratio;
+};
+var keyWordToPercentageMap = {
+	left: 0,
+	top: 0,
+	center: 50,
+	bottom: 100,
+	right: 100
+};
+var handleBackgroundSize = ({ backgroundSize, drawOpt, imageRatio, canvasWidth, canvasHeight, canvasRatio }) => {
+	if (backgroundSize) {
+		let backgroundSizeValueArr = getNumberValueFromStr(backgroundSize);
+		if (backgroundSizeValueArr[0] === "auto" && backgroundSizeValueArr[1] === "auto") return;
+		if (backgroundSizeValueArr[0] === "cover") {
+			if (imageRatio > canvasRatio) {
+				drawOpt.height = canvasHeight;
+				drawOpt.width = zoomWidth(imageRatio, canvasHeight);
+			} else {
+				drawOpt.width = canvasWidth;
+				drawOpt.height = zoomHeight(imageRatio, canvasWidth);
+			}
+			return;
+		}
+		if (backgroundSizeValueArr[0] === "contain") {
+			if (imageRatio > canvasRatio) {
+				drawOpt.width = canvasWidth;
+				drawOpt.height = zoomHeight(imageRatio, canvasWidth);
+			} else {
+				drawOpt.height = canvasHeight;
+				drawOpt.width = zoomWidth(imageRatio, canvasHeight);
+			}
+			return;
+		}
+		let newNumberWidth = -1;
+		if (backgroundSizeValueArr[0]) {
+			if (Array.isArray(backgroundSizeValueArr[0])) if (backgroundSizeValueArr[0][1] === "%") {
+				drawOpt.width = backgroundSizeValueArr[0][0] / 100 * canvasWidth;
+				newNumberWidth = drawOpt.width;
+			} else {
+				drawOpt.width = backgroundSizeValueArr[0][0];
+				newNumberWidth = backgroundSizeValueArr[0][0];
+			}
+			else if (backgroundSizeValueArr[0] === "auto") {
+				if (backgroundSizeValueArr[1]) if (backgroundSizeValueArr[1][1] === "%") drawOpt.width = zoomWidth(imageRatio, backgroundSizeValueArr[1][0] / 100 * canvasHeight);
+				else drawOpt.width = zoomWidth(imageRatio, backgroundSizeValueArr[1][0]);
+			}
+		}
+		if (backgroundSizeValueArr[1] && Array.isArray(backgroundSizeValueArr[1])) if (backgroundSizeValueArr[1][1] === "%") drawOpt.height = backgroundSizeValueArr[1][0] / 100 * canvasHeight;
+		else drawOpt.height = backgroundSizeValueArr[1][0];
+		else if (newNumberWidth !== -1) drawOpt.height = zoomHeight(imageRatio, newNumberWidth);
+	}
+};
+var handleBackgroundPosition = ({ backgroundPosition, drawOpt, imgWidth, imgHeight, canvasWidth, canvasHeight }) => {
+	if (backgroundPosition) {
+		let backgroundPositionValueArr = getNumberValueFromStr(backgroundPosition);
+		backgroundPositionValueArr = backgroundPositionValueArr.map((item) => {
+			if (typeof item === "string") return keyWordToPercentageMap[item] !== void 0 ? [keyWordToPercentageMap[item], "%"] : item;
+			return item;
+		});
+		if (Array.isArray(backgroundPositionValueArr[0])) {
+			if (backgroundPositionValueArr.length === 1) backgroundPositionValueArr.push([50, "%"]);
+			if (backgroundPositionValueArr[0][1] === "%") drawOpt.x = backgroundPositionValueArr[0][0] / 100 * canvasWidth - backgroundPositionValueArr[0][0] / 100 * imgWidth;
+			else drawOpt.x = backgroundPositionValueArr[0][0];
+			if (backgroundPositionValueArr[1][1] === "%") drawOpt.y = backgroundPositionValueArr[1][0] / 100 * canvasHeight - backgroundPositionValueArr[1][0] / 100 * imgHeight;
+			else drawOpt.y = backgroundPositionValueArr[1][0];
+		}
+	}
+};
+var handleBackgroundRepeat = ({ ctx, image, backgroundRepeat, drawOpt, imgWidth, imgHeight, canvasWidth, canvasHeight }) => {
+	if (backgroundRepeat) {
+		let ox = drawOpt.x;
+		let oy = drawOpt.y;
+		let oxRepeatNum = Math.ceil(ox / imgWidth);
+		let oyRepeatNum = Math.ceil(oy / imgHeight);
+		let oxRepeatX = ox - oxRepeatNum * imgWidth;
+		let oxRepeatY = oy - oyRepeatNum * imgHeight;
+		let backgroundRepeatValueArr = getNumberValueFromStr(backgroundRepeat);
+		if (backgroundRepeatValueArr[0] === "no-repeat" || imgWidth >= canvasWidth && imgHeight >= canvasHeight) return;
+		if (backgroundRepeatValueArr[0] === "repeat-x") {
+			if (canvasWidth > imgWidth) {
+				let x = oxRepeatX;
+				while (x < canvasWidth) {
+					drawImage(ctx, image, {
+						...drawOpt,
+						x
+					});
+					x += imgWidth;
+				}
+				return true;
+			}
+		}
+		if (backgroundRepeatValueArr[0] === "repeat-y") {
+			if (canvasHeight > imgHeight) {
+				let y = oxRepeatY;
+				while (y < canvasHeight) {
+					drawImage(ctx, image, {
+						...drawOpt,
+						y
+					});
+					y += imgHeight;
+				}
+				return true;
+			}
+		}
+		if (backgroundRepeatValueArr[0] === "repeat") {
+			let x = oxRepeatX;
+			while (x < canvasWidth) {
+				if (canvasHeight > imgHeight) {
+					let y = oxRepeatY;
+					while (y < canvasHeight) {
+						drawImage(ctx, image, {
+							...drawOpt,
+							x,
+							y
+						});
+						y += imgHeight;
+					}
+				}
+				x += imgWidth;
+			}
+			return true;
+		}
+	}
+};
+var drawImage = (ctx, image, drawOpt) => {
+	ctx.drawImage(image, drawOpt.sx, drawOpt.sy, drawOpt.swidth, drawOpt.sheight, drawOpt.x, drawOpt.y, drawOpt.width, drawOpt.height);
+};
+var drawBackgroundImageToCanvas = (ctx, width, height, img, { backgroundSize, backgroundPosition, backgroundRepeat }, callback = () => {}) => {
+	let canvasRatio = width / height;
+	let image = new Image();
+	image.src = img;
+	image.onload = () => {
+		let imgWidth = image.width;
+		let imgHeight = image.height;
+		let imageRatio = imgWidth / imgHeight;
+		let drawOpt = {
+			sx: 0,
+			sy: 0,
+			swidth: imgWidth,
+			sheight: imgHeight,
+			x: 0,
+			y: 0,
+			width: imgWidth,
+			height: imgHeight
+		};
+		handleBackgroundSize({
+			backgroundSize,
+			drawOpt,
+			imageRatio,
+			canvasWidth: width,
+			canvasHeight: height,
+			canvasRatio
+		});
+		handleBackgroundPosition({
+			backgroundPosition,
+			drawOpt,
+			imgWidth: drawOpt.width,
+			imgHeight: drawOpt.height,
+			imageRatio,
+			canvasWidth: width,
+			canvasHeight: height,
+			canvasRatio
+		});
+		if (!handleBackgroundRepeat({
+			ctx,
+			image,
+			backgroundRepeat,
+			drawOpt,
+			imgWidth: drawOpt.width,
+			imgHeight: drawOpt.height,
+			imageRatio,
+			canvasWidth: width,
+			canvasHeight: height,
+			canvasRatio
+		})) drawImage(ctx, image, drawOpt);
+		callback();
+	};
+	image.onerror = (e) => {
+		callback(e);
 	};
 };
-/**
-* 验证图片 URL
-* @param {string} url - 图片 URL
-* @returns {boolean} 是否有效
-*/
-var isValidImageUrl = (url) => {
-	try {
-		const parsed = new URL(url);
-		return ["http:", "https:"].includes(parsed.protocol);
-	} catch {
-		return false;
-	}
+//#endregion
+//#region node_modules/simple-mind-map/src/parse/toMarkdown.js
+var getNodeText$1 = (data) => {
+	return data.richText ? nodeRichTextToTextWithWrap(data.text) : data.text;
 };
-/**
-* 从 URL 加载图片并转换为 Base64
-* @param {string} url - 图片 URL
-* @param {Object} options - 压缩选项（同 compressImage）
-* @returns {Promise<string>} Base64 字符串
-*/
-var imageUrlToBase64 = async (url, options = {}) => {
-	if (!isValidImageUrl(url)) throw new Error("无效的图片 URL");
-	try {
-		const response = await fetch(url, {
-			mode: "cors",
-			credentials: "omit"
+var getTitleMark = (level) => {
+	return new Array(level).fill("#").join("");
+};
+var getIndentMark = (level) => {
+	return new Array(level - 6).fill("   ").join("") + "*";
+};
+var transformToMarkdown = (root) => {
+	let content = "";
+	walk(root, null, (node, parent, isRoot, layerIndex) => {
+		const level = layerIndex + 1;
+		if (level <= 6) content += getTitleMark(level);
+		else content += getIndentMark(level);
+		content += " " + getNodeText$1(node.data);
+		const generalization = node.data.generalization;
+		if (Array.isArray(generalization)) content += generalization.map((item) => {
+			return ` [${getNodeText$1(item)}]`;
 		});
-		if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-		const blob = await response.blob();
-		if (!blob.type.startsWith("image/")) throw new Error("URL 返回的不是图片文件");
-		return await compressImage(new File([blob], "image.jpg", { type: blob.type }), options);
-	} catch (error) {
-		console.warn("Fetch 方式失败，尝试 Image 方式:", error.message);
+		else if (generalization && generalization.text) {
+			const generalizationText = getNodeText$1(generalization);
+			content += ` [${generalizationText}]`;
+		}
+		content += "\n\n";
+		if (node.data.note) content += node.data.note + "\n\n";
+	}, () => {}, true);
+	return content;
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/parse/toTxt.js
+var getNodeText = (data) => {
+	return data.richText ? nodeRichTextToTextWithWrap(data.text) : data.text;
+};
+var getIndent = (level) => {
+	return new Array(level).fill("   ").join("");
+};
+var transformToTxt = (root) => {
+	let content = "";
+	walk(root, null, (node, parent, isRoot, layerIndex) => {
+		content += getIndent(layerIndex);
+		content += " " + getNodeText(node.data);
+		const generalization = node.data.generalization;
+		if (Array.isArray(generalization)) content += generalization.map((item) => {
+			return ` [${getNodeText(item)}]`;
+		});
+		else if (generalization && generalization.text) content += ` [${getNodeText(generalization)}]`;
+		content += "\n\n";
+	}, () => {}, true);
+	return content;
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/plugins/Export.js
+var Export = class {
+	constructor(opt) {
+		this.mindMap = opt.mindMap;
+	}
+	async export(type, isDownload = true, name = "思维导图", ...args) {
+		if (this[type]) {
+			const result = await this[type](name, ...args);
+			if (isDownload) downloadFile(result, name + "." + type);
+			return result;
+		} else return null;
+	}
+	createTransformImgTaskList(svg, tagName, propName, getUrlFn) {
+		return svg.find(tagName).map(async (item) => {
+			const imgUlr = getUrlFn(item);
+			if (/^data:/.test(imgUlr) || imgUlr === "none") return;
+			const imgData = await imgToDataUrl(imgUlr);
+			item.attr(propName, imgData);
+		});
+	}
+	async getSvgData(node) {
+		let { exportPaddingX, exportPaddingY, errorHandler, resetCss, addContentToHeader, addContentToFooter, handleBeingExportSvg } = this.mindMap.opt;
+		let { svg, svgHTML, clipData } = this.mindMap.getSvgData({
+			paddingX: exportPaddingX,
+			paddingY: exportPaddingY,
+			addContentToHeader,
+			addContentToFooter,
+			node
+		});
+		if (clipData) {
+			clipData.paddingX = exportPaddingX;
+			clipData.paddingY = exportPaddingY;
+		}
+		let svgIsChange = false;
+		const task1 = this.createTransformImgTaskList(svg, "image", "href", (item) => {
+			return item.attr("href") || item.attr("xlink:href");
+		});
+		const task2 = this.createTransformImgTaskList(svg, "img", "src", (item) => {
+			return item.attr("src");
+		});
+		const taskList = [...task1, ...task2];
+		try {
+			await Promise.all(taskList);
+		} catch (error) {
+			errorHandler(ERROR_TYPES.EXPORT_LOAD_IMAGE_ERROR, error);
+		}
+		if (this.mindMap.richText) {
+			const foreignObjectList = svg.find("foreignObject");
+			if (foreignObjectList.length > 0) {
+				foreignObjectList[0].add(SVG(`<style>${resetCss}</style>`));
+				svgIsChange = true;
+			}
+			if (this.mindMap.formula) {
+				if (svg.find(".ql-formula").length > 0) {
+					const styleText = this.mindMap.formula.getStyleText();
+					if (styleText) {
+						const styleEl = document.createElement("style");
+						styleEl.innerHTML = styleText;
+						addXmlns(styleEl);
+						foreignObjectList[0].add(styleEl);
+						svgIsChange = true;
+					}
+				}
+			}
+		}
+		if (typeof handleBeingExportSvg === "function") {
+			svgIsChange = true;
+			svg = handleBeingExportSvg(svg);
+		}
+		if (taskList.length > 0 || svgIsChange) svgHTML = svg.svg();
+		return {
+			node: svg,
+			str: svgHTML,
+			clipData
+		};
+	}
+	svgToPng(svgSrc, transparent, clipData = null, fitBg = false, format = "image/png") {
+		const { maxCanvasSize, minExportImgCanvasScale } = this.mindMap.opt;
 		return new Promise((resolve, reject) => {
 			const img = new Image();
-			img.crossOrigin = "anonymous";
-			img.onload = () => {
+			img.setAttribute("crossOrigin", "anonymous");
+			img.onload = async () => {
 				try {
 					const canvas = document.createElement("canvas");
-					canvas.width = img.width;
-					canvas.height = img.height;
-					canvas.getContext("2d").drawImage(img, 0, 0);
-					resolve(canvas.toDataURL(options.format || "image/jpeg", options.quality || .8));
-				} catch (err) {
-					reject(/* @__PURE__ */ new Error(`Canvas 转换失败: ${err.message}`));
+					const dpr = Math.max(window.devicePixelRatio, minExportImgCanvasScale);
+					let imgWidth = img.width;
+					let imgHeight = img.height;
+					let paddingX = 0;
+					let paddingY = 0;
+					if (clipData) {
+						paddingX = clipData.paddingX;
+						paddingY = clipData.paddingY;
+						imgWidth = clipData.width + paddingX * 2;
+						imgHeight = clipData.height + paddingY * 2;
+					}
+					let fitBgImgWidth = 0;
+					let fitBgImgHeight = 0;
+					const { backgroundImage } = this.mindMap.themeConfig;
+					if (fitBg && backgroundImage && !transparent) {
+						const bgImgSize = await new Promise((resolve) => {
+							const bgImg = new Image();
+							bgImg.onload = () => {
+								resolve([bgImg.width, bgImg.height]);
+							};
+							bgImg.onerror = () => {
+								resolve(null);
+							};
+							bgImg.src = backgroundImage;
+						});
+						if (bgImgSize) {
+							const imgRatio = imgWidth / imgHeight;
+							const bgRatio = bgImgSize[0] / bgImgSize[1];
+							if (imgRatio > bgRatio) {
+								fitBgImgWidth = imgWidth;
+								fitBgImgHeight = imgWidth / bgRatio;
+							} else {
+								fitBgImgHeight = imgHeight;
+								fitBgImgWidth = imgHeight * bgRatio;
+							}
+						}
+					}
+					let scaleX = 1;
+					let scaleY = 1;
+					let canvasWidth = (fitBgImgWidth || imgWidth) * dpr;
+					let canvasHeight = (fitBgImgHeight || imgHeight) * dpr;
+					if (canvasWidth > maxCanvasSize || canvasHeight > maxCanvasSize) {
+						let newWidth = null;
+						let newHeight = null;
+						if (canvasWidth > maxCanvasSize) newWidth = maxCanvasSize;
+						else if (canvasHeight > maxCanvasSize) newHeight = maxCanvasSize;
+						const res = resizeImgSize(canvasWidth, canvasHeight, newWidth, newHeight);
+						scaleX = res[0] / canvasWidth;
+						scaleY = res[1] / canvasHeight;
+						canvasWidth = res[0];
+						canvasHeight = res[1];
+					}
+					canvas.width = canvasWidth;
+					canvas.height = canvasHeight;
+					const styleWidth = canvasWidth / dpr;
+					const styleHeight = canvasHeight / dpr;
+					canvas.style.width = styleWidth + "px";
+					canvas.style.height = styleHeight + "px";
+					const ctx = canvas.getContext("2d");
+					ctx.scale(dpr, dpr);
+					if (!transparent) await this.drawBackgroundToCanvas(ctx, styleWidth, styleHeight);
+					const fitBgLeft = (fitBgImgWidth > 0 ? (fitBgImgWidth - imgWidth) / 2 : 0) * scaleX;
+					const fitBgTop = (fitBgImgHeight > 0 ? (fitBgImgHeight - imgHeight) / 2 : 0) * scaleY;
+					if (clipData) ctx.drawImage(img, clipData.left, clipData.top, clipData.width, clipData.height, paddingX * scaleX + fitBgLeft, paddingY * scaleY + fitBgTop, clipData.width * scaleX, clipData.height * scaleY);
+					else ctx.drawImage(img, fitBgLeft, fitBgTop, imgWidth * scaleX, imgHeight * scaleY);
+					resolve(canvas.toDataURL(format));
+				} catch (error) {
+					reject(error);
 				}
 			};
-			img.onerror = () => {
-				reject(/* @__PURE__ */ new Error("无法加载图片。可能原因：\n1. URL 地址不正确\n2. 图片服务器禁止跨域访问（CORS）\n3. 网络连接失败\n\n建议：尝试下载图片后使用\"本地上传\"方式插入"));
+			img.onerror = (e) => {
+				reject(e);
 			};
-			img.src = url;
+			img.src = svgSrc;
 		});
+	}
+	drawBackgroundToCanvas(ctx, width, height) {
+		return new Promise((resolve, reject) => {
+			const { backgroundColor = "#fff", backgroundImage, backgroundRepeat = "no-repeat", backgroundPosition = "center center", backgroundSize = "cover" } = this.mindMap.themeConfig;
+			ctx.save();
+			ctx.rect(0, 0, width, height);
+			ctx.fillStyle = backgroundColor;
+			ctx.fill();
+			ctx.restore();
+			if (backgroundImage && backgroundImage !== "none") {
+				ctx.save();
+				drawBackgroundImageToCanvas(ctx, width, height, backgroundImage, {
+					backgroundRepeat,
+					backgroundPosition,
+					backgroundSize
+				}, (err) => {
+					if (err) reject(err);
+					else resolve();
+					ctx.restore();
+				});
+			} else resolve();
+		});
+	}
+	drawBackgroundToSvg(svg) {
+		return new Promise(async (resolve) => {
+			const { backgroundColor = "#fff", backgroundImage, backgroundRepeat = "repeat" } = this.mindMap.themeConfig;
+			svg.css("background-color", backgroundColor);
+			if (backgroundImage && backgroundImage !== "none") {
+				const imgDataUrl = await imgToDataUrl(backgroundImage);
+				svg.css("background-image", `url(${imgDataUrl})`);
+				svg.css("background-repeat", backgroundRepeat);
+				resolve();
+			} else resolve();
+		});
+	}
+	async _image(format, name, transparent = false, node = null, fitBg = false) {
+		this.mindMap.renderer.textEdit.hideEditTextBox();
+		this.handleNodeExport(node);
+		const { str, clipData } = await this.getSvgData(node);
+		const svgUrl = await this.fixSvgStrAndToBlob(str);
+		return await this.svgToPng(svgUrl, transparent, clipData, fitBg, format);
+	}
+	/**
+	* 方法1.把svg的图片都转化成data:url格式，再转换
+	* 方法2.把svg的图片提取出来再挨个绘制到canvas里，最后一起转换
+	*/
+	async png(...args) {
+		return await this._image("image/png", ...args);
+	}
+	async jpg(...args) {
+		return await this._image("image/jpg", ...args);
+	}
+	handleNodeExport(node) {
+		if (node && node.getData("isActive")) {
+			node.deactivate();
+			const { alwaysShowExpandBtn, notShowExpandBtn } = this.mindMap.opt;
+			if (!alwaysShowExpandBtn && !notShowExpandBtn && node.getData("expand")) node.removeExpandBtn();
+		}
+	}
+	async pdf(name, transparent = false, fitBg = false) {
+		if (!this.mindMap.doExportPDF) throw new Error("请注册ExportPDF插件");
+		const img = await this.png(name, transparent, null, fitBg);
+		return await this.mindMap.doExportPDF.pdf(img);
+	}
+	async xmind(name) {
+		if (!this.mindMap.doExportXMind) throw new Error("请注册ExportXMind插件");
+		const data = this.mindMap.getData();
+		return await readBlob(await this.mindMap.doExportXMind.xmind(data, name));
+	}
+	async svg(name) {
+		this.mindMap.renderer.textEdit.hideEditTextBox();
+		const { node } = await this.getSvgData();
+		node.first().before(SVG(`<title>${name}</title>`));
+		await this.drawBackgroundToSvg(node);
+		const str = node.svg();
+		return await this.fixSvgStrAndToBlob(str);
+	}
+	async fixSvgStrAndToBlob(str) {
+		str = removeHTMLEntities(str);
+		str = handleSelfCloseTags(str);
+		return await readBlob(new Blob([str], { type: "image/svg+xml" }));
+	}
+	async json(name, withConfig = true) {
+		const data = this.mindMap.getData(withConfig);
+		const str = JSON.stringify(data);
+		return await readBlob(new Blob([str]));
+	}
+	async smm(name, withConfig) {
+		return await this.json(name, withConfig);
+	}
+	async md() {
+		const content = transformToMarkdown(this.mindMap.getData());
+		return await readBlob(new Blob([content]));
+	}
+	async txt() {
+		const content = transformToTxt(this.mindMap.getData());
+		return await readBlob(new Blob([content]));
 	}
 };
-/**
-* 根据目标大小自动选择压缩参数
-* @param {File} file - 原始图片文件
-* @param {number} targetSizeKB - 目标大小（KB，默认 500）
-* @returns {Promise<string>} 压缩后的 Base64 字符串
-*/
-var compressToTargetSize = async (file, targetSizeKB = 500) => {
-	let quality = .8;
-	let maxWidth = 1920;
-	let attempts = 0;
-	const maxAttempts = 5;
-	while (attempts < maxAttempts) {
-		const base64 = await compressImage(file, {
-			quality,
-			maxWidth,
-			maxHeight: Math.floor(maxWidth * .75)
-		});
-		const size = getBase64Size(base64);
-		if (parseFloat(size.kb) <= targetSizeKB) return base64;
-		quality *= .7;
-		maxWidth = Math.floor(maxWidth * .8);
-		attempts++;
-	}
-	return await compressImage(file, {
-		quality: .5,
-		maxWidth: 800,
-		maxHeight: 600
+Export.instanceName = "doExport";
+//#endregion
+//#region node_modules/simple-mind-map/src/plugins/associativeLine/associativeLineUtils.js
+var getAssociativeLineTargetIndex = (node, toNode) => {
+	return node.getData("associativeLineTargets").findIndex((item) => {
+		return item === toNode.getData("uid");
 	});
 };
-//#endregion
-//#region src/components/ImageCompressor.vue
-var _hoisted_1$3 = { class: "image-compressor" };
-var _hoisted_2$3 = { class: "source-tabs" };
-var _hoisted_3$3 = {
-	key: 0,
-	class: "upload-area"
+var computeCubicBezierPathPoints = (x1, y1, x2, y2) => {
+	const min = 5;
+	let cx1 = x1 + (x2 - x1) / 2;
+	let cy1 = y1;
+	let cx2 = cx1;
+	let cy2 = y2;
+	if (Math.abs(x1 - x2) <= min) {
+		cx1 = x1 + (y2 - y1) / 2;
+		cx2 = cx1;
+	}
+	if (Math.abs(y1 - y2) <= min) {
+		cx1 = x1;
+		cy1 = y1 - (x2 - x1) / 2;
+		cx2 = x2;
+		cy2 = cy1;
+	}
+	return [{
+		x: cx1,
+		y: cy1
+	}, {
+		x: cx2,
+		y: cy2
+	}];
 };
-var _hoisted_4$3 = ["src"];
-var _hoisted_5$3 = {
-	key: 1,
-	class: "upload-placeholder"
+var joinCubicBezierPath = (startPoint, endPoint, point1, point2) => {
+	return `M ${startPoint.x},${startPoint.y} C ${point1.x},${point1.y} ${point2.x},${point2.y} ${endPoint.x},${endPoint.y}`;
 };
-var _hoisted_6$3 = {
-	key: 0,
-	class: "file-info"
+var getNodeRect = (node) => {
+	let { left, top, width, height } = node;
+	return {
+		right: left + width,
+		bottom: top + height,
+		left,
+		top,
+		width,
+		height
+	};
 };
-var _hoisted_7$3 = { class: "file-name" };
-var _hoisted_8$2 = { class: "file-size" };
-var _hoisted_9$2 = {
-	key: 1,
-	class: "url-input-area"
+var cubicBezierPath = (x1, y1, x2, y2) => {
+	let points = computeCubicBezierPathPoints(x1, y1, x2, y2);
+	return joinCubicBezierPath({
+		x: x1,
+		y: y1
+	}, {
+		x: x2,
+		y: y2
+	}, points[0], points[1]);
 };
-var _hoisted_10$2 = { class: "input-group" };
-var _hoisted_11$2 = ["disabled"];
-var _hoisted_12$2 = {
-	key: 0,
-	class: "fa-solid fa-spinner fa-spin"
-};
-var _hoisted_13$1 = {
-	key: 1,
-	class: "fa-solid fa-download"
-};
-var _hoisted_14$1 = {
-	key: 0,
-	class: "url-preview"
-};
-var _hoisted_15$1 = ["src"];
-var _hoisted_16$1 = {
-	key: 2,
-	class: "compression-options"
-};
-var _hoisted_17$1 = { class: "compression-modes" };
-var _hoisted_18$1 = { class: "mode-option" };
-var _hoisted_19$1 = { class: "mode-option" };
-var _hoisted_20$1 = { class: "mode-option" };
-var _hoisted_21$1 = { class: "mode-content" };
-var _hoisted_22 = { class: "custom-controls" };
-var _hoisted_23 = { class: "quality-value" };
-var _hoisted_24 = {
-	key: 0,
-	class: "size-comparison"
-};
-var _hoisted_25 = { class: "size-item" };
-var _hoisted_26 = { class: "size-value" };
-var _hoisted_27 = { class: "size-item" };
-var _hoisted_28 = { class: "size-value highlight" };
-var _hoisted_29 = {
-	key: 0,
-	class: "size-item"
-};
-var _hoisted_30 = { class: "size-value success" };
-var _hoisted_31 = { class: "modal-actions" };
-var _hoisted_32 = ["disabled"];
-var _hoisted_33 = {
-	key: 0,
-	class: "fa-solid fa-spinner fa-spin"
-};
-var _hoisted_34 = {
-	key: 1,
-	class: "fa-solid fa-check"
-};
-var ImageCompressor_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
-	__name: "ImageCompressor",
-	props: { modelValue: {
-		type: Boolean,
-		default: false
-	} },
-	emits: ["update:modelValue", "confirm"],
-	setup(__props, { emit: __emit }) {
-		const props = __props;
-		const emit = __emit;
-		const visible = computed({
-			get: () => props.modelValue,
-			set: (val) => emit("update:modelValue", val)
-		});
-		const sourceType = /* @__PURE__ */ ref("local");
-		const selectedFile = /* @__PURE__ */ ref(null);
-		const previewUrl = /* @__PURE__ */ ref(null);
-		const imageUrl = /* @__PURE__ */ ref("");
-		const compressionMode = /* @__PURE__ */ ref("auto");
-		const customQuality = /* @__PURE__ */ ref(80);
-		const isDragOver = /* @__PURE__ */ ref(false);
-		const isLoading = /* @__PURE__ */ ref(false);
-		const isProcessing = /* @__PURE__ */ ref(false);
-		const fileInput = /* @__PURE__ */ ref(null);
-		const originalSize = computed(() => {
-			if (!selectedFile.value) return "-";
-			return formatFileSize(selectedFile.value.size);
-		});
-		const compressedSize = /* @__PURE__ */ ref(null);
-		const savedPercent = computed(() => {
-			if (!selectedFile.value || !compressedSize.value) return null;
-			const original = parseFloat(originalSize.value);
-			const percent = ((original - parseFloat(compressedSize.value)) / original * 100).toFixed(1);
-			return percent > 0 ? `${percent}%` : null;
-		});
-		watch(visible, (newVal) => {
-			if (!newVal) resetState();
-		});
-		watch([
-			compressionMode,
-			customQuality,
-			previewUrl
-		], async () => {
-			if (previewUrl.value && selectedFile.value) await processCompression();
-		});
-		const onFileChange = (e) => {
-			const file = e.target.files[0];
-			if (file) handleFileSelect(file);
-			e.target.value = "";
+var calcPoint = (node, e) => {
+	const { left, top, translateLeft, translateTop, width, height } = node;
+	const clientX = e.clientX;
+	const clientY = e.clientY;
+	const centerX = translateLeft + width / 2;
+	const centerY = translateTop + height / 2;
+	const translateCenterX = left + width / 2;
+	const translateCenterY = top + height / 2;
+	const theta = Math.atan(height / width);
+	const deltaX = clientX - centerX;
+	const deltaY = centerY - clientY;
+	const direction = Math.atan2(deltaY, deltaX);
+	let x = left + width;
+	let y = top + height;
+	if (direction < theta && direction >= -theta) {
+		const range = direction * (width / 2);
+		if (direction < theta && direction >= 0) y = translateCenterY - range;
+		else if (direction >= -theta && direction < 0) y = translateCenterY - range;
+		return {
+			x,
+			y,
+			dir: "right",
+			range
 		};
-		const onDrop = (e) => {
-			isDragOver.value = false;
-			const file = e.dataTransfer.files[0];
-			if (file && file.type.startsWith("image/")) handleFileSelect(file);
+	} else if (direction >= theta && direction < Math.PI - theta) {
+		y = top;
+		let range = 0;
+		if (direction < Math.PI / 2 - theta && direction >= theta) {
+			const side = height / 2 / direction;
+			range = -side;
+			x = translateCenterX + side;
+		} else if (direction >= Math.PI / 2 - theta && direction < Math.PI - theta) {
+			const tanValue = (centerX - clientX) / (centerY - clientY);
+			const side = height / 2 * tanValue;
+			range = side;
+			x = translateCenterX - side;
+		}
+		return {
+			x,
+			y,
+			dir: "top",
+			range
 		};
-		const handleFileSelect = async (file) => {
-			selectedFile.value = file;
-			previewUrl.value = URL.createObjectURL(file);
-		};
-		const loadImageUrl = async () => {
-			if (!imageUrl.value.trim()) return;
-			isLoading.value = true;
-			try {
-				const url = imageUrl.value.trim();
-				previewUrl.value = url;
-				try {
-					const response = await fetch(url);
-					if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-					const blob = await response.blob();
-					if (!blob.type.startsWith("image/")) throw new Error("URL 返回的不是图片文件");
-					selectedFile.value = new File([blob], "image.jpg", { type: blob.type });
-					console.log("URL 图片加载成功:", blob.type, formatFileSize(blob.size));
-				} catch (fetchError) {
-					console.warn("Fetch 失败（可能是 CORS 限制）:", fetchError.message);
-					selectedFile.value = null;
-					showToast("注意：由于浏览器安全限制，将直接使用URL加载图片", "warning");
-				}
-			} catch (error) {
-				console.error("URL 加载错误:", error);
-				showToast("无法加载图片：" + error.message, "error");
-				previewUrl.value = null;
-			} finally {
-				isLoading.value = false;
-			}
-		};
-		const processCompression = async () => {
-			if (!selectedFile.value) return;
-			isProcessing.value = true;
-			try {
-				let base64;
-				switch (compressionMode.value) {
-					case "original":
-						base64 = await fileToBase64(selectedFile.value);
-						break;
-					case "auto":
-						base64 = await compressToTargetSize(selectedFile.value, 500);
-						break;
-					case "custom":
-						base64 = await compressImage(selectedFile.value, {
-							quality: customQuality.value / 100,
-							maxWidth: 1920,
-							maxHeight: 1080
-						});
-						break;
-				}
-				compressedSize.value = getBase64Size(base64).kb + " KB";
-			} catch (error) {
-				console.error("压缩失败:", error);
-				alert("图片处理失败，请重试");
-			} finally {
-				isProcessing.value = false;
-			}
-		};
-		const handleConfirm = async () => {
-			if (!previewUrl.value) return;
-			isProcessing.value = true;
-			try {
-				let base64;
-				switch (compressionMode.value) {
-					case "original":
-						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, { quality: 1 });
-						else base64 = await fileToBase64(selectedFile.value);
-						break;
-					case "auto":
-						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, {});
-						else base64 = await compressToTargetSize(selectedFile.value, 500);
-						break;
-					case "custom":
-						if (sourceType.value === "url") base64 = await imageUrlToBase64(imageUrl.value, { quality: customQuality.value / 100 });
-						else base64 = await compressImage(selectedFile.value, {
-							quality: customQuality.value / 100,
-							maxWidth: 1920,
-							maxHeight: 1080
-						});
-						break;
-				}
-				emit("confirm", {
-					base64,
-					size: getBase64Size(base64),
-					mode: compressionMode.value
-				});
-				visible.value = false;
-			} catch (error) {
-				console.error("处理失败:", error);
-				alert("图片处理失败，请重试");
-			} finally {
-				isProcessing.value = false;
-			}
-		};
-		const handleCancel = () => {
-			visible.value = false;
-		};
-		const resetState = () => {
-			sourceType.value = "local";
-			selectedFile.value = null;
-			previewUrl.value = null;
-			imageUrl.value = "";
-			compressionMode.value = "auto";
-			customQuality.value = 80;
-			compressedSize.value = null;
-			isDragOver.value = false;
-		};
-		const formatFileSize = (bytes) => {
-			if (bytes < 1024) return bytes + " B";
-			if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
-			return (bytes / 1048576).toFixed(2) + " MB";
-		};
-		return (_ctx, _cache) => {
-			return openBlock(), createBlock(AppModal_default, {
-				modelValue: visible.value,
-				"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => visible.value = $event),
-				title: "插入图片",
-				icon: "fa-solid fa-image",
-				size: "medium"
-			}, {
-				default: withCtx(() => [createBaseVNode("div", _hoisted_1$3, [
-					createBaseVNode("div", _hoisted_2$3, [createBaseVNode("button", {
-						class: normalizeClass(["tab-btn", { active: sourceType.value === "local" }]),
-						onClick: _cache[0] || (_cache[0] = ($event) => sourceType.value = "local")
-					}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-upload" }, null, -1), createTextVNode(" 本地上传 ", -1)])], 2), createBaseVNode("button", {
-						class: normalizeClass(["tab-btn", { active: sourceType.value === "url" }]),
-						onClick: _cache[1] || (_cache[1] = ($event) => sourceType.value = "url")
-					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-link" }, null, -1), createTextVNode(" URL 链接 ", -1)])], 2)]),
-					sourceType.value === "local" ? (openBlock(), createElementBlock("div", _hoisted_3$3, [createBaseVNode("div", {
-						class: normalizeClass(["drop-zone", {
-							"has-file": previewUrl.value,
-							"drag-over": isDragOver.value
-						}]),
-						onClick: _cache[2] || (_cache[2] = ($event) => fileInput.value.click()),
-						onDragover: _cache[3] || (_cache[3] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
-						onDragleave: _cache[4] || (_cache[4] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
-						onDrop: withModifiers(onDrop, ["prevent"])
-					}, [previewUrl.value ? (openBlock(), createElementBlock("img", {
-						key: 0,
-						src: previewUrl.value,
-						class: "preview-img",
-						alt: "预览"
-					}, null, 8, _hoisted_4$3)) : (openBlock(), createElementBlock("div", _hoisted_5$3, [..._cache[13] || (_cache[13] = [
-						createBaseVNode("i", { class: "fa-solid fa-cloud-arrow-up" }, null, -1),
-						createBaseVNode("p", null, "点击或拖拽图片到此处", -1),
-						createBaseVNode("span", { class: "hint" }, "支持 JPG、PNG、WebP 格式", -1)
-					])])), createBaseVNode("input", {
-						ref_key: "fileInput",
-						ref: fileInput,
-						type: "file",
-						accept: "image/jpeg,image/png,image/webp",
-						class: "hidden-input",
-						onChange: onFileChange
-					}, null, 544)], 34), selectedFile.value ? (openBlock(), createElementBlock("div", _hoisted_6$3, [createBaseVNode("span", _hoisted_7$3, toDisplayString(selectedFile.value.name), 1), createBaseVNode("span", _hoisted_8$2, toDisplayString(formatFileSize(selectedFile.value.size)), 1)])) : createCommentVNode("", true)])) : (openBlock(), createElementBlock("div", _hoisted_9$2, [createBaseVNode("div", _hoisted_10$2, [withDirectives(createBaseVNode("input", {
-						"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => imageUrl.value = $event),
-						type: "text",
-						placeholder: "请输入图片 URL（http:// 或 https://）",
-						class: "url-input",
-						onKeyup: withKeys(loadImageUrl, ["enter"])
-					}, null, 544), [[vModelText, imageUrl.value]]), createBaseVNode("button", {
-						class: "btn btn-primary",
-						disabled: !imageUrl.value || isLoading.value,
-						onClick: loadImageUrl
-					}, [isLoading.value ? (openBlock(), createElementBlock("i", _hoisted_12$2)) : (openBlock(), createElementBlock("i", _hoisted_13$1)), createTextVNode(" " + toDisplayString(isLoading.value ? "加载中..." : "加载"), 1)], 8, _hoisted_11$2)]), previewUrl.value ? (openBlock(), createElementBlock("div", _hoisted_14$1, [createBaseVNode("img", {
-						src: previewUrl.value,
-						class: "preview-img",
-						alt: "预览"
-					}, null, 8, _hoisted_15$1)])) : createCommentVNode("", true)])),
-					previewUrl.value ? (openBlock(), createElementBlock("div", _hoisted_16$1, [
-						_cache[20] || (_cache[20] = createBaseVNode("h4", { class: "section-title" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 压缩设置 ")], -1)),
-						createBaseVNode("div", _hoisted_17$1, [
-							createBaseVNode("label", _hoisted_18$1, [withDirectives(createBaseVNode("input", {
-								"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => compressionMode.value = $event),
-								type: "radio",
-								value: "original",
-								name: "compression"
-							}, null, 512), [[vModelRadio, compressionMode.value]]), _cache[14] || (_cache[14] = createBaseVNode("div", { class: "mode-content" }, [createBaseVNode("span", { class: "mode-label" }, "保持原图"), createBaseVNode("span", { class: "mode-desc" }, "不压缩，直接使用原始图片")], -1))]),
-							createBaseVNode("label", _hoisted_19$1, [withDirectives(createBaseVNode("input", {
-								"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => compressionMode.value = $event),
-								type: "radio",
-								value: "auto",
-								name: "compression"
-							}, null, 512), [[vModelRadio, compressionMode.value]]), _cache[15] || (_cache[15] = createBaseVNode("div", { class: "mode-content" }, [createBaseVNode("span", { class: "mode-label" }, "自动压缩"), createBaseVNode("span", { class: "mode-desc" }, "压缩到 500KB 以内（推荐）")], -1))]),
-							createBaseVNode("label", _hoisted_20$1, [withDirectives(createBaseVNode("input", {
-								"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => compressionMode.value = $event),
-								type: "radio",
-								value: "custom",
-								name: "compression"
-							}, null, 512), [[vModelRadio, compressionMode.value]]), createBaseVNode("div", _hoisted_21$1, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "mode-label" }, "自定义质量", -1)), createBaseVNode("div", _hoisted_22, [withDirectives(createBaseVNode("input", {
-								"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => customQuality.value = $event),
-								type: "range",
-								min: "10",
-								max: "100",
-								step: "5",
-								class: "quality-slider"
-							}, null, 512), [[
-								vModelText,
-								customQuality.value,
-								void 0,
-								{ number: true }
-							]]), createBaseVNode("span", _hoisted_23, toDisplayString(customQuality.value) + "%", 1)])])])
-						]),
-						compressedSize.value ? (openBlock(), createElementBlock("div", _hoisted_24, [
-							createBaseVNode("div", _hoisted_25, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "size-label" }, "原始大小：", -1)), createBaseVNode("span", _hoisted_26, toDisplayString(originalSize.value), 1)]),
-							createBaseVNode("div", _hoisted_27, [_cache[18] || (_cache[18] = createBaseVNode("span", { class: "size-label" }, "压缩后：", -1)), createBaseVNode("span", _hoisted_28, toDisplayString(compressedSize.value), 1)]),
-							savedPercent.value ? (openBlock(), createElementBlock("div", _hoisted_29, [_cache[19] || (_cache[19] = createBaseVNode("span", { class: "size-label" }, "节省：", -1)), createBaseVNode("span", _hoisted_30, toDisplayString(savedPercent.value), 1)])) : createCommentVNode("", true)
-						])) : createCommentVNode("", true)
-					])) : createCommentVNode("", true),
-					createBaseVNode("div", _hoisted_31, [createBaseVNode("button", {
-						class: "btn",
-						onClick: handleCancel
-					}, "取消"), createBaseVNode("button", {
-						class: "btn btn-primary",
-						disabled: !previewUrl.value || isProcessing.value,
-						onClick: handleConfirm
-					}, [isProcessing.value ? (openBlock(), createElementBlock("i", _hoisted_33)) : (openBlock(), createElementBlock("i", _hoisted_34)), createTextVNode(" " + toDisplayString(isProcessing.value ? "处理中..." : "确认插入"), 1)], 8, _hoisted_32)])
-				])]),
-				_: 1
-			}, 8, ["modelValue"]);
+	} else if (direction < -theta && direction >= theta - Math.PI) {
+		let range = 0;
+		if (direction >= theta - Math.PI / 2 && direction < -theta) {
+			const side = height / 2 / direction;
+			range = side;
+			x = translateCenterX - side;
+		} else if (direction < theta - Math.PI / 2 && direction >= theta - Math.PI) {
+			const tanValue = (centerX - clientX) / (centerY - clientY);
+			const side = height / 2 * tanValue;
+			range = -side;
+			x = translateCenterX + side;
+		}
+		return {
+			x,
+			y,
+			dir: "bottom",
+			range
 		};
 	}
-}, [["__scopeId", "data-v-82b8ee30"]]);
+	x = left;
+	const range = (centerY - clientY) / (centerX - clientX) * (width / 2);
+	if (direction >= -Math.PI && direction < theta - Math.PI) y = translateCenterY - range;
+	else if (direction < Math.PI && direction >= Math.PI - theta) y = translateCenterY - range;
+	return {
+		x,
+		y,
+		dir: "left",
+		range
+	};
+};
+var getNodePoint = (node, dir = "right", range = 0, e = null) => {
+	let { left, top, width, height } = node;
+	if (e) return calcPoint(node, e);
+	switch (dir) {
+		case "left": return {
+			x: left,
+			y: top + height / 2 - range,
+			dir
+		};
+		case "right": return {
+			x: left + width,
+			y: top + height / 2 - range,
+			dir
+		};
+		case "top": return {
+			x: left + width / 2 - range,
+			y: top,
+			dir
+		};
+		case "bottom": return {
+			x: left + width / 2 - range,
+			y: top + height,
+			dir
+		};
+		default: break;
+	}
+};
+var computeNodePoints = (fromNode, toNode) => {
+	const fromRect = getNodeRect(fromNode);
+	const toRect = getNodeRect(toNode);
+	let fromDir = "";
+	let toDir = "";
+	switch (getRectRelativePosition({
+		x: fromRect.left,
+		y: fromRect.top,
+		width: fromRect.width,
+		height: fromRect.height
+	}, {
+		x: toRect.left,
+		y: toRect.top,
+		width: toRect.width,
+		height: toRect.height
+	})) {
+		case "left-top":
+			fromDir = "right";
+			toDir = "top";
+			break;
+		case "right-top":
+			fromDir = "left";
+			toDir = "top";
+			break;
+		case "right-bottom":
+			fromDir = "left";
+			toDir = "bottom";
+			break;
+		case "left-bottom":
+			fromDir = "right";
+			toDir = "bottom";
+			break;
+		case "left":
+			fromDir = "right";
+			toDir = "left";
+			break;
+		case "right":
+			fromDir = "left";
+			toDir = "right";
+			break;
+		case "top":
+			fromDir = "right";
+			toDir = "right";
+			break;
+		case "bottom":
+			fromDir = "left";
+			toDir = "left";
+			break;
+		case "overlap":
+			fromDir = "right";
+			toDir = "right";
+			break;
+		default: break;
+	}
+	return [getNodePoint(fromNode, fromDir), getNodePoint(toNode, toDir)];
+};
+var getNodeLinePath = (startPoint, endPoint, node, toNode) => {
+	let targetIndex = getAssociativeLineTargetIndex(node, toNode);
+	let controlPoints = [];
+	let associativeLineTargetControlOffsets = node.getData("associativeLineTargetControlOffsets");
+	if (associativeLineTargetControlOffsets && associativeLineTargetControlOffsets[targetIndex]) {
+		let offsets = associativeLineTargetControlOffsets[targetIndex];
+		controlPoints = [{
+			x: startPoint.x + offsets[0].x,
+			y: startPoint.y + offsets[0].y
+		}, {
+			x: endPoint.x + offsets[1].x,
+			y: endPoint.y + offsets[1].y
+		}];
+	} else controlPoints = computeCubicBezierPathPoints(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+	return {
+		path: joinCubicBezierPath(startPoint, endPoint, controlPoints[0], controlPoints[1]),
+		controlPoints
+	};
+};
+var getDefaultControlPointOffsets = (startPoint, endPoint) => {
+	let controlPoints = computeCubicBezierPathPoints(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+	return [{
+		x: controlPoints[0].x - startPoint.x,
+		y: controlPoints[0].y - startPoint.y
+	}, {
+		x: controlPoints[1].x - endPoint.x,
+		y: controlPoints[1].y - endPoint.y
+	}];
+};
 //#endregion
-//#region src/components/ImageViewer.vue
-var _hoisted_1$2 = ["disabled"];
-var _hoisted_2$2 = ["disabled"];
-var _hoisted_3$2 = ["src"];
-var _hoisted_4$2 = { class: "toolbar-left" };
-var _hoisted_5$2 = { class: "image-counter" };
-var _hoisted_6$2 = { class: "toolbar-center" };
-var _hoisted_7$2 = { class: "zoom-level" };
-var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
-	__name: "ImageViewer",
+//#region node_modules/simple-mind-map/src/plugins/associativeLine/associativeLineControls.js
+function createControlNodes(node, toNode) {
+	let { associativeLineActiveColor } = this.getStyleConfig(node, toNode);
+	this.controlLine1 = this.associativeLineDraw.line().stroke({
+		color: associativeLineActiveColor,
+		width: 2
+	});
+	this.controlLine2 = this.associativeLineDraw.line().stroke({
+		color: associativeLineActiveColor,
+		width: 2
+	});
+	this.controlPoint1 = this.createOneControlNode("controlPoint1", node, toNode);
+	this.controlPoint2 = this.createOneControlNode("controlPoint2", node, toNode);
+}
+function createOneControlNode(pointKey, node, toNode) {
+	let { associativeLineActiveColor } = this.getStyleConfig(node, toNode);
+	return this.associativeLineDraw.circle(this.controlPointDiameter).stroke({ color: associativeLineActiveColor }).fill({ color: "#fff" }).click((e) => {
+		e.stopPropagation();
+	}).mousedown((e) => {
+		this.onControlPointMousedown(e, pointKey);
+	});
+}
+function onControlPointMousedown(e, pointKey) {
+	e.stopPropagation();
+	e.preventDefault();
+	this.isControlPointMousedown = true;
+	this.mousedownControlPointKey = pointKey;
+}
+function onControlPointMousemove(e) {
+	if (!this.isControlPointMousedown || !this.mousedownControlPointKey || !this[this.mousedownControlPointKey]) return;
+	e.stopPropagation();
+	e.preventDefault();
+	let radius = this.controlPointDiameter / 2;
+	let { x, y } = this.getTransformedEventPos(e);
+	this.controlPointMousemoveState.pos = {
+		x,
+		y
+	};
+	this[this.mousedownControlPointKey].x(x - radius).y(y - radius);
+	let [, , , node, toNode] = this.activeLine;
+	let targetIndex = getAssociativeLineTargetIndex(node, toNode);
+	let { associativeLinePoint, associativeLineTargetControlOffsets } = node.getData();
+	associativeLinePoint = associativeLinePoint || [];
+	const nodePos = this.getNodePos(node);
+	const toNodePos = this.getNodePos(toNode);
+	let [startPoint, endPoint] = this.updateAllLinesPos(node, toNode, associativeLinePoint[targetIndex]);
+	this.controlPointMousemoveState.startPoint = startPoint;
+	this.controlPointMousemoveState.endPoint = endPoint;
+	this.controlPointMousemoveState.targetIndex = targetIndex;
+	let offsets = [];
+	if (!associativeLineTargetControlOffsets) offsets = getDefaultControlPointOffsets(startPoint, endPoint);
+	else offsets = associativeLineTargetControlOffsets[targetIndex];
+	let point1 = null;
+	let point2 = null;
+	const { x: clientX, y: clientY } = this.mindMap.toPos(e.clientX, e.clientY);
+	const _e = {
+		clientX,
+		clientY
+	};
+	if (this.mousedownControlPointKey === "controlPoint1") {
+		startPoint = getNodePoint(nodePos, "", 0, _e);
+		point1 = {
+			x,
+			y
+		};
+		point2 = {
+			x: endPoint.x + offsets[1].x,
+			y: endPoint.y + offsets[1].y
+		};
+		if (startPoint) {
+			this.controlPointMousemoveState.startPoint = startPoint;
+			this.controlLine1.plot(startPoint.x, startPoint.y, point1.x, point1.y);
+		}
+	} else {
+		endPoint = getNodePoint(toNodePos, "", 0, _e);
+		point1 = {
+			x: startPoint.x + offsets[0].x,
+			y: startPoint.y + offsets[0].y
+		};
+		point2 = {
+			x,
+			y
+		};
+		if (endPoint) {
+			this.controlPointMousemoveState.endPoint = endPoint;
+			this.controlLine2.plot(endPoint.x, endPoint.y, point2.x, point2.y);
+		}
+	}
+	this.updataAassociativeLine(startPoint, endPoint, point1, point2, this.activeLine);
+}
+function updataAassociativeLine(startPoint, endPoint, point1, point2, activeLine) {
+	const [path, clickPath, text] = activeLine;
+	const pathStr = joinCubicBezierPath(startPoint, endPoint, point1, point2);
+	path.plot(pathStr);
+	clickPath.plot(pathStr);
+	this.updateTextPos(path, text);
+	this.updateTextEditBoxPos(text);
+}
+function onControlPointMouseup(e) {
+	if (!this.isControlPointMousedown) return;
+	e.stopPropagation();
+	e.preventDefault();
+	let { pos, startPoint, endPoint, targetIndex } = this.controlPointMousemoveState;
+	let [, , , node] = this.activeLine;
+	let offsetList = [];
+	let { associativeLinePoint, associativeLineTargetControlOffsets } = node.getData();
+	if (!associativeLinePoint) associativeLinePoint = [];
+	associativeLinePoint[targetIndex] = associativeLinePoint[targetIndex] || {
+		startPoint,
+		endPoint
+	};
+	if (!associativeLineTargetControlOffsets) offsetList[targetIndex] = getDefaultControlPointOffsets(startPoint, endPoint);
+	else offsetList = associativeLineTargetControlOffsets;
+	let offset1 = null;
+	let offset2 = null;
+	if (this.mousedownControlPointKey === "controlPoint1") {
+		offset1 = {
+			x: pos.x - startPoint.x,
+			y: pos.y - startPoint.y
+		};
+		offset2 = offsetList[targetIndex][1];
+		associativeLinePoint[targetIndex].startPoint = startPoint;
+	} else {
+		offset1 = offsetList[targetIndex][0];
+		offset2 = {
+			x: pos.x - endPoint.x,
+			y: pos.y - endPoint.y
+		};
+		associativeLinePoint[targetIndex].endPoint = endPoint;
+	}
+	offsetList[targetIndex] = [offset1, offset2];
+	this.mindMap.execCommand("SET_NODE_DATA", node, {
+		associativeLineTargetControlOffsets: offsetList,
+		associativeLinePoint
+	});
+	this.isNotRenderAllLines = true;
+	setTimeout(() => {
+		this.resetControlPoint();
+	}, 0);
+}
+function resetControlPoint() {
+	this.isControlPointMousedown = false;
+	this.mousedownControlPointKey = "";
+	this.controlPointMousemoveState = {
+		pos: null,
+		startPoint: null,
+		endPoint: null,
+		targetIndex: ""
+	};
+}
+function renderControls(startPoint, endPoint, point1, point2, node, toNode) {
+	if (!this.mindMap.opt.enableAdjustAssociativeLinePoints) return;
+	if (!this.controlLine1) this.createControlNodes(node, toNode);
+	let radius = this.controlPointDiameter / 2;
+	this.controlLine1.plot(startPoint.x, startPoint.y, point1.x, point1.y);
+	this.controlLine2.plot(endPoint.x, endPoint.y, point2.x, point2.y);
+	this.controlPoint1.x(point1.x - radius).y(point1.y - radius);
+	this.controlPoint2.x(point2.x - radius).y(point2.y - radius);
+}
+function removeControls() {
+	if (!this.controlLine1) return;
+	[
+		this.controlLine1,
+		this.controlLine2,
+		this.controlPoint1,
+		this.controlPoint2
+	].forEach((item) => {
+		item.remove();
+	});
+	this.controlLine1 = null;
+	this.controlLine2 = null;
+	this.controlPoint1 = null;
+	this.controlPoint2 = null;
+}
+function hideControls() {
+	if (!this.controlLine1) return;
+	[
+		this.controlLine1,
+		this.controlLine2,
+		this.controlPoint1,
+		this.controlPoint2
+	].forEach((item) => {
+		item.hide();
+	});
+}
+function showControls() {
+	if (!this.controlLine1) return;
+	[
+		this.controlLine1,
+		this.controlLine2,
+		this.controlPoint1,
+		this.controlPoint2
+	].forEach((item) => {
+		item.show();
+	});
+}
+var associativeLineControls_default = {
+	createControlNodes,
+	createOneControlNode,
+	onControlPointMousedown,
+	onControlPointMousemove,
+	onControlPointMouseup,
+	resetControlPoint,
+	renderControls,
+	removeControls,
+	hideControls,
+	showControls,
+	updataAassociativeLine
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/plugins/associativeLine/associativeLineText.js
+var ASSOCIATIVE_LINE_TEXT_EDIT_WRAP$1 = "associative-line-text-edit-warp";
+function createText(data) {
+	let g = this.associativeLineDraw.group();
+	const setActive = () => {
+		if (!this.activeLine || this.activeLine[3] !== data.node || this.activeLine[4] !== data.toNode) this.setActiveLine({
+			...data,
+			text: g
+		});
+	};
+	g.click((e) => {
+		e.stopPropagation();
+		setActive();
+	});
+	g.on("dblclick", (e) => {
+		e.stopPropagation();
+		setActive();
+		if (!this.activeLine) return;
+		this.showEditTextBox(g);
+	});
+	return g;
+}
+function showEditTextBox(g) {
+	this.mindMap.emit("before_show_text_edit");
+	this.mindMap.keyCommand.addShortcut("Enter", () => {
+		this.hideEditTextBox();
+	});
+	if (!this.textEditNode) {
+		this.textEditNode = document.createElement("div");
+		this.textEditNode.className = ASSOCIATIVE_LINE_TEXT_EDIT_WRAP$1;
+		this.textEditNode.style.cssText = `position:fixed;box-sizing: border-box;background-color:#fff;box-shadow: 0 0 20px rgba(0,0,0,.5);padding: 3px 5px;margin-left: -5px;margin-top: -3px;outline: none; word-break: break-all;`;
+		this.textEditNode.setAttribute("contenteditable", true);
+		this.textEditNode.addEventListener("keyup", (e) => {
+			e.stopPropagation();
+		});
+		this.textEditNode.addEventListener("click", (e) => {
+			e.stopPropagation();
+		});
+		(this.mindMap.opt.customInnerElsAppendTo || document.body).appendChild(this.textEditNode);
+	}
+	let [, , , node, toNode] = this.activeLine;
+	let { associativeLineTextFontSize, associativeLineTextFontFamily, associativeLineTextLineHeight } = this.getStyleConfig(node, toNode);
+	let { defaultAssociativeLineText, nodeTextEditZIndex } = this.mindMap.opt;
+	let scale = this.mindMap.view.scale;
+	let text = this.getText(node, toNode);
+	let textLines = (text || defaultAssociativeLineText).split(/\n/gim);
+	this.textEditNode.style.fontFamily = associativeLineTextFontFamily;
+	this.textEditNode.style.fontSize = associativeLineTextFontSize * scale + "px";
+	this.textEditNode.style.lineHeight = textLines.length > 1 ? associativeLineTextLineHeight : "normal";
+	this.textEditNode.style.zIndex = nodeTextEditZIndex;
+	this.textEditNode.innerHTML = textLines.join("<br>");
+	this.textEditNode.style.display = "block";
+	this.updateTextEditBoxPos(g);
+	this.setIsShowTextEdit(true);
+	if (text === "" || text === defaultAssociativeLineText) selectAllInput(this.textEditNode);
+	else focusInput(this.textEditNode);
+}
+function setIsShowTextEdit(val) {
+	this.showTextEdit = val;
+	if (val) this.mindMap.keyCommand.stopCheckInSvg();
+	else this.mindMap.keyCommand.recoveryCheckInSvg();
+}
+function removeTextEditEl() {
+	if (!this.textEditNode) return;
+	(this.mindMap.opt.customInnerElsAppendTo || document.body).removeChild(this.textEditNode);
+}
+function onScale() {
+	this.hideEditTextBox();
+}
+function updateTextEditBoxPos(g) {
+	let rect = g.node.getBoundingClientRect();
+	if (this.textEditNode) {
+		this.textEditNode.style.minWidth = `${rect.width + 10}px`;
+		this.textEditNode.style.minHeight = `${rect.height + 6}px`;
+		this.textEditNode.style.left = `${rect.left}px`;
+		this.textEditNode.style.top = `${rect.top}px`;
+	}
+}
+function hideEditTextBox() {
+	if (!this.showTextEdit) return;
+	let [path, , text, node, toNode] = this.activeLine;
+	let str = getStrWithBrFromHtml(this.textEditNode.innerHTML);
+	str = str === this.mindMap.opt.defaultAssociativeLineText ? "" : str;
+	this.mindMap.execCommand("SET_NODE_DATA", node, { associativeLineText: {
+		...node.getData("associativeLineText") || {},
+		[toNode.getData("uid")]: str
+	} });
+	this.textEditNode.style.display = "none";
+	this.textEditNode.innerHTML = "";
+	this.setIsShowTextEdit(false);
+	this.renderText(str, path, text, node, toNode);
+	this.mindMap.emit("hide_text_edit");
+}
+function getText(node, toNode) {
+	let obj = node.getData("associativeLineText");
+	if (!obj) return "";
+	return obj[toNode.getData("uid")] || "";
+}
+function renderText(str, path, text, node, toNode) {
+	if (!str) return;
+	let { associativeLineTextFontSize, associativeLineTextLineHeight } = this.getStyleConfig(node, toNode);
+	text.clear();
+	str.replace(/\n$/g, "").split(/\n/gim).forEach((item, index) => {
+		if (item === "") item = "﻿";
+		let textNode = new Text().text(item);
+		textNode.y(associativeLineTextFontSize * associativeLineTextLineHeight * index);
+		this.styleText(textNode, node, toNode);
+		text.add(textNode);
+	});
+	updateTextPos(path, text);
+}
+function styleText(textNode, node, toNode) {
+	let { associativeLineTextColor, associativeLineTextFontSize, associativeLineTextFontFamily } = this.getStyleConfig(node, toNode);
+	textNode.fill({ color: associativeLineTextColor }).css({
+		"font-family": associativeLineTextFontFamily,
+		"font-size": associativeLineTextFontSize + "px"
+	});
+}
+function updateTextPos(path, text) {
+	let pathLength = path.length();
+	let centerPoint = path.pointAt(pathLength / 2);
+	let { width: textWidth, height: textHeight } = text.bbox();
+	text.x(centerPoint.x - textWidth / 2);
+	text.y(centerPoint.y - textHeight / 2);
+}
+var associativeLineText_default = {
+	getText,
+	createText,
+	styleText,
+	onScale,
+	showEditTextBox,
+	setIsShowTextEdit,
+	removeTextEditEl,
+	hideEditTextBox,
+	updateTextEditBoxPos,
+	renderText,
+	updateTextPos
+};
+//#endregion
+//#region node_modules/simple-mind-map/src/plugins/AssociativeLine.js
+var styleProps = [
+	"associativeLineWidth",
+	"associativeLineColor",
+	"associativeLineActiveWidth",
+	"associativeLineActiveColor",
+	"associativeLineDasharray",
+	"associativeLineTextColor",
+	"associativeLineTextFontSize",
+	"associativeLineTextLineHeight",
+	"associativeLineTextFontFamily"
+];
+var ASSOCIATIVE_LINE_TEXT_EDIT_WRAP = "associative-line-text-edit-warp";
+var AssociativeLine = class {
+	constructor(opt = {}) {
+		this.mindMap = opt.mindMap;
+		this.associativeLineDraw = this.mindMap.associativeLineDraw;
+		this.isNotRenderAllLines = false;
+		this.lineList = [];
+		this.activeLine = null;
+		this.isCreatingLine = false;
+		this.creatingStartNode = null;
+		this.creatingLine = null;
+		this.overlapNode = null;
+		this.isNodeDragging = false;
+		this.controlLine1 = null;
+		this.controlLine2 = null;
+		this.controlPoint1 = null;
+		this.controlPoint2 = null;
+		this.controlPointDiameter = 10;
+		this.isControlPointMousedown = false;
+		this.mousedownControlPointKey = "";
+		this.controlPointMousemoveState = {
+			pos: null,
+			startPoint: null,
+			endPoint: null,
+			targetIndex: ""
+		};
+		this.checkOverlapNode = throttle(this.checkOverlapNode, 100, this);
+		Object.keys(associativeLineControls_default).forEach((item) => {
+			this[item] = associativeLineControls_default[item].bind(this);
+		});
+		this.showTextEdit = false;
+		Object.keys(associativeLineText_default).forEach((item) => {
+			this[item] = associativeLineText_default[item].bind(this);
+		});
+		this.mindMap.addEditNodeClass(ASSOCIATIVE_LINE_TEXT_EDIT_WRAP);
+		this.bindEvent();
+	}
+	bindEvent() {
+		this.renderAllLines = this.renderAllLines.bind(this);
+		this.onDrawClick = this.onDrawClick.bind(this);
+		this.onNodeClick = this.onNodeClick.bind(this);
+		this.removeLine = this.removeLine.bind(this);
+		this.addLine = this.addLine.bind(this);
+		this.onMousemove = this.onMousemove.bind(this);
+		this.onNodeDragging = this.onNodeDragging.bind(this);
+		this.onNodeDragend = this.onNodeDragend.bind(this);
+		this.onControlPointMouseup = this.onControlPointMouseup.bind(this);
+		this.onBeforeDestroy = this.onBeforeDestroy.bind(this);
+		this.mindMap.on("node_tree_render_end", this.renderAllLines);
+		this.mindMap.on("data_change", this.renderAllLines);
+		this.mindMap.on("draw_click", this.onDrawClick);
+		this.mindMap.on("node_click", this.onNodeClick);
+		this.mindMap.on("contextmenu", this.onDrawClick);
+		this.mindMap.keyCommand.addShortcut("Del|Backspace", this.removeLine);
+		this.mindMap.command.add("ADD_ASSOCIATIVE_LINE", this.addLine);
+		this.mindMap.on("mousemove", this.onMousemove);
+		this.mindMap.on("node_dragging", this.onNodeDragging);
+		this.mindMap.on("node_dragend", this.onNodeDragend);
+		this.mindMap.on("mouseup", this.onControlPointMouseup);
+		this.mindMap.on("scale", this.onScale);
+		this.mindMap.on("beforeDestroy", this.onBeforeDestroy);
+	}
+	unBindEvent() {
+		this.mindMap.off("node_tree_render_end", this.renderAllLines);
+		this.mindMap.off("data_change", this.renderAllLines);
+		this.mindMap.off("draw_click", this.onDrawClick);
+		this.mindMap.off("node_click", this.onNodeClick);
+		this.mindMap.off("contextmenu", this.onDrawClick);
+		this.mindMap.keyCommand.removeShortcut("Del|Backspace", this.removeLine);
+		this.mindMap.command.remove("ADD_ASSOCIATIVE_LINE", this.addLine);
+		this.mindMap.off("mousemove", this.onMousemove);
+		this.mindMap.off("node_dragging", this.onNodeDragging);
+		this.mindMap.off("node_dragend", this.onNodeDragend);
+		this.mindMap.off("mouseup", this.onControlPointMouseup);
+		this.mindMap.off("scale", this.onScale);
+		this.mindMap.off("beforeDestroy", this.onBeforeDestroy);
+	}
+	getStyleConfig(node, toNode) {
+		let lineStyle = {};
+		if (toNode) lineStyle = (node.getData("associativeLineStyle") || {})[toNode.getData("uid")] || {};
+		const res = {};
+		styleProps.forEach((prop) => {
+			if (typeof lineStyle[prop] !== "undefined") res[prop] = lineStyle[prop];
+			else res[prop] = node.getStyle(prop);
+		});
+		return res;
+	}
+	onBeforeDestroy() {
+		this.hideEditTextBox();
+		this.removeTextEditEl();
+	}
+	onDrawClick() {
+		if (this.isCreatingLine) this.cancelCreateLine();
+		if (!this.isControlPointMousedown) {
+			this.clearActiveLine();
+			this.renderAllLines();
+		}
+	}
+	onNodeClick(node) {
+		if (this.isCreatingLine) this.completeCreateLine(node);
+		else {
+			this.clearActiveLine();
+			this.renderAllLines();
+		}
+	}
+	createMarker(callback = () => {}) {
+		return this.associativeLineDraw.marker(20, 20, (add) => {
+			add.ref(12, 5);
+			add.size(10, 10);
+			add.attr("orient", "auto-start-reverse");
+			callback(add.path("M0,0 L2,5 L0,10 L10,5 Z"));
+		});
+	}
+	updateAllLinesPos(node, toNode, associativeLinePoint) {
+		associativeLinePoint = associativeLinePoint || {};
+		let [startPoint, endPoint] = computeNodePoints(node, toNode);
+		let nodeRange = 0;
+		let nodeDir = "";
+		let toNodeRange = 0;
+		let toNodeDir = "";
+		if (associativeLinePoint.startPoint) {
+			nodeRange = associativeLinePoint.startPoint.range || 0;
+			nodeDir = associativeLinePoint.startPoint.dir || "right";
+			startPoint = getNodePoint(node, nodeDir, nodeRange);
+		}
+		if (associativeLinePoint.endPoint) {
+			toNodeRange = associativeLinePoint.endPoint.range || 0;
+			toNodeDir = associativeLinePoint.endPoint.dir || "right";
+			endPoint = getNodePoint(toNode, toNodeDir, toNodeRange);
+		}
+		return [startPoint, endPoint];
+	}
+	renderAllLines() {
+		if (this.isNotRenderAllLines) {
+			this.isNotRenderAllLines = false;
+			return;
+		}
+		this.removeAllLines();
+		this.removeControls();
+		this.clearActiveLine();
+		let tree = this.mindMap.renderer.root;
+		if (!tree) return;
+		let idToNode = /* @__PURE__ */ new Map();
+		let nodeToIds = /* @__PURE__ */ new Map();
+		walk(tree, null, (cur) => {
+			if (!cur) return;
+			let data = cur.getData();
+			if (data.associativeLineTargets && data.associativeLineTargets.length > 0) nodeToIds.set(cur, data.associativeLineTargets);
+			if (data.uid) idToNode.set(data.uid, cur);
+		}, () => {}, true, 0);
+		nodeToIds.forEach((ids, node) => {
+			ids.forEach((uid, index) => {
+				let toNode = idToNode.get(uid);
+				if (!node || !toNode) return;
+				const associativeLinePoint = (node.getData("associativeLinePoint") || [])[index];
+				const [startPoint, endPoint] = this.updateAllLinesPos(node, toNode, associativeLinePoint);
+				this.drawLine(startPoint, endPoint, node, toNode);
+			});
+		});
+	}
+	drawLine(startPoint, endPoint, node, toNode) {
+		let { associativeLineWidth, associativeLineColor, associativeLineActiveWidth, associativeLineDasharray } = this.getStyleConfig(node, toNode);
+		let markerPath = null;
+		const marker = this.createMarker((p) => {
+			markerPath = p;
+		});
+		markerPath.stroke({ color: associativeLineColor }).fill({ color: associativeLineColor });
+		let { path: pathStr, controlPoints } = getNodeLinePath(startPoint, endPoint, node, toNode);
+		let path = this.associativeLineDraw.path();
+		path.stroke({
+			width: associativeLineWidth,
+			color: associativeLineColor,
+			dasharray: associativeLineDasharray || "6,4"
+		}).fill({ color: "none" });
+		path.plot(pathStr);
+		path.marker("end", marker);
+		let clickPath = this.associativeLineDraw.path();
+		clickPath.stroke({
+			width: associativeLineActiveWidth,
+			color: "transparent"
+		}).fill({ color: "none" });
+		clickPath.plot(pathStr);
+		let text = this.createText({
+			path,
+			clickPath,
+			markerPath,
+			node,
+			toNode,
+			startPoint,
+			endPoint,
+			controlPoints
+		});
+		clickPath.click((e) => {
+			e.stopPropagation();
+			this.setActiveLine({
+				path,
+				clickPath,
+				markerPath,
+				text,
+				node,
+				toNode,
+				startPoint,
+				endPoint,
+				controlPoints
+			});
+		});
+		clickPath.dblclick(() => {
+			if (!this.activeLine) return;
+			this.showEditTextBox(text);
+		});
+		this.renderText(this.getText(node, toNode), path, text, node, toNode);
+		this.lineList.push([
+			path,
+			clickPath,
+			text,
+			node,
+			toNode
+		]);
+	}
+	updateActiveLineStyle() {
+		if (!this.activeLine) return;
+		this.isNotRenderAllLines = true;
+		const [path, clickPath, text, node, toNode, markerPath] = this.activeLine;
+		const { associativeLineWidth, associativeLineColor, associativeLineDasharray, associativeLineActiveWidth, associativeLineActiveColor, associativeLineTextColor, associativeLineTextFontFamily, associativeLineTextFontSize } = this.getStyleConfig(node, toNode);
+		path.stroke({
+			width: associativeLineWidth,
+			color: associativeLineColor,
+			dasharray: associativeLineDasharray || "6,4"
+		}).fill({ color: "none" });
+		clickPath.stroke({
+			width: associativeLineActiveWidth,
+			color: associativeLineActiveColor
+		}).fill({ color: "none" });
+		markerPath.stroke({ color: associativeLineColor }).fill({ color: associativeLineColor });
+		text.find("text").forEach((textNode) => {
+			textNode.fill({ color: associativeLineTextColor }).css({
+				"font-family": associativeLineTextFontFamily,
+				"font-size": associativeLineTextFontSize + "px"
+			});
+		});
+		if (this.controlLine1) this.controlLine1.stroke({ color: associativeLineActiveColor });
+		if (this.controlLine2) this.controlLine2.stroke({ color: associativeLineActiveColor });
+		if (this.controlPoint1) this.controlPoint1.stroke({ color: associativeLineActiveColor });
+		if (this.controlPoint2) this.controlPoint2.stroke({ color: associativeLineActiveColor });
+		this.updateTextPos(path, text);
+	}
+	setActiveLine({ path, clickPath, markerPath, text, node, toNode, startPoint, endPoint, controlPoints }) {
+		let { associativeLineActiveColor } = this.getStyleConfig(node, toNode);
+		this.mindMap.execCommand("CLEAR_ACTIVE_NODE");
+		this.clearActiveLine();
+		this.activeLine = [
+			path,
+			clickPath,
+			text,
+			node,
+			toNode,
+			markerPath
+		];
+		clickPath.stroke({ color: associativeLineActiveColor });
+		if (!this.getText(node, toNode)) this.renderText(this.mindMap.opt.defaultAssociativeLineText, path, text, node, toNode);
+		this.renderControls(startPoint, endPoint, controlPoints[0], controlPoints[1], node, toNode);
+		this.mindMap.emit("associative_line_click", path, clickPath, node, toNode);
+		this.front();
+	}
+	removeAllLines() {
+		this.lineList.forEach((line) => {
+			line[0].remove();
+			line[1].remove();
+			line[2].remove();
+		});
+		this.lineList = [];
+	}
+	createLineFromActiveNode() {
+		if (this.mindMap.renderer.activeNodeList.length <= 0) return;
+		let node = this.mindMap.renderer.activeNodeList[0];
+		this.createLine(node);
+	}
+	createLine(fromNode) {
+		let { associativeLineWidth, associativeLineColor, associativeLineDasharray } = this.getStyleConfig(fromNode);
+		if (this.isCreatingLine || !fromNode) return;
+		this.front();
+		this.isCreatingLine = true;
+		this.creatingStartNode = fromNode;
+		this.creatingLine = this.associativeLineDraw.path();
+		this.creatingLine.stroke({
+			width: associativeLineWidth,
+			color: associativeLineColor,
+			dasharray: associativeLineDasharray || "6,4"
+		}).fill({ color: "none" });
+		let markerPath = null;
+		const marker = this.createMarker((p) => {
+			markerPath = p;
+		});
+		markerPath.stroke({ color: associativeLineColor }).fill({ color: associativeLineColor });
+		this.creatingLine.marker("end", marker);
+	}
+	cancelCreateLine() {
+		this.isCreatingLine = false;
+		this.creatingStartNode = null;
+		this.creatingLine.remove();
+		this.creatingLine = null;
+		this.overlapNode = null;
+		this.back();
+	}
+	onMousemove(e) {
+		this.onControlPointMousemove(e);
+		this.updateCreatingLine(e);
+	}
+	updateCreatingLine(e) {
+		if (!this.isCreatingLine) return;
+		let { x, y } = this.getTransformedEventPos(e);
+		let startPoint = getNodePoint(this.creatingStartNode);
+		let offsetX = x > startPoint.x ? -10 : 10;
+		let pathStr = cubicBezierPath(startPoint.x, startPoint.y, x + offsetX, y);
+		this.creatingLine.plot(pathStr);
+		this.checkOverlapNode(x, y);
+	}
+	getTransformedEventPos(e) {
+		let { x, y } = this.mindMap.toPos(e.clientX, e.clientY);
+		let { scaleX, scaleY, translateX, translateY } = this.mindMap.draw.transform();
+		return {
+			x: (x - translateX) / scaleX,
+			y: (y - translateY) / scaleY
+		};
+	}
+	getNodePos(node) {
+		const { scaleX, scaleY, translateX, translateY } = this.mindMap.draw.transform();
+		const { left, top, width, height } = node;
+		return {
+			left,
+			top,
+			translateLeft: left * scaleX + translateX,
+			translateTop: top * scaleY + translateY,
+			width,
+			height
+		};
+	}
+	checkOverlapNode(x, y) {
+		this.overlapNode = null;
+		bfsWalk(this.mindMap.renderer.root, (node) => {
+			if (node.getData("isActive")) this.mindMap.execCommand("SET_NODE_ACTIVE", node, false);
+			if (node.uid === this.creatingStartNode.uid || this.overlapNode) return;
+			let { left, top, width, height } = node;
+			let right = left + width;
+			let bottom = top + height;
+			if (x >= left && x <= right && y >= top && y <= bottom) this.overlapNode = node;
+		});
+		if (this.overlapNode && !this.overlapNode.getData("isActive")) this.mindMap.execCommand("SET_NODE_ACTIVE", this.overlapNode, true);
+	}
+	completeCreateLine(node) {
+		if (this.creatingStartNode.uid === node.uid) return;
+		const { beforeAssociativeLineConnection } = this.mindMap.opt;
+		let stop = false;
+		if (typeof beforeAssociativeLineConnection === "function") stop = beforeAssociativeLineConnection(node);
+		if (stop) return;
+		this.addLine(this.creatingStartNode, node);
+		if (this.overlapNode && this.overlapNode.getData("isActive")) this.mindMap.execCommand("SET_NODE_ACTIVE", this.overlapNode, false);
+		this.cancelCreateLine();
+	}
+	addLine(fromNode, toNode) {
+		if (!fromNode || !toNode) return;
+		let uid = toNode.getData("uid");
+		if (!uid) {
+			uid = v4();
+			this.mindMap.execCommand("SET_NODE_DATA", toNode, { uid });
+		}
+		let list = fromNode.getData("associativeLineTargets") || [];
+		if (list.some((item) => item === uid)) return;
+		list.push(uid);
+		let [startPoint, endPoint] = computeNodePoints(fromNode, toNode);
+		let controlPoints = computeCubicBezierPathPoints(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+		const { associativeLineInitPointsPosition } = this.mindMap.opt;
+		if (associativeLineInitPointsPosition) {
+			const { from, to } = associativeLineInitPointsPosition;
+			if (from) startPoint.dir = from;
+			if (to) endPoint.dir = to;
+		}
+		let offsetList = fromNode.getData("associativeLineTargetControlOffsets") || [];
+		offsetList[list.length - 1] = [{
+			x: controlPoints[0].x - startPoint.x,
+			y: controlPoints[0].y - startPoint.y
+		}, {
+			x: controlPoints[1].x - endPoint.x,
+			y: controlPoints[1].y - endPoint.y
+		}];
+		let associativeLinePoint = fromNode.getData("associativeLinePoint") || [];
+		associativeLinePoint[list.length - 1] = {
+			startPoint,
+			endPoint
+		};
+		this.mindMap.execCommand("SET_NODE_DATA", fromNode, {
+			associativeLineTargets: list,
+			associativeLineTargetControlOffsets: offsetList,
+			associativeLinePoint
+		});
+	}
+	removeLine() {
+		if (!this.activeLine) return;
+		let [, , , node, toNode] = this.activeLine;
+		this.removeControls();
+		let { associativeLineTargets, associativeLinePoint, associativeLineTargetControlOffsets, associativeLineText, associativeLineStyle } = node.getData();
+		associativeLinePoint = associativeLinePoint || [];
+		let targetIndex = getAssociativeLineTargetIndex(node, toNode);
+		let newAssociativeLineText = {};
+		if (associativeLineText) Object.keys(associativeLineText).forEach((item) => {
+			if (item !== toNode.getData("uid")) newAssociativeLineText[item] = associativeLineText[item];
+		});
+		let newAssociativeLineStyle = {};
+		if (associativeLineStyle) Object.keys(associativeLineStyle).forEach((item) => {
+			if (item !== toNode.getData("uid")) newAssociativeLineStyle[item] = associativeLineStyle[item];
+		});
+		this.mindMap.execCommand("SET_NODE_DATA", node, {
+			associativeLineTargets: associativeLineTargets.filter((_, index) => {
+				return index !== targetIndex;
+			}),
+			associativeLinePoint: associativeLinePoint.filter((_, index) => {
+				return index !== targetIndex;
+			}),
+			associativeLineTargetControlOffsets: associativeLineTargetControlOffsets ? associativeLineTargetControlOffsets.filter((_, index) => {
+				return index !== targetIndex;
+			}) : [],
+			associativeLineText: newAssociativeLineText,
+			associativeLineStyle: newAssociativeLineStyle
+		});
+	}
+	clearActiveLine() {
+		if (this.activeLine) {
+			let [, clickPath, text, node, toNode] = this.activeLine;
+			clickPath.stroke({ color: "transparent" });
+			this.hideEditTextBox();
+			if (!this.getText(node, toNode)) text.clear();
+			this.activeLine = null;
+			this.removeControls();
+			this.back();
+			this.mindMap.emit("associative_line_deactivate");
+		}
+	}
+	onNodeDragging() {
+		if (this.isNodeDragging) return;
+		this.isNodeDragging = true;
+		this.lineList.forEach((line) => {
+			line[0].hide();
+			line[1].hide();
+			line[2].hide();
+		});
+		this.hideControls();
+	}
+	onNodeDragend() {
+		if (!this.isNodeDragging) return;
+		this.lineList.forEach((line) => {
+			line[0].show();
+			line[1].show();
+			line[2].show();
+		});
+		this.showControls();
+		this.isNodeDragging = false;
+	}
+	front() {
+		if (this.mindMap.opt.associativeLineIsAlwaysAboveNode) return;
+		this.associativeLineDraw.front();
+	}
+	back() {
+		if (this.mindMap.opt.associativeLineIsAlwaysAboveNode) return;
+		this.associativeLineDraw.back();
+		this.associativeLineDraw.forward();
+	}
+	beforePluginRemove() {
+		this.mindMap.deleteEditNodeClass(ASSOCIATIVE_LINE_TEXT_EDIT_WRAP);
+		this.unBindEvent();
+	}
+	beforePluginDestroy() {
+		this.mindMap.deleteEditNodeClass(ASSOCIATIVE_LINE_TEXT_EDIT_WRAP);
+		this.unBindEvent();
+	}
+};
+AssociativeLine.instanceName = "associativeLine";
+//#endregion
+//#region src/composables/useMindMap.js
+try {
+	Themes.init(MindMap);
+} catch (e) {}
+MindMap.usePlugin(Export);
+MindMap.usePlugin(AssociativeLine);
+var mindMapInstance = null;
+var isInitialized = false;
+var refCount = 0;
+var isReady = /* @__PURE__ */ ref(false);
+var activeNodes = /* @__PURE__ */ ref([]);
+var canUndo = /* @__PURE__ */ ref(false);
+var canRedo = /* @__PURE__ */ ref(false);
+var currentTheme$1 = /* @__PURE__ */ ref("classic7");
+var currentLayout = /* @__PURE__ */ ref("logicalStructure");
+var scale = /* @__PURE__ */ ref(1);
+var isReadonly = /* @__PURE__ */ ref(false);
+var isAssociativeLineMode = /* @__PURE__ */ ref(false);
+var fullThemeList = [{
+	name: "默认主题",
+	value: "default",
+	dark: false
+}, ...(themeList_default || []).map((t) => ({
+	name: t.name,
+	value: t.value,
+	dark: !!t.dark
+}))];
+var lightThemeList = fullThemeList.filter((t) => !t.dark);
+var darkThemeList = fullThemeList.filter((t) => t.dark);
+var themePreviewMap = themeImgMap_default || {};
+var defaultData = {
+	data: { text: "中心主题" },
+	children: [
+		{
+			data: { text: "分支主题 1" },
+			children: [{
+				data: { text: "子主题 1-1" },
+				children: []
+			}, {
+				data: { text: "子主题 1-2" },
+				children: []
+			}]
+		},
+		{
+			data: { text: "分支主题 2" },
+			children: [{
+				data: { text: "子主题 2-1" },
+				children: []
+			}]
+		},
+		{
+			data: { text: "分支主题 3" },
+			children: []
+		}
+	]
+};
+var hasUnsavedChanges = /* @__PURE__ */ ref(false);
+function updateHistoryStatus() {
+	if (!mindMapInstance) return;
+	try {
+		const history = mindMapInstance.command?.history;
+		if (history) {
+			canUndo.value = history.activeIndex > 0;
+			canRedo.value = history.activeIndex < history.length - 1;
+		}
+	} catch (e) {}
+}
+function bindEvents() {
+	if (!mindMapInstance) return;
+	try {
+		mindMapInstance.on("node_active", (node, nodeList) => {
+			activeNodes.value = nodeList || [];
+		});
+		mindMapInstance.on("data_change", () => {
+			updateHistoryStatus();
+			hasUnsavedChanges.value = true;
+		});
+		mindMapInstance.on("back_forward", (index, len) => {
+			canUndo.value = index > 0;
+			canRedo.value = index < len - 1;
+		});
+		mindMapInstance.on("scale", (val) => {
+			scale.value = val;
+		});
+	} catch (e) {
+		console.error("[MindMap] 绑定事件失败", e);
+	}
+}
+function getActiveNodeList() {
+	if (!mindMapInstance) return [];
+	try {
+		if (activeNodes.value.length > 0) return activeNodes.value;
+		return mindMapInstance.renderer?.activeNodeList || [];
+	} catch (e) {
+		return [];
+	}
+}
+function destroyInstance() {
+	if (mindMapInstance) {
+		try {
+			mindMapInstance.destroy();
+		} catch (e) {}
+		mindMapInstance = null;
+	}
+	isInitialized = false;
+	isReady.value = false;
+	activeNodes.value = [];
+	canUndo.value = false;
+	canRedo.value = false;
+	isAssociativeLineMode.value = false;
+	hasUnsavedChanges.value = false;
+}
+function useMindMap() {
+	refCount++;
+	onBeforeUnmount(() => {
+		refCount--;
+		if (refCount <= 0) {
+			refCount = 0;
+			destroyInstance();
+		}
+	});
+	function init(el, data) {
+		if (!el) return;
+		if (isInitialized && mindMapInstance) return;
+		if (mindMapInstance) {
+			try {
+				mindMapInstance.destroy();
+			} catch (e) {}
+			mindMapInstance = null;
+		}
+		mindMapInstance = new MindMap({
+			el,
+			data: JSON.parse(JSON.stringify(data || defaultData)),
+			theme: currentTheme$1.value,
+			layout: currentLayout.value,
+			themeConfig: {
+				lineStyle: "curve",
+				background: "#f0f2f5",
+				second: {
+					marginX: 130,
+					marginY: 20
+				},
+				node: {
+					marginX: 100,
+					marginY: 80
+				}
+			},
+			openRealtimeRenderOnNodeTextEdit: true,
+			defaultInsertSecondLevelNodeText: "分支主题",
+			defaultInsertBelowSecondLevelNodeText: "子主题",
+			isShowWatermark: false,
+			mousewheelAction: "zoom"
+		});
+		markRaw(mindMapInstance);
+		bindEvents();
+		isInitialized = true;
+		isReady.value = true;
+		hasUnsavedChanges.value = false;
+		console.log("[MindMap] 初始化成功");
+	}
+	function newFile() {
+		if (!mindMapInstance) return;
+		mindMapInstance.setData(JSON.parse(JSON.stringify(defaultData)));
+		mindMapInstance.view.reset();
+		mindMapInstance.command.clearHistory?.();
+		hasUnsavedChanges.value = false;
+		canUndo.value = false;
+		canRedo.value = false;
+	}
+	function undo() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("BACK");
+		} catch (e) {}
+	}
+	function redo() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("FORWARD");
+		} catch (e) {}
+	}
+	function insertChildNode() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("INSERT_CHILD_NODE");
+		} catch (e) {}
+	}
+	function insertSiblingNode() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("INSERT_NODE");
+		} catch (e) {}
+	}
+	function removeNode() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("REMOVE_NODE");
+		} catch (e) {}
+	}
+	function insertParentNode() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("INSERT_PARENT_NODE");
+		} catch (e) {}
+	}
+	function insertGeneralization() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("ADD_GENERALIZATION");
+		} catch (e) {}
+	}
+	function setNodeStyle(key, value) {
+		if (!mindMapInstance) return;
+		try {
+			const nodeList = getActiveNodeList();
+			if (!nodeList.length) return;
+			nodeList.forEach((node) => {
+				if (typeof node.setStyle === "function") node.setStyle(key, value, true);
+				else {
+					const nodeData = node.nodeData?.data || {};
+					nodeData[key] = value;
+				}
+			});
+			mindMapInstance.render();
+		} catch (e) {}
+	}
+	function insertImageToNode(url, title = "") {
+		if (!mindMapInstance) return;
+		const nodeList = getActiveNodeList();
+		if (!nodeList.length) return;
+		const img = new Image();
+		img.onload = () => {
+			const maxWidth = 200;
+			let width = img.naturalWidth;
+			let height = img.naturalHeight;
+			if (width > maxWidth) {
+				const ratio = maxWidth / width;
+				width = maxWidth;
+				height = Math.round(height * ratio);
+			}
+			nodeList.forEach((node) => {
+				if (typeof node.setImage === "function") node.setImage({
+					url,
+					title: title || "图片",
+					width,
+					height
+				});
+			});
+			mindMapInstance.render();
+		};
+		img.onerror = () => {
+			nodeList.forEach((node) => {
+				if (typeof node.setImage === "function") node.setImage({
+					url,
+					title: title || "图片",
+					width: 200,
+					height: 150
+				});
+			});
+			mindMapInstance.render();
+		};
+		img.src = url;
+	}
+	function removeNodeImage() {
+		if (!mindMapInstance) return;
+		const nodeList = getActiveNodeList();
+		if (!nodeList.length) return;
+		nodeList.forEach((node) => {
+			if (typeof node.setImage === "function") node.setImage({
+				url: "",
+				title: "",
+				width: 0,
+				height: 0
+			});
+		});
+		mindMapInstance.render();
+	}
+	function insertHyperlink(url, name = "") {
+		if (!mindMapInstance) return;
+		const nodeList = getActiveNodeList();
+		if (!nodeList.length) return;
+		nodeList.forEach((node) => {
+			const nodeData = node.nodeData?.data || {};
+			nodeData.link = url;
+			nodeData.linkTitle = name || url;
+		});
+		mindMapInstance.render();
+	}
+	function removeHyperlink() {
+		if (!mindMapInstance) return;
+		const nodeList = getActiveNodeList();
+		if (!nodeList.length) return;
+		nodeList.forEach((node) => {
+			const nodeData = node.nodeData?.data || {};
+			delete nodeData.link;
+			delete nodeData.linkTitle;
+		});
+		mindMapInstance.render();
+	}
+	function openLocalFile() {
+		return new Promise((resolve) => {
+			const input = document.createElement("input");
+			input.type = "file";
+			input.accept = ".json,.smm";
+			input.onchange = (e) => {
+				const file = e.target.files[0];
+				if (!file) {
+					resolve(null);
+					return;
+				}
+				const reader = new FileReader();
+				reader.onload = (ev) => {
+					try {
+						const data = JSON.parse(ev.target.result);
+						setData(data);
+						resolve(data);
+					} catch (err) {
+						alert("文件格式不正确");
+						resolve(null);
+					}
+				};
+				reader.readAsText(file);
+			};
+			input.click();
+		});
+	}
+	function saveAsJSON() {
+		const data = getData();
+		if (!data) return;
+		const pureData = {
+			data: data.data,
+			children: data.children || []
+		};
+		const json = JSON.stringify(pureData, null, 2);
+		const blob = new Blob([json], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "思维导图.json";
+		a.click();
+		URL.revokeObjectURL(url);
+		hasUnsavedChanges.value = false;
+	}
+	function importFile() {
+		return new Promise((resolve) => {
+			const input = document.createElement("input");
+			input.type = "file";
+			input.accept = ".json,.smm";
+			input.onchange = (e) => {
+				const file = e.target.files[0];
+				if (!file) {
+					resolve(null);
+					return;
+				}
+				const reader = new FileReader();
+				reader.onload = (ev) => {
+					try {
+						const data = JSON.parse(ev.target.result);
+						setData(data);
+						resolve(data);
+					} catch (err) {
+						alert("文件解析失败");
+						resolve(null);
+					}
+				};
+				reader.readAsText(file);
+			};
+			input.click();
+		});
+	}
+	function exportFile(type = "png") {
+		if (!mindMapInstance) return;
+		try {
+			if (type === "json") {
+				const data = mindMapInstance.getData();
+				const pureData = {
+					data: data.data,
+					children: data.children || []
+				};
+				const json = JSON.stringify(pureData, null, 2);
+				const blob = new Blob([json], { type: "application/json" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = "思维导图.json";
+				a.click();
+				URL.revokeObjectURL(url);
+				return;
+			}
+			if (type === "txt") {
+				const text = nodeToText(mindMapInstance.getData(), 0);
+				const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = "思维导图.txt";
+				a.click();
+				URL.revokeObjectURL(url);
+				return;
+			}
+			if (mindMapInstance.doExport && typeof mindMapInstance.doExport[type] === "function") mindMapInstance.doExport[type]().then((data) => {
+				const a = document.createElement("a");
+				a.href = data;
+				a.download = "思维导图." + type;
+				a.click();
+			}).catch((err) => {
+				console.error("[MindMap] 导出失败", err);
+			});
+		} catch (e) {
+			console.error("[MindMap] 导出异常", e);
+		}
+	}
+	function nodeToText(node, level) {
+		if (!node) return "";
+		const indent = "  ".repeat(level);
+		const text = (node.data?.text || "").replace(/<[^>]*>/g, "");
+		let result = indent + "- " + text + "\n";
+		if (node.children && node.children.length) node.children.forEach((child) => {
+			result += nodeToText(child, level + 1);
+		});
+		return result;
+	}
+	function toggleAssociativeLineMode() {
+		if (!mindMapInstance) return;
+		isAssociativeLineMode.value = !isAssociativeLineMode.value;
+		try {
+			if (isAssociativeLineMode.value) mindMapInstance.associativeLine?.createLineFromActiveNode?.();
+			else mindMapInstance.associativeLine?.cancelCreateLine?.();
+		} catch (e) {}
+	}
+	function exitAssociativeLineMode() {
+		isAssociativeLineMode.value = false;
+		try {
+			mindMapInstance?.associativeLine?.cancelCreateLine?.();
+		} catch (e) {}
+	}
+	function deleteActiveLine() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.associativeLine?.removeLine?.();
+		} catch (e) {}
+	}
+	function setTheme(themeValue) {
+		currentTheme$1.value = themeValue;
+		if (mindMapInstance) try {
+			mindMapInstance.setTheme(themeValue);
+		} catch (e) {}
+	}
+	function setLayout(layout) {
+		currentLayout.value = layout;
+		if (mindMapInstance) try {
+			mindMapInstance.setLayout(layout);
+		} catch (e) {}
+	}
+	function zoomIn() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.view.enlarge();
+			scale.value = mindMapInstance.view.scale;
+		} catch (e) {}
+	}
+	function zoomOut() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.view.narrow();
+			scale.value = mindMapInstance.view.scale;
+		} catch (e) {}
+	}
+	function fit() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.view.fit();
+			scale.value = mindMapInstance.view.scale;
+		} catch (e) {}
+	}
+	function resetPosition() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.view.reset();
+		} catch (e) {}
+	}
+	function setScale(val) {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.view.setScale(val);
+			scale.value = val;
+		} catch (e) {}
+	}
+	function getData() {
+		if (!mindMapInstance) return null;
+		try {
+			return mindMapInstance.getData();
+		} catch (e) {
+			return null;
+		}
+	}
+	function setData(data) {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.setData(data);
+		} catch (e) {}
+		hasUnsavedChanges.value = false;
+	}
+	function selectAll() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("SELECT_ALL");
+		} catch (e) {}
+	}
+	function expandAll() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("EXPAND_ALL");
+		} catch (e) {}
+	}
+	function collapseAll() {
+		if (!mindMapInstance) return;
+		try {
+			mindMapInstance.execCommand("COLLAPSE_ALL");
+		} catch (e) {}
+	}
+	function toggleReadonly() {
+		isReadonly.value = !isReadonly.value;
+		if (mindMapInstance) try {
+			mindMapInstance.setMode(isReadonly.value ? "readonly" : "edit");
+		} catch (e) {}
+	}
+	function render() {
+		if (mindMapInstance) try {
+			mindMapInstance.render();
+		} catch (e) {}
+	}
+	function getOutlineTree() {
+		if (!mindMapInstance) return null;
+		try {
+			return mindMapInstance.getData() || null;
+		} catch (e) {
+			return null;
+		}
+	}
+	function traverseAndApplyImage(node, width, height) {
+		if (!node) return;
+		try {
+			const imgData = node.getData?.("image");
+			if (imgData && typeof node.setImage === "function") {
+				const title = node.getData?.("imageTitle") || "";
+				node.setImage({
+					url: imgData,
+					title,
+					width,
+					height
+				});
+			}
+		} catch (e) {}
+		if (node.children && node.children.length) node.children.forEach((child) => {
+			traverseAndApplyImage(child, width, height);
+		});
+	}
+	return {
+		isReady,
+		activeNodes,
+		canUndo,
+		canRedo,
+		currentTheme: currentTheme$1,
+		currentLayout,
+		scale,
+		isReadonly,
+		isAssociativeLineMode,
+		hasUnsavedChanges,
+		fullThemeList,
+		lightThemeList,
+		darkThemeList,
+		themePreviewMap,
+		init,
+		newFile,
+		undo,
+		redo,
+		insertChildNode,
+		insertSiblingNode,
+		insertParentNode,
+		removeNode,
+		insertGeneralization,
+		setNodeStyle,
+		insertImageToNode,
+		removeNodeImage,
+		insertHyperlink,
+		removeHyperlink,
+		toggleAssociativeLineMode,
+		exitAssociativeLineMode,
+		deleteActiveLine,
+		setTheme,
+		setLayout,
+		zoomIn,
+		zoomOut,
+		fit,
+		resetPosition,
+		setScale,
+		getData,
+		setData,
+		exportFile,
+		selectAll,
+		expandAll,
+		collapseAll,
+		toggleReadonly,
+		render,
+		openLocalFile,
+		saveAsJSON,
+		importFile,
+		getActiveNodeList,
+		getOutlineTree
+	};
+}
+//#endregion
+//#region src/components/mindmap/MindMapToolbar.vue
+var _hoisted_1$6 = { class: "toolbar" };
+var _hoisted_2$5 = { class: "toolbar-inner" };
+var _hoisted_3$5 = { class: "toolbar-block" };
+var _hoisted_4$5 = { class: "toolbar-block" };
+var _hoisted_5$3 = {
+	key: 0,
+	class: "theme-dropdown"
+};
+var _hoisted_6$3 = { class: "theme-section" };
+var _hoisted_7$3 = ["onClick"];
+var _hoisted_8$3 = ["src", "alt"];
+var _hoisted_9$3 = {
+	key: 1,
+	class: "theme-thumb fallback"
+};
+var _hoisted_10$3 = { class: "theme-label" };
+var _hoisted_11$3 = {
+	key: 2,
+	class: "theme-check",
+	viewBox: "0 0 24 24",
+	width: "14",
+	height: "14",
+	fill: "none",
+	stroke: "currentColor",
+	"stroke-width": "3"
+};
+var _hoisted_12$3 = { class: "theme-section" };
+var _hoisted_13$2 = ["onClick"];
+var _hoisted_14$2 = ["src", "alt"];
+var _hoisted_15$2 = {
+	key: 1,
+	class: "theme-thumb fallback dark"
+};
+var _hoisted_16$2 = { class: "theme-label" };
+var _hoisted_17$2 = {
+	key: 2,
+	class: "theme-check",
+	viewBox: "0 0 24 24",
+	width: "14",
+	height: "14",
+	fill: "none",
+	stroke: "currentColor",
+	"stroke-width": "3"
+};
+var _hoisted_18$2 = { class: "toolbar-inner" };
+var _hoisted_19$2 = { class: "toolbar-block" };
+var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "MindMapToolbar",
 	props: {
-		modelValue: {
+		canUndo: {
 			type: Boolean,
 			default: false
 		},
-		images: {
+		canRedo: {
+			type: Boolean,
+			default: false
+		},
+		hasNode: {
+			type: Boolean,
+			default: false
+		},
+		currentTheme: {
+			type: String,
+			default: "default"
+		},
+		lightThemeList: {
 			type: Array,
 			default: () => []
 		},
-		initialIndex: {
+		darkThemeList: {
+			type: Array,
+			default: () => []
+		},
+		themePreviewMap: {
+			type: Object,
+			default: () => ({})
+		},
+		isAssociativeLineMode: {
+			type: Boolean,
+			default: false
+		}
+	},
+	emits: [
+		"new-file",
+		"open",
+		"save-as",
+		"import",
+		"export",
+		"undo",
+		"redo",
+		"insert-sibling",
+		"insert-child",
+		"remove",
+		"insert-image",
+		"insert-hyperlink",
+		"set-theme",
+		"toggle-outline",
+		"toggle-associative-line"
+	],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const showThemeDropdown = /* @__PURE__ */ ref(false);
+		const themeDropRef = /* @__PURE__ */ ref(null);
+		function getPreview(value) {
+			return props.themePreviewMap[value] || "";
+		}
+		function handleThemeSelect(value) {
+			emit("set-theme", value);
+			showThemeDropdown.value = false;
+		}
+		function handleClickOutside(e) {
+			if (themeDropRef.value && !themeDropRef.value.contains(e.target)) showThemeDropdown.value = false;
+		}
+		onMounted(() => {
+			document.addEventListener("click", handleClickOutside);
+		});
+		onBeforeUnmount(() => {
+			document.removeEventListener("click", handleClickOutside);
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$6, [createBaseVNode("div", _hoisted_2$5, [createBaseVNode("div", _hoisted_3$5, [
+				_cache[22] || (_cache[22] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.canUndo }]),
+					onClick: _cache[0] || (_cache[0] = ($event) => __props.canUndo && _ctx.$emit("undo"))
+				}, [..._cache[15] || (_cache[15] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><polyline points=\"1 4 1 10 7 10\" data-v-601b3b04></polyline><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\" data-v-601b3b04></path></svg></span><span class=\"text\" data-v-601b3b04>回退</span>", 2)])], 2),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.canRedo }]),
+					onClick: _cache[1] || (_cache[1] = ($event) => __props.canRedo && _ctx.$emit("redo"))
+				}, [..._cache[16] || (_cache[16] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><polyline points=\"23 4 23 10 17 10\" data-v-601b3b04></polyline><path d=\"M20.49 15a9 9 0 1 1-2.13-9.36L23 10\" data-v-601b3b04></path></svg></span><span class=\"text\" data-v-601b3b04>前进</span>", 2)])], 2),
+				_cache[23] || (_cache[23] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+					onClick: _cache[2] || (_cache[2] = ($event) => __props.hasNode && _ctx.$emit("insert-sibling"))
+				}, [..._cache[17] || (_cache[17] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><rect x=\"2\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-601b3b04></rect><rect x=\"14\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-601b3b04></rect><line x1=\"10\" y1=\"7\" x2=\"14\" y2=\"7\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>同级节点</span>", 2)])], 2),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+					onClick: _cache[3] || (_cache[3] = ($event) => __props.hasNode && _ctx.$emit("insert-child"))
+				}, [..._cache[18] || (_cache[18] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><rect x=\"2\" y=\"2\" width=\"8\" height=\"6\" rx=\"1\" data-v-601b3b04></rect><rect x=\"2\" y=\"14\" width=\"8\" height=\"6\" rx=\"1\" data-v-601b3b04></rect><line x1=\"6\" y1=\"8\" x2=\"6\" y2=\"14\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>子节点</span>", 2)])], 2),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+					onClick: _cache[4] || (_cache[4] = ($event) => __props.hasNode && _ctx.$emit("remove"))
+				}, [..._cache[19] || (_cache[19] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><polyline points=\"3 6 5 6 21 6\" data-v-601b3b04></polyline><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\" data-v-601b3b04></path><path d=\"M10 11v6\" data-v-601b3b04></path><path d=\"M14 11v6\" data-v-601b3b04></path></svg></span><span class=\"text\" data-v-601b3b04>删除节点</span>", 2)])], 2),
+				_cache[24] || (_cache[24] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+					onClick: _cache[5] || (_cache[5] = ($event) => __props.hasNode && _ctx.$emit("insert-image"))
+				}, [..._cache[20] || (_cache[20] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" data-v-601b3b04></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\" data-v-601b3b04></circle><polyline points=\"21 15 16 10 5 21\" data-v-601b3b04></polyline></svg></span><span class=\"text\" data-v-601b3b04>图片</span>", 2)])], 2),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+					onClick: _cache[6] || (_cache[6] = ($event) => __props.hasNode && _ctx.$emit("insert-hyperlink"))
+				}, [..._cache[21] || (_cache[21] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" data-v-601b3b04></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" data-v-601b3b04></path></svg></span><span class=\"text\" data-v-601b3b04>超链接</span>", 2)])], 2)
+			]), createBaseVNode("div", _hoisted_4$5, [
+				_cache[32] || (_cache[32] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", {
+					class: "dropdown",
+					ref_key: "themeDropRef",
+					ref: themeDropRef
+				}, [createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { active: showThemeDropdown.value }]),
+					onClick: _cache[7] || (_cache[7] = ($event) => showThemeDropdown.value = !showThemeDropdown.value)
+				}, [..._cache[25] || (_cache[25] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><circle cx=\"12\" cy=\"12\" r=\"5\" data-v-601b3b04></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" data-v-601b3b04></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" data-v-601b3b04></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" data-v-601b3b04></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" data-v-601b3b04></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" data-v-601b3b04></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>主题</span>", 2)])], 2), showThemeDropdown.value ? (openBlock(), createElementBlock("div", _hoisted_5$3, [createBaseVNode("div", _hoisted_6$3, [_cache[27] || (_cache[27] = createBaseVNode("div", { class: "theme-section-title" }, "亮色主题", -1)), (openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.lightThemeList, (item) => {
+					return openBlock(), createElementBlock("div", {
+						key: item.value,
+						class: normalizeClass(["theme-item", { active: __props.currentTheme === item.value }]),
+						onClick: ($event) => handleThemeSelect(item.value)
+					}, [
+						getPreview(item.value) ? (openBlock(), createElementBlock("img", {
+							key: 0,
+							class: "theme-thumb",
+							src: getPreview(item.value),
+							alt: item.name
+						}, null, 8, _hoisted_8$3)) : (openBlock(), createElementBlock("div", _hoisted_9$3)),
+						createBaseVNode("span", _hoisted_10$3, toDisplayString(item.name), 1),
+						__props.currentTheme === item.value ? (openBlock(), createElementBlock("svg", _hoisted_11$3, [..._cache[26] || (_cache[26] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
+					], 10, _hoisted_7$3);
+				}), 128))]), createBaseVNode("div", _hoisted_12$3, [_cache[29] || (_cache[29] = createBaseVNode("div", { class: "theme-section-title" }, "暗色主题", -1)), (openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.darkThemeList, (item) => {
+					return openBlock(), createElementBlock("div", {
+						key: item.value,
+						class: normalizeClass(["theme-item", { active: __props.currentTheme === item.value }]),
+						onClick: ($event) => handleThemeSelect(item.value)
+					}, [
+						getPreview(item.value) ? (openBlock(), createElementBlock("img", {
+							key: 0,
+							class: "theme-thumb",
+							src: getPreview(item.value),
+							alt: item.name
+						}, null, 8, _hoisted_14$2)) : (openBlock(), createElementBlock("div", _hoisted_15$2)),
+						createBaseVNode("span", _hoisted_16$2, toDisplayString(item.name), 1),
+						__props.currentTheme === item.value ? (openBlock(), createElementBlock("svg", _hoisted_17$2, [..._cache[28] || (_cache[28] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
+					], 10, _hoisted_13$2);
+				}), 128))])])) : createCommentVNode("", true)], 512),
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[8] || (_cache[8] = ($event) => _ctx.$emit("toggle-outline"))
+				}, [..._cache[30] || (_cache[30] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\" data-v-601b3b04></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\" data-v-601b3b04></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\" data-v-601b3b04></line><line x1=\"3\" y1=\"6\" x2=\"3.01\" y2=\"6\" data-v-601b3b04></line><line x1=\"3\" y1=\"12\" x2=\"3.01\" y2=\"12\" data-v-601b3b04></line><line x1=\"3\" y1=\"18\" x2=\"3.01\" y2=\"18\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>大纲</span>", 2)])]),
+				createBaseVNode("div", {
+					class: normalizeClass(["toolbar-btn", { active: __props.isAssociativeLineMode }]),
+					onClick: _cache[9] || (_cache[9] = ($event) => _ctx.$emit("toggle-associative-line"))
+				}, [..._cache[31] || (_cache[31] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" data-v-601b3b04></path><polyline points=\"15 3 21 3 21 9\" data-v-601b3b04></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>关联线</span>", 2)])], 2)
+			])]), createBaseVNode("div", _hoisted_18$2, [createBaseVNode("div", _hoisted_19$2, [
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[10] || (_cache[10] = ($event) => _ctx.$emit("new-file"))
+				}, [..._cache[33] || (_cache[33] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-601b3b04></path><polyline points=\"14 2 14 8 20 8\" data-v-601b3b04></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-601b3b04></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>新建</span>", 2)])]),
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[11] || (_cache[11] = ($event) => _ctx.$emit("open"))
+				}, [..._cache[34] || (_cache[34] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
+					viewBox: "0 0 24 24",
+					width: "16",
+					height: "16",
+					fill: "none",
+					stroke: "currentColor",
+					"stroke-width": "2"
+				}, [createBaseVNode("path", { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" })])], -1), createBaseVNode("span", { class: "text" }, "打开", -1)])]),
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[12] || (_cache[12] = ($event) => _ctx.$emit("save-as"))
+				}, [..._cache[35] || (_cache[35] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\" data-v-601b3b04></path><polyline points=\"17 21 17 13 7 13 7 21\" data-v-601b3b04></polyline><polyline points=\"7 3 7 8 15 8\" data-v-601b3b04></polyline></svg></span><span class=\"text\" data-v-601b3b04>另存为</span>", 2)])]),
+				_cache[38] || (_cache[38] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[13] || (_cache[13] = ($event) => _ctx.$emit("import"))
+				}, [..._cache[36] || (_cache[36] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-601b3b04></path><polyline points=\"17 8 12 3 7 8\" data-v-601b3b04></polyline><line x1=\"12\" y1=\"3\" x2=\"12\" y2=\"15\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>导入</span>", 2)])]),
+				createBaseVNode("div", {
+					class: "toolbar-btn",
+					onClick: _cache[14] || (_cache[14] = ($event) => _ctx.$emit("export"))
+				}, [..._cache[37] || (_cache[37] = [createStaticVNode("<span class=\"icon\" data-v-601b3b04><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-601b3b04><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-601b3b04></path><polyline points=\"7 10 12 15 17 10\" data-v-601b3b04></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" data-v-601b3b04></line></svg></span><span class=\"text\" data-v-601b3b04>导出</span>", 2)])])
+			])])]);
+		};
+	}
+}, [["__scopeId", "data-v-601b3b04"]]);
+//#endregion
+//#region src/components/mindmap/MindMapCore.vue
+var _hoisted_1$5 = { class: "mind-map-core" };
+var MindMapCore_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "MindMapCore",
+	setup(__props) {
+		const { init, removeNode, insertSiblingNode, getActiveNodeList } = useMindMap();
+		const containerRef = /* @__PURE__ */ ref(null);
+		function handleKeyDown(e) {
+			const tag = e.target.tagName;
+			if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+			if (isNodeEditing()) return;
+			const hasNode = getActiveNodeList().length > 0;
+			if (e.key === "Delete" || e.key === "Backspace") {
+				if (hasNode) {
+					e.preventDefault();
+					e.stopPropagation();
+					removeNode();
+				}
+			}
+			if (e.key === "Enter") {
+				if (hasNode) {
+					e.preventDefault();
+					e.stopPropagation();
+					insertSiblingNode();
+				}
+			}
+		}
+		function isNodeEditing() {
+			if (document.activeElement?.getAttribute?.("contenteditable") === "true") return true;
+			if (containerRef.value) {
+				if (containerRef.value.querySelector("[contenteditable=\"true\"]:focus")) return true;
+			}
+			return false;
+		}
+		onMounted(async () => {
+			await nextTick$1();
+			await new Promise((resolve) => setTimeout(resolve, 50));
+			if (!containerRef.value) {
+				console.error("[MindMap] 容器未就绪");
+				return;
+			}
+			let data = null;
+			const saved = localStorage.getItem("mindMapData");
+			if (saved) try {
+				data = JSON.parse(saved);
+			} catch (e) {}
+			init(containerRef.value, data || void 0);
+			document.addEventListener("keydown", handleKeyDown);
+		});
+		onBeforeUnmount(() => {
+			document.removeEventListener("keydown", handleKeyDown);
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$5, [createBaseVNode("div", {
+				ref_key: "containerRef",
+				ref: containerRef,
+				class: "map-container"
+			}, null, 512)]);
+		};
+	}
+}, [["__scopeId", "data-v-9f238226"]]);
+//#endregion
+//#region src/components/mindmap/NodeStylePanel.vue
+var _hoisted_1$4 = { class: "style-panel" };
+var _hoisted_2$4 = { class: "panel-header" };
+var _hoisted_3$4 = { class: "panel-badge" };
+var _hoisted_4$4 = { class: "panel-body" };
+var _hoisted_5$2 = { class: "style-section" };
+var _hoisted_6$2 = { class: "btn-group font-group" };
+var _hoisted_7$2 = ["value"];
+var _hoisted_8$2 = { class: "style-section" };
+var _hoisted_9$2 = { class: "color-row" };
+var _hoisted_10$2 = ["value"];
+var _hoisted_11$2 = { class: "preset-colors" };
+var _hoisted_12$2 = ["onClick"];
+var _hoisted_13$1 = { class: "style-section" };
+var _hoisted_14$1 = { class: "color-row" };
+var _hoisted_15$1 = ["value"];
+var _hoisted_16$1 = { class: "preset-colors" };
+var _hoisted_17$1 = ["onClick"];
+var _hoisted_18$1 = { class: "style-section" };
+var _hoisted_19$1 = { class: "section-label" };
+var _hoisted_20$1 = { class: "label-value" };
+var _hoisted_21$1 = ["value"];
+var _hoisted_22$1 = { class: "style-section" };
+var _hoisted_23$1 = { class: "btn-group" };
+var _hoisted_24$1 = ["onClick"];
+var _hoisted_25$1 = { class: "style-section" };
+var _hoisted_26$1 = { class: "btn-group" };
+var _hoisted_27$1 = ["onClick"];
+var _hoisted_28$1 = { class: "style-section" };
+var _hoisted_29$1 = { class: "section-label" };
+var _hoisted_30$1 = { class: "label-value" };
+var _hoisted_31$1 = ["value"];
+var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "NodeStylePanel",
+	props: { activeNodes: {
+		type: Array,
+		default: () => []
+	} },
+	emits: ["set-style"],
+	setup(__props) {
+		const props = __props;
+		const textColors = [
+			"#1a1a2e",
+			"#333333",
+			"#555555",
+			"#e74c3c",
+			"#3498db",
+			"#2ecc71",
+			"#9b59b6",
+			"#e67e22"
+		];
+		const bgColors = [
+			"#ffffff",
+			"#f5f5f5",
+			"#fff3e0",
+			"#e3f2fd",
+			"#e8f5e9",
+			"#fce4ec",
+			"#f3e5f5",
+			"#fff8e1"
+		];
+		const fontWeights = [{
+			label: "常规",
+			value: "normal"
+		}, {
+			label: "加粗",
+			value: "bold"
+		}];
+		const shapeOptions = [
+			{
+				label: "矩形",
+				value: ""
+			},
+			{
+				label: "圆角",
+				value: "roundedRectangle"
+			},
+			{
+				label: "椭圆",
+				value: "ellipse"
+			}
+		];
+		function getStyle(key, defaultVal) {
+			if (!props.activeNodes.length) return defaultVal;
+			const node = props.activeNodes[0];
+			if (typeof node.getData === "function") try {
+				const val = node.getData(key);
+				if (val !== void 0 && val !== null) return val;
+			} catch (e) {}
+			const data = node?.nodeData?.data;
+			if (data && data[key] !== void 0) return data[key];
+			return defaultVal;
+		}
+		const currentColor = computed(() => getStyle("color", "#1a1a2e"));
+		const currentBg = computed(() => getStyle("background", "#ffffff"));
+		const currentFontSize = computed(() => getStyle("fontSize", 16));
+		const currentFontWeight = computed(() => getStyle("fontWeight", "normal"));
+		const currentShape = computed(() => getStyle("shape", ""));
+		const currentBorderRadius = computed(() => getStyle("borderRadius", 5));
+		const currentFontFamily = computed(() => getStyle("fontFamily", "default"));
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$4, [createBaseVNode("div", _hoisted_2$4, [_cache[6] || (_cache[6] = createBaseVNode("span", { class: "panel-title" }, "节点样式", -1)), createBaseVNode("span", _hoisted_3$4, toDisplayString(__props.activeNodes.length) + " 个节点", 1)]), createBaseVNode("div", _hoisted_4$4, [
+				createBaseVNode("div", _hoisted_5$2, [_cache[8] || (_cache[8] = createBaseVNode("label", { class: "section-label" }, "字体", -1)), createBaseVNode("div", _hoisted_6$2, [createBaseVNode("select", {
+					class: "font-select",
+					value: currentFontFamily.value,
+					onChange: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("set-style", "fontFamily", $event.target.value))
+				}, [..._cache[7] || (_cache[7] = [createStaticVNode("<option value=\"default\" data-v-27892a6f>默认</option><option value=\"微软雅黑, Microsoft YaHei\" data-v-27892a6f>微软雅黑</option><option value=\"宋体, SimSun\" data-v-27892a6f>宋体</option><option value=\"黑体, SimHei\" data-v-27892a6f>黑体</option><option value=\"楷体, KaiTi\" data-v-27892a6f>楷体</option><option value=\"Arial\" data-v-27892a6f>Arial</option><option value=\"PingFang SC\" data-v-27892a6f>苹方</option><option value=\"Georgia\" data-v-27892a6f>Georgia</option>", 8)])], 40, _hoisted_7$2)])]),
+				createBaseVNode("div", _hoisted_8$2, [_cache[9] || (_cache[9] = createBaseVNode("label", { class: "section-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_9$2, [createBaseVNode("input", {
+					type: "color",
+					class: "color-input",
+					value: currentColor.value,
+					onInput: _cache[1] || (_cache[1] = (e) => _ctx.$emit("set-style", "color", e.target.value))
+				}, null, 40, _hoisted_10$2), createBaseVNode("div", _hoisted_11$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList(textColors, (c) => {
+					return createBaseVNode("button", {
+						key: c,
+						class: normalizeClass(["preset-dot", { active: currentColor.value === c }]),
+						style: normalizeStyle({ background: c }),
+						onClick: ($event) => _ctx.$emit("set-style", "color", c)
+					}, null, 14, _hoisted_12$2);
+				}), 64))])])]),
+				createBaseVNode("div", _hoisted_13$1, [_cache[10] || (_cache[10] = createBaseVNode("label", { class: "section-label" }, "背景颜色", -1)), createBaseVNode("div", _hoisted_14$1, [createBaseVNode("input", {
+					type: "color",
+					class: "color-input",
+					value: currentBg.value,
+					onInput: _cache[2] || (_cache[2] = (e) => _ctx.$emit("set-style", "background", e.target.value))
+				}, null, 40, _hoisted_15$1), createBaseVNode("div", _hoisted_16$1, [(openBlock(), createElementBlock(Fragment$1, null, renderList(bgColors, (c) => {
+					return createBaseVNode("button", {
+						key: c,
+						class: normalizeClass(["preset-dot", { active: currentBg.value === c }]),
+						style: normalizeStyle({ background: c }),
+						onClick: ($event) => _ctx.$emit("set-style", "background", c)
+					}, null, 14, _hoisted_17$1);
+				}), 64)), createBaseVNode("button", {
+					class: "preset-dot preset-dot--none",
+					title: "透明",
+					onClick: _cache[3] || (_cache[3] = ($event) => _ctx.$emit("set-style", "background", "transparent"))
+				})])])]),
+				createBaseVNode("div", _hoisted_18$1, [createBaseVNode("label", _hoisted_19$1, [_cache[11] || (_cache[11] = createTextVNode("字号 ", -1)), createBaseVNode("span", _hoisted_20$1, toDisplayString(currentFontSize.value) + "px", 1)]), createBaseVNode("input", {
+					type: "range",
+					class: "range-input",
+					min: "12",
+					max: "48",
+					value: currentFontSize.value,
+					onInput: _cache[4] || (_cache[4] = (e) => _ctx.$emit("set-style", "fontSize", parseInt(e.target.value)))
+				}, null, 40, _hoisted_21$1)]),
+				createBaseVNode("div", _hoisted_22$1, [_cache[12] || (_cache[12] = createBaseVNode("label", { class: "section-label" }, "字重", -1)), createBaseVNode("div", _hoisted_23$1, [(openBlock(), createElementBlock(Fragment$1, null, renderList(fontWeights, (w) => {
+					return createBaseVNode("button", {
+						key: w.value,
+						class: normalizeClass(["style-btn", { active: currentFontWeight.value === w.value }]),
+						onClick: ($event) => _ctx.$emit("set-style", "fontWeight", w.value)
+					}, toDisplayString(w.label), 11, _hoisted_24$1);
+				}), 64))])]),
+				createBaseVNode("div", _hoisted_25$1, [_cache[13] || (_cache[13] = createBaseVNode("label", { class: "section-label" }, "形状", -1)), createBaseVNode("div", _hoisted_26$1, [(openBlock(), createElementBlock(Fragment$1, null, renderList(shapeOptions, (s) => {
+					return createBaseVNode("button", {
+						key: s.value,
+						class: normalizeClass(["style-btn", { active: currentShape.value === s.value }]),
+						onClick: ($event) => _ctx.$emit("set-style", "shape", s.value)
+					}, toDisplayString(s.label), 11, _hoisted_27$1);
+				}), 64))])]),
+				createBaseVNode("div", _hoisted_28$1, [createBaseVNode("label", _hoisted_29$1, [_cache[14] || (_cache[14] = createTextVNode("圆角 ", -1)), createBaseVNode("span", _hoisted_30$1, toDisplayString(currentBorderRadius.value) + "px", 1)]), createBaseVNode("input", {
+					type: "range",
+					class: "range-input",
+					min: "0",
+					max: "30",
+					value: currentBorderRadius.value,
+					onInput: _cache[5] || (_cache[5] = (e) => _ctx.$emit("set-style", "borderRadius", parseInt(e.target.value)))
+				}, null, 40, _hoisted_31$1)])
+			])]);
+		};
+	}
+}, [["__scopeId", "data-v-27892a6f"]]);
+//#endregion
+//#region src/components/mindmap/OutlineNode.vue
+var _hoisted_1$3 = { class: "outline-node" };
+var _hoisted_2$3 = {
+	key: 1,
+	class: "expand-placeholder"
+};
+var _hoisted_3$3 = ["innerHTML"];
+var _hoisted_4$3 = {
+	key: 0,
+	class: "children"
+};
+var OutlineNode_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "OutlineNode",
+	props: {
+		node: {
+			type: Object,
+			required: true
+		},
+		depth: {
 			type: Number,
 			default: 0
 		}
 	},
-	emits: ["update:modelValue", "close"],
-	setup(__props, { emit: __emit }) {
+	emits: ["focus-node"],
+	setup(__props) {
 		const props = __props;
-		const emit = __emit;
-		const visible = computed({
-			get: () => props.modelValue,
-			set: (val) => emit("update:modelValue", val)
+		const expanded = /* @__PURE__ */ ref(true);
+		const hasChildren = computed(() => {
+			return props.node.children && props.node.children.length > 0;
 		});
-		const currentIndex = /* @__PURE__ */ ref(props.initialIndex);
-		const currentImage = computed(() => props.images[currentIndex.value] || "");
-		const scale = /* @__PURE__ */ ref(1);
-		const rotation = /* @__PURE__ */ ref(0);
-		const translateX = /* @__PURE__ */ ref(0);
-		const translateY = /* @__PURE__ */ ref(0);
-		const isDragging = /* @__PURE__ */ ref(false);
-		const dragStartX = /* @__PURE__ */ ref(0);
-		const dragStartY = /* @__PURE__ */ ref(0);
-		const transformStyle = computed(() => ({ transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotation.value}deg)` }));
-		watch(() => props.initialIndex, (newIndex) => {
-			currentIndex.value = newIndex;
-			resetZoom();
-		});
-		watch(visible, (isVisible) => {
-			if (isVisible) {
-				resetZoom();
-				document.body.style.overflow = "hidden";
-			} else document.body.style.overflow = "";
-		});
-		const close = () => {
-			visible.value = false;
-			emit("close");
-		};
-		const handleClose = () => {
-			close();
-		};
-		const prevImage = () => {
-			if (currentIndex.value > 0) {
-				currentIndex.value--;
-				resetZoom();
-			}
-		};
-		const nextImage = () => {
-			if (currentIndex.value < props.images.length - 1) {
-				currentIndex.value++;
-				resetZoom();
-			}
-		};
-		const zoomIn = () => {
-			scale.value = Math.min(scale.value + .25, 5);
-		};
-		const zoomOut = () => {
-			scale.value = Math.max(scale.value - .25, .25);
-		};
-		const resetZoom = () => {
-			scale.value = 1;
-			rotation.value = 0;
-			translateX.value = 0;
-			translateY.value = 0;
-		};
-		const handleWheel = (e) => {
-			e.preventDefault();
-			if (e.deltaY < 0) zoomIn();
-			else zoomOut();
-		};
-		const rotateLeft = () => {
-			rotation.value -= 90;
-		};
-		const rotateRight = () => {
-			rotation.value += 90;
-		};
-		const startDrag = (e) => {
-			if (scale.value > 1) {
-				isDragging.value = true;
-				dragStartX.value = e.clientX - translateX.value;
-				dragStartY.value = e.clientY - translateY.value;
-				document.addEventListener("mousemove", onDrag);
-				document.addEventListener("mouseup", stopDrag);
-			}
-		};
-		const onDrag = (e) => {
-			if (isDragging.value) {
-				translateX.value = e.clientX - dragStartX.value;
-				translateY.value = e.clientY - dragStartY.value;
-			}
-		};
-		const stopDrag = () => {
-			isDragging.value = false;
-			document.removeEventListener("mousemove", onDrag);
-			document.removeEventListener("mouseup", stopDrag);
-		};
-		const downloadImage = () => {
-			if (!currentImage.value) return;
-			const link = document.createElement("a");
-			link.href = currentImage.value;
-			link.download = `image_${Date.now()}.png`;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		};
-		const handleKeydown = (e) => {
-			if (!visible.value) return;
-			switch (e.key) {
-				case "Escape":
-					close();
-					break;
-				case "ArrowLeft":
-					prevImage();
-					break;
-				case "ArrowRight":
-					nextImage();
-					break;
-				case "+":
-				case "=":
-					zoomIn();
-					break;
-				case "-":
-					zoomOut();
-					break;
-				case "0":
-					resetZoom();
-					break;
-				case "d":
-				case "D":
-					downloadImage();
-					break;
-			}
-		};
-		onMounted(() => {
-			document.addEventListener("keydown", handleKeydown);
-		});
-		onUnmounted(() => {
-			document.removeEventListener("keydown", handleKeydown);
-			document.body.style.overflow = "";
+		const nodeText = computed(() => {
+			return props.node.data?.text || "未命名";
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createBlock(Teleport, { to: "body" }, [createVNode(Transition, { name: "viewer-fade" }, {
-				default: withCtx(() => [visible.value ? (openBlock(), createElementBlock("div", {
-					key: 0,
-					class: "image-viewer",
-					onClick: handleClose
-				}, [
-					_cache[12] || (_cache[12] = createBaseVNode("div", { class: "viewer-overlay" }, null, -1)),
-					createBaseVNode("button", {
-						class: "viewer-close",
-						onClick: withModifiers(close, ["stop"]),
-						title: "关闭 (Esc)"
-					}, [..._cache[3] || (_cache[3] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])]),
-					__props.images.length > 1 ? (openBlock(), createElementBlock("button", {
-						key: 0,
-						class: "viewer-nav viewer-prev",
-						onClick: withModifiers(prevImage, ["stop"]),
-						disabled: currentIndex.value === 0,
-						title: "上一张 (←)"
-					}, [..._cache[4] || (_cache[4] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])], 8, _hoisted_1$2)) : createCommentVNode("", true),
-					__props.images.length > 1 ? (openBlock(), createElementBlock("button", {
-						key: 1,
-						class: "viewer-nav viewer-next",
-						onClick: withModifiers(nextImage, ["stop"]),
-						disabled: currentIndex.value === __props.images.length - 1,
-						title: "下一张 (→)"
-					}, [..._cache[5] || (_cache[5] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])], 8, _hoisted_2$2)) : createCommentVNode("", true),
-					createBaseVNode("div", {
-						class: "viewer-content",
-						onClick: _cache[1] || (_cache[1] = withModifiers(() => {}, ["stop"]))
-					}, [createBaseVNode("div", {
-						class: "image-wrapper",
-						style: normalizeStyle(transformStyle.value)
-					}, [createBaseVNode("img", {
-						src: currentImage.value,
-						class: "viewer-image",
-						onWheel: handleWheel,
-						onMousedown: startDrag,
-						onDragstart: _cache[0] || (_cache[0] = withModifiers(() => {}, ["prevent"]))
-					}, null, 40, _hoisted_3$2)], 4)]),
-					createBaseVNode("div", {
-						class: "viewer-toolbar",
-						onClick: _cache[2] || (_cache[2] = withModifiers(() => {}, ["stop"]))
-					}, [
-						createBaseVNode("div", _hoisted_4$2, [createBaseVNode("span", _hoisted_5$2, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(__props.images.length), 1)]),
-						createBaseVNode("div", _hoisted_6$2, [
-							createBaseVNode("button", {
-								class: "tool-btn",
-								onClick: zoomOut,
-								title: "缩小 (-)"
-							}, [..._cache[6] || (_cache[6] = [createBaseVNode("i", { class: "fa-solid fa-magnifying-glass-minus" }, null, -1)])]),
-							createBaseVNode("span", _hoisted_7$2, toDisplayString(Math.round(scale.value * 100)) + "%", 1),
-							createBaseVNode("button", {
-								class: "tool-btn",
-								onClick: zoomIn,
-								title: "放大 (+)"
-							}, [..._cache[7] || (_cache[7] = [createBaseVNode("i", { class: "fa-solid fa-magnifying-glass-plus" }, null, -1)])]),
-							createBaseVNode("button", {
-								class: "tool-btn",
-								onClick: resetZoom,
-								title: "重置大小 (0)"
-							}, [..._cache[8] || (_cache[8] = [createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)])]),
-							createBaseVNode("button", {
-								class: "tool-btn",
-								onClick: rotateLeft,
-								title: "向左旋转"
-							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1)])]),
-							createBaseVNode("button", {
-								class: "tool-btn",
-								onClick: rotateRight,
-								title: "向右旋转"
-							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])])
-						]),
-						createBaseVNode("div", { class: "toolbar-right" }, [createBaseVNode("button", {
-							class: "tool-btn primary",
-							onClick: downloadImage,
-							title: "下载 (D)"
-						}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1), createBaseVNode("span", null, "下载", -1)])])])
-					])
-				])) : createCommentVNode("", true)]),
-				_: 1
-			})]);
+			const _component_OutlineNode = resolveComponent("OutlineNode", true);
+			return openBlock(), createElementBlock("div", _hoisted_1$3, [createBaseVNode("div", {
+				class: "node-row",
+				style: normalizeStyle({ paddingLeft: __props.depth * 16 + "px" }),
+				onClick: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("focus-node", __props.node))
+			}, [hasChildren.value ? (openBlock(), createElementBlock("button", {
+				key: 0,
+				class: normalizeClass(["expand-btn", { collapsed: !expanded.value }]),
+				onClick: _cache[0] || (_cache[0] = withModifiers(($event) => expanded.value = !expanded.value, ["stop"]))
+			}, [..._cache[3] || (_cache[3] = [createBaseVNode("svg", {
+				viewBox: "0 0 24 24",
+				width: "12",
+				height: "12",
+				fill: "none",
+				stroke: "currentColor",
+				"stroke-width": "2.5"
+			}, [createBaseVNode("polyline", { points: "6 9 12 15 18 9" })], -1)])], 2)) : (openBlock(), createElementBlock("div", _hoisted_2$3)), createBaseVNode("span", {
+				class: normalizeClass(["node-text", { root: __props.depth === 0 }]),
+				innerHTML: nodeText.value
+			}, null, 10, _hoisted_3$3)], 4), hasChildren.value && expanded.value ? (openBlock(), createElementBlock("div", _hoisted_4$3, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.node.children, (child, index) => {
+				return openBlock(), createBlock(_component_OutlineNode, {
+					key: index,
+					node: child,
+					depth: __props.depth + 1,
+					onFocusNode: _cache[2] || (_cache[2] = ($event) => _ctx.$emit("focus-node", $event))
+				}, null, 8, ["node", "depth"]);
+			}), 128))])) : createCommentVNode("", true)]);
 		};
 	}
-}, [["__scopeId", "data-v-350cd48f"]]);
+}, [["__scopeId", "data-v-d28e7e9b"]]);
+//#endregion
+//#region src/components/mindmap/OutlinePanel.vue
+var _hoisted_1$2 = { class: "panel-header" };
+var _hoisted_2$2 = { class: "panel-body customScrollbar" };
+var _hoisted_3$2 = {
+	key: 0,
+	class: "outline-tree"
+};
+var _hoisted_4$2 = {
+	key: 1,
+	class: "outline-empty"
+};
+var OutlinePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "OutlinePanel",
+	props: { tree: {
+		type: Object,
+		default: null
+	} },
+	emits: ["close", "focus-node"],
+	setup(__props, { emit: __emit }) {
+		const emit = __emit;
+		const panelRef = /* @__PURE__ */ ref(null);
+		function handleOutsideClick(e) {
+			if (panelRef.value && !panelRef.value.contains(e.target)) emit("close");
+		}
+		onMounted(() => {
+			setTimeout(() => {
+				document.addEventListener("mousedown", handleOutsideClick);
+			}, 100);
+		});
+		onBeforeUnmount(() => {
+			document.removeEventListener("mousedown", handleOutsideClick);
+		});
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", {
+				class: "outline-panel",
+				ref_key: "panelRef",
+				ref: panelRef
+			}, [createBaseVNode("div", _hoisted_1$2, [_cache[2] || (_cache[2] = createBaseVNode("span", { class: "panel-title" }, "大纲", -1)), createBaseVNode("button", {
+				class: "panel-close",
+				onClick: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("close"))
+			}, "×")]), createBaseVNode("div", _hoisted_2$2, [__props.tree ? (openBlock(), createElementBlock("div", _hoisted_3$2, [createVNode(OutlineNode_default, {
+				node: __props.tree,
+				depth: 0,
+				onFocusNode: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("focus-node", $event))
+			}, null, 8, ["node"])])) : (openBlock(), createElementBlock("div", _hoisted_4$2, "暂无内容"))])], 512);
+		};
+	}
+}, [["__scopeId", "data-v-28b0f702"]]);
 //#endregion
 //#region src/views/MindMap.vue
-var _hoisted_1$1 = { class: "mindmap-container" };
-var _hoisted_2$1 = { class: "toolbar" };
-var _hoisted_3$1 = { class: "toolbar-left" };
-var _hoisted_4$1 = { class: "layout-selector" };
-var _hoisted_5$1 = { class: "toolbar-right" };
-var _hoisted_6$1 = {
+var _hoisted_1$1 = { class: "mind-map-view" };
+var _hoisted_2$1 = { class: "main-area" };
+var _hoisted_3$1 = { class: "dialog image-dialog" };
+var _hoisted_4$1 = { class: "image-tabs" };
+var _hoisted_5$1 = { class: "dialog-body" };
+var _hoisted_6$1 = { class: "tab-content" };
+var _hoisted_7$1 = ["src"];
+var _hoisted_8$1 = { class: "drop-file-name" };
+var _hoisted_9$1 = { class: "drop-file-size" };
+var _hoisted_10$1 = {
 	key: 0,
-	class: "style-panel"
+	class: "compress-section"
 };
-var _hoisted_7$1 = { class: "panel-header" };
-var _hoisted_8$1 = { class: "panel-content" };
-var _hoisted_9$1 = { class: "style-group" };
-var _hoisted_10$1 = { class: "color-picker-wrapper" };
-var _hoisted_11$1 = { class: "color-value" };
-var _hoisted_12$1 = { class: "style-group" };
-var _hoisted_13 = { class: "color-picker-wrapper" };
-var _hoisted_14 = { class: "color-value" };
-var _hoisted_15 = { class: "style-group" };
-var _hoisted_16 = { class: "color-picker-wrapper" };
-var _hoisted_17 = { class: "color-value" };
-var _hoisted_18 = { class: "style-group" };
-var _hoisted_19 = { class: "range-value" };
-var _hoisted_20 = { class: "style-group" };
-var _hoisted_21 = { class: "range-value" };
+var _hoisted_11$1 = { class: "compress-options" };
+var _hoisted_12$1 = { class: "radio-item" };
+var _hoisted_13 = { class: "radio-item" };
+var _hoisted_14 = { class: "radio-item" };
+var _hoisted_15 = {
+	key: 0,
+	class: "compress-slider-row"
+};
+var _hoisted_16 = { class: "slider-value" };
+var _hoisted_17 = { class: "compress-estimate" };
+var _hoisted_18 = { class: "estimate-value" };
+var _hoisted_19 = { class: "dialog-footer" };
+var _hoisted_20 = ["disabled"];
+var _hoisted_21 = { class: "tab-content" };
+var _hoisted_22 = { class: "url-input-row" };
+var _hoisted_23 = {
+	key: 0,
+	class: "url-preview-area"
+};
+var _hoisted_24 = ["src"];
+var _hoisted_25 = {
+	key: 1,
+	class: "url-preview-area url-loading"
+};
+var _hoisted_26 = {
+	key: 2,
+	class: "url-preview-area url-error"
+};
+var _hoisted_27 = { class: "dialog-footer" };
+var _hoisted_28 = ["disabled"];
+var _hoisted_29 = { class: "dialog" };
+var _hoisted_30 = { class: "dialog-header" };
+var _hoisted_31 = { class: "dialog-body" };
+var _hoisted_32 = { class: "downloadTypeSelectBox" };
+var _hoisted_33 = { class: "downloadTypeList customScrollbar" };
+var _hoisted_34 = ["onClick"];
+var _hoisted_35 = { class: "name" };
 var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "MindMap",
 	setup(__props) {
-		const { showToast } = useToast();
-		const canvasWrapper = /* @__PURE__ */ ref(null);
-		const mindMapInstance = /* @__PURE__ */ ref(null);
-		const currentLayout = /* @__PURE__ */ ref("logicalStructure");
-		const showStylePanel = /* @__PURE__ */ ref(false);
-		const showImageCompressor = /* @__PURE__ */ ref(false);
-		const fileInput = /* @__PURE__ */ ref(null);
-		const selectedNode = /* @__PURE__ */ ref(null);
-		const showImageViewer = /* @__PURE__ */ ref(false);
-		const viewerImages = /* @__PURE__ */ ref([]);
-		const viewerInitialIndex = /* @__PURE__ */ ref(0);
-		const nodeStyle = /* @__PURE__ */ ref({
-			fillColor: "#ffffff",
-			textColor: "#333333",
-			borderColor: "#4a90e2",
-			borderWidth: 2,
-			borderRadius: 5
+		const { canUndo, canRedo, activeNodes, isReadonly, currentTheme, lightThemeList, darkThemeList, themePreviewMap, undo, redo, insertChildNode, insertSiblingNode, removeNode, setNodeStyle, setTheme, insertImageToNode, insertHyperlink, openLocalFile, saveAsJSON, importFile, exportFile, hasUnsavedChanges, isAssociativeLineMode, newFile, toggleAssociativeLineMode, saveLineText, deleteLineText, getOutlineTree } = useMindMap();
+		const hasNode = computed(() => activeNodes.value.length > 0);
+		const showOutline = /* @__PURE__ */ ref(false);
+		function handleToggleOutline() {
+			showOutline.value = !showOutline.value;
+			if (showOutline.value) showBasicStyle.value = false;
+		}
+		const outlineTree = computed(() => {
+			if (!showOutline.value) return null;
+			return getOutlineTree();
 		});
-		onMounted(async () => {
-			await nextTick$1();
-			initMindMap();
+		const lineTextRef = /* @__PURE__ */ ref(null);
+		onMounted(() => {
+			const timer = setInterval(() => {
+				const { mindMap } = useMindMap();
+				if (mindMap && mindMap.value) {
+					clearInterval(timer);
+					try {
+						mindMap.value.on("line_text_edit", (data) => {
+							lineTextRef.value?.show(data);
+						});
+					} catch (e) {}
+				}
+			}, 200);
+			setTimeout(() => clearInterval(timer), 5e3);
 		});
-		onUnmounted(() => {
-			if (mindMapInstance.value) mindMapInstance.value.destroy();
+		function handleNewFile() {
+			if (hasUnsavedChanges.value) {
+				if (confirm("当前画布有未保存的修改，是否先保存？\n\n点\"确定\"保存后新建，点\"取消\"直接新建。")) saveAsJSON();
+			}
+			newFile();
+		}
+		function handleInsertImage() {
+			if (!activeNodes.value.length) {
+				alert("请先选中一个节点");
+				return;
+			}
+			openImageDialog();
+		}
+		function handleOpen() {
+			openLocalFile();
+		}
+		function handleSaveAs() {
+			saveAsJSON();
+		}
+		function handleImport() {
+			importFile();
+		}
+		const showImageDialog = /* @__PURE__ */ ref(false);
+		const imageTab = /* @__PURE__ */ ref("local");
+		const fileInputRef = /* @__PURE__ */ ref(null);
+		const localFile = /* @__PURE__ */ ref(null);
+		const localPreview = /* @__PURE__ */ ref("");
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const compressMode = /* @__PURE__ */ ref("none");
+		const compressQuality = /* @__PURE__ */ ref(80);
+		const compressedBlob = /* @__PURE__ */ ref(null);
+		const imageUrl = /* @__PURE__ */ ref("");
+		const urlPreview = /* @__PURE__ */ ref("");
+		const urlLoading = /* @__PURE__ */ ref(false);
+		const urlError = /* @__PURE__ */ ref("");
+		const estimatedSize = computed(() => {
+			if (!localFile.value) return "0 KB";
+			if (compressMode.value === "none") return formatSize(localFile.value.size);
+			const quality = compressMode.value === "auto" ? .7 : compressQuality.value / 100;
+			return formatSize(Math.round(localFile.value.size * quality * .6));
 		});
-		const initMindMap = () => {
-			const container = document.getElementById("mindMapContainer");
-			if (!container) return;
-			mindMapInstance.value = new MindMap({
-				el: container,
-				data: {
-					data: {
-						text: "中心主题",
-						image: "",
-						expand: true
-					},
-					children: [{
-						data: {
-							text: "分支 1",
-							image: ""
-						},
-						children: []
-					}, {
-						data: {
-							text: "分支 2",
-							image: ""
-						},
-						children: []
-					}]
-				},
-				theme: "default",
-				layout: currentLayout.value,
-				enableFreeDrag: true,
-				enableDblclickResetTransform: true,
-				mousewheelAction: "zoom",
-				customNoteContentShow: null,
-				fitPadding: 50
-			});
-			mindMapInstance.value.on("keydown", handleKeydown);
-			mindMapInstance.value.on("node_click", handleNodeClick);
-			mindMapInstance.value.on("node_img_dblclick", handleImageClick);
-			mindMapInstance.value.on("svg_mousedown", () => {
-				selectedNode.value = null;
-			});
-			showToast("思维导图已就绪", "success");
-		};
-		/**
-		* 收集所有节点的图片
-		*/
-		const collectAllImages = () => {
-			const images = [];
-			if (!mindMapInstance.value) return images;
-			const traverse = (node) => {
-				const data = node.getData();
-				if (data && data.image) images.push(data.image);
-				if (node.children && node.children.length > 0) node.children.forEach((child) => traverse(child));
-			};
-			const root = mindMapInstance.value.renderer.root;
-			if (root) traverse(root);
-			return images;
-		};
-		/**
-		* 处理图片点击事件
-		*/
-		const handleImageClick = (node, e) => {
-			console.log("图片被点击:", node);
-			const allImages = collectAllImages();
-			if (allImages.length === 0) {
-				showToast("没有找到图片", "warning");
+		function formatSize(bytes) {
+			if (!bytes) return "0 KB";
+			if (bytes < 1024) return bytes + " B";
+			if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+		}
+		function openImageDialog() {
+			if (!activeNodes.value.length) {
+				alert("请先选中一个节点");
 				return;
 			}
-			const currentImage = node.getData()?.image;
-			let initialIndex = 0;
-			if (currentImage) {
-				initialIndex = allImages.indexOf(currentImage);
-				if (initialIndex === -1) initialIndex = 0;
-			}
-			viewerImages.value = allImages;
-			viewerInitialIndex.value = initialIndex;
-			showImageViewer.value = true;
-		};
-		const handleViewerClose = () => {
-			console.log("图片查看器关闭");
-		};
-		const addNode = () => {
-			if (!mindMapInstance.value) return;
-			try {
-				mindMapInstance.value.execCommand("INSERT_CHILD_NODE");
-				showToast("已添加子节点", "success");
-			} catch (error) {
-				console.error("添加节点失败:", error);
-				showToast("添加节点失败：" + error.message, "error");
-			}
-		};
-		const deleteNode = () => {
-			if (!mindMapInstance.value) return;
-			const node = selectedNode.value;
-			if (node) {
-				if (node.isRoot) {
-					showToast("不能删除根节点", "warning");
-					return;
-				}
-				node.remove();
-				selectedNode.value = null;
-				showToast("已删除节点", "success");
-			} else showToast("请先选择一个节点", "warning");
-		};
-		const handleNodeClick = (node, e) => {
-			console.log("节点点击:", node);
-			selectedNode.value = node;
-			showToast("已选中节点", "success");
-		};
-		const handleKeydown = (e) => {
-			if (e.key === "Tab") {
-				e.preventDefault();
-				addNode();
-			}
-			if (e.key === "Delete" || e.key === "Backspace") {
-				if (selectedNode.value && !selectedNode.value.isRoot) {
-					e.preventDefault();
-					deleteNode();
-				}
-			}
-			if (e.key === "Enter") {
-				if (selectedNode.value) {
-					e.preventDefault();
-					selectedNode.value.beginTextEdit();
-				}
-			}
-		};
-		const changeLayout = () => {
-			if (!mindMapInstance.value) return;
-			mindMapInstance.value.setLayout(currentLayout.value);
-			showToast(`已切换到${getLayoutName(currentLayout.value)}`, "success");
-		};
-		const getLayoutName = (layout) => {
-			return {
-				logicalStructure: "逻辑结构图",
-				mindMap: "思维导图",
-				organizationStructure: "组织结构图",
-				verticalTimeline: "垂直时间轴",
-				horizontalTimeline: "水平时间轴"
-			}[layout] || layout;
-		};
-		const showImageDialog = () => {
-			if (!selectedNode.value) {
-				showToast("请先点击选择一个节点", "warning");
-				return;
-			}
-			showImageCompressor.value = true;
-		};
-		const handleImageConfirm = ({ base64, size }) => {
-			if (!mindMapInstance.value || !selectedNode.value) {
-				showToast("请先选择一个节点", "warning");
-				return;
-			}
-			try {
-				console.log("开始插入图片...");
-				const imgData = {
-					url: base64,
-					width: 200,
-					height: 150
-				};
-				console.log("准备插入的图片数据:", imgData);
-				mindMapInstance.value.execCommand("SET_NODE_IMAGE", selectedNode.value, imgData);
-				console.log("SET_NODE_IMAGE 命令执行成功");
-				showToast(`图片已插入 (${size})`, "success");
-			} catch (error) {
-				console.error("插入图片失败:", error);
-				showToast("插入图片失败：" + error.message, "error");
-			}
-		};
-		const applyNodeStyle = () => {
-			if (!mindMapInstance.value || !selectedNode.value) {
-				showToast("请先选择一个节点", "warning");
-				return;
-			}
-			selectedNode.value.setStyle({
-				fill: nodeStyle.value.fillColor,
-				color: nodeStyle.value.textColor,
-				borderColor: nodeStyle.value.borderColor,
-				borderWidth: nodeStyle.value.borderWidth,
-				borderRadius: nodeStyle.value.borderRadius
-			});
-		};
-		const resetStyle = () => {
-			nodeStyle.value = {
-				fillColor: "#ffffff",
-				textColor: "#333333",
-				borderColor: "#4a90e2",
-				borderWidth: 2,
-				borderRadius: 5
-			};
-			if (mindMapInstance.value && selectedNode.value) {
-				selectedNode.value.setStyle({});
-				showToast("样式已重置", "success");
-			}
-		};
-		const exportJSON = () => {
-			if (!mindMapInstance.value) return;
-			const data = mindMapInstance.value.getData();
-			const jsonStr = JSON.stringify(data, null, 2);
-			const blob = new Blob([jsonStr], { type: "application/json" });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `mindmap_${Date.now()}.json`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			URL.revokeObjectURL(url);
-			showToast("已导出 JSON 文件", "success");
-		};
-		const importJSON = () => {
-			if (fileInput.value) fileInput.value.click();
-		};
-		const handleFileImport = (e) => {
+			resetImageDialog();
+			showImageDialog.value = true;
+		}
+		function resetImageDialog() {
+			imageTab.value = "local";
+			localFile.value = null;
+			localPreview.value = "";
+			compressedBlob.value = null;
+			isDragOver.value = false;
+			compressMode.value = "none";
+			compressQuality.value = 80;
+			imageUrl.value = "";
+			urlPreview.value = "";
+			urlLoading.value = false;
+			urlError.value = "";
+		}
+		function closeImageDialog() {
+			showImageDialog.value = false;
+			resetImageDialog();
+		}
+		function triggerFileInput() {
+			fileInputRef.value?.click();
+		}
+		function handleFileSelect(e) {
 			const file = e.target.files[0];
-			if (!file) return;
-			const reader = new FileReader();
-			reader.onload = (event) => {
-				try {
-					const data = JSON.parse(event.target.result);
-					if (!data.data || !data.data.text) throw new Error("无效的思维导图数据");
-					if (mindMapInstance.value) {
-						mindMapInstance.value.setData(data);
-						showToast("已导入思维导图", "success");
-					}
-				} catch (error) {
-					console.error("导入失败:", error);
-					showToast("导入失败：" + error.message, "error");
-				}
-			};
-			reader.readAsText(file);
+			if (file) loadLocalFile(file);
 			e.target.value = "";
-		};
-		const exportImage = async () => {
-			if (!mindMapInstance.value) return;
+		}
+		function handleDrop(e) {
+			isDragOver.value = false;
+			const file = e.dataTransfer?.files?.[0];
+			if (file && file.type.startsWith("image/")) loadLocalFile(file);
+		}
+		function loadLocalFile(file) {
+			localFile.value = file;
+			compressedBlob.value = null;
+			const reader = new FileReader();
+			reader.onload = (ev) => {
+				localPreview.value = ev.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+		async function compressImage(file) {
+			if (compressMode.value === "none") return file;
+			const quality = compressMode.value === "auto" ? .7 : compressQuality.value / 100;
+			return new Promise((resolve) => {
+				const img = new Image();
+				img.onload = () => {
+					const canvas = document.createElement("canvas");
+					canvas.width = img.naturalWidth;
+					canvas.height = img.naturalHeight;
+					canvas.getContext("2d").drawImage(img, 0, 0);
+					canvas.toBlob((blob) => {
+						if (blob && compressMode.value === "auto" && blob.size > 500 * 1024) canvas.toBlob((blob2) => resolve(blob2 || file), "image/jpeg", .4);
+						else resolve(blob || file);
+					}, "image/jpeg", quality);
+				};
+				img.onerror = () => resolve(file);
+				img.src = URL.createObjectURL(file);
+			});
+		}
+		async function confirmLocalImage() {
+			if (!localPreview.value) return;
+			let finalUrl = localPreview.value;
+			if (compressMode.value !== "none") finalUrl = await blobToDataURL(await compressImage(localFile.value));
+			insertImageToNode(finalUrl, localFile.value?.name || "图片");
+			closeImageDialog();
+		}
+		function blobToDataURL(blob) {
+			return new Promise((resolve) => {
+				const reader = new FileReader();
+				reader.onload = (ev) => resolve(ev.target.result);
+				reader.readAsDataURL(blob);
+			});
+		}
+		async function fetchUrlImage() {
+			const url = imageUrl.value.trim();
+			if (!url) return;
+			urlLoading.value = true;
+			urlError.value = "";
+			urlPreview.value = "";
 			try {
-				const result = await mindMapInstance.value.export("png", {
-					padding: 20,
-					bg: "#ffffff"
-				});
-				console.log("导出结果类型:", typeof result);
-				console.log("导出结果:", result);
-				let blob;
-				let url;
-				if (typeof result === "string") {
-					blob = await (await fetch(result)).blob();
-					url = URL.createObjectURL(blob);
-				} else if (result instanceof Blob) url = URL.createObjectURL(result);
-				else if (result && result.data) if (typeof result.data === "string") {
-					blob = await (await fetch(result.data)).blob();
-					url = URL.createObjectURL(blob);
-				} else throw new Error("不支持的导出格式");
-				else throw new Error("未知的导出结果格式");
-				const a = document.createElement("a");
-				a.href = url;
-				a.download = `mindmap_${Date.now()}.png`;
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-				URL.revokeObjectURL(url);
-				showToast("已导出 PNG 图片", "success");
-			} catch (error) {
-				console.error("导出失败:", error);
-				showToast("导出失败：" + error.message, "error");
+				urlPreview.value = await loadImageViaElement(url);
+			} catch (err) {
+				urlError.value = err.message || "获取图片失败，请检查链接";
+			} finally {
+				urlLoading.value = false;
 			}
-		};
-		const goBack = () => {
-			window.location.hash = "#";
-		};
+		}
+		function loadImageViaElement(url) {
+			return new Promise((resolve, reject) => {
+				const img = new Image();
+				img.onload = () => {
+					resolve(url);
+				};
+				img.onerror = () => {
+					reject(/* @__PURE__ */ new Error("图片加载失败，请检查链接是否有效"));
+				};
+				img.src = url;
+			});
+		}
+		function urlToDataURL(url) {
+			return new Promise((resolve, reject) => {
+				const img = new Image();
+				img.crossOrigin = "anonymous";
+				img.onload = () => {
+					try {
+						const canvas = document.createElement("canvas");
+						canvas.width = img.naturalWidth;
+						canvas.height = img.naturalHeight;
+						canvas.getContext("2d").drawImage(img, 0, 0);
+						resolve(canvas.toDataURL("image/png"));
+					} catch (e) {
+						resolve(null);
+					}
+				};
+				img.onerror = () => resolve(null);
+				img.src = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
+			});
+		}
+		async function confirmUrlImage() {
+			if (!urlPreview.value) return;
+			try {
+				const dataUrl = await urlToDataURL(urlPreview.value);
+				if (dataUrl) insertImageToNode(dataUrl, imageUrl.value);
+				else {
+					const response = await fetch(urlPreview.value);
+					if (response.ok) {
+						const blob = await response.blob();
+						const reader = new FileReader();
+						reader.onload = (ev) => {
+							insertImageToNode(ev.target.result, imageUrl.value);
+						};
+						reader.readAsDataURL(blob);
+						closeImageDialog();
+						return;
+					}
+					insertImageToNode(urlPreview.value, imageUrl.value);
+				}
+			} catch (err) {
+				insertImageToNode(urlPreview.value, imageUrl.value);
+			}
+			closeImageDialog();
+		}
+		const showExportDialog = /* @__PURE__ */ ref(false);
+		const exportOptions = [
+			{
+				type: "png",
+				name: "图片"
+			},
+			{
+				type: "jpg",
+				name: "JPG"
+			},
+			{
+				type: "pdf",
+				name: "PDF"
+			},
+			{
+				type: "md",
+				name: "Markdown"
+			},
+			{
+				type: "txt",
+				name: "TXT"
+			},
+			{
+				type: "json",
+				name: "JSON"
+			}
+		];
+		function confirmExport(type) {
+			showExportDialog.value = false;
+			exportFile(type);
+		}
 		return (_ctx, _cache) => {
 			return openBlock(), createElementBlock("div", _hoisted_1$1, [
-				createBaseVNode("div", _hoisted_2$1, [createBaseVNode("div", _hoisted_3$1, [
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: goBack,
-						title: "返回主页"
-					}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-arrow-left" }, null, -1)])]),
-					_cache[16] || (_cache[16] = createBaseVNode("div", { class: "divider" }, null, -1)),
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: addNode,
-						title: "添加子节点 (Tab)"
-					}, [..._cache[11] || (_cache[11] = [createBaseVNode("i", { class: "fa-solid fa-plus" }, null, -1), createBaseVNode("span", null, "添加节点", -1)])]),
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: deleteNode,
-						title: "删除节点 (Delete)"
-					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createBaseVNode("span", null, "删除", -1)])]),
-					_cache[17] || (_cache[17] = createBaseVNode("div", { class: "divider" }, null, -1)),
-					createBaseVNode("div", _hoisted_4$1, [_cache[14] || (_cache[14] = createBaseVNode("label", { class: "label" }, "布局：", -1)), withDirectives(createBaseVNode("select", {
-						"onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => currentLayout.value = $event),
-						onChange: changeLayout,
-						class: "select-input"
-					}, [..._cache[13] || (_cache[13] = [createStaticVNode("<option value=\"logicalStructure\" data-v-ef1bbe61>逻辑结构图</option><option value=\"mindMap\" data-v-ef1bbe61>思维导图</option><option value=\"organizationStructure\" data-v-ef1bbe61>组织结构图</option><option value=\"verticalTimeline\" data-v-ef1bbe61>垂直时间轴</option><option value=\"horizontalTimeline\" data-v-ef1bbe61>水平时间轴</option>", 5)])], 544), [[vModelSelect, currentLayout.value]])]),
-					createBaseVNode("div", { class: normalizeClass(["selection-indicator", { active: selectedNode.value }]) }, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-circle-check" }, null, -1)), createBaseVNode("span", null, toDisplayString(selectedNode.value ? "已选中节点" : "未选择节点"), 1)], 2)
-				]), createBaseVNode("div", _hoisted_5$1, [
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: showImageDialog,
-						title: "插入图片"
-					}, [..._cache[18] || (_cache[18] = [createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1), createBaseVNode("span", null, "插入图片", -1)])]),
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: _cache[1] || (_cache[1] = ($event) => showStylePanel.value = !showStylePanel.value),
-						title: "节点样式"
-					}, [..._cache[19] || (_cache[19] = [createBaseVNode("i", { class: "fa-solid fa-palette" }, null, -1), createBaseVNode("span", null, "样式", -1)])]),
-					_cache[23] || (_cache[23] = createBaseVNode("div", { class: "divider" }, null, -1)),
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: exportJSON,
-						title: "导出 JSON"
-					}, [..._cache[20] || (_cache[20] = [createBaseVNode("i", { class: "fa-solid fa-file-export" }, null, -1), createBaseVNode("span", null, "导出 JSON", -1)])]),
-					createBaseVNode("button", {
-						class: "tool-btn",
-						onClick: importJSON,
-						title: "导入 JSON"
-					}, [..._cache[21] || (_cache[21] = [createBaseVNode("i", { class: "fa-solid fa-file-import" }, null, -1), createBaseVNode("span", null, "导入 JSON", -1)])]),
-					createBaseVNode("button", {
-						class: "tool-btn btn-primary",
-						onClick: exportImage,
-						title: "导出为图片"
-					}, [..._cache[22] || (_cache[22] = [createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1), createBaseVNode("span", null, "导出 PNG", -1)])])
-				])]),
-				createBaseVNode("div", {
-					class: "canvas-wrapper",
-					ref_key: "canvasWrapper",
-					ref: canvasWrapper
-				}, [..._cache[24] || (_cache[24] = [createBaseVNode("div", {
-					id: "mindMapContainer",
-					class: "mindmap-canvas"
-				}, null, -1)])], 512),
-				showStylePanel.value ? (openBlock(), createElementBlock("div", _hoisted_6$1, [createBaseVNode("div", _hoisted_7$1, [_cache[26] || (_cache[26] = createBaseVNode("h3", null, [createBaseVNode("i", { class: "fa-solid fa-palette" }), createTextVNode(" 节点样式")], -1)), createBaseVNode("button", {
-					class: "close-btn",
-					onClick: _cache[2] || (_cache[2] = ($event) => showStylePanel.value = false)
-				}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])])]), createBaseVNode("div", _hoisted_8$1, [
-					createBaseVNode("div", _hoisted_9$1, [_cache[27] || (_cache[27] = createBaseVNode("label", { class: "style-label" }, "背景颜色", -1)), createBaseVNode("div", _hoisted_10$1, [withDirectives(createBaseVNode("input", {
-						"onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => nodeStyle.value.fillColor = $event),
-						type: "color",
-						class: "color-input",
-						onChange: applyNodeStyle
-					}, null, 544), [[vModelText, nodeStyle.value.fillColor]]), createBaseVNode("span", _hoisted_11$1, toDisplayString(nodeStyle.value.fillColor), 1)])]),
-					createBaseVNode("div", _hoisted_12$1, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "style-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_13, [withDirectives(createBaseVNode("input", {
-						"onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => nodeStyle.value.textColor = $event),
-						type: "color",
-						class: "color-input",
-						onChange: applyNodeStyle
-					}, null, 544), [[vModelText, nodeStyle.value.textColor]]), createBaseVNode("span", _hoisted_14, toDisplayString(nodeStyle.value.textColor), 1)])]),
-					createBaseVNode("div", _hoisted_15, [_cache[29] || (_cache[29] = createBaseVNode("label", { class: "style-label" }, "边框颜色", -1)), createBaseVNode("div", _hoisted_16, [withDirectives(createBaseVNode("input", {
-						"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => nodeStyle.value.borderColor = $event),
-						type: "color",
-						class: "color-input",
-						onChange: applyNodeStyle
-					}, null, 544), [[vModelText, nodeStyle.value.borderColor]]), createBaseVNode("span", _hoisted_17, toDisplayString(nodeStyle.value.borderColor), 1)])]),
-					createBaseVNode("div", _hoisted_18, [
-						_cache[30] || (_cache[30] = createBaseVNode("label", { class: "style-label" }, "边框宽度", -1)),
-						withDirectives(createBaseVNode("input", {
-							"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => nodeStyle.value.borderWidth = $event),
-							type: "range",
-							min: "0",
-							max: "10",
-							step: "1",
-							class: "range-input",
-							onInput: applyNodeStyle
-						}, null, 544), [[
-							vModelText,
-							nodeStyle.value.borderWidth,
-							void 0,
-							{ number: true }
-						]]),
-						createBaseVNode("span", _hoisted_19, toDisplayString(nodeStyle.value.borderWidth) + "px", 1)
-					]),
-					createBaseVNode("div", _hoisted_20, [
-						_cache[31] || (_cache[31] = createBaseVNode("label", { class: "style-label" }, "圆角半径", -1)),
-						withDirectives(createBaseVNode("input", {
-							"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => nodeStyle.value.borderRadius = $event),
-							type: "range",
-							min: "0",
-							max: "20",
-							step: "2",
-							class: "range-input",
-							onInput: applyNodeStyle
-						}, null, 544), [[
-							vModelText,
-							nodeStyle.value.borderRadius,
-							void 0,
-							{ number: true }
-						]]),
-						createBaseVNode("span", _hoisted_21, toDisplayString(nodeStyle.value.borderRadius) + "px", 1)
-					]),
-					createBaseVNode("button", {
-						class: "btn btn-block",
-						onClick: resetStyle
-					}, [..._cache[32] || (_cache[32] = [createBaseVNode("i", { class: "fa-solid fa-rotate-left" }, null, -1), createTextVNode(" 重置样式 ", -1)])])
-				])])) : createCommentVNode("", true),
-				createVNode(ImageCompressor_default, {
-					modelValue: showImageCompressor.value,
-					"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => showImageCompressor.value = $event),
-					onConfirm: handleImageConfirm
-				}, null, 8, ["modelValue"]),
-				createVNode(ImageViewer_default, {
-					modelValue: showImageViewer.value,
-					"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => showImageViewer.value = $event),
-					images: viewerImages.value,
-					"initial-index": viewerInitialIndex.value,
-					onClose: handleViewerClose
+				createVNode(MindMapToolbar_default, {
+					"can-undo": unref(canUndo),
+					"can-redo": unref(canRedo),
+					"has-node": hasNode.value,
+					"current-theme": unref(currentTheme),
+					"light-theme-list": unref(lightThemeList),
+					"dark-theme-list": unref(darkThemeList),
+					"theme-preview-map": unref(themePreviewMap),
+					"is-associative-line-mode": unref(isAssociativeLineMode),
+					onNewFile: handleNewFile,
+					onUndo: unref(undo),
+					onRedo: unref(redo),
+					onInsertSibling: unref(insertSiblingNode),
+					onInsertChild: unref(insertChildNode),
+					onRemove: unref(removeNode),
+					onInsertImage: handleInsertImage,
+					onInsertHyperlink: _ctx.handleInsertHyperlink,
+					onOpen: handleOpen,
+					onSaveAs: handleSaveAs,
+					onImport: handleImport,
+					onExport: _cache[0] || (_cache[0] = ($event) => showExportDialog.value = true),
+					onSetTheme: unref(setTheme),
+					onToggleOutline: handleToggleOutline,
+					onToggleAssociativeLine: unref(toggleAssociativeLineMode)
 				}, null, 8, [
-					"modelValue",
-					"images",
-					"initial-index"
+					"can-undo",
+					"can-redo",
+					"has-node",
+					"current-theme",
+					"light-theme-list",
+					"dark-theme-list",
+					"theme-preview-map",
+					"is-associative-line-mode",
+					"onUndo",
+					"onRedo",
+					"onInsertSibling",
+					"onInsertChild",
+					"onRemove",
+					"onInsertHyperlink",
+					"onSetTheme",
+					"onToggleAssociativeLine"
 				]),
-				createBaseVNode("input", {
-					ref_key: "fileInput",
-					ref: fileInput,
-					type: "file",
-					accept: ".json",
-					class: "hidden-input",
-					onChange: handleFileImport
-				}, null, 544)
+				createBaseVNode("div", _hoisted_2$1, [
+					createVNode(MindMapCore_default),
+					showOutline.value ? (openBlock(), createBlock(OutlinePanel_default, {
+						key: 0,
+						tree: outlineTree.value,
+						onClose: _cache[1] || (_cache[1] = ($event) => showOutline.value = false)
+					}, null, 8, ["tree"])) : createCommentVNode("", true),
+					unref(activeNodes).length > 0 && !unref(isReadonly) ? (openBlock(), createBlock(NodeStylePanel_default, {
+						key: 1,
+						"active-nodes": unref(activeNodes),
+						onSetStyle: unref(setNodeStyle)
+					}, null, 8, ["active-nodes", "onSetStyle"])) : createCommentVNode("", true)
+				]),
+				(openBlock(), createBlock(Teleport, { to: "body" }, [showImageDialog.value ? (openBlock(), createElementBlock("div", {
+					key: 0,
+					class: "dialog-overlay",
+					onClick: withModifiers(closeImageDialog, ["self"])
+				}, [createBaseVNode("div", _hoisted_3$1, [
+					createBaseVNode("div", { class: "dialog-header" }, [_cache[13] || (_cache[13] = createBaseVNode("span", null, "插入图片", -1)), createBaseVNode("button", {
+						class: "dialog-close",
+						onClick: closeImageDialog
+					}, "×")]),
+					createBaseVNode("div", _hoisted_4$1, [createBaseVNode("div", {
+						class: normalizeClass(["image-tab", { active: imageTab.value === "local" }]),
+						onClick: _cache[2] || (_cache[2] = ($event) => imageTab.value = "local")
+					}, " 本地图片 ", 2), createBaseVNode("div", {
+						class: normalizeClass(["image-tab", { active: imageTab.value === "url" }]),
+						onClick: _cache[3] || (_cache[3] = ($event) => imageTab.value = "url")
+					}, " 在线URL ", 2)]),
+					createBaseVNode("div", _hoisted_5$1, [withDirectives(createBaseVNode("div", _hoisted_6$1, [
+						createBaseVNode("div", {
+							class: normalizeClass(["drop-zone", {
+								"drag-over": isDragOver.value,
+								"has-file": !!localFile.value
+							}]),
+							onDragover: _cache[4] || (_cache[4] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+							onDragleave: _cache[5] || (_cache[5] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+							onDrop: withModifiers(handleDrop, ["prevent"]),
+							onClick: triggerFileInput
+						}, [localPreview.value ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
+							createBaseVNode("img", {
+								src: localPreview.value,
+								class: "drop-preview"
+							}, null, 8, _hoisted_7$1),
+							createBaseVNode("div", _hoisted_8$1, toDisplayString(localFile.value?.name), 1),
+							createBaseVNode("div", _hoisted_9$1, toDisplayString(formatSize(localFile.value?.size)), 1)
+						], 64)) : (openBlock(), createElementBlock(Fragment$1, { key: 1 }, [
+							_cache[14] || (_cache[14] = createBaseVNode("svg", {
+								class: "drop-icon",
+								viewBox: "0 0 24 24",
+								width: "32",
+								height: "32",
+								fill: "none",
+								stroke: "currentColor",
+								"stroke-width": "1.5"
+							}, [
+								createBaseVNode("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+								createBaseVNode("polyline", { points: "17 8 12 3 7 8" }),
+								createBaseVNode("line", {
+									x1: "12",
+									y1: "3",
+									x2: "12",
+									y2: "15"
+								})
+							], -1)),
+							_cache[15] || (_cache[15] = createBaseVNode("div", { class: "drop-text" }, "拖拽图片到此处，或点击选择文件", -1)),
+							_cache[16] || (_cache[16] = createBaseVNode("div", { class: "drop-hint" }, "支持 JPG、PNG、GIF、WebP 格式", -1))
+						], 64))], 34),
+						createBaseVNode("input", {
+							ref_key: "fileInputRef",
+							ref: fileInputRef,
+							type: "file",
+							accept: "image/*",
+							style: { "display": "none" },
+							onChange: handleFileSelect
+						}, null, 544),
+						localFile.value ? (openBlock(), createElementBlock("div", _hoisted_10$1, [
+							_cache[22] || (_cache[22] = createBaseVNode("div", { class: "compress-title" }, "图片压缩", -1)),
+							createBaseVNode("div", _hoisted_11$1, [
+								createBaseVNode("label", _hoisted_12$1, [withDirectives(createBaseVNode("input", {
+									type: "radio",
+									"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => compressMode.value = $event),
+									value: "none"
+								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[17] || (_cache[17] = createBaseVNode("span", null, "不压缩", -1))]),
+								createBaseVNode("label", _hoisted_13, [withDirectives(createBaseVNode("input", {
+									type: "radio",
+									"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => compressMode.value = $event),
+									value: "auto"
+								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[18] || (_cache[18] = createBaseVNode("span", null, "压缩至 500KB 以下", -1))]),
+								createBaseVNode("label", _hoisted_14, [withDirectives(createBaseVNode("input", {
+									type: "radio",
+									"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => compressMode.value = $event),
+									value: "custom"
+								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[19] || (_cache[19] = createBaseVNode("span", null, "自定义", -1))])
+							]),
+							compressMode.value === "custom" ? (openBlock(), createElementBlock("div", _hoisted_15, [
+								_cache[20] || (_cache[20] = createBaseVNode("span", { class: "slider-label" }, "质量", -1)),
+								withDirectives(createBaseVNode("input", {
+									type: "range",
+									class: "compress-slider",
+									min: "10",
+									max: "100",
+									step: "5",
+									"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => compressQuality.value = $event)
+								}, null, 512), [[
+									vModelText,
+									compressQuality.value,
+									void 0,
+									{ number: true }
+								]]),
+								createBaseVNode("span", _hoisted_16, toDisplayString(compressQuality.value) + "%", 1)
+							])) : createCommentVNode("", true),
+							createBaseVNode("div", _hoisted_17, [createTextVNode(" 原始大小：" + toDisplayString(formatSize(localFile.value?.size)) + " ", 1), compressMode.value !== "none" ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [_cache[21] || (_cache[21] = createTextVNode(" → 预估压缩后：", -1)), createBaseVNode("span", _hoisted_18, toDisplayString(estimatedSize.value), 1)], 64)) : createCommentVNode("", true)])
+						])) : createCommentVNode("", true),
+						createBaseVNode("div", _hoisted_19, [createBaseVNode("button", {
+							class: "btn btn--ghost",
+							onClick: closeImageDialog
+						}, "取消"), createBaseVNode("button", {
+							class: "btn btn--primary",
+							disabled: !localPreview.value,
+							onClick: confirmLocalImage
+						}, " 确认 ", 8, _hoisted_20)])
+					], 512), [[vShow, imageTab.value === "local"]]), withDirectives(createBaseVNode("div", _hoisted_21, [
+						createBaseVNode("div", _hoisted_22, [withDirectives(createBaseVNode("input", {
+							"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => imageUrl.value = $event),
+							class: "form-input url-input",
+							placeholder: "输入图片地址，如 https://example.com/image.png",
+							onKeydown: withKeys(fetchUrlImage, ["enter"])
+						}, null, 544), [[vModelText, imageUrl.value]]), createBaseVNode("button", {
+							class: "btn btn--primary btn--sm",
+							onClick: fetchUrlImage
+						}, " 获取 ")]),
+						urlPreview.value ? (openBlock(), createElementBlock("div", _hoisted_23, [createBaseVNode("img", {
+							src: urlPreview.value,
+							class: "url-preview-img"
+						}, null, 8, _hoisted_24)])) : urlLoading.value ? (openBlock(), createElementBlock("div", _hoisted_25, " 加载中... ")) : urlError.value ? (openBlock(), createElementBlock("div", _hoisted_26, toDisplayString(urlError.value), 1)) : createCommentVNode("", true),
+						createBaseVNode("div", _hoisted_27, [createBaseVNode("button", {
+							class: "btn btn--ghost",
+							onClick: closeImageDialog
+						}, "取消"), createBaseVNode("button", {
+							class: "btn btn--primary",
+							disabled: !urlPreview.value,
+							onClick: confirmUrlImage
+						}, " 确认 ", 8, _hoisted_28)])
+					], 512), [[vShow, imageTab.value === "url"]])])
+				])])) : createCommentVNode("", true)])),
+				(openBlock(), createBlock(Teleport, { to: "body" }, [showExportDialog.value ? (openBlock(), createElementBlock("div", {
+					key: 0,
+					class: "dialog-overlay",
+					onClick: _cache[12] || (_cache[12] = withModifiers(($event) => showExportDialog.value = false, ["self"]))
+				}, [createBaseVNode("div", _hoisted_29, [createBaseVNode("div", _hoisted_30, [_cache[23] || (_cache[23] = createBaseVNode("span", null, "导出", -1)), createBaseVNode("button", {
+					class: "dialog-close",
+					onClick: _cache[11] || (_cache[11] = ($event) => showExportDialog.value = false)
+				}, "×")]), createBaseVNode("div", _hoisted_31, [createBaseVNode("div", _hoisted_32, [createBaseVNode("div", _hoisted_33, [(openBlock(), createElementBlock(Fragment$1, null, renderList(exportOptions, (item) => {
+					return createBaseVNode("div", {
+						key: item.type,
+						class: "downloadTypeItem",
+						onClick: ($event) => confirmExport(item.type)
+					}, [
+						createBaseVNode("div", { class: normalizeClass(["typeIcon", item.type]) }, null, 2),
+						createBaseVNode("div", _hoisted_35, toDisplayString(item.name), 1),
+						_cache[24] || (_cache[24] = createBaseVNode("div", { class: "checked-icon" }, [createBaseVNode("svg", {
+							viewBox: "0 0 24 24",
+							width: "16",
+							height: "16",
+							fill: "none",
+							stroke: "currentColor",
+							"stroke-width": "3"
+						}, [createBaseVNode("polyline", { points: "20 6 9 17 4 12" })])], -1))
+					], 8, _hoisted_34);
+				}), 64))])])])])])) : createCommentVNode("", true)]))
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-ef1bbe61"]]);
+}, [["__scopeId", "data-v-ceef8eba"]]);
 //#endregion
 //#region src/composables/useTheme.js
 var THEME_KEY = "subtitle-extractor-theme";
