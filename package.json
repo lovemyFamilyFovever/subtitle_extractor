@@ -12,6 +12,8 @@
   "dependencies": {
     "gif.js": "^0.2.0",
     "jszip": "^3.10.1",
+    "simple-mind-map": "^0.14.0-fix.2",
+    "simple-mind-map-plugin-themes": "^1.0.1",
     "vue": "^3.5.30"
   },
   "devDependencies": {

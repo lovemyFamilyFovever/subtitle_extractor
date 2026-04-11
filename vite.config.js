@@ -47,5 +47,8 @@ export default defineConfig({
   // 优化依赖预构建
   optimizeDeps: {
     include: ['vue', 'jszip']
-  }
+  },
+  css: {
+    devSourcemap: true, // 启用 CSS Source Map，这是关键配置
+  },
 })
