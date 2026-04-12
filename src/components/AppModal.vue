@@ -176,11 +176,6 @@ watch(() => props.modelValue, (isOpen) => {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  /* 禁止头部被压缩 */
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 2;
 }
 
 .modal-header h2 {

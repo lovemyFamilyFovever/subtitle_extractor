@@ -8,7 +8,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useMindMap } from '@/composables/useMindMap'
 
-const { init, removeNode, insertSiblingNode, getActiveNodeList } = useMindMap()
+const { init, destroy, removeNode, insertSiblingNode, getActiveNodeList } = useMindMap()
 const containerRef = ref(null)
 
 function handleKeyDown(e) {
@@ -47,13 +47,9 @@ function isNodeEditing() {
 
 onMounted(async () => {
   await nextTick()
-  // 等待 DOM 完全渲染
   await new Promise((resolve) => setTimeout(resolve, 50))
 
-  if (!containerRef.value) {
-    console.error('[MindMap] 容器未就绪')
-    return
-  }
+  if (!containerRef.value) return
 
   let data = null
   const saved = localStorage.getItem('mindMapData')
@@ -67,12 +63,14 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeyDown)
+  // 关键：组件卸载时销毁实例
+  destroy()
 })
 </script>
 
 <style scoped>
 .mind-map-core {
-    height: 100%;
+  height: 100%;
   flex: 1;
   position: relative;
   overflow: hidden;

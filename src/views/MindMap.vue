@@ -4,17 +4,17 @@
       :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap"
       :is-associative-line-mode="isAssociativeLineMode" @new-file="handleNewFile" @undo="undo" @redo="redo"
       @insert-sibling="insertSiblingNode" @insert-child="insertChildNode" @remove="removeNode"
-      @insert-image="handleInsertImage" @insert-hyperlink="handleInsertHyperlink" @open="handleOpen"
-      @save-as="handleSaveAs" @import="handleImport" @export="showExportDialog = true" @set-theme="setTheme"
-      @toggle-outline="handleToggleOutline" @toggle-associative-line="toggleAssociativeLineMode" />
+      @insert-image="handleInsertImage" @open="handleOpen" @save-as="handleSaveAs" @import="handleImport"
+      @export="showExportDialog = true" @set-theme="setTheme" @toggle-outline="handleToggleOutline"
+      @toggle-associative-line="toggleAssociativeLineMode" />
 
     <div class="main-area">
       <MindMapCore />
 
       <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="showOutline = false" />
 
-      <NodeStylePanel v-if="activeNodes.length > 0 && !isReadonly" :active-nodes="activeNodes"
-        @set-style="setNodeStyle" />
+      <NodeStylePanel v-if="activeNodes.length > 0 && !isReadonly" :active-nodes="activeNodes" @set-style="setNodeStyle"
+        @set-theme-config="setThemeConfig" :theme-config="themeConfig" />
     </div>
 
     <!-- 图片弹窗 -->
@@ -137,6 +137,8 @@
       </div>
     </Teleport>
 
+    <!-- 图片查看器 -->
+    <ImageViewer v-model="showImageViewer" :images="viewerImages" :viewer-index="viewerIndex" />
 
     <!-- 导出弹窗 -->
     <Teleport to="body">
@@ -169,13 +171,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted,nextTick  } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useMindMap } from '@/composables/useMindMap'
 import MindMapToolbar from '@/components/mindmap/MindMapToolbar.vue'
 import MindMapCore from '@/components/mindmap/MindMapCore.vue'
 import NodeStylePanel from '@/components/mindmap/NodeStylePanel.vue'
-import AssociativeLineText from '@/components/mindmap/AssociativeLineText.vue'
 import OutlinePanel from '@/components/mindmap/OutlinePanel.vue'
+import ImageViewer from '@/components/ImageViewer.vue'
 
 const {
   canUndo,
@@ -192,9 +194,11 @@ const {
   insertSiblingNode,
   removeNode,
   setNodeStyle,
+  setThemeConfig,
+  getThemeConfig,
+  themeConfigVersion,
   setTheme,
   insertImageToNode,
-  insertHyperlink,
   openLocalFile,
   saveAsJSON,
   importFile,
@@ -203,29 +207,44 @@ const {
   isAssociativeLineMode,
   newFile,
   toggleAssociativeLineMode,
-  saveLineText,
-  deleteLineText,
   getOutlineTree,
+  imageDblClickData, collectAllImages
 } = useMindMap()
 
+const themeConfig = computed(() => {
+  themeConfigVersion.value
+  return getThemeConfig()
+})
 
+// ===== 图片查看器状态 =====
+const showImageViewer = ref(false)
+const viewerImages = ref([])
+const viewerIndex = ref(0)
+
+// 监听双击事件
+watch(imageDblClickData, (data) => {
+  if (!data || !data.imgSrc) return
+
+  const allImages = collectAllImages()
+  if (!allImages.length) return
+
+  viewerImages.value = allImages
+  viewerIndex.value = allImages.findIndex(obj => obj.imgSrc === data.imgSrc)
+  showImageViewer.value = true
+})
+
+// ===== 大纲 =====
 const hasNode = computed(() => activeNodes.value.length > 0)
-
 const showOutline = ref(false)
-
 
 function handleToggleOutline() {
   showOutline.value = !showOutline.value
-  if (showOutline.value) {
-    showBasicStyle.value = false
-  }
 }
 
 const outlineTree = computed(() => {
   if (!showOutline.value) return null
   return getOutlineTree()
 })
-
 
 // ===== 关联线 =====
 const lineTextRef = ref(null)
@@ -248,16 +267,6 @@ onMounted(() => {
   // 5秒后停止轮询
   setTimeout(() => clearInterval(timer), 5000)
 })
-
-function handleLineTextSave({ lineId, text }) {
-  saveLineText(lineId, text)
-}
-
-function handleLineTextDelete({ lineId }) {
-  deleteLineText(lineId)
-}
-
-
 
 // ===== 新建画布 =====
 function handleNewFile() {
@@ -565,7 +574,7 @@ function confirmExport(type) {
 .mind-map-view {
   display: flex;
   flex-direction: column;
-  width: 100vw;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
   background: #f0f2f5;
@@ -747,7 +756,6 @@ function confirmExport(type) {
 
 .compress-slider {
   flex: 1;
-  -webkit-appearance: none;
   height: 4px;
   border-radius: 2px;
   background: rgba(0, 0, 0, 0.08);

@@ -13,8 +13,6 @@ MindMap.usePlugin(AssociativeLine)
 
 // ========== 模块级单例 ==========
 let mindMapInstance = null
-let isInitialized = false
-let refCount = 0
 
 const isReady = ref(false)
 const activeNodes = ref([])
@@ -25,6 +23,9 @@ const currentLayout = ref('logicalStructure')
 const scale = ref(1)
 const isReadonly = ref(false)
 const isAssociativeLineMode = ref(false)
+const hasUnsavedChanges = ref(false)
+const imageDblClickData = ref(null)
+const themeConfigVersion = ref(0)
 
 // ========== 主题列表 ==========
 const fullThemeList = [
@@ -54,8 +55,7 @@ const defaultData = {
   ],
 }
 
-// ========== 数据变更标记（用于新建时判断是否需要保存） ==========
-const hasUnsavedChanges = ref(false)
+
 
 function updateHistoryStatus() {
   if (!mindMapInstance) return
@@ -89,10 +89,87 @@ function bindEvents() {
       scale.value = val
     })
 
+    mindMapInstance.on('node_img_dblclick', (node, e, imgNode) => {
+      const imgSrc = node.getData?.('image') || ''
+      if (imgSrc) {
+        imageDblClickData.value = { node, imgSrc, imgNode }
+      }
+    })
+
+
+  } catch (e) { /* ignore */ }
+}
+
+// ========== 收集所有节点的图片 ==========
+function collectAllImages() {
+  if (!mindMapInstance) return []
+  try {
+    const data = mindMapInstance.getData()
+    const images = []
+    traverseCollectImages(data, images)
+    return images
   } catch (e) {
-    console.error('[MindMap] 绑定事件失败', e)
+    return []
   }
 }
+
+function traverseCollectImages(node, images) {
+  if (!node) return
+  const imgSrc = node.data?.image
+  const imgTitle = node.data?.imageTitle
+  const imgText = node.data?.text
+  const imgSize = node.data?.imageSize
+
+  if (imgSrc) {
+    const fileSize = calcBase64Size(imgSrc)
+    images.push({
+      imgSrc,
+      imgTitle,
+      imgText,
+      imgSize,
+      fileSize,        // 原始字节数
+      fileSizeText: formatFileSize(fileSize),  // 格式化文本
+    })
+
+  }
+  if (node.children && node.children.length) {
+    node.children.forEach((child) => {
+      traverseCollectImages(child, images)
+    })
+  }
+}
+
+
+/**
+ * base64 dataURL → 原始文件大小（字节）
+ * base64 编码后体积膨胀约 33%
+ * 公式：去掉前缀后，每4个字符代表3个字节
+ */
+function calcBase64Size(dataUrl) {
+  // 去掉 "data:image/png;base64," 前缀
+  const base64 = dataUrl.split(',')[1]
+  if (!base64) return 0
+
+  // 原始字节数
+  let bytes = base64.length * 3 / 4
+
+  // 减去末尾的 padding 字符（=）
+  if (base64.endsWith('==')) bytes -= 2
+  else if (base64.endsWith('=')) bytes -= 1
+
+  return Math.round(bytes)
+}
+
+/**
+ * 格式化大小
+ */
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}
+
+
 
 function getActiveNodeList() {
   if (!mindMapInstance) return []
@@ -102,12 +179,7 @@ function getActiveNodeList() {
   } catch (e) { return [] }
 }
 
-function destroyInstance() {
-  if (mindMapInstance) {
-    try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
-    mindMapInstance = null
-  }
-  isInitialized = false
+function resetState() {
   isReady.value = false
   activeNodes.value = []
   canUndo.value = false
@@ -118,22 +190,14 @@ function destroyInstance() {
 
 // ========== 导出 ==========
 export function useMindMap() {
-  refCount++
-
-  onBeforeUnmount(() => {
-    refCount--
-    if (refCount <= 0) {
-      refCount = 0
-      destroyInstance()
-    }
-  })
 
   function init(el, data) {
     if (!el) return
-    if (isInitialized && mindMapInstance) return
+    // 先销毁旧实例
     if (mindMapInstance) {
       try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
       mindMapInstance = null
+      resetState()
     }
 
     const initData = data || defaultData
@@ -166,10 +230,19 @@ export function useMindMap() {
 
     markRaw(mindMapInstance)
     bindEvents()
-    isInitialized = true
     isReady.value = true
     hasUnsavedChanges.value = false
     console.log('[MindMap] 初始化成功')
+  }
+
+  // ========== 销毁（由 MindMapCore 的 onBeforeUnmount 调用） ==========
+  function destroy() {
+    if (mindMapInstance) {
+      try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
+      mindMapInstance = null
+    }
+    resetState()
+    console.log('[MindMap] 已销毁')
   }
 
   // ========== 新建画布 ==========
@@ -236,6 +309,26 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
+  function setThemeConfig(config) {
+    if (!mindMapInstance) return
+    try {
+      mindMapInstance.setThemeConfig(config)
+      mindMapInstance.render()
+        themeConfigVersion.value++
+    } catch (e) { /* ignore */ }
+  }
+
+  function getThemeConfig() {
+    if (!mindMapInstance) return {}
+    try {
+      return mindMapInstance.getThemeConfig() || {}
+    } catch (e) {
+      console.warn('Failed to get theme config:', e)
+      return {}
+    }
+  }
+
+
   // ========== 插入图片 ==========
   function insertImageToNode(url, title = '') {
     if (!mindMapInstance) return
@@ -280,20 +373,6 @@ export function useMindMap() {
     })
     mindMapInstance.render()
   }
-
-  // ========== 超链接 ==========
-  function insertHyperlink(url, name = '') {
-    if (!mindMapInstance) return
-    const nodeList = getActiveNodeList()
-    if (!nodeList.length) return
-    nodeList.forEach((node) => {
-      const nodeData = node.nodeData?.data || {}
-      nodeData.link = url
-      nodeData.linkTitle = name || url
-    })
-    mindMapInstance.render()
-  }
-
   function removeHyperlink() {
     if (!mindMapInstance) return
     const nodeList = getActiveNodeList()
@@ -449,22 +528,12 @@ export function useMindMap() {
       }
     } catch (e) { /* ignore */ }
   }
-
-  function exitAssociativeLineMode() {
-    isAssociativeLineMode.value = false
-    try {
-      mindMapInstance?.associativeLine?.cancelCreateLine?.()
-    } catch (e) { /* ignore */ }
-  }
-
   function deleteActiveLine() {
     if (!mindMapInstance) return
-    try {
-      mindMapInstance.associativeLine?.removeLine?.()
-    } catch (e) { /* ignore */ }
+    try { mindMapInstance.associativeLine?.removeLine?.() } catch (e) { /* ignore */ }
   }
 
-  // ========== 主题 ==========
+  // ========== 主题/布局 ==========
   function setTheme(themeValue) {
     currentTheme.value = themeValue
     if (mindMapInstance) {
@@ -612,6 +681,7 @@ export function useMindMap() {
     darkThemeList,
     themePreviewMap,
     init,
+    destroy,
     newFile,
     undo,
     redo,
@@ -621,12 +691,13 @@ export function useMindMap() {
     removeNode,
     insertGeneralization,
     setNodeStyle,
+    setThemeConfig,
+    getThemeConfig,
+    themeConfigVersion,
     insertImageToNode,
     removeNodeImage,
-    insertHyperlink,
     removeHyperlink,
     toggleAssociativeLineMode,
-    exitAssociativeLineMode,
     deleteActiveLine,
     setTheme,
     setLayout,
@@ -648,5 +719,8 @@ export function useMindMap() {
     importFile,
     getActiveNodeList,
     getOutlineTree,
+    imageDblClickData,
+    collectAllImages,
+
   }
 }

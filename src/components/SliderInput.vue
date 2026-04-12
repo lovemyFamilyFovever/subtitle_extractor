@@ -11,12 +11,12 @@
       注意：这里不用 v-model，因为我们要手动控制值的传递
     -->
     <input type="range" :min="min" :max="max" :step="step" :value="modelValue" :style="{ '--pct': pct }"
-      @input="onInput" class="slider" />
+      @input="onInput" class="slider" v-show="showSlider" />
 
     <!-- 顶部：标签 + 当前值显示 -->
     <div class="slider-header">
       <span class="form-label">{{ label }}</span>
-      <input class="form-input" type="text" :value="modelValue" @input="onTextChange" @focus="onTextFocus"/>{{ unit }}
+      <input class="form-input" type="text" :value="modelValue" @input="onTextChange" @focus="onTextFocus" />{{ unit }}
     </div>
   </div>
 </template>
@@ -37,7 +37,8 @@ const props = defineProps({
   unit: { type: String, default: '' },
   min: { type: Number, default: 0 },
   max: { type: Number, default: 100 },
-  step: { type: Number, default: 1 }
+  step: { type: Number, default: 1 },
+  showSlider: { type: Boolean, default: true }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -62,7 +63,7 @@ const onTextChange = (e) => {
 }
 
 // 光标在输入框时，鼠标滚轮可以控制数字大小增减,键盘上下键也可以控制增减
-const onTextFocus=(e)=>{
+const onTextFocus = (e) => {
   const input = e.target
   const onWheel = (event) => {
     event.preventDefault()
@@ -120,12 +121,14 @@ const onTextFocus=(e)=>{
   align-items: center;
 }
 
-.form-input{
-  width: 60px;
-  padding: 0.1rem 0.3rem;
+.form-input {
   font-size: 0.8rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  height: 30px;
+  border: 2px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  padding: 0px 10px;
 }
 
 /* 覆盖 global.css 里 form-label 的 margin-bottom */
@@ -146,7 +149,7 @@ const onTextFocus=(e)=>{
 .slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 100%;
+  width: 70%;
   height: 4px;
   background: var(--border);
   border-radius: 10px;
@@ -156,6 +159,7 @@ const onTextFocus=(e)=>{
   padding: 0;
   /* 覆盖 global.css 里 input 的通用样式 */
   box-shadow: none !important;
+  flex-shrink: 0;
 }
 
 

@@ -1,9 +1,9 @@
 <template>
   <Teleport to="body">
     <Transition name="viewer-fade">
-      <div v-if="visible" class="image-viewer" @click="handleClose">
+      <div v-if="visible" class="image-viewer">
         <!-- 遮罩层 -->
-        <div class="viewer-overlay"></div>
+        <div class="viewer-overlay" @click.stop="close"></div>
 
         <!-- 关闭按钮 -->
         <button class="viewer-close" @click.stop="close" title="关闭 (Esc)">
@@ -11,45 +11,40 @@
         </button>
 
         <!-- 上一张按钮 -->
-        <button 
-          v-if="images.length > 1" 
-          class="viewer-nav viewer-prev" 
-          @click.stop="prevImage"
-          :disabled="currentIndex === 0"
-          title="上一张 (←)"
-        >
+        <button v-if="images.length > 1" class="viewer-nav viewer-prev" @click.stop="prevImage"
+          :disabled="localIndex === 0" title="上一张 (←)">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
 
         <!-- 下一张按钮 -->
-        <button 
-          v-if="images.length > 1" 
-          class="viewer-nav viewer-next" 
-          @click.stop="nextImage"
-          :disabled="currentIndex === images.length - 1"
-          title="下一张 (→)"
-        >
+        <button v-if="images.length > 1" class="viewer-nav viewer-next" @click.stop="nextImage"
+          :disabled="localIndex >= images.length - 1" title="下一张 (→)">
           <i class="fa-solid fa-chevron-right"></i>
         </button>
 
         <!-- 图片容器 -->
         <div class="viewer-content" @click.stop>
           <div class="image-wrapper" :style="transformStyle">
-            <img 
-              :src="currentImage" 
-              class="viewer-image"
-              @wheel="handleWheel"
-              @mousedown="startDrag"
-              @dragstart.prevent
-            />
+            <img :src="currentImage" class="viewer-image" @wheel.prevent="handleWheel" @mousedown="startDrag"
+              @dragstart.prevent />
           </div>
+
+          <div class="imageAttribution">
+            <span v-if="imageTitle">{{ imageTitle }}</span>
+            <span v-if="imgText">{{ imgText }}</span>
+            <span v-if="imageSize && imageSize.width && imageSize.height">
+              {{ imageSize.width }}x{{ imageSize.height }}
+            </span>
+            <span v-if="fileSizeText">{{ fileSizeText }}</span>
+          </div>
+
         </div>
 
         <!-- 底部工具栏 -->
         <div class="viewer-toolbar" @click.stop>
           <div class="toolbar-left">
             <span class="image-counter">
-              {{ currentIndex + 1 }} / {{ images.length }}
+              {{ localIndex + 1 }} / {{ images.length }}
             </span>
           </div>
 
@@ -57,21 +52,21 @@
             <button class="tool-btn" @click="zoomOut" title="缩小 (-)">
               <i class="fa-solid fa-magnifying-glass-minus"></i>
             </button>
-            
+
             <span class="zoom-level">{{ Math.round(scale * 100) }}%</span>
-            
+
             <button class="tool-btn" @click="zoomIn" title="放大 (+)">
               <i class="fa-solid fa-magnifying-glass-plus"></i>
             </button>
-            
+
             <button class="tool-btn" @click="resetZoom" title="重置大小 (0)">
               <i class="fa-solid fa-expand"></i>
             </button>
-            
+
             <button class="tool-btn" @click="rotateLeft" title="向左旋转">
               <i class="fa-solid fa-rotate-left"></i>
             </button>
-            
+
             <button class="tool-btn" @click="rotateRight" title="向右旋转">
               <i class="fa-solid fa-rotate-right"></i>
             </button>
@@ -101,7 +96,7 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  initialIndex: {
+  viewerIndex: {
     type: Number,
     default: 0
   }
@@ -114,8 +109,32 @@ const visible = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-const currentIndex = ref(props.initialIndex)
-const currentImage = computed(() => props.images[currentIndex.value] || '')
+// 本地索引，跟随外部 prop 变化
+const localIndex = ref(props.viewerIndex)
+
+// 外部 prop 变化时同步
+watch(() => props.viewerIndex, (val) => {
+  localIndex.value = val
+})
+
+// 打开时同步索引 + 重置状态
+watch(visible, (isVisible) => {
+  if (isVisible) {
+    localIndex.value = props.viewerIndex
+    resetZoom()
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
+// 安全读取当前图片数据
+const currentImage = computed(() => props.images[localIndex.value]?.imgSrc || '')
+const imageTitle = computed(() => props.images[localIndex.value]?.imgTitle || '')
+const imgText = computed(() => props.images[localIndex.value]?.imgText || '')
+const imageSize = computed(() => props.images[localIndex.value]?.imgSize || {})
+const fileSizeText = computed(() => props.images[localIndex.value]?.fileSizeText || '')
+
 
 // 缩放和旋转状态
 const scale = ref(1)
@@ -131,44 +150,23 @@ const transformStyle = computed(() => ({
   transform: `translate(${translateX.value}px, ${translateY.value}px) scale(${scale.value}) rotate(${rotation.value}deg)`
 }))
 
-// 监听初始索引变化
-watch(() => props.initialIndex, (newIndex) => {
-  currentIndex.value = newIndex
-  resetZoom()
-})
-
-// 打开时重置状态
-watch(visible, (isVisible) => {
-  if (isVisible) {
-    resetZoom()
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
-  }
-})
-
 // 关闭
 const close = () => {
   visible.value = false
-  emit('close')
-}
-
-const handleClose = () => {
-  close()
 }
 
 // 上一张
 const prevImage = () => {
-  if (currentIndex.value > 0) {
-    currentIndex.value--
+  if (localIndex.value > 0) {
+    localIndex.value--
     resetZoom()
   }
 }
 
 // 下一张
 const nextImage = () => {
-  if (currentIndex.value < props.images.length - 1) {
-    currentIndex.value++
+  if (localIndex.value < props.images.length - 1) {
+    localIndex.value++
     resetZoom()
   }
 }
@@ -191,7 +189,6 @@ const resetZoom = () => {
 
 // 滚轮缩放
 const handleWheel = (e) => {
-  e.preventDefault()
   if (e.deltaY < 0) {
     zoomIn()
   } else {
@@ -214,7 +211,7 @@ const startDrag = (e) => {
     isDragging.value = true
     dragStartX.value = e.clientX - translateX.value
     dragStartY.value = e.clientY - translateY.value
-    
+
     document.addEventListener('mousemove', onDrag)
     document.addEventListener('mouseup', stopDrag)
   }
@@ -283,6 +280,8 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
   document.body.style.overflow = ''
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
 })
 </script>
 
@@ -373,6 +372,7 @@ onUnmounted(() => {
   overflow: hidden;
   position: relative;
   z-index: 1;
+  flex-direction: column;
 }
 
 .image-wrapper {
@@ -386,13 +386,25 @@ onUnmounted(() => {
 
 .viewer-image {
   max-width: 90vw;
-  max-height: 80vh;
+  max-height: 75vh;
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* 底部工具栏 */
+.imageAttribution {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  color: rgb(0, 0, 0);
+  font-size: 13px;
+  background: #ffffffc2;
+  width: max-content;
+  padding: 10px 100px;
+  border-radius: 7px;
+  font-weight: bold;
+}
+
 .viewer-toolbar {
   position: relative;
   z-index: 10;
