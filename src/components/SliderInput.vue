@@ -14,7 +14,7 @@
       @input="onInput" class="slider" v-show="showSlider" />
 
     <!-- 顶部：标签 + 当前值显示 -->
-    <div class="slider-header">
+    <div class="slider-header" v-show="showInput">
       <span class="form-label">{{ label }}</span>
       <input class="form-input" type="text" :value="modelValue" @input="onTextChange" @focus="onTextFocus" />{{ unit }}
     </div>
@@ -38,7 +38,8 @@ const props = defineProps({
   min: { type: Number, default: 0 },
   max: { type: Number, default: 100 },
   step: { type: Number, default: 1 },
-  showSlider: { type: Boolean, default: true }
+  showSlider: { type: Boolean, default: true },
+  showInput: { type: Boolean, default: true }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -62,9 +63,9 @@ const onTextChange = (e) => {
   emit('update:modelValue', val)
 }
 
-// 光标在输入框时，鼠标滚轮可以控制数字大小增减,键盘上下键也可以控制增减
 const onTextFocus = (e) => {
   const input = e.target
+
   const onWheel = (event) => {
     event.preventDefault()
     let val = Number(input.value)
@@ -74,36 +75,36 @@ const onTextFocus = (e) => {
     val = Math.max(props.min, Math.min(props.max, val))
     emit('update:modelValue', val)
   }
-  input.addEventListener('wheel', onWheel)
-  // 离开输入框时移除事件监听
-  const onBlur = () => {
-    input.removeEventListener('wheel', onWheel)
-    input.removeEventListener('blur', onBlur)
-  }
-  input.addEventListener('blur', onBlur)
 
-  // 添加键盘事件监听
+  input.addEventListener('wheel', onWheel, { passive: false })
+
   const onKeyDown = (event) => {
     let val = Number(input.value)
     if (isNaN(val)) return
     if (event.key === 'ArrowUp') {
-      val += 1
+      event.preventDefault()
+      val += props.step
     } else if (event.key === 'ArrowDown') {
-      val -= 1
+      event.preventDefault()
+      val -= props.step
+    } else {
+      return
     }
     // 限制在 min-max 范围内
     val = Math.max(props.min, Math.min(props.max, val))
     emit('update:modelValue', val)
   }
+
   input.addEventListener('keydown', onKeyDown)
-  // 离开输入框时移除事件监听
-  const onBlurKey = () => {
+
+  const onBlur = () => {
+    input.removeEventListener('wheel', onWheel)
     input.removeEventListener('keydown', onKeyDown)
-    input.removeEventListener('blur', onBlurKey)
+    input.removeEventListener('blur', onBlur)
   }
 
+  input.addEventListener('blur', onBlur)
 }
-
 
 </script>
 

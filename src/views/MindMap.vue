@@ -6,15 +6,18 @@
       @insert-sibling="insertSiblingNode" @insert-child="insertChildNode" @remove="removeNode"
       @insert-image="handleInsertImage" @open="handleOpen" @save-as="handleSaveAs" @import="handleImport"
       @export="showExportDialog = true" @set-theme="setTheme" @toggle-outline="handleToggleOutline"
-      @toggle-associative-line="toggleAssociativeLineMode" />
+      @toggle-basestyle="handleToggleBaseStyle" @toggle-associative-line="toggleAssociativeLineMode" />
 
     <div class="main-area">
       <MindMapCore />
 
       <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="showOutline = false" />
 
-      <NodeStylePanel v-if="activeNodes.length > 0 && !isReadonly" :active-nodes="activeNodes" @set-style="setNodeStyle"
-        @set-theme-config="setThemeConfig" :theme-config="themeConfig" />
+      <BaseStylePanel v-if="showBaseStyle" @close="showBaseStyle = false" @set-theme-config="setThemeConfig"
+        :get-theme-config="getThemeConfig" />
+
+      <NodeStylePanel v-if="activeNodes.length > 0 && !isReadonly" :active-nodes="activeNodes"
+        @set-style="setNodeStyle" />
     </div>
 
     <!-- 图片弹窗 -->
@@ -177,6 +180,7 @@ import MindMapToolbar from '@/components/mindmap/MindMapToolbar.vue'
 import MindMapCore from '@/components/mindmap/MindMapCore.vue'
 import NodeStylePanel from '@/components/mindmap/NodeStylePanel.vue'
 import OutlinePanel from '@/components/mindmap/OutlinePanel.vue'
+import BaseStylePanel from '@/components/mindmap/BaseStylePanel.vue'
 import ImageViewer from '@/components/ImageViewer.vue'
 
 const {
@@ -196,7 +200,6 @@ const {
   setNodeStyle,
   setThemeConfig,
   getThemeConfig,
-  themeConfigVersion,
   setTheme,
   insertImageToNode,
   openLocalFile,
@@ -211,10 +214,7 @@ const {
   imageDblClickData, collectAllImages
 } = useMindMap()
 
-const themeConfig = computed(() => {
-  themeConfigVersion.value
-  return getThemeConfig()
-})
+
 
 // ===== 图片查看器状态 =====
 const showImageViewer = ref(false)
@@ -245,6 +245,12 @@ const outlineTree = computed(() => {
   if (!showOutline.value) return null
   return getOutlineTree()
 })
+
+// ===== 基础样式 =====
+const showBaseStyle = ref(false)
+function handleToggleBaseStyle() {
+  showBaseStyle.value = !showBaseStyle.value
+}
 
 // ===== 关联线 =====
 const lineTextRef = ref(null)

@@ -8,7 +8,6 @@
         <div class="panel-body">
 
             <!-- 字体 -->
-
             <div class="style-section">
 
                 <div class="section-group-item">
@@ -102,35 +101,25 @@
                         @update:model-value="(val) => $emit('set-style', 'borderWidth', val)" />
                 </div>
             </div>
+
             <div class="divider"></div>
 
             <!-- 节点内边距 -->
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">节点内边距-垂直</label>
-                    <SliderInput v-model="currentPaddingY" label="" unit="" :min="10" :max="30" :showSlider=false
+                    <SliderInput v-model="currentPaddingY" label="" unit="" :min="10" :max="80" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">节点内边距-水平</label>
-                    <SliderInput v-model="currentPaddingX" label="" unit="" :min="10" :max="30" :showSlider=false
+                    <SliderInput v-model="currentPaddingX" label="" unit="" :min="10" :max="80" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                 </div>
             </div>
 
-            <!-- 节点外边距 -->
-            <div class="style-section">
-                <div class="section-group-item">
-                    <label class="section-label">节点外边距-垂直</label>
-                    <SliderInput v-model="currentMarginY" label="" unit="" :min="0" :max="80" :showSlider=false />
-                </div>
-
-                <div class="section-group-item">
-                    <label class="section-label">节点外边距-水平</label>
-                    <SliderInput v-model="currentMarginX" label="" unit="" :min="0" :max="80" :showSlider=false />
-                </div>
-            </div>
+           
         </div>
 
     </div>
@@ -146,18 +135,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    themeConfig: {
-        type: Object,
-        default: () => ({})
-    }
 })
 
 const emit = defineEmits(['set-style', 'set-theme-config'])
 
-const currentColor = computed(() => getStyle('color', '#1a1a2e'))
-const currentFontWeight = computed(() => getStyle('fontWeight', 'normal'))
+const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
+const currentFontWeight = computed(() => getNodeStyle('fontWeight', 'normal'))
 
-const currentFontFamily = computed(() => getStyle('fontFamily', '微软雅黑, Microsoft YaHei'))
+const currentFontFamily = computed(() => getNodeStyle('fontFamily', '微软雅黑, Microsoft YaHei'))
 const fontFamilies = [
     { label: '微软雅黑', value: '微软雅黑, Microsoft YaHei' },
     { label: '宋体', value: '宋体, SimSun' },
@@ -165,7 +150,7 @@ const fontFamilies = [
     { label: '楷体', value: '楷体, KaiTi' },
     { label: 'Arial', value: 'Arial' },
 ]
-const currentFontSize = computed(() => getStyle('fontSize', 16))
+const currentFontSize = computed(() => getNodeStyle('fontSize', 16))
 const fontWeights = [
     { label: '常规', value: 'normal', icon: 'fas fa-font' },
     { label: '加粗', value: 'bold', icon: 'fas fa-bold' },
@@ -173,10 +158,10 @@ const fontWeights = [
     { label: '斜体加粗', value: 'bold italic', icon: 'fas fa-bold fa-italic' },
 ]
 
-const currentBg = computed(() => getStyle('background', '#ffffff'))
+const currentBg = computed(() => getNodeStyle('background', '#ffffff'))
 const bgColors = ['#f5f5f5', '#fff3e0', '#e3f2fd', '#e8f5e9', '#fce4ec']
 
-const currentShape = computed(() => getStyle('shape', 'rectangle'))
+const currentShape = computed(() => getNodeStyle('shape', 'rectangle'))
 const shapeOptions = [
     { label: '矩形', value: 'rectangle', svg: '<svg width="60" height="26" style="margin-top: 5px;"><path d="M 4 12 L 4 3 L 56 3 L 56 21 L 4 21 L 4 12 Z" fill="none" stroke="#409eff" stroke-width="2"></path></svg>' },
     { label: '平行四边形', value: 'parallelogram', svg: '<svg width="60" height="26" style="margin-top: 5px;"><path d="M 4 12 L 30 3 L 56 12 L 30 21 L 4 12 Z" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
@@ -188,61 +173,16 @@ const shapeOptions = [
     { label: '圆', value: 'circle', svg: '<svg width="60" height="26" style="margin-top: 5px;"><path d="M 21 12 A 9 9 0, 1, 0 30 3 A 9 9 0, 0, 0 21 12 Z" fill="none" stroke="#000" stroke-width="2"></path></svg>' }
 ]
 
-const currentBorderRadius = computed(() => getStyle('borderRadius', 5))
+const currentBorderRadius = computed(() => getNodeStyle('borderRadius', 5))
 
-const currentBorderColor = computed(() => getStyle('borderColor', '#000'))
-const currentBorderWidth = computed(() => getStyle('borderWidth', 1))
+const currentBorderColor = computed(() => getNodeStyle('borderColor', '#000'))
+const currentBorderWidth = computed(() => getNodeStyle('borderWidth', 1))
 
-const currentPaddingX = computed(() => getStyle('paddingX', 10))
-const currentPaddingY = computed(() => getStyle('paddingY', 10))
+const currentPaddingX = computed(() => getNodeStyle('paddingX', 10))
+const currentPaddingY = computed(() => getNodeStyle('paddingY', 10))
 
-const currentMarginX = computed({
-    get() {
-        const level = getNodeLevel()
-        const configKey = level <= 2 ? 'second' : 'node'
-        return props.themeConfig?.[configKey]?.marginX ?? 10
-    },
-    set(val) {
-        const level = getNodeLevel()
-        const configKey = level <= 2 ? 'second' : 'node'
-        // 传递完整的主题配置，避免覆盖其他配置项
-        emit('set-theme-config', {
-            ...props.themeConfig,
-            [configKey]: {
-                ...props.themeConfig?.[configKey],
-                marginX: Number(val)
-            }
-        })
-    }
-})
 
-const currentMarginY = computed({
-    get() {
-        const level = getNodeLevel()
-        const configKey = level <= 2 ? 'second' : 'node'
-        return props.themeConfig?.[configKey]?.marginY ?? 10
-    },
-    set(val) {
-        const level = getNodeLevel()
-        const configKey = level <= 2 ? 'second' : 'node'
-        // 传递完整的主题配置，避免覆盖其他配置项
-        emit('set-theme-config', {
-            ...props.themeConfig,
-            [configKey]: {
-                ...props.themeConfig?.[configKey],
-                marginY: Number(val)
-            }
-        })
-    }
-})
-
-function getNodeLevel() {
-    if (!props.activeNodes.length) return 0
-    const node = props.activeNodes[0]
-    return node.getLevel ? node.getLevel() : 0
-}
-
-function getStyle(key, defaultVal) {
+function getNodeStyle(key, defaultVal) {
     if (!props.activeNodes.length) return defaultVal
     const node = props.activeNodes[0]
     if (typeof node.getData === 'function') {
@@ -255,21 +195,6 @@ function getStyle(key, defaultVal) {
     if (data && data[key] !== undefined) return data[key]
     return defaultVal
 }
-
-function getThemeConfig(key) {
-    if (!props.activeNodes.length) return
-    const node = props.activeNodes[0]
-    if (typeof node.getData === 'function') {
-        try {
-            const val = node.getData(key)
-            if (val !== undefined && val !== null) return val
-        } catch (e) { /* ignore */ }
-    }
-    const data = node?.nodeData?.data
-    if (data && data[key] !== undefined) return data[key]
-}
-
-
 
 </script>
 
@@ -482,6 +407,7 @@ function getThemeConfig(key) {
     padding: 10px 0;
     gap: 10px;
 }
+
 
 .section-group-item {
     flex: 1;

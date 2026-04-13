@@ -25,7 +25,6 @@ const isReadonly = ref(false)
 const isAssociativeLineMode = ref(false)
 const hasUnsavedChanges = ref(false)
 const imageDblClickData = ref(null)
-const themeConfigVersion = ref(0)
 
 // ========== 主题列表 ==========
 const fullThemeList = [
@@ -309,12 +308,13 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
-  function setThemeConfig(config) {
+  function setThemeConfig(key, value) {
     if (!mindMapInstance) return
     try {
+      const config = getThemeConfig()
+      config[key] = value
       mindMapInstance.setThemeConfig(config)
       mindMapInstance.render()
-      themeConfigVersion.value++
     } catch (e) { /* ignore */ }
   }
 
@@ -693,7 +693,6 @@ export function useMindMap() {
     setNodeStyle,
     setThemeConfig,
     getThemeConfig,
-    themeConfigVersion,
     insertImageToNode,
     removeNodeImage,
     removeHyperlink,
