@@ -103,36 +103,32 @@
                 </div>
             </div>
             <div class="divider"></div>
+
+            <!-- 节点内边距 -->
             <div class="style-section">
-
                 <div class="section-group-item">
-
-                    <label class="section-label">节点内边距-垂直 </label>
+                    <label class="section-label">节点内边距-垂直</label>
                     <SliderInput v-model="currentPaddingY" label="" unit="" :min="10" :max="30" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
                 </div>
 
                 <div class="section-group-item">
-
-                    <label class="section-label">节点内边距-水平 </label>
+                    <label class="section-label">节点内边距-水平</label>
                     <SliderInput v-model="currentPaddingX" label="" unit="" :min="10" :max="30" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                 </div>
-
             </div>
 
+            <!-- 节点外边距 -->
             <div class="style-section">
-
                 <div class="section-group-item">
-                    <label class="section-label">节点外边距-垂直 </label>
-                    <SliderInput v-model="currentMarginY" label="" unit="" :min="0" :max="80" :showSlider=false
-                        @update:model-value="(val) => $emit('set-theme-config', { marginY: Number(val) })" />
+                    <label class="section-label">节点外边距-垂直</label>
+                    <SliderInput v-model="currentMarginY" label="" unit="" :min="0" :max="80" :showSlider=false />
                 </div>
 
                 <div class="section-group-item">
-                    <label class="section-label">节点外边距-水平 </label>
-                    <SliderInput v-model="currentMarginX" label="" unit="" :min="0" :max="80" :showSlider=false
-                        @update:model-value="(val) => $emit('set-theme-config', { marginX: Number(val) })" />
+                    <label class="section-label">节点外边距-水平</label>
+                    <SliderInput v-model="currentMarginX" label="" unit="" :min="0" :max="80" :showSlider=false />
                 </div>
             </div>
         </div>
@@ -156,7 +152,7 @@ const props = defineProps({
     }
 })
 
-defineEmits(['set-style', 'set-theme-config'])
+const emit = defineEmits(['set-style', 'set-theme-config'])
 
 const currentColor = computed(() => getStyle('color', '#1a1a2e'))
 const currentFontWeight = computed(() => getStyle('fontWeight', 'normal'))
@@ -200,16 +196,44 @@ const currentBorderWidth = computed(() => getStyle('borderWidth', 1))
 const currentPaddingX = computed(() => getStyle('paddingX', 10))
 const currentPaddingY = computed(() => getStyle('paddingY', 10))
 
-const currentMarginX = computed(() => {
-    const level = getNodeLevel()
-    const configKey = level <= 2 ? 'second' : 'node'
-    return props.themeConfig?.[configKey]?.marginX ?? 10
+const currentMarginX = computed({
+    get() {
+        const level = getNodeLevel()
+        const configKey = level <= 2 ? 'second' : 'node'
+        return props.themeConfig?.[configKey]?.marginX ?? 10
+    },
+    set(val) {
+        const level = getNodeLevel()
+        const configKey = level <= 2 ? 'second' : 'node'
+        // 传递完整的主题配置，避免覆盖其他配置项
+        emit('set-theme-config', {
+            ...props.themeConfig,
+            [configKey]: {
+                ...props.themeConfig?.[configKey],
+                marginX: Number(val)
+            }
+        })
+    }
 })
 
-const currentMarginY = computed(() => {
-    const level = getNodeLevel()
-    const configKey = level <= 2 ? 'second' : 'node'
-    return props.themeConfig?.[configKey]?.marginY ?? 10
+const currentMarginY = computed({
+    get() {
+        const level = getNodeLevel()
+        const configKey = level <= 2 ? 'second' : 'node'
+        return props.themeConfig?.[configKey]?.marginY ?? 10
+    },
+    set(val) {
+        const level = getNodeLevel()
+        const configKey = level <= 2 ? 'second' : 'node'
+        // 传递完整的主题配置，避免覆盖其他配置项
+        emit('set-theme-config', {
+            ...props.themeConfig,
+            [configKey]: {
+                ...props.themeConfig?.[configKey],
+                marginY: Number(val)
+            }
+        })
+    }
 })
 
 function getNodeLevel() {

@@ -46,7 +46,7 @@ onBeforeUnmount(() => {
 .outline-panel {
   position: absolute;
   top: 16px;
-  right: 16px;
+  left: 16px;
   width: 280px;
   max-height: calc(100vh - 32px);
   background: rgba(255, 255, 255, 0.92);

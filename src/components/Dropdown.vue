@@ -150,8 +150,9 @@ onBeforeUnmount(() => {
   transition: background 0.15s;
   min-width: max-content;
   display: flex;
-    align-items: center;
-    justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .dropdown-menu li:hover {

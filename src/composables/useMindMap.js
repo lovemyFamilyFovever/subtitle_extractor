@@ -314,7 +314,7 @@ export function useMindMap() {
     try {
       mindMapInstance.setThemeConfig(config)
       mindMapInstance.render()
-        themeConfigVersion.value++
+      themeConfigVersion.value++
     } catch (e) { /* ignore */ }
   }
 
