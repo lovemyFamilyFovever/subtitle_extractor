@@ -539,6 +539,10 @@ export function useMindMap() {
   function exportFile(type = 'png') {
     if (!mindMapInstance) return
     try {
+
+      const date = new Date()
+      const filename = date.toLocaleString() + '思维导图.' + type
+
       if (type === 'json') {
         const data = getData()
         const pureData = { data: data.data, children: data.children || [] }
@@ -547,7 +551,8 @@ export function useMindMap() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = '思维导图.json'
+        const date = new Date()
+        a.download = filename
         a.click()
         URL.revokeObjectURL(url)
         return
@@ -560,7 +565,7 @@ export function useMindMap() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = '思维导图.txt'
+        a.download = filename
         a.click()
         URL.revokeObjectURL(url)
         return
@@ -570,7 +575,7 @@ export function useMindMap() {
         mindMapInstance.doExport[type]().then((data) => {
           const a = document.createElement('a')
           a.href = data
-          a.download = '思维导图.' + type
+          a.download =filename
           a.click()
         }).catch((err) => {
           console.error('[MindMap] 导出失败', err)
@@ -580,6 +585,33 @@ export function useMindMap() {
       console.error('[MindMap] 导出异常', e)
     }
   }
+
+  // ========== 保存到本地文件 ==========
+  async function saveToLocalFile(fileHandle) {
+    if (!mindMapInstance || !fileHandle) return false
+    try {
+      const data = mindMapInstance.getData()
+      if (!data) return false
+
+      const pureData = {
+        data: data.data,
+        children: data.children || [],
+      }
+      const json = JSON.stringify(pureData, null, 2)
+
+      const writable = await fileHandle.createWritable()
+      await writable.write(json)
+      await writable.close()
+
+      hasUnsavedChanges.value = false
+      console.log(`[MindMap] 已保存到: ${fileHandle.name}`)
+      return true
+    } catch (err) {
+      console.error('[MindMap] 保存失败:', err)
+      return false
+    }
+  }
+
 
   function nodeToText(node, level) {
     if (!node) return ''
@@ -797,5 +829,6 @@ export function useMindMap() {
     getOutlineTree,
     imageDblClickData,
     collectAllImages,
+    saveToLocalFile
   }
 }

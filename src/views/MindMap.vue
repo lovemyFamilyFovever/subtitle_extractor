@@ -46,8 +46,8 @@
 
 <script setup>
 
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useMindMap } from '@/composables/useMindMap'
 import MindMapToolbar from '@/components/mindmap/MindMapToolbar.vue'
 import MindMapCore from '@/components/mindmap/MindMapCore.vue'
@@ -70,7 +70,7 @@ const {
   insertImageToNode, openLocalFile, importFile, exportFile,
   hasUnsavedChanges, isAssociativeLineMode, newFile,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,
-  collectAllImages, setData, getData, render,
+  collectAllImages, setData, getData, render, saveToLocalFile
 } = useMindMap()
 
 const overlayRef = ref(null)
@@ -158,6 +158,61 @@ function handleRemoveFile(id) {
   fileList.value = fileList.value.filter(f => f.id !== id)
   if (currentFileIndex.value === id) currentFileIndex.value = -1
 }
+
+// ============================================================
+// ★★★ Ctrl+S 自动保存 ★★★
+// ============================================================
+
+// 获取当前文件的 fileHandle
+function getCurrentFileHandle() {
+  if (currentFileIndex.value < 0) return null
+  const file = fileList.value.find(f => f.id === currentFileIndex.value)
+  return file?._raw?.fileHandle || null
+}
+
+// 保存当前画布
+async function handleSave() {
+  const fileHandle = getCurrentFileHandle()
+
+  if (!fileHandle) {
+    // 没有 fileHandle（传统模式或未选择文件），降级为导出 JSON
+    const data = getData()
+    if (!data) return
+    const pureData = { data: data.data, children: data.children || [] }
+    const json = JSON.stringify(pureData, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const date = new Date()
+    a.download = date.toLocaleString()+'.json'
+    a.click()
+    URL.revokeObjectURL(url)
+    return
+  }
+
+  const success = await saveToLocalFile(fileHandle)
+  if (success) {
+    console.log('保存成功')
+  }
+}
+
+// 键盘事件监听
+function handleKeydown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault()
+    handleSave()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
+
 
 // ============================================================
 // Overlay 坐标
@@ -305,7 +360,7 @@ onMounted(() => {
     const { mindMap } = useMindMap()
     if (mindMap && mindMap.value) {
       clearInterval(timer)
-      try { mindMap.value.on('line_text_edit', (data) => lineTextRef.value?.show(data)) } catch (e) {}
+      try { mindMap.value.on('line_text_edit', (data) => lineTextRef.value?.show(data)) } catch (e) { }
     }
   }, 200)
   setTimeout(() => clearInterval(timer), 5000)
