@@ -5318,11 +5318,11 @@ var _plugin_vue_export_helper_default = (sfc, props) => {
 };
 //#endregion
 //#region src/components/AppModal.vue
-var _hoisted_1$16 = ["aria-labelledby"];
-var _hoisted_2$15 = { class: "modal-header" };
-var _hoisted_3$15 = ["id"];
-var _hoisted_4$15 = ["aria-label"];
-var _hoisted_5$11 = { class: "modal-body" };
+var _hoisted_1$22 = ["aria-labelledby"];
+var _hoisted_2$21 = { class: "modal-header" };
+var _hoisted_3$20 = ["id"];
+var _hoisted_4$19 = ["aria-label"];
+var _hoisted_5$15 = { class: "modal-body" };
 var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "AppModal",
 	props: {
@@ -5376,11 +5376,11 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				"aria-modal": "true",
 				"aria-labelledby": titleId.value,
 				tabindex: "-1"
-			}, [createBaseVNode("div", _hoisted_2$15, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
+			}, [createBaseVNode("div", _hoisted_2$21, [createBaseVNode("h2", { id: titleId.value }, [__props.icon ? (openBlock(), createElementBlock("i", {
 				key: 0,
 				class: normalizeClass(__props.icon),
 				"aria-hidden": "true"
-			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$15), createBaseVNode("button", {
+			}, null, 2)) : createCommentVNode("", true), createTextVNode(" " + toDisplayString(__props.title), 1)], 8, _hoisted_3$20), createBaseVNode("button", {
 				class: "close-btn",
 				onClick: close,
 				"aria-label": `关闭${__props.title ? " " + __props.title : ""}对话框`,
@@ -5388,24 +5388,24 @@ var AppModal_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			}, [..._cache[0] || (_cache[0] = [createBaseVNode("i", {
 				class: "fa-solid fa-xmark",
 				"aria-hidden": "true"
-			}, null, -1)])], 8, _hoisted_4$15)]), createBaseVNode("div", _hoisted_5$11, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 8, _hoisted_1$16)], 2);
+			}, null, -1)])], 8, _hoisted_4$19)]), createBaseVNode("div", _hoisted_5$15, [renderSlot(_ctx.$slots, "default", {}, void 0, true)])], 8, _hoisted_1$22)], 2);
 		};
 	}
-}, [["__scopeId", "data-v-c9a69a69"]]);
+}, [["__scopeId", "data-v-6f0a5be5"]]);
 //#endregion
 //#region src/components/SliderInput.vue
-var _hoisted_1$15 = [
+var _hoisted_1$21 = [
 	"min",
 	"max",
 	"step",
 	"value"
 ];
-var _hoisted_2$14 = { class: "slider-header" };
-var _hoisted_3$14 = {
+var _hoisted_2$20 = { class: "slider-header" };
+var _hoisted_3$19 = {
 	key: 0,
 	class: "form-label"
 };
-var _hoisted_4$14 = ["value"];
+var _hoisted_4$18 = ["value"];
 var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "SliderInput",
 	props: {
@@ -5503,20 +5503,20 @@ var SliderInput_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				style: normalizeStyle({ "--pct": pct.value }),
 				onInput,
 				class: "slider"
-			}, null, 44, _hoisted_1$15), [[vShow, __props.showSlider]]), withDirectives(createBaseVNode("div", _hoisted_2$14, [
-				__props.label ? (openBlock(), createElementBlock("span", _hoisted_3$14, toDisplayString(__props.label), 1)) : createCommentVNode("", true),
+			}, null, 44, _hoisted_1$21), [[vShow, __props.showSlider]]), withDirectives(createBaseVNode("div", _hoisted_2$20, [
+				__props.label ? (openBlock(), createElementBlock("span", _hoisted_3$19, toDisplayString(__props.label), 1)) : createCommentVNode("", true),
 				createBaseVNode("input", {
 					class: "form-input",
 					type: "text",
 					value: __props.modelValue,
 					onInput: onTextChange,
 					onFocus: onTextFocus
-				}, null, 40, _hoisted_4$14),
+				}, null, 40, _hoisted_4$18),
 				createTextVNode(toDisplayString(__props.unit), 1)
 			], 512), [[vShow, __props.showInput]])], 2);
 		};
 	}
-}, [["__scopeId", "data-v-58e5ae08"]]);
+}, [["__scopeId", "data-v-925583f0"]]);
 //#endregion
 //#region src/composables/useToast.js
 var toasts = /* @__PURE__ */ ref([]);
@@ -5625,26 +5625,26 @@ function useUndoRedo(maxHistory = 20) {
 }
 //#endregion
 //#region src/views/VideoSubtitle.vue
-var _hoisted_1$14 = { class: "app-layout" };
-var _hoisted_2$13 = { class: "app-left" };
-var _hoisted_3$13 = { class: "upload-text" };
-var _hoisted_4$13 = ["src"];
-var _hoisted_5$10 = {
+var _hoisted_1$20 = { class: "app-layout" };
+var _hoisted_2$19 = { class: "app-left" };
+var _hoisted_3$18 = { class: "upload-text" };
+var _hoisted_4$17 = ["src"];
+var _hoisted_5$14 = {
 	key: 1,
 	class: "video-info-bar"
 };
-var _hoisted_6$10 = {
+var _hoisted_6$12 = {
 	key: 2,
 	class: "toolbar"
 };
-var _hoisted_7$10 = { class: "cover-btn-container" };
-var _hoisted_8$10 = {
+var _hoisted_7$11 = { class: "cover-btn-container" };
+var _hoisted_8$11 = {
 	key: 0,
 	class: "cover-options"
 };
-var _hoisted_9$10 = ["disabled"];
-var _hoisted_10$10 = { class: "fa-solid fa-play" };
-var _hoisted_11$10 = { class: "fa-solid fa-pause" };
+var _hoisted_9$11 = ["disabled"];
+var _hoisted_10$11 = { class: "fa-solid fa-play" };
+var _hoisted_11$11 = { class: "fa-solid fa-pause" };
 var _hoisted_12$10 = ["disabled"];
 var _hoisted_13$9 = { class: "app-middle" };
 var _hoisted_14$8 = { class: "settings-panel" };
@@ -5661,23 +5661,23 @@ var _hoisted_22$7 = {
 };
 var _hoisted_23$7 = { class: "seg-control" };
 var _hoisted_24$7 = ["disabled", "onClick"];
-var _hoisted_25$7 = {
+var _hoisted_25$6 = {
 	class: "time-wrapper",
 	ref: "timeWrapperRef"
 };
-var _hoisted_26$7 = ["onClick"];
-var _hoisted_27$7 = { class: "time-item-text" };
-var _hoisted_28$7 = ["onClick"];
-var _hoisted_29$7 = { class: "action-row" };
-var _hoisted_30$6 = ["disabled"];
-var _hoisted_31$6 = ["disabled"];
-var _hoisted_32$6 = ["disabled"];
-var _hoisted_33$5 = ["disabled"];
-var _hoisted_34$5 = {
+var _hoisted_26$6 = ["onClick"];
+var _hoisted_27$6 = { class: "time-item-text" };
+var _hoisted_28$6 = ["onClick"];
+var _hoisted_29$6 = { class: "action-row" };
+var _hoisted_30$5 = ["disabled"];
+var _hoisted_31$5 = ["disabled"];
+var _hoisted_32$5 = ["disabled"];
+var _hoisted_33$4 = ["disabled"];
+var _hoisted_34$4 = {
 	key: 0,
 	class: "progress-container"
 };
-var _hoisted_35$5 = { class: "progress-header" };
+var _hoisted_35$4 = { class: "progress-header" };
 var _hoisted_36$3 = { class: "progress-text" };
 var _hoisted_37$3 = { class: "progress-percent" };
 var _hoisted_38$2 = { class: "progress-bar" };
@@ -6357,8 +6357,8 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (resizeObserver) resizeObserver.disconnect();
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$14, [
-				createBaseVNode("div", _hoisted_2$13, [
+			return openBlock(), createElementBlock("div", _hoisted_1$20, [
+				createBaseVNode("div", _hoisted_2$19, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -6370,7 +6370,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[8] || (_cache[8] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$13, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						createBaseVNode("p", _hoisted_3$18, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
 						_cache[9] || (_cache[9] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
@@ -6401,26 +6401,26 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "video-player",
 							onLoadedmetadata: onVideoLoaded,
 							onError: onVideoError
-						}, null, 40, _hoisted_4$13),
+						}, null, 40, _hoisted_4$17),
 						createBaseVNode("canvas", {
 							ref_key: "overlayCanvas",
 							ref: overlayCanvas,
 							class: "overlay-canvas"
 						}, null, 512)
 					], 512)) : createCommentVNode("", true),
-					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$10, [
+					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$14, [
 						createBaseVNode("span", null, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
 						createBaseVNode("span", null, [_cache[12] || (_cache[12] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.width) + " × " + toDisplayString(videoInfo.value.height), 1)]),
 						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
 					])) : createCommentVNode("", true),
-					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$10, [
-						createBaseVNode("div", _hoisted_7$10, [createBaseVNode("button", {
+					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$12, [
+						createBaseVNode("div", _hoisted_7$11, [createBaseVNode("button", {
 							class: normalizeClass(["btn cover-btn", { "cover-active": coverTimeSec.value !== null || customCoverImage.value !== null }]),
 							onClick: toggleCoverOptions,
 							onMouseenter: _cache[3] || (_cache[3] = ($event) => showCoverTip.value = true),
 							onMouseleave: _cache[4] || (_cache[4] = ($event) => showCoverTip.value = false),
 							title: "设置封面"
-						}, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "自动封面"), 1)], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$10, [
+						}, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverTimeSec.value !== null ? "当前封面" : "自动封面"), 1)], 34), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_8$11, [
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: setCoverFrameFromVideo
@@ -6447,10 +6447,10 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							disabled: !videoUrl.value,
 							onClick: togglePlayPause
 						}, [
-							withDirectives(createBaseVNode("i", _hoisted_10$10, null, 512), [[vShow, !isPlaying.value]]),
-							withDirectives(createBaseVNode("i", _hoisted_11$10, null, 512), [[vShow, isPlaying.value]]),
+							withDirectives(createBaseVNode("i", _hoisted_10$11, null, 512), [[vShow, !isPlaying.value]]),
+							withDirectives(createBaseVNode("i", _hoisted_11$11, null, 512), [[vShow, isPlaying.value]]),
 							createTextVNode(" " + toDisplayString(isPlaying.value ? "暂停" : "播放"), 1)
-						], 8, _hoisted_9$10),
+						], 8, _hoisted_9$11),
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !videoUrl.value,
@@ -6509,17 +6509,17 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						createTextVNode(" 时间标记 "),
 						createBaseVNode("span", { class: "panel-hint" }, "Enter 添加帧 · Space 播放/暂停")
 					], -1)),
-					createBaseVNode("div", _hoisted_25$7, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(timePoints.value, (time, index) => {
+					createBaseVNode("div", _hoisted_25$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(timePoints.value, (time, index) => {
 						return openBlock(), createElementBlock("div", {
 							class: normalizeClass(["time-item", { active: activeTimeIndex.value === index }]),
 							key: index,
 							onClick: ($event) => goToTime(time.timeSec)
-						}, [createBaseVNode("span", _hoisted_27$7, toDisplayString(formatTime(time.timeSec)), 1), createBaseVNode("button", {
+						}, [createBaseVNode("span", _hoisted_27$6, toDisplayString(formatTime(time.timeSec)), 1), createBaseVNode("button", {
 							class: "time-item-btn",
 							onClick: withModifiers(($event) => removeTimePoint(time), ["stop"])
-						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_28$7)], 10, _hoisted_26$7);
+						}, [..._cache[23] || (_cache[23] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_28$6)], 10, _hoisted_26$6);
 					}), 128))], 512),
-					createBaseVNode("div", _hoisted_29$7, [
+					createBaseVNode("div", _hoisted_29$6, [
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !unref(canUndo)(),
@@ -6530,7 +6530,7 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								"padding": "0.6rem 0.8rem",
 								"width": "20%"
 							}
-						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_30$6),
+						}, [..._cache[24] || (_cache[24] = [createBaseVNode("i", { class: "fa-solid fa-undo" }, null, -1)])], 8, _hoisted_30$5),
 						createBaseVNode("button", {
 							class: "btn",
 							disabled: !unref(canRedo)(),
@@ -6541,21 +6541,21 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								"padding": "0.6rem 0.8rem",
 								"width": "20%"
 							}
-						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_31$6),
+						}, [..._cache[25] || (_cache[25] = [createBaseVNode("i", { class: "fa-solid fa-redo" }, null, -1)])], 8, _hoisted_31$5),
 						createBaseVNode("button", {
 							class: "btn btn-danger",
 							disabled: timePoints.value.length === 0,
 							onClick: clearMarks,
 							style: { "width": "50%" }
-						}, [..._cache[26] || (_cache[26] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 清空标记 ", -1)])], 8, _hoisted_32$6),
+						}, [..._cache[26] || (_cache[26] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 清空标记 ", -1)])], 8, _hoisted_32$5),
 						createBaseVNode("button", {
 							class: "btn btn-primary btn-block",
 							disabled: !videoUrl.value || isExtracting.value,
 							onClick: extractAndStitch
-						}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_33$5)
+						}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isExtracting.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isExtracting.value ? statusMsg.value : "智能提取并拼接"), 1)], 8, _hoisted_33$4)
 					]),
-					isExtracting.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_34$5, [
-						createBaseVNode("div", _hoisted_35$5, [createBaseVNode("span", _hoisted_36$3, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_37$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+					isExtracting.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_34$4, [
+						createBaseVNode("div", _hoisted_35$4, [createBaseVNode("span", _hoisted_36$3, [_cache[27] || (_cache[27] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_37$3, toDisplayString(progressInfo.value.percent) + "%", 1)]),
 						createBaseVNode("div", _hoisted_38$2, [createBaseVNode("div", {
 							class: "progress-fill",
 							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
@@ -6581,29 +6581,29 @@ var VideoSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-68e8ce12"]]);
+}, [["__scopeId", "data-v-2acf98ed"]]);
 //#endregion
 //#region src/views/ImageSubtitle.vue
-var _hoisted_1$13 = { class: "app-layout" };
-var _hoisted_2$12 = { class: "app-left" };
-var _hoisted_3$12 = { class: "upload-text" };
-var _hoisted_4$12 = {
+var _hoisted_1$19 = { class: "app-layout" };
+var _hoisted_2$18 = { class: "app-left" };
+var _hoisted_3$17 = { class: "upload-text" };
+var _hoisted_4$16 = {
 	key: 0,
 	class: "upload-hint"
 };
-var _hoisted_5$9 = { class: "canvas-container" };
-var _hoisted_6$9 = {
+var _hoisted_5$13 = { class: "canvas-container" };
+var _hoisted_6$11 = {
 	key: 0,
 	class: "nav-bar"
 };
-var _hoisted_7$9 = { class: "nav-info" };
-var _hoisted_8$9 = { class: "cover-btn-container" };
-var _hoisted_9$9 = ["disabled"];
-var _hoisted_10$9 = {
+var _hoisted_7$10 = { class: "nav-info" };
+var _hoisted_8$10 = { class: "cover-btn-container" };
+var _hoisted_9$10 = ["disabled"];
+var _hoisted_10$10 = {
 	key: 0,
 	class: "cover-options"
 };
-var _hoisted_11$9 = ["disabled"];
+var _hoisted_11$10 = ["disabled"];
 var _hoisted_12$9 = ["disabled"];
 var _hoisted_13$8 = ["disabled"];
 var _hoisted_14$7 = ["disabled"];
@@ -6620,23 +6620,23 @@ var _hoisted_21$7 = { class: "setting-item" };
 var _hoisted_22$6 = { class: "setting-item" };
 var _hoisted_23$6 = { class: "seg-control" };
 var _hoisted_24$6 = ["onClick"];
-var _hoisted_25$6 = { class: "setting-item" };
-var _hoisted_26$6 = { class: "form-label" };
-var _hoisted_27$6 = {
+var _hoisted_25$5 = { class: "setting-item" };
+var _hoisted_26$5 = { class: "form-label" };
+var _hoisted_27$5 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_28$6 = { class: "seg-control" };
-var _hoisted_29$6 = ["disabled", "onClick"];
-var _hoisted_30$5 = { class: "action-row" };
-var _hoisted_31$5 = ["disabled"];
-var _hoisted_32$5 = {
+var _hoisted_28$5 = { class: "seg-control" };
+var _hoisted_29$5 = ["disabled", "onClick"];
+var _hoisted_30$4 = { class: "action-row" };
+var _hoisted_31$4 = ["disabled"];
+var _hoisted_32$4 = {
 	key: 0,
 	class: "app-right result-section"
 };
-var _hoisted_33$4 = { class: "result-header" };
-var _hoisted_34$4 = { class: "result-canvas-container" };
-var _hoisted_35$4 = { class: "result-actions" };
+var _hoisted_33$3 = { class: "result-header" };
+var _hoisted_34$3 = { class: "result-canvas-container" };
+var _hoisted_35$3 = { class: "result-actions" };
 var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "ImageSubtitle",
 	setup(__props) {
@@ -7023,8 +7023,8 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			images.value.forEach((item) => URL.revokeObjectURL(item.url));
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$13, [
-				createBaseVNode("div", _hoisted_2$12, [
+			return openBlock(), createElementBlock("div", _hoisted_1$19, [
+				createBaseVNode("div", _hoisted_2$18, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -7036,8 +7036,8 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[7] || (_cache[7] = createBaseVNode("i", { class: "fa-solid fa-image upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$12, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
-						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$12, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
+						createBaseVNode("p", _hoisted_3$17, toDisplayString(images.value.length > 0 ? "点击或拖拽新图片到此处" : "点击或拖拽图片到此处"), 1),
+						images.value.length === 0 ? (openBlock(), createElementBlock("p", _hoisted_4$16, " 支持 JPG / PNG / WEBP 等常见格式 ")) : createCommentVNode("", true),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
 							ref: fileInput,
@@ -7048,7 +7048,7 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					createBaseVNode("div", _hoisted_5$9, [withDirectives(createBaseVNode("canvas", {
+					createBaseVNode("div", _hoisted_5$13, [withDirectives(createBaseVNode("canvas", {
 						ref_key: "canvas",
 						ref: canvas,
 						class: "preview-canvas",
@@ -7060,27 +7060,27 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onTouchmove: withModifiers(onTouchMove, ["prevent"]),
 						onTouchend: onMouseUp
 					}, null, 544), [[vShow, images.value.length > 0]])]),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_6$9, [
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_6$11, [
 						createBaseVNode("button", {
 							class: "btn",
 							onClick: goPrev
 						}, [..._cache[8] || (_cache[8] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])]),
-						createBaseVNode("span", _hoisted_7$9, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(images.value.length), 1),
+						createBaseVNode("span", _hoisted_7$10, toDisplayString(currentIndex.value + 1) + " / " + toDisplayString(images.value.length), 1),
 						createBaseVNode("button", {
 							class: "btn",
 							onClick: goNext
 						}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])]),
-						createBaseVNode("div", _hoisted_8$9, [createBaseVNode("button", {
+						createBaseVNode("div", _hoisted_8$10, [createBaseVNode("button", {
 							class: normalizeClass(["btn cover-btn", { "cover-active": coverMode.value !== "auto" || customCoverImage.value !== null }]),
 							onClick: toggleCoverOptions,
 							disabled: images.value.length == 0,
 							title: "设置封面"
-						}, [_cache[10] || (_cache[10] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverMode.value === "current" ? "当前封面" : "封面设置"), 1)], 10, _hoisted_9$9), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_10$9, [
+						}, [_cache[10] || (_cache[10] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" " + toDisplayString(customCoverImage.value ? "本地封面" : coverMode.value === "current" ? "当前封面" : "封面设置"), 1)], 10, _hoisted_9$10), showCoverOptions.value ? (openBlock(), createElementBlock("div", _hoisted_10$10, [
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: setCoverFromCurrentImage,
 								disabled: images.value.length == 0
-							}, "当前封面", 8, _hoisted_11$9),
+							}, "当前封面", 8, _hoisted_11$10),
 							createBaseVNode("button", {
 								class: "btn",
 								onClick: _cache[3] || (_cache[3] = ($event) => coverFileInput.value.click()),
@@ -7162,34 +7162,34 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onClick: ($event) => format.value = fmt
 						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_24$6);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_25$6, [createBaseVNode("label", _hoisted_26$6, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+					createBaseVNode("div", _hoisted_25$5, [createBaseVNode("label", _hoisted_26$5, [_cache[19] || (_cache[19] = createBaseVNode("label", {
 						class: "form-label",
 						style: { "display": "inline" }
-					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_27$6, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_28$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_27$5, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_28$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
 							disabled: format.value === "png",
 							onClick: ($event) => compression.value = opt.value
-						}, toDisplayString(opt.label), 11, _hoisted_29$6);
+						}, toDisplayString(opt.label), 11, _hoisted_29$5);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_30$5, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_30$4, [createBaseVNode("button", {
 						class: "btn btn-primary btn-block",
 						disabled: images.value.length === 0 || isGenerating.value,
 						onClick: generate
-					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? "生成中..." : "生成长拼接图"), 1)], 8, _hoisted_31$5)])
+					}, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? "生成中..." : "生成长拼接图"), 1)], 8, _hoisted_31$4)])
 				])]),
-				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_32$5, [
-					createBaseVNode("div", _hoisted_33$4, [_cache[21] || (_cache[21] = createBaseVNode("i", {
+				resultCanvas.value ? (openBlock(), createElementBlock("div", _hoisted_32$4, [
+					createBaseVNode("div", _hoisted_33$3, [_cache[21] || (_cache[21] = createBaseVNode("i", {
 						class: "fa-solid fa-check-circle",
 						style: { "color": "var(--accent)" }
 					}, null, -1)), createTextVNode(" 拼接完成 · " + toDisplayString(resultWidth.value) + " × " + toDisplayString(resultHeight.value) + " px ", 1)]),
-					createBaseVNode("div", _hoisted_34$4, [createBaseVNode("canvas", {
+					createBaseVNode("div", _hoisted_34$3, [createBaseVNode("canvas", {
 						ref_key: "resultCanvasEl",
 						ref: resultCanvasEl,
 						class: "result-canvas"
 					}, null, 512)]),
-					createBaseVNode("div", _hoisted_35$4, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_35$3, [createBaseVNode("button", {
 						class: "btn btn-primary",
 						onClick: _cache[6] || (_cache[6] = ($event) => saveResult(format.value))
 					}, [_cache[22] || (_cache[22] = createBaseVNode("i", { class: "fa-solid fa-download" }, null, -1)), createTextVNode(" 保存 " + toDisplayString(format.value.toUpperCase()), 1)])])
@@ -7197,20 +7197,20 @@ var ImageSubtitle_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-e1bb010c"]]);
+}, [["__scopeId", "data-v-0414f43e"]]);
 //#endregion
 //#region src/views/ImageStitch.vue
-var _hoisted_1$12 = { class: "app-layout" };
-var _hoisted_2$11 = { class: "app-left" };
-var _hoisted_3$11 = { key: 0 };
-var _hoisted_4$11 = { class: "form-label" };
-var _hoisted_5$8 = { class: "image-list" };
-var _hoisted_6$8 = ["onDragstart", "onDragover"];
-var _hoisted_7$8 = ["src", "alt"];
-var _hoisted_8$8 = { class: "item-index" };
-var _hoisted_9$8 = ["onClick"];
-var _hoisted_10$8 = ["onClick"];
-var _hoisted_11$8 = { class: "app-middle" };
+var _hoisted_1$18 = { class: "app-layout" };
+var _hoisted_2$17 = { class: "app-left" };
+var _hoisted_3$16 = { key: 0 };
+var _hoisted_4$15 = { class: "form-label" };
+var _hoisted_5$12 = { class: "image-list" };
+var _hoisted_6$10 = ["onDragstart", "onDragover"];
+var _hoisted_7$9 = ["src", "alt"];
+var _hoisted_8$9 = { class: "item-index" };
+var _hoisted_9$9 = ["onClick"];
+var _hoisted_10$9 = ["onClick"];
+var _hoisted_11$9 = { class: "app-middle" };
 var _hoisted_12$8 = { class: "settings-panel" };
 var _hoisted_13$7 = { class: "setting-item" };
 var _hoisted_14$6 = { class: "seg-control" };
@@ -7234,20 +7234,20 @@ var _hoisted_24$5 = {
 		"color": "var(--muted)"
 	}
 };
-var _hoisted_25$5 = ["title"];
-var _hoisted_26$5 = { class: "setting-item" };
-var _hoisted_27$5 = { class: "seg-control" };
-var _hoisted_28$5 = ["onClick"];
-var _hoisted_29$5 = { class: "setting-item" };
-var _hoisted_30$4 = { class: "form-label" };
-var _hoisted_31$4 = {
+var _hoisted_25$4 = ["title"];
+var _hoisted_26$4 = { class: "setting-item" };
+var _hoisted_27$4 = { class: "seg-control" };
+var _hoisted_28$4 = ["onClick"];
+var _hoisted_29$4 = { class: "setting-item" };
+var _hoisted_30$3 = { class: "form-label" };
+var _hoisted_31$3 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_32$4 = { class: "seg-control" };
-var _hoisted_33$3 = ["disabled", "onClick"];
-var _hoisted_34$3 = { class: "app-right" };
-var _hoisted_35$3 = { class: "preview-area" };
+var _hoisted_32$3 = { class: "seg-control" };
+var _hoisted_33$2 = ["disabled", "onClick"];
+var _hoisted_34$2 = { class: "app-right" };
+var _hoisted_35$2 = { class: "preview-area" };
 var _hoisted_36$2 = {
 	key: 0,
 	class: "preview-info"
@@ -7661,8 +7661,8 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			images.value.forEach((item) => URL.revokeObjectURL(item.url));
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$12, [
-				createBaseVNode("div", _hoisted_2$11, [
+			return openBlock(), createElementBlock("div", _hoisted_1$18, [
+				createBaseVNode("div", _hoisted_2$17, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
@@ -7683,7 +7683,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$11, [createBaseVNode("span", _hoisted_4$11, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$8, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(images.value, (item, index) => {
+					images.value.length > 0 ? (openBlock(), createElementBlock("div", _hoisted_3$16, [createBaseVNode("span", _hoisted_4$15, "图片列表 (" + toDisplayString(images.value.length) + ") 拖拽调整顺序", 1), createBaseVNode("div", _hoisted_5$12, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(images.value, (item, index) => {
 						return openBlock(), createElementBlock("div", {
 							key: item.id,
 							class: normalizeClass(["image-item", {
@@ -7698,19 +7698,19 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							createBaseVNode("img", {
 								src: item.url,
 								alt: item.name
-							}, null, 8, _hoisted_7$8),
-							createBaseVNode("span", _hoisted_8$8, toDisplayString(index + 1), 1),
+							}, null, 8, _hoisted_7$9),
+							createBaseVNode("span", _hoisted_8$9, toDisplayString(index + 1), 1),
 							createBaseVNode("button", {
 								class: "item-rotate",
 								onClick: withModifiers(($event) => rotateImage(index), ["stop"]),
 								title: "旋转90°"
-							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])], 8, _hoisted_9$8),
+							}, [..._cache[9] || (_cache[9] = [createBaseVNode("i", { class: "fa-solid fa-rotate-right" }, null, -1)])], 8, _hoisted_9$9),
 							createBaseVNode("button", {
 								class: "item-delete",
 								onClick: withModifiers(($event) => removeImage(index), ["stop"]),
 								title: "删除"
-							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$8)
-						], 42, _hoisted_6$8);
+							}, [..._cache[10] || (_cache[10] = [createBaseVNode("i", { class: "fa-solid fa-xmark" }, null, -1)])], 8, _hoisted_10$9)
+						], 42, _hoisted_6$10);
 					}), 128))])])) : createCommentVNode("", true),
 					images.value.length > 0 ? (openBlock(), createElementBlock("button", {
 						key: 1,
@@ -7718,7 +7718,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onClick: clearAll
 					}, [_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1)), createTextVNode(" 清空全部 (" + toDisplayString(images.value.length) + ") ", 1)])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_11$8, [createBaseVNode("div", _hoisted_12$8, [
+				createBaseVNode("div", _hoisted_11$9, [createBaseVNode("div", _hoisted_12$8, [
 					createBaseVNode("div", _hoisted_13$7, [_cache[12] || (_cache[12] = createBaseVNode("span", { class: "form-label" }, "布局方式", -1)), createBaseVNode("div", _hoisted_14$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList(layoutOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
@@ -7783,9 +7783,9 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							class: "palette-input",
 							"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => customBgColor.value = $event),
 							onInput: applyCustomBgColor
-						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_25$5))], 64);
+						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_25$4))], 64);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_26$5, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_27$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_26$4, [_cache[18] || (_cache[18] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_27$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -7794,21 +7794,21 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_28$5);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_28$4);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_29$5, [createBaseVNode("label", _hoisted_30$4, [_cache[19] || (_cache[19] = createBaseVNode("label", {
+					createBaseVNode("div", _hoisted_29$4, [createBaseVNode("label", _hoisted_30$3, [_cache[19] || (_cache[19] = createBaseVNode("label", {
 						class: "form-label",
 						style: { "display": "inline" }
-					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_31$4, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_32$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					}, "图片压缩", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_31$3, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_32$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
 							disabled: format.value === "png",
 							onClick: ($event) => compression.value = opt.value
-						}, toDisplayString(opt.label), 11, _hoisted_33$3);
+						}, toDisplayString(opt.label), 11, _hoisted_33$2);
 					}), 64))])])
 				])]),
-				createBaseVNode("div", _hoisted_34$3, [createBaseVNode("div", _hoisted_35$3, [
+				createBaseVNode("div", _hoisted_34$2, [createBaseVNode("div", _hoisted_35$2, [
 					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_36$2, [_cache[20] || (_cache[20] = createBaseVNode("i", { class: "fa-solid fa-image" }, null, -1)), createTextVNode(" 预览 · 输出尺寸 " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
 					images.value.length < 2 ? (openBlock(), createElementBlock("div", _hoisted_37$2, [..._cache[21] || (_cache[21] = [createBaseVNode("span", { class: "empty-icon" }, "🖼️", -1), createBaseVNode("span", null, "添加至少 2 张图片后预览", -1)])])) : createCommentVNode("", true),
 					createBaseVNode("div", {
@@ -7841,7 +7841,7 @@ var ImageStitch_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-84899bbf"]]);
+}, [["__scopeId", "data-v-c52b704b"]]);
 //#endregion
 //#region \0vite/preload-helper.js
 var scriptRel = "modulepreload";
@@ -7904,26 +7904,26 @@ var __vitePreload = function preload(baseModule, deps, importerUrl) {
 };
 //#endregion
 //#region src/views/ImageSegmentation.vue
-var _hoisted_1$11 = { class: "app-layout" };
-var _hoisted_2$10 = { class: "app-left" };
-var _hoisted_3$10 = {
+var _hoisted_1$17 = { class: "app-layout" };
+var _hoisted_2$16 = { class: "app-left" };
+var _hoisted_3$15 = {
 	key: 0,
 	class: "source-preview-wrap"
 };
-var _hoisted_4$10 = { class: "source-preview" };
-var _hoisted_5$7 = ["src", "alt"];
-var _hoisted_6$7 = {
+var _hoisted_4$14 = { class: "source-preview" };
+var _hoisted_5$11 = ["src", "alt"];
+var _hoisted_6$9 = {
 	key: 1,
 	class: "nav-bar"
 };
-var _hoisted_7$7 = ["disabled"];
-var _hoisted_8$7 = {
+var _hoisted_7$8 = ["disabled"];
+var _hoisted_8$8 = {
 	key: 2,
 	class: "info-bar"
 };
-var _hoisted_9$7 = { class: "nav-filename" };
-var _hoisted_10$7 = { class: "app-middle" };
-var _hoisted_11$7 = { class: "settings-panel" };
+var _hoisted_9$8 = { class: "nav-filename" };
+var _hoisted_10$8 = { class: "app-middle" };
+var _hoisted_11$8 = { class: "settings-panel" };
 var _hoisted_12$7 = { class: "setting-item" };
 var _hoisted_13$6 = { class: "seg-control" };
 var _hoisted_14$5 = ["onClick"];
@@ -7944,20 +7944,20 @@ var _hoisted_23$4 = {
 	}
 };
 var _hoisted_24$4 = ["title"];
-var _hoisted_25$4 = { class: "setting-item" };
-var _hoisted_26$4 = { class: "seg-control" };
-var _hoisted_27$4 = ["onClick"];
-var _hoisted_28$4 = { class: "setting-item" };
-var _hoisted_29$4 = { class: "form-label" };
-var _hoisted_30$3 = {
+var _hoisted_25$3 = { class: "setting-item" };
+var _hoisted_26$3 = { class: "seg-control" };
+var _hoisted_27$3 = ["onClick"];
+var _hoisted_28$3 = { class: "setting-item" };
+var _hoisted_29$3 = { class: "form-label" };
+var _hoisted_30$2 = {
 	key: 0,
 	class: "form-hint"
 };
-var _hoisted_31$3 = { class: "seg-control" };
-var _hoisted_32$3 = ["disabled", "onClick"];
-var _hoisted_33$2 = { class: "app-right" };
-var _hoisted_34$2 = { class: "preview-area" };
-var _hoisted_35$2 = {
+var _hoisted_31$2 = { class: "seg-control" };
+var _hoisted_32$2 = ["disabled", "onClick"];
+var _hoisted_33$1 = { class: "app-right" };
+var _hoisted_34$1 = { class: "preview-area" };
+var _hoisted_35$1 = {
 	key: 0,
 	class: "preview-info"
 };
@@ -8205,7 +8205,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-oPtclfCs.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-DLSeCOCs.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -8249,8 +8249,8 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url);
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$11, [
-				createBaseVNode("div", _hoisted_2$10, [
+			return openBlock(), createElementBlock("div", _hoisted_1$17, [
+				createBaseVNode("div", _hoisted_2$16, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", { "drag-over": isDragOver.value }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => fileInput.value.click()),
@@ -8270,23 +8270,23 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							onChange: onFileChange
 						}, null, 544)
 					], 34),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$10, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$10, [createBaseVNode("img", {
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_3$15, [_cache[11] || (_cache[11] = createBaseVNode("span", { class: "form-label" }, "已上传图片", -1)), createBaseVNode("div", _hoisted_4$14, [createBaseVNode("img", {
 						src: sourceImage.value.url,
 						alt: sourceImage.value.name,
 						class: "source-thumb"
-					}, null, 8, _hoisted_5$7)])])) : createCommentVNode("", true),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_6$7, [createBaseVNode("button", {
+					}, null, 8, _hoisted_5$11)])])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_6$9, [createBaseVNode("button", {
 						class: "btn btn-danger",
 						onClick: clearSource,
 						disabled: !sourceImage.value
-					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7$7)])) : createCommentVNode("", true),
-					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$7, [
-						createBaseVNode("span", _hoisted_9$7, toDisplayString(sourceImage.value.name), 1),
+					}, [..._cache[12] || (_cache[12] = [createBaseVNode("i", { class: "fa-solid fa-trash" }, null, -1), createTextVNode(" 删除 ", -1)])], 8, _hoisted_7$8)])) : createCommentVNode("", true),
+					sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_8$8, [
+						createBaseVNode("span", _hoisted_9$8, toDisplayString(sourceImage.value.name), 1),
 						createBaseVNode("span", null, [_cache[13] || (_cache[13] = createBaseVNode("i", { class: "fa-solid fa-expand" }, null, -1)), createTextVNode(" " + toDisplayString(sourceImage.value.img.naturalWidth) + " × " + toDisplayString(sourceImage.value.img.naturalHeight) + " px", 1)]),
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(formatBytes(sourceImage.value.size)), 1)])
 					])) : createCommentVNode("", true)
 				]),
-				createBaseVNode("div", _hoisted_10$7, [createBaseVNode("div", _hoisted_11$7, [
+				createBaseVNode("div", _hoisted_10$8, [createBaseVNode("div", _hoisted_11$8, [
 					createBaseVNode("div", _hoisted_12$7, [_cache[16] || (_cache[16] = createBaseVNode("span", { class: "form-label" }, "切割方式", -1)), createBaseVNode("div", _hoisted_13$6, [(openBlock(), createElementBlock(Fragment$1, null, renderList(presetOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
@@ -8372,7 +8372,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							onInput: applyCustomBgColor
 						}, null, 544), [[vModelText, customBgColor.value]])], 14, _hoisted_24$4))], 64);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_25$4, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_26$4, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
+					createBaseVNode("div", _hoisted_25$3, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "form-label" }, "输出格式", -1)), createBaseVNode("div", _hoisted_26$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList([
 						"png",
 						"jpeg",
 						"webp"
@@ -8381,19 +8381,19 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 							key: fmt,
 							class: normalizeClass(["seg-btn", { active: format.value === fmt }]),
 							onClick: ($event) => format.value = fmt
-						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_27$4);
+						}, toDisplayString(fmt.toUpperCase()), 11, _hoisted_27$3);
 					}), 64))])]),
-					createBaseVNode("div", _hoisted_28$4, [createBaseVNode("label", _hoisted_29$4, [_cache[23] || (_cache[23] = createTextVNode(" 图片压缩 ", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_30$3, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_31$3, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
+					createBaseVNode("div", _hoisted_28$3, [createBaseVNode("label", _hoisted_29$3, [_cache[23] || (_cache[23] = createTextVNode(" 图片压缩 ", -1)), format.value === "png" ? (openBlock(), createElementBlock("span", _hoisted_30$2, "（PNG 无损，此项无效）")) : createCommentVNode("", true)]), createBaseVNode("div", _hoisted_31$2, [(openBlock(), createElementBlock(Fragment$1, null, renderList(compressionOptions, (opt) => {
 						return createBaseVNode("button", {
 							key: opt.value,
 							class: normalizeClass(["seg-btn", { active: compression.value === opt.value }]),
 							disabled: format.value === "png",
 							onClick: ($event) => compression.value = opt.value
-						}, toDisplayString(opt.label), 11, _hoisted_32$3);
+						}, toDisplayString(opt.label), 11, _hoisted_32$2);
 					}), 64))])])
 				])]),
-				createBaseVNode("div", _hoisted_33$2, [createBaseVNode("div", _hoisted_34$2, [
-					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_35$2, [_cache[24] || (_cache[24] = createBaseVNode("i", { class: "fa-solid fa-scissors" }, null, -1)), createTextVNode(" " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
+				createBaseVNode("div", _hoisted_33$1, [createBaseVNode("div", _hoisted_34$1, [
+					previewInfo.value ? (openBlock(), createElementBlock("div", _hoisted_35$1, [_cache[24] || (_cache[24] = createBaseVNode("i", { class: "fa-solid fa-scissors" }, null, -1)), createTextVNode(" " + toDisplayString(previewInfo.value), 1)])) : createCommentVNode("", true),
 					!sourceImage.value ? (openBlock(), createElementBlock("div", _hoisted_36$1, [..._cache[25] || (_cache[25] = [createBaseVNode("span", { class: "empty-icon" }, "✂️", -1), createBaseVNode("span", null, "上传图片后预览切割效果", -1)])])) : createCommentVNode("", true),
 					sourceImage.value ? (openBlock(), createElementBlock("div", {
 						key: 2,
@@ -8426,7 +8426,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-15f7cf9f"]]);
+}, [["__scopeId", "data-v-6b854ad7"]]);
 //#endregion
 //#region src/views/VideoToGif.vue?vue&type=style&index=0&scoped=c08f40d2&lang.css
 var import_gif = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
@@ -8877,23 +8877,23 @@ var import_gif = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((export
 })))());
 //#endregion
 //#region src/views/VideoToGif.vue
-var _hoisted_1$10 = { class: "gif-converter" };
-var _hoisted_2$9 = { class: "converter-left" };
-var _hoisted_3$9 = { class: "upload-text" };
-var _hoisted_4$9 = ["src"];
-var _hoisted_5$6 = {
+var _hoisted_1$16 = { class: "gif-converter" };
+var _hoisted_2$15 = { class: "converter-left" };
+var _hoisted_3$14 = { class: "upload-text" };
+var _hoisted_4$13 = ["src"];
+var _hoisted_5$10 = {
 	key: 1,
 	class: "video-info-bar"
 };
-var _hoisted_6$6 = {
+var _hoisted_6$8 = {
 	key: 2,
 	class: "timeline-container"
 };
-var _hoisted_7$6 = { class: "timeline-header" };
-var _hoisted_8$6 = { class: "timeline-time" };
-var _hoisted_9$6 = { class: "handle-label" };
-var _hoisted_10$6 = { class: "handle-label" };
-var _hoisted_11$6 = { class: "timeline-actions" };
+var _hoisted_7$7 = { class: "timeline-header" };
+var _hoisted_8$7 = { class: "timeline-time" };
+var _hoisted_9$7 = { class: "handle-label" };
+var _hoisted_10$7 = { class: "handle-label" };
+var _hoisted_11$7 = { class: "timeline-actions" };
 var _hoisted_12$6 = ["disabled"];
 var _hoisted_13$5 = { class: "fa-solid fa-play" };
 var _hoisted_14$4 = { class: "fa-solid fa-pause" };
@@ -8907,20 +8907,20 @@ var _hoisted_21$4 = { class: "setting-item" };
 var _hoisted_22$3 = { class: "seg-control" };
 var _hoisted_23$3 = ["onClick"];
 var _hoisted_24$3 = { class: "setting-item" };
-var _hoisted_25$3 = { class: "setting-item" };
-var _hoisted_26$3 = { class: "setting-item" };
-var _hoisted_27$3 = { class: "form-label" };
-var _hoisted_28$3 = { class: "action-row" };
-var _hoisted_29$3 = ["disabled"];
-var _hoisted_30$2 = ["disabled"];
-var _hoisted_31$2 = { class: "btn-content" };
-var _hoisted_32$2 = {
+var _hoisted_25$2 = { class: "setting-item" };
+var _hoisted_26$2 = { class: "setting-item" };
+var _hoisted_27$2 = { class: "form-label" };
+var _hoisted_28$2 = { class: "action-row" };
+var _hoisted_29$2 = ["disabled"];
+var _hoisted_30$1 = ["disabled"];
+var _hoisted_31$1 = { class: "btn-content" };
+var _hoisted_32$1 = {
 	key: 0,
 	class: "progress-container"
 };
-var _hoisted_33$1 = { class: "progress-header" };
-var _hoisted_34$1 = { class: "progress-text" };
-var _hoisted_35$1 = { class: "progress-percent" };
+var _hoisted_33 = { class: "progress-header" };
+var _hoisted_34 = { class: "progress-text" };
+var _hoisted_35 = { class: "progress-percent" };
 var _hoisted_36 = { class: "progress-bar" };
 var _hoisted_37 = { class: "progress-footer" };
 var _hoisted_38 = {
@@ -9400,8 +9400,8 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			if (gifPreviewUrl.value) URL.revokeObjectURL(gifPreviewUrl.value);
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$10, [
-				createBaseVNode("div", _hoisted_2$9, [
+			return openBlock(), createElementBlock("div", _hoisted_1$16, [
+				createBaseVNode("div", _hoisted_2$15, [
 					createBaseVNode("div", {
 						class: normalizeClass(["upload-zone", {
 							"drag-over": isDragOver.value,
@@ -9413,7 +9413,7 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onDrop: withModifiers(onDrop, ["prevent"])
 					}, [
 						_cache[11] || (_cache[11] = createBaseVNode("i", { class: "fa-solid fa-film upload-icon" }, null, -1)),
-						createBaseVNode("p", _hoisted_3$9, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
+						createBaseVNode("p", _hoisted_3$14, toDisplayString(videoUrl.value ? "点击或拖拽新视频到此处" : "点击或拖拽视频到此处"), 1),
 						_cache[12] || (_cache[12] = createBaseVNode("p", { class: "upload-hint" }, "支持 MP4 / WebM / MOV 等浏览器可播放格式", -1)),
 						createBaseVNode("input", {
 							ref_key: "fileInput",
@@ -9443,14 +9443,14 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onLoadedmetadata: onVideoLoaded,
 						onError: onVideoError,
 						onTimeupdate: onTimeUpdate
-					}, null, 40, _hoisted_4$9)], 512)) : createCommentVNode("", true),
-					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$6, [
+					}, null, 40, _hoisted_4$13)], 512)) : createCommentVNode("", true),
+					videoInfo.value ? (openBlock(), createElementBlock("div", _hoisted_5$10, [
 						createBaseVNode("span", null, [_cache[14] || (_cache[14] = createBaseVNode("i", { class: "fa-solid fa-file-video" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.name), 1)]),
 						createBaseVNode("span", null, [_cache[15] || (_cache[15] = createBaseVNode("i", { class: "fa-solid fa-clock" }, null, -1)), createTextVNode(" 时长: " + toDisplayString(formatTime(videoInfo.value.duration)), 1)]),
 						createBaseVNode("span", null, [_cache[16] || (_cache[16] = createBaseVNode("i", { class: "fa-solid fa-weight-hanging" }, null, -1)), createTextVNode(" " + toDisplayString(videoInfo.value.size), 1)])
 					])) : createCommentVNode("", true),
-					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$6, [
-						createBaseVNode("div", _hoisted_7$6, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "timeline-label" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 选择片段范围 ")], -1)), createBaseVNode("span", _hoisted_8$6, toDisplayString(formatTime(trimStart.value)) + " - " + toDisplayString(formatTime(trimEnd.value)) + " (" + toDisplayString(formatTime(trimEnd.value - trimStart.value)) + ")", 1)]),
+					videoUrl.value ? (openBlock(), createElementBlock("div", _hoisted_6$8, [
+						createBaseVNode("div", _hoisted_7$7, [_cache[17] || (_cache[17] = createBaseVNode("span", { class: "timeline-label" }, [createBaseVNode("i", { class: "fa-solid fa-sliders" }), createTextVNode(" 选择片段范围 ")], -1)), createBaseVNode("span", _hoisted_8$7, toDisplayString(formatTime(trimStart.value)) + " - " + toDisplayString(formatTime(trimEnd.value)) + " (" + toDisplayString(formatTime(trimEnd.value - trimStart.value)) + ")", 1)]),
 						createBaseVNode("div", {
 							class: "timeline-track",
 							ref_key: "timelineTrack",
@@ -9469,18 +9469,18 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 								class: "timeline-handle timeline-handle-start",
 								style: normalizeStyle(handleStartStyle.value),
 								onMousedown: _cache[3] || (_cache[3] = withModifiers(($event) => onHandleMouseDown($event, "start"), ["stop"]))
-							}, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_9$6, toDisplayString(formatTime(trimStart.value)), 1)], 36),
+							}, [_cache[18] || (_cache[18] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_9$7, toDisplayString(formatTime(trimStart.value)), 1)], 36),
 							createBaseVNode("div", {
 								class: "timeline-handle timeline-handle-end",
 								style: normalizeStyle(handleEndStyle.value),
 								onMousedown: _cache[4] || (_cache[4] = withModifiers(($event) => onHandleMouseDown($event, "end"), ["stop"]))
-							}, [_cache[19] || (_cache[19] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_10$6, toDisplayString(formatTime(trimEnd.value)), 1)], 36),
+							}, [_cache[19] || (_cache[19] = createBaseVNode("div", { class: "handle-line" }, null, -1)), createBaseVNode("div", _hoisted_10$7, toDisplayString(formatTime(trimEnd.value)), 1)], 36),
 							createBaseVNode("div", {
 								class: "timeline-playhead",
 								style: normalizeStyle(playheadStyle.value)
 							}, null, 4)
 						], 544),
-						createBaseVNode("div", _hoisted_11$6, [
+						createBaseVNode("div", _hoisted_11$7, [
 							createBaseVNode("button", {
 								class: "btn btn-sm",
 								onClick: togglePlayPause,
@@ -9546,7 +9546,7 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => dither.value = $event),
 						class: "form-select"
 					}, [..._cache[26] || (_cache[26] = [createStaticVNode("<option value=\"none\" data-v-c08f40d2>无抖动</option><option value=\"FloydSteinberg-serpentine\" data-v-c08f40d2>Floyd-Steinberg</option><option value=\"FalseFloydSteinberg\" data-v-c08f40d2>False Floyd-Steinberg</option><option value=\"Stucki\" data-v-c08f40d2>Stucki</option><option value=\"Atkinson\" data-v-c08f40d2>Atkinson</option>", 5)])], 512), [[vModelSelect, dither.value]])]),
-					createBaseVNode("div", _hoisted_25$3, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "form-label" }, "压缩级别", -1)), createVNode(SliderInput_default, {
+					createBaseVNode("div", _hoisted_25$2, [_cache[28] || (_cache[28] = createBaseVNode("label", { class: "form-label" }, "压缩级别", -1)), createVNode(SliderInput_default, {
 						"model-value": compressionLevel.value,
 						label: "",
 						unit: "",
@@ -9555,25 +9555,25 @@ var VideoToGif_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onUpdate:modelValue": _cache[9] || (_cache[9] = (val) => compressionLevel.value = val),
 						step: "1"
 					}, null, 8, ["model-value"])]),
-					createBaseVNode("div", _hoisted_26$3, [createBaseVNode("label", _hoisted_27$3, [withDirectives(createBaseVNode("input", {
+					createBaseVNode("div", _hoisted_26$2, [createBaseVNode("label", _hoisted_27$2, [withDirectives(createBaseVNode("input", {
 						type: "checkbox",
 						"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => loop.value = $event),
 						class: "checkbox-input"
 					}, null, 512), [[vModelCheckbox, loop.value]]), _cache[29] || (_cache[29] = createTextVNode(" 循环播放 ", -1))])]),
-					createBaseVNode("div", _hoisted_28$3, [createBaseVNode("button", {
+					createBaseVNode("div", _hoisted_28$2, [createBaseVNode("button", {
 						class: "btn btn-danger",
 						disabled: !isGenerating.value,
 						onClick: cancelGenerate
-					}, [..._cache[30] || (_cache[30] = [createBaseVNode("i", { class: "fa-solid fa-stop" }, null, -1), createTextVNode(" 取消 ", -1)])], 8, _hoisted_29$3), createBaseVNode("button", {
+					}, [..._cache[30] || (_cache[30] = [createBaseVNode("i", { class: "fa-solid fa-stop" }, null, -1), createTextVNode(" 取消 ", -1)])], 8, _hoisted_29$2), createBaseVNode("button", {
 						class: normalizeClass(["btn btn-primary btn-block generate-btn", { generating: isGenerating.value }]),
 						disabled: !canGenerate.value && !isGenerating.value,
 						onClick: generateGif
 					}, [createBaseVNode("div", {
 						class: "btn-progress",
 						style: normalizeStyle({ width: progressInfo.value.percent + "%" })
-					}, null, 4), createBaseVNode("span", _hoisted_31$2, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-film"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? statusMsg.value : "生成 GIF"), 1)])], 10, _hoisted_30$2)]),
-					isGenerating.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_32$2, [
-						createBaseVNode("div", _hoisted_33$1, [createBaseVNode("span", _hoisted_34$1, [_cache[31] || (_cache[31] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_35$1, toDisplayString(progressInfo.value.percent) + "%", 1)]),
+					}, null, 4), createBaseVNode("span", _hoisted_31$1, [createBaseVNode("i", { class: normalizeClass(["fa-solid", isGenerating.value ? "fa-spinner fa-spin" : "fa-film"]) }, null, 2), createTextVNode(" " + toDisplayString(isGenerating.value ? statusMsg.value : "生成 GIF"), 1)])], 10, _hoisted_30$1)]),
+					isGenerating.value && progressInfo.value.total > 0 ? (openBlock(), createElementBlock("div", _hoisted_32$1, [
+						createBaseVNode("div", _hoisted_33, [createBaseVNode("span", _hoisted_34, [_cache[31] || (_cache[31] = createBaseVNode("i", { class: "fa-solid fa-layer-group" }, null, -1)), createTextVNode(" 处理进度：" + toDisplayString(progressInfo.value.current) + " / " + toDisplayString(progressInfo.value.total) + " 帧 ", 1)]), createBaseVNode("span", _hoisted_35, toDisplayString(progressInfo.value.percent) + "%", 1)]),
 						createBaseVNode("div", _hoisted_36, [createBaseVNode("div", {
 							class: "progress-fill",
 							style: normalizeStyle({ width: progressInfo.value.percent + "%" })
@@ -27575,30 +27575,31 @@ var darkThemeList = fullThemeList.filter((t) => t.dark);
 var themePreviewMap = themeImgMap_default || {};
 var defaultData = {
 	data: { text: "中心主题" },
-	children: [
-		{
-			data: { text: "分支主题 1" },
-			children: [{
-				data: { text: "子主题 1-1" },
-				children: []
-			}, {
-				data: { text: "子主题 1-2" },
-				children: []
-			}]
-		},
-		{
-			data: { text: "分支主题 2" },
-			children: [{
-				data: { text: "子主题 2-1" },
-				children: []
-			}]
-		},
-		{
-			data: { text: "分支主题 3" },
+	children: [{
+		data: { text: "分支主题 1" },
+		children: [{
+			data: { text: "子主题 1-1" },
 			children: []
-		}
-	]
+		}]
+	}, {
+		data: { text: "分支主题 2" },
+		children: [{
+			data: { text: "子主题 2-1" },
+			children: []
+		}]
+	}]
 };
+function formatTime(timestamp) {
+	if (!timestamp) return "";
+	const d = new Date(timestamp);
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+function formatFileSize(bytes) {
+	if (!bytes) return "0 B";
+	if (bytes < 1024) return bytes + " B";
+	if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+	return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
 function updateHistoryStatus() {
 	if (!mindMapInstance) return;
 	try {
@@ -27681,14 +27682,6 @@ function calcBase64Size(dataUrl) {
 	else if (base64.endsWith("=")) bytes -= 1;
 	return Math.round(bytes);
 }
-/**
-* 格式化大小
-*/
-function formatFileSize(bytes) {
-	if (bytes < 1024) return bytes + " B";
-	if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-	return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-}
 function getActiveNodeList() {
 	if (!mindMapInstance) return [];
 	try {
@@ -27737,7 +27730,8 @@ function useMindMap() {
 			defaultInsertSecondLevelNodeText: "分支主题",
 			defaultInsertBelowSecondLevelNodeText: "子主题",
 			isShowWatermark: false,
-			mousewheelAction: "zoom"
+			mousewheelAction: "zoom",
+			showNumber: false
 		});
 		markRaw(mindMapInstance);
 		bindEvents();
@@ -27901,49 +27895,109 @@ function useMindMap() {
 		});
 		mindMapInstance.render();
 	}
-	function openLocalFile() {
+	/**
+	* 打开本地文件
+	* 返回格式化后的数组: [{ id, name, time, size, _raw }]
+	* 如果浏览器不支持 File System API，回退到传统模式
+	*/
+	async function openLocalFile() {
+		if (!("showOpenFilePicker" in window)) {
+			console.warn("当前浏览器不支持 File System Access API，使用传统模式");
+			return openLocalFileLegacy();
+		}
+		try {
+			const fileHandles = await window.showOpenFilePicker({
+				types: [{
+					description: "思维导图文件",
+					accept: { "application/json": [".json", ".smm"] }
+				}],
+				excludeAcceptAllOption: false,
+				multiple: true
+			});
+			if (!fileHandles || fileHandles.length === 0) return null;
+			const results = [];
+			for (let i = 0; i < fileHandles.length; i++) {
+				const fileHandle = fileHandles[i];
+				try {
+					const file = await fileHandle.getFile();
+					const content = await file.text();
+					try {
+						const data = JSON.parse(content);
+						results.push({
+							id: i,
+							name: fileHandle.name,
+							time: formatTime(file.lastModified),
+							size: formatFileSize(file.size),
+							_raw: {
+								data,
+								fileName: fileHandle.name,
+								fileHandle,
+								index: i,
+								lastModified: file.lastModified,
+								size: file.size
+							}
+						});
+						console.log(`已打开文件: ${fileHandle.name}`);
+					} catch (err) {
+						console.error(`文件 ${fileHandle.name} 解析失败:`, err);
+					}
+				} catch (err) {
+					console.error(`读取文件 ${fileHandle.name} 失败:`, err);
+				}
+			}
+			if (results.length > 0) {
+				console.log(`[MindMap] 共加载 ${results.length} 个文件`);
+				return results;
+			} else return null;
+		} catch (err) {
+			if (err.name !== "AbortError") console.error("打开文件失败:", err);
+			return null;
+		}
+	}
+	/**
+	* 传统模式（不支持 File System API 的浏览器）
+	*/
+	function openLocalFileLegacy() {
 		return new Promise((resolve) => {
 			const input = document.createElement("input");
 			input.type = "file";
 			input.accept = ".json,.smm";
-			input.onchange = (e) => {
-				const file = e.target.files[0];
-				if (!file) {
+			input.multiple = true;
+			input.onchange = async (e) => {
+				const files = Array.from(e.target.files);
+				if (!files.length) {
 					resolve(null);
 					return;
 				}
-				const reader = new FileReader();
-				reader.onload = (ev) => {
+				const results = [];
+				for (let i = 0; i < files.length; i++) {
+					const file = files[i];
 					try {
-						const data = JSON.parse(ev.target.result);
-						setData(data);
-						resolve(data);
+						const content = await file.text();
+						const data = JSON.parse(content);
+						results.push({
+							id: i,
+							name: file.name,
+							time: formatTime(file.lastModified),
+							size: formatFileSize(file.size),
+							_raw: {
+								data,
+								fileName: file.name,
+								fileHandle: null,
+								index: i,
+								lastModified: file.lastModified,
+								size: file.size
+							}
+						});
+						console.log(`已打开文件: ${file.name}`);
 					} catch (err) {
-						alert("文件格式不正确");
-						resolve(null);
+						console.error(`文件 ${file.name} 解析失败:`, err);
 					}
-				};
-				reader.readAsText(file);
+				}
+				resolve(results.length > 0 ? results : null);
 			};
 			input.click();
 		});
-	}
-	function saveAsJSON() {
-		const data = getData();
-		if (!data) return;
-		const pureData = {
-			data: data.data,
-			children: data.children || []
-		};
-		const json = JSON.stringify(pureData, null, 2);
-		const blob = new Blob([json], { type: "application/json" });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = "思维导图.json";
-		a.click();
-		URL.revokeObjectURL(url);
-		hasUnsavedChanges.value = false;
 	}
 	function importFile() {
 		return new Promise((resolve) => {
@@ -27976,7 +28030,7 @@ function useMindMap() {
 		if (!mindMapInstance) return;
 		try {
 			if (type === "json") {
-				const data = mindMapInstance.getData();
+				const data = getData();
 				const pureData = {
 					data: data.data,
 					children: data.children || []
@@ -27992,7 +28046,7 @@ function useMindMap() {
 				return;
 			}
 			if (type === "txt") {
-				const text = nodeToText(mindMapInstance.getData(), 0);
+				const text = nodeToText(getData(), 0);
 				const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
 				const url = URL.createObjectURL(blob);
 				const a = document.createElement("a");
@@ -28012,6 +28066,27 @@ function useMindMap() {
 			});
 		} catch (e) {
 			console.error("[MindMap] 导出异常", e);
+		}
+	}
+	async function saveToLocalFile(fileHandle) {
+		if (!mindMapInstance || !fileHandle) return false;
+		try {
+			const data = mindMapInstance.getData();
+			if (!data) return false;
+			const pureData = {
+				data: data.data,
+				children: data.children || []
+			};
+			const json = JSON.stringify(pureData, null, 2);
+			const writable = await fileHandle.createWritable();
+			await writable.write(json);
+			await writable.close();
+			hasUnsavedChanges.value = false;
+			console.log(`[MindMap] 已保存到: ${fileHandle.name}`);
+			return true;
+		} catch (err) {
+			console.error("[MindMap] 保存失败:", err);
+			return false;
 		}
 	}
 	function nodeToText(node, level) {
@@ -28203,30 +28278,30 @@ function useMindMap() {
 		toggleReadonly,
 		render,
 		openLocalFile,
-		saveAsJSON,
 		importFile,
 		getActiveNodeList,
 		getOutlineTree,
 		imageDblClickData,
-		collectAllImages
+		collectAllImages,
+		saveToLocalFile
 	};
 }
 //#endregion
 //#region src/components/mindmap/MindMapToolbar.vue
-var _hoisted_1$9 = { class: "toolbar" };
-var _hoisted_2$8 = { class: "toolbar-inner" };
-var _hoisted_3$8 = { class: "toolbar-block" };
-var _hoisted_4$8 = { class: "toolbar-block" };
-var _hoisted_5$5 = {
+var _hoisted_1$15 = { class: "toolbar" };
+var _hoisted_2$14 = { class: "toolbar-inner" };
+var _hoisted_3$13 = { class: "toolbar-block" };
+var _hoisted_4$12 = { class: "toolbar-block" };
+var _hoisted_5$9 = {
 	key: 0,
 	class: "theme-dropdown"
 };
-var _hoisted_6$5 = { class: "theme-section-title-group" };
-var _hoisted_7$5 = ["onClick"];
-var _hoisted_8$5 = { class: "theme-section" };
-var _hoisted_9$5 = ["onClick"];
-var _hoisted_10$5 = ["src", "alt"];
-var _hoisted_11$5 = {
+var _hoisted_6$7 = { class: "theme-section-title-group" };
+var _hoisted_7$6 = ["onClick"];
+var _hoisted_8$6 = { class: "theme-section" };
+var _hoisted_9$6 = ["onClick"];
+var _hoisted_10$6 = ["src", "alt"];
+var _hoisted_11$6 = {
 	key: 1,
 	class: "theme-thumb fallback"
 };
@@ -28310,6 +28385,7 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		"remove",
 		"insert-image",
 		"insert-hyperlink",
+		"insert-note",
 		"set-theme",
 		"toggle-outline",
 		"toggle-associative-line"
@@ -28347,52 +28423,67 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			document.removeEventListener("click", handleClickOutside);
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$9, [createBaseVNode("div", _hoisted_2$8, [
-				createBaseVNode("div", _hoisted_3$8, [
+			return openBlock(), createElementBlock("div", _hoisted_1$15, [createBaseVNode("div", _hoisted_2$14, [
+				createBaseVNode("div", _hoisted_3$13, [
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.canUndo }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => __props.canUndo && _ctx.$emit("undo"))
-					}, [..._cache[15] || (_cache[15] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><polyline points=\"1 4 1 10 7 10\" data-v-3c1b3b41></polyline><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\" data-v-3c1b3b41></path></svg></span><span class=\"text\" data-v-3c1b3b41>回退</span>", 2)])], 2),
+					}, [..._cache[16] || (_cache[16] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><polyline points=\"1 4 1 10 7 10\" data-v-ab114d8d></polyline><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\" data-v-ab114d8d></path></svg></span><span class=\"text\" data-v-ab114d8d>回退</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.canRedo }]),
 						onClick: _cache[1] || (_cache[1] = ($event) => __props.canRedo && _ctx.$emit("redo"))
-					}, [..._cache[16] || (_cache[16] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><polyline points=\"23 4 23 10 17 10\" data-v-3c1b3b41></polyline><path d=\"M20.49 15a9 9 0 1 1-2.13-9.36L23 10\" data-v-3c1b3b41></path></svg></span><span class=\"text\" data-v-3c1b3b41>前进</span>", 2)])], 2),
-					_cache[21] || (_cache[21] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><polyline points=\"23 4 23 10 17 10\" data-v-ab114d8d></polyline><path d=\"M20.49 15a9 9 0 1 1-2.13-9.36L23 10\" data-v-ab114d8d></path></svg></span><span class=\"text\" data-v-ab114d8d>前进</span>", 2)])], 2),
+					_cache[24] || (_cache[24] = createBaseVNode("div", { class: "divider" }, null, -1)),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[2] || (_cache[2] = ($event) => __props.hasNode && _ctx.$emit("insert-sibling"))
-					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><rect x=\"2\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-3c1b3b41></rect><rect x=\"14\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-3c1b3b41></rect><line x1=\"10\" y1=\"7\" x2=\"14\" y2=\"7\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>同级节点</span>", 2)])], 2),
+					}, [..._cache[18] || (_cache[18] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><rect x=\"2\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-ab114d8d></rect><rect x=\"14\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-ab114d8d></rect><line x1=\"10\" y1=\"7\" x2=\"14\" y2=\"7\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>同级节点</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[3] || (_cache[3] = ($event) => __props.hasNode && _ctx.$emit("insert-child"))
-					}, [..._cache[18] || (_cache[18] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><rect x=\"2\" y=\"2\" width=\"8\" height=\"6\" rx=\"1\" data-v-3c1b3b41></rect><rect x=\"2\" y=\"14\" width=\"8\" height=\"6\" rx=\"1\" data-v-3c1b3b41></rect><line x1=\"6\" y1=\"8\" x2=\"6\" y2=\"14\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>子节点</span>", 2)])], 2),
+					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><rect x=\"2\" y=\"2\" width=\"8\" height=\"6\" rx=\"1\" data-v-ab114d8d></rect><rect x=\"2\" y=\"14\" width=\"8\" height=\"6\" rx=\"1\" data-v-ab114d8d></rect><line x1=\"6\" y1=\"8\" x2=\"6\" y2=\"14\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>子节点</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[4] || (_cache[4] = ($event) => __props.hasNode && _ctx.$emit("remove"))
-					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><polyline points=\"3 6 5 6 21 6\" data-v-3c1b3b41></polyline><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\" data-v-3c1b3b41></path><path d=\"M10 11v6\" data-v-3c1b3b41></path><path d=\"M14 11v6\" data-v-3c1b3b41></path></svg></span><span class=\"text\" data-v-3c1b3b41>删除节点</span>", 2)])], 2),
-					_cache[22] || (_cache[22] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					}, [..._cache[20] || (_cache[20] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><polyline points=\"3 6 5 6 21 6\" data-v-ab114d8d></polyline><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\" data-v-ab114d8d></path><path d=\"M10 11v6\" data-v-ab114d8d></path><path d=\"M14 11v6\" data-v-ab114d8d></path></svg></span><span class=\"text\" data-v-ab114d8d>删除节点</span>", 2)])], 2),
+					_cache[25] || (_cache[25] = createBaseVNode("div", { class: "divider" }, null, -1)),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[5] || (_cache[5] = ($event) => __props.hasNode && _ctx.$emit("insert-image"))
-					}, [..._cache[20] || (_cache[20] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" data-v-3c1b3b41></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\" data-v-3c1b3b41></circle><polyline points=\"21 15 16 10 5 21\" data-v-3c1b3b41></polyline></svg></span><span class=\"text\" data-v-3c1b3b41>图片</span>", 2)])], 2)
+					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" data-v-ab114d8d></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\" data-v-ab114d8d></circle><polyline points=\"21 15 16 10 5 21\" data-v-ab114d8d></polyline></svg></span><span class=\"text\" data-v-ab114d8d>图片</span>", 2)])], 2),
+					createBaseVNode("div", {
+						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+						onClick: _cache[6] || (_cache[6] = ($event) => __props.hasNode && _ctx.$emit("insert-hyperlink"))
+					}, [..._cache[22] || (_cache[22] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" data-v-ab114d8d></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" data-v-ab114d8d></path></svg></span><span class=\"text\" data-v-ab114d8d>超链接</span>", 2)])], 2),
+					createBaseVNode("div", {
+						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
+						onClick: _cache[7] || (_cache[7] = ($event) => __props.hasNode && _ctx.$emit("insert-note"))
+					}, [..._cache[23] || (_cache[23] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
+						viewBox: "0 0 24 24",
+						width: "16",
+						height: "16",
+						fill: "none",
+						stroke: "currentColor",
+						"stroke-width": "2"
+					}, [createBaseVNode("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })])], -1), createBaseVNode("span", { class: "text" }, "备注", -1)])], 2)
 				]),
-				_cache[29] || (_cache[29] = createBaseVNode("div", { class: "divider" }, null, -1)),
-				createBaseVNode("div", _hoisted_4$8, [
+				_cache[32] || (_cache[32] = createBaseVNode("div", { class: "divider" }, null, -1)),
+				createBaseVNode("div", _hoisted_4$12, [
 					createBaseVNode("div", {
 						class: "dropdown",
 						ref_key: "themeDropRef",
 						ref: themeDropRef
 					}, [createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { active: showThemeDropdown.value }]),
-						onClick: _cache[6] || (_cache[6] = ($event) => showThemeDropdown.value = !showThemeDropdown.value)
-					}, [..._cache[23] || (_cache[23] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><circle cx=\"12\" cy=\"12\" r=\"5\" data-v-3c1b3b41></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" data-v-3c1b3b41></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" data-v-3c1b3b41></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" data-v-3c1b3b41></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" data-v-3c1b3b41></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" data-v-3c1b3b41></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>主题</span>", 2)])], 2), showThemeDropdown.value ? (openBlock(), createElementBlock("div", _hoisted_5$5, [
-						createBaseVNode("div", _hoisted_6$5, [(openBlock(), createElementBlock(Fragment$1, null, renderList(themeConfig, (theme) => {
+						onClick: _cache[8] || (_cache[8] = ($event) => showThemeDropdown.value = !showThemeDropdown.value)
+					}, [..._cache[26] || (_cache[26] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><circle cx=\"12\" cy=\"12\" r=\"5\" data-v-ab114d8d></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" data-v-ab114d8d></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" data-v-ab114d8d></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" data-v-ab114d8d></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" data-v-ab114d8d></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" data-v-ab114d8d></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>主题</span>", 2)])], 2), showThemeDropdown.value ? (openBlock(), createElementBlock("div", _hoisted_5$9, [
+						createBaseVNode("div", _hoisted_6$7, [(openBlock(), createElementBlock(Fragment$1, null, renderList(themeConfig, (theme) => {
 							return createBaseVNode("div", {
 								class: normalizeClass(["theme-section-title", { active: currentTheme.value === theme.value }]),
 								onClick: ($event) => changeTheme(theme.value)
-							}, toDisplayString(theme.label), 11, _hoisted_7$5);
+							}, toDisplayString(theme.label), 11, _hoisted_7$6);
 						}), 64))]),
-						withDirectives(createBaseVNode("div", _hoisted_8$5, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.lightThemeList, (item) => {
+						withDirectives(createBaseVNode("div", _hoisted_8$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.lightThemeList, (item) => {
 							return openBlock(), createElementBlock("div", {
 								key: item.value,
 								class: normalizeClass(["theme-item", { active: currentTheme.value === item.value }]),
@@ -28403,10 +28494,10 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 									class: "theme-thumb",
 									src: getPreview(item.value),
 									alt: item.name
-								}, null, 8, _hoisted_10$5)) : (openBlock(), createElementBlock("div", _hoisted_11$5)),
+								}, null, 8, _hoisted_10$6)) : (openBlock(), createElementBlock("div", _hoisted_11$6)),
 								createBaseVNode("span", _hoisted_12$5, toDisplayString(item.name), 1),
-								currentTheme.value === item.value ? (openBlock(), createElementBlock("svg", _hoisted_13$4, [..._cache[24] || (_cache[24] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
-							], 10, _hoisted_9$5);
+								currentTheme.value === item.value ? (openBlock(), createElementBlock("svg", _hoisted_13$4, [..._cache[27] || (_cache[27] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
+							], 10, _hoisted_9$6);
 						}), 128))], 512), [[vShow, currentTheme.value == "light"]]),
 						withDirectives(createBaseVNode("div", _hoisted_14$3, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.darkThemeList, (item) => {
 							return openBlock(), createElementBlock("div", {
@@ -28421,18 +28512,18 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 									alt: item.name
 								}, null, 8, _hoisted_16$3)) : (openBlock(), createElementBlock("div", _hoisted_17$3)),
 								createBaseVNode("span", _hoisted_18$3, toDisplayString(item.name), 1),
-								currentTheme.value === item.value ? (openBlock(), createElementBlock("svg", _hoisted_19$3, [..._cache[25] || (_cache[25] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
+								currentTheme.value === item.value ? (openBlock(), createElementBlock("svg", _hoisted_19$3, [..._cache[28] || (_cache[28] = [createBaseVNode("polyline", { points: "20 6 9 17 4 12" }, null, -1)])])) : createCommentVNode("", true)
 							], 10, _hoisted_15$3);
 						}), 128))], 512), [[vShow, currentTheme.value == "dark"]])
 					])) : createCommentVNode("", true)], 512),
 					createBaseVNode("div", {
 						class: "toolbar-btn",
-						onClick: _cache[7] || (_cache[7] = ($event) => _ctx.$emit("toggle-outline"))
-					}, [..._cache[26] || (_cache[26] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\" data-v-3c1b3b41></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\" data-v-3c1b3b41></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>大纲</span>", 2)])]),
+						onClick: _cache[9] || (_cache[9] = ($event) => _ctx.$emit("toggle-outline"))
+					}, [..._cache[29] || (_cache[29] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\" data-v-ab114d8d></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\" data-v-ab114d8d></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>大纲</span>", 2)])]),
 					createBaseVNode("div", {
 						class: "toolbar-btn",
-						onClick: _cache[8] || (_cache[8] = ($event) => _ctx.$emit("toggle-basestyle"))
-					}, [..._cache[27] || (_cache[27] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
+						onClick: _cache[10] || (_cache[10] = ($event) => _ctx.$emit("toggle-basestyle"))
+					}, [..._cache[30] || (_cache[30] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
 						viewBox: "0 0 1024 1024",
 						width: "16",
 						height: "16",
@@ -28444,45 +28535,40 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					})])], -1), createBaseVNode("span", { class: "text" }, "基础样式", -1)])]),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { active: __props.isAssociativeLineMode }]),
-						onClick: _cache[9] || (_cache[9] = ($event) => _ctx.$emit("toggle-associative-line"))
-					}, [..._cache[28] || (_cache[28] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" data-v-3c1b3b41></path><polyline points=\"15 3 21 3 21 9\" data-v-3c1b3b41></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>关联线</span>", 2)])], 2)
+						onClick: _cache[11] || (_cache[11] = ($event) => _ctx.$emit("toggle-associative-line"))
+					}, [..._cache[31] || (_cache[31] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" data-v-ab114d8d></path><polyline points=\"15 3 21 3 21 9\" data-v-ab114d8d></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>关联线</span>", 2)])], 2)
 				])
 			]), createBaseVNode("div", _hoisted_20$3, [createBaseVNode("div", _hoisted_21$3, [
 				createBaseVNode("div", {
 					class: "toolbar-btn",
-					onClick: _cache[10] || (_cache[10] = ($event) => _ctx.$emit("new-file"))
-				}, [..._cache[30] || (_cache[30] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-3c1b3b41></path><polyline points=\"14 2 14 8 20 8\" data-v-3c1b3b41></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-3c1b3b41></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>新建</span>", 2)])]),
+					onClick: _cache[12] || (_cache[12] = ($event) => _ctx.$emit("new-file"))
+				}, [..._cache[33] || (_cache[33] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-ab114d8d></path><polyline points=\"14 2 14 8 20 8\" data-v-ab114d8d></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-ab114d8d></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>新建</span>", 2)])]),
 				createBaseVNode("div", {
 					class: "toolbar-btn",
-					onClick: _cache[11] || (_cache[11] = ($event) => _ctx.$emit("open"))
-				}, [..._cache[31] || (_cache[31] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
+					onClick: _cache[13] || (_cache[13] = ($event) => _ctx.$emit("open"))
+				}, [..._cache[34] || (_cache[34] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
 					viewBox: "0 0 24 24",
 					width: "16",
 					height: "16",
 					fill: "none",
 					stroke: "currentColor",
 					"stroke-width": "2"
-				}, [createBaseVNode("path", { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" })])], -1), createBaseVNode("span", { class: "text" }, "打开", -1)])]),
+				}, [createBaseVNode("path", { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" })])], -1), createBaseVNode("span", { class: "text" }, "加载列表", -1)])]),
 				createBaseVNode("div", {
 					class: "toolbar-btn",
-					onClick: _cache[12] || (_cache[12] = ($event) => _ctx.$emit("save-as"))
-				}, [..._cache[32] || (_cache[32] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><path d=\"M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z\" data-v-3c1b3b41></path><polyline points=\"17 21 17 13 7 13 7 21\" data-v-3c1b3b41></polyline><polyline points=\"7 3 7 8 15 8\" data-v-3c1b3b41></polyline></svg></span><span class=\"text\" data-v-3c1b3b41>另存为</span>", 2)])]),
-				_cache[35] || (_cache[35] = createBaseVNode("div", { class: "divider" }, null, -1)),
+					onClick: _cache[14] || (_cache[14] = ($event) => _ctx.$emit("import"))
+				}, [..._cache[35] || (_cache[35] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-ab114d8d></path><polyline points=\"17 8 12 3 7 8\" data-v-ab114d8d></polyline><line x1=\"12\" y1=\"3\" x2=\"12\" y2=\"15\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>导入</span>", 2)])]),
 				createBaseVNode("div", {
 					class: "toolbar-btn",
-					onClick: _cache[13] || (_cache[13] = ($event) => _ctx.$emit("import"))
-				}, [..._cache[33] || (_cache[33] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-3c1b3b41></path><polyline points=\"17 8 12 3 7 8\" data-v-3c1b3b41></polyline><line x1=\"12\" y1=\"3\" x2=\"12\" y2=\"15\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>导入</span>", 2)])]),
-				createBaseVNode("div", {
-					class: "toolbar-btn",
-					onClick: _cache[14] || (_cache[14] = ($event) => _ctx.$emit("export"))
-				}, [..._cache[34] || (_cache[34] = [createStaticVNode("<span class=\"icon\" data-v-3c1b3b41><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-3c1b3b41><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-3c1b3b41></path><polyline points=\"7 10 12 15 17 10\" data-v-3c1b3b41></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" data-v-3c1b3b41></line></svg></span><span class=\"text\" data-v-3c1b3b41>导出</span>", 2)])])
+					onClick: _cache[15] || (_cache[15] = ($event) => _ctx.$emit("export"))
+				}, [..._cache[36] || (_cache[36] = [createStaticVNode("<span class=\"icon\" data-v-ab114d8d><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-ab114d8d><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-ab114d8d></path><polyline points=\"7 10 12 15 17 10\" data-v-ab114d8d></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" data-v-ab114d8d></line></svg></span><span class=\"text\" data-v-ab114d8d>导出</span>", 2)])])
 			])])]);
 		};
 	}
-}, [["__scopeId", "data-v-3c1b3b41"]]);
+}, [["__scopeId", "data-v-ab114d8d"]]);
 //#endregion
 //#region src/components/mindmap/MindMapCore.vue
-var _hoisted_1$8 = { class: "mind-map-core" };
+var _hoisted_1$14 = { class: "mind-map-core" };
 var MindMapCore_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "MindMapCore",
 	setup(__props) {
@@ -28532,20 +28618,20 @@ var MindMapCore_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			destroy();
 		});
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$8, [createBaseVNode("div", {
+			return openBlock(), createElementBlock("div", _hoisted_1$14, [createBaseVNode("div", {
 				ref_key: "containerRef",
 				ref: containerRef,
 				class: "map-container"
 			}, null, 512)]);
 		};
 	}
-}, [["__scopeId", "data-v-063d7d84"]]);
+}, [["__scopeId", "data-v-896a200f"]]);
 //#endregion
 //#region src/components/Dropdown.vue
-var _hoisted_1$7 = { class: "selected-text" };
-var _hoisted_2$7 = ["onClick"];
-var _hoisted_3$7 = ["innerHTML"];
-var _hoisted_4$7 = { class: "option-label" };
+var _hoisted_1$13 = { class: "selected-text" };
+var _hoisted_2$13 = ["onClick"];
+var _hoisted_3$12 = ["innerHTML"];
+var _hoisted_4$11 = { class: "option-label" };
 var Dropdown_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "Dropdown",
 	props: {
@@ -28595,7 +28681,7 @@ var Dropdown_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			}, [createBaseVNode("button", {
 				class: "dropdown-toggle",
 				onClick: toggleDropdown
-			}, [createBaseVNode("span", _hoisted_1$7, toDisplayString(selectedLabel.value), 1), createBaseVNode("span", { class: normalizeClass(["arrow", { rotated: isOpen.value }]) }, "▼", 2)]), createBaseVNode("div", { class: normalizeClass(["dropdown-menu", { open: isOpen.value }]) }, [createBaseVNode("ul", null, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.options, (item) => {
+			}, [createBaseVNode("span", _hoisted_1$13, toDisplayString(selectedLabel.value), 1), createBaseVNode("span", { class: normalizeClass(["arrow", { rotated: isOpen.value }]) }, "▼", 2)]), createBaseVNode("div", { class: normalizeClass(["dropdown-menu", { open: isOpen.value }]) }, [createBaseVNode("ul", null, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.options, (item) => {
 				return openBlock(), createElementBlock("li", {
 					key: item.value,
 					class: normalizeClass({ selected: selectedValue.value === item.value }),
@@ -28604,24 +28690,24 @@ var Dropdown_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					key: 0,
 					innerHTML: item.svg,
 					class: "option-icon"
-				}, null, 8, _hoisted_3$7)) : createCommentVNode("", true), createBaseVNode("span", _hoisted_4$7, toDisplayString(item.label), 1)], 10, _hoisted_2$7);
+				}, null, 8, _hoisted_3$12)) : createCommentVNode("", true), createBaseVNode("span", _hoisted_4$11, toDisplayString(item.label), 1)], 10, _hoisted_2$13);
 			}), 128))])], 2)], 512);
 		};
 	}
-}, [["__scopeId", "data-v-cae0630f"]]);
+}, [["__scopeId", "data-v-36ab995b"]]);
 //#endregion
 //#region src/components/mindmap/NodeStylePanel.vue
-var _hoisted_1$6 = { class: "style-panel" };
-var _hoisted_2$6 = { class: "panel-header" };
-var _hoisted_3$6 = { class: "panel-badge" };
-var _hoisted_4$6 = { class: "panel-body customScrollbar" };
-var _hoisted_5$4 = { class: "style-section" };
-var _hoisted_6$4 = { class: "section-group-item" };
-var _hoisted_7$4 = { class: "btn-group" };
-var _hoisted_8$4 = { class: "section-group-item" };
-var _hoisted_9$4 = { class: "color-row" };
-var _hoisted_10$4 = ["value"];
-var _hoisted_11$4 = { class: "style-section" };
+var _hoisted_1$12 = { class: "style-panel" };
+var _hoisted_2$12 = { class: "panel-header" };
+var _hoisted_3$11 = { class: "panel-badge" };
+var _hoisted_4$10 = { class: "panel-body customScrollbar" };
+var _hoisted_5$8 = { class: "style-section" };
+var _hoisted_6$6 = { class: "section-group-item" };
+var _hoisted_7$5 = { class: "btn-group" };
+var _hoisted_8$5 = { class: "section-group-item" };
+var _hoisted_9$5 = { class: "color-row" };
+var _hoisted_10$5 = ["value"];
+var _hoisted_11$5 = { class: "style-section" };
 var _hoisted_12$4 = { class: "section-group-item" };
 var _hoisted_13$3 = { class: "section-group-item" };
 var _hoisted_14$2 = { class: "btn-group font-weight-group" };
@@ -28635,11 +28721,11 @@ var _hoisted_21$2 = { class: "section-group-item" };
 var _hoisted_22$2 = { class: "btn-group" };
 var _hoisted_23$2 = { class: "style-section" };
 var _hoisted_24$2 = { class: "section-group-item" };
-var _hoisted_25$2 = ["value"];
-var _hoisted_26$2 = { class: "section-group-item" };
-var _hoisted_27$2 = { class: "style-section" };
-var _hoisted_28$2 = { class: "section-group-item" };
-var _hoisted_29$2 = { class: "section-group-item" };
+var _hoisted_25$1 = ["value"];
+var _hoisted_26$1 = { class: "section-group-item" };
+var _hoisted_27$1 = { class: "style-section" };
+var _hoisted_28$1 = { class: "section-group-item" };
+var _hoisted_29$1 = { class: "section-group-item" };
 var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "NodeStylePanel",
 	props: { activeNodes: {
@@ -28744,21 +28830,21 @@ var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			return defaultVal;
 		}
 		return (_ctx, _cache) => {
-			return openBlock(), createElementBlock("div", _hoisted_1$6, [createBaseVNode("div", _hoisted_2$6, [_cache[20] || (_cache[20] = createBaseVNode("span", { class: "panel-title" }, "节点样式", -1)), createBaseVNode("span", _hoisted_3$6, toDisplayString(__props.activeNodes.length) + " 个节点", 1)]), createBaseVNode("div", _hoisted_4$6, [
-				createBaseVNode("div", _hoisted_5$4, [createBaseVNode("div", _hoisted_6$4, [_cache[21] || (_cache[21] = createBaseVNode("label", { class: "section-label" }, "字体", -1)), createBaseVNode("div", _hoisted_7$4, [createVNode(Dropdown_default, {
+			return openBlock(), createElementBlock("div", _hoisted_1$12, [createBaseVNode("div", _hoisted_2$12, [_cache[20] || (_cache[20] = createBaseVNode("span", { class: "panel-title" }, "节点样式", -1)), createBaseVNode("span", _hoisted_3$11, toDisplayString(__props.activeNodes.length) + " 个节点", 1)]), createBaseVNode("div", _hoisted_4$10, [
+				createBaseVNode("div", _hoisted_5$8, [createBaseVNode("div", _hoisted_6$6, [_cache[21] || (_cache[21] = createBaseVNode("label", { class: "section-label" }, "字体", -1)), createBaseVNode("div", _hoisted_7$5, [createVNode(Dropdown_default, {
 					modelValue: currentFontFamily.value,
 					"onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => currentFontFamily.value = $event),
 					options: fontFamilies,
 					onChange: _cache[1] || (_cache[1] = (item) => {
 						_ctx.$emit("set-style", "fontFamily", item.value);
 					})
-				}, null, 8, ["modelValue"])])]), createBaseVNode("div", _hoisted_8$4, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "section-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_9$4, [createBaseVNode("input", {
+				}, null, 8, ["modelValue"])])]), createBaseVNode("div", _hoisted_8$5, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "section-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_9$5, [createBaseVNode("input", {
 					type: "color",
 					class: "color-input",
 					value: currentColor.value,
 					onInput: _cache[2] || (_cache[2] = (e) => _ctx.$emit("set-style", "color", e.target.value))
-				}, null, 40, _hoisted_10$4)])])]),
-				createBaseVNode("div", _hoisted_11$4, [createBaseVNode("div", _hoisted_12$4, [_cache[23] || (_cache[23] = createBaseVNode("label", { class: "section-label" }, "字号", -1)), createVNode(SliderInput_default, {
+				}, null, 40, _hoisted_10$5)])])]),
+				createBaseVNode("div", _hoisted_11$5, [createBaseVNode("div", _hoisted_12$4, [_cache[23] || (_cache[23] = createBaseVNode("label", { class: "section-label" }, "字号", -1)), createVNode(SliderInput_default, {
 					modelValue: currentFontSize.value,
 					"onUpdate:modelValue": [_cache[3] || (_cache[3] = ($event) => currentFontSize.value = $event), _cache[4] || (_cache[4] = (val) => _ctx.$emit("set-style", "fontSize", val))],
 					label: "",
@@ -28819,7 +28905,7 @@ var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					class: "color-input",
 					value: currentBorderColor.value,
 					onInput: _cache[13] || (_cache[13] = (e) => _ctx.$emit("set-style", "borderColor", e.target.value))
-				}, null, 40, _hoisted_25$2)]), createBaseVNode("div", _hoisted_26$2, [_cache[29] || (_cache[29] = createBaseVNode("label", { class: "section-label" }, "宽度", -1)), createVNode(SliderInput_default, {
+				}, null, 40, _hoisted_25$1)]), createBaseVNode("div", _hoisted_26$1, [_cache[29] || (_cache[29] = createBaseVNode("label", { class: "section-label" }, "宽度", -1)), createVNode(SliderInput_default, {
 					modelValue: currentBorderWidth.value,
 					"onUpdate:modelValue": [_cache[14] || (_cache[14] = ($event) => currentBorderWidth.value = $event), _cache[15] || (_cache[15] = (val) => _ctx.$emit("set-style", "borderWidth", val))],
 					label: "",
@@ -28829,7 +28915,7 @@ var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					showSlider: false
 				}, null, 8, ["modelValue"])])]),
 				_cache[34] || (_cache[34] = createBaseVNode("div", { class: "divider" }, null, -1)),
-				createBaseVNode("div", _hoisted_27$2, [createBaseVNode("div", _hoisted_28$2, [_cache[30] || (_cache[30] = createBaseVNode("label", { class: "section-label" }, "节点内边距-垂直", -1)), createVNode(SliderInput_default, {
+				createBaseVNode("div", _hoisted_27$1, [createBaseVNode("div", _hoisted_28$1, [_cache[30] || (_cache[30] = createBaseVNode("label", { class: "section-label" }, "节点内边距-垂直", -1)), createVNode(SliderInput_default, {
 					modelValue: currentPaddingY.value,
 					"onUpdate:modelValue": [_cache[16] || (_cache[16] = ($event) => currentPaddingY.value = $event), _cache[17] || (_cache[17] = (val) => _ctx.$emit("set-style", "paddingY", val))],
 					label: "",
@@ -28837,7 +28923,7 @@ var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					min: 10,
 					max: 80,
 					showSlider: false
-				}, null, 8, ["modelValue"])]), createBaseVNode("div", _hoisted_29$2, [_cache[31] || (_cache[31] = createBaseVNode("label", { class: "section-label" }, "节点内边距-水平", -1)), createVNode(SliderInput_default, {
+				}, null, 8, ["modelValue"])]), createBaseVNode("div", _hoisted_29$1, [_cache[31] || (_cache[31] = createBaseVNode("label", { class: "section-label" }, "节点内边距-水平", -1)), createVNode(SliderInput_default, {
 					modelValue: currentPaddingX.value,
 					"onUpdate:modelValue": [_cache[18] || (_cache[18] = ($event) => currentPaddingX.value = $event), _cache[19] || (_cache[19] = (val) => _ctx.$emit("set-style", "paddingX", val))],
 					label: "",
@@ -28849,16 +28935,16 @@ var NodeStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-de56cc18"]]);
+}, [["__scopeId", "data-v-7f397f29"]]);
 //#endregion
 //#region src/components/mindmap/OutlineNode.vue
-var _hoisted_1$5 = { class: "outline-node" };
-var _hoisted_2$5 = {
+var _hoisted_1$11 = { class: "outline-node" };
+var _hoisted_2$11 = {
 	key: 1,
 	class: "expand-placeholder"
 };
-var _hoisted_3$5 = ["innerHTML"];
-var _hoisted_4$5 = {
+var _hoisted_3$10 = ["innerHTML"];
+var _hoisted_4$9 = {
 	key: 0,
 	class: "children"
 };
@@ -28886,7 +28972,7 @@ var OutlineNode_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		});
 		return (_ctx, _cache) => {
 			const _component_OutlineNode = resolveComponent("OutlineNode", true);
-			return openBlock(), createElementBlock("div", _hoisted_1$5, [createBaseVNode("div", {
+			return openBlock(), createElementBlock("div", _hoisted_1$11, [createBaseVNode("div", {
 				class: "node-row",
 				style: normalizeStyle({ paddingLeft: __props.depth * 16 + "px" }),
 				onClick: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("focus-node", __props.node))
@@ -28901,10 +28987,10 @@ var OutlineNode_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				fill: "none",
 				stroke: "currentColor",
 				"stroke-width": "2.5"
-			}, [createBaseVNode("polyline", { points: "6 9 12 15 18 9" })], -1)])], 2)) : (openBlock(), createElementBlock("div", _hoisted_2$5)), createBaseVNode("span", {
+			}, [createBaseVNode("polyline", { points: "6 9 12 15 18 9" })], -1)])], 2)) : (openBlock(), createElementBlock("div", _hoisted_2$11)), createBaseVNode("span", {
 				class: normalizeClass(["node-text", { root: __props.depth === 0 }]),
 				innerHTML: nodeText.value
-			}, null, 10, _hoisted_3$5)], 4), hasChildren.value && expanded.value ? (openBlock(), createElementBlock("div", _hoisted_4$5, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.node.children, (child, index) => {
+			}, null, 10, _hoisted_3$10)], 4), hasChildren.value && expanded.value ? (openBlock(), createElementBlock("div", _hoisted_4$9, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.node.children, (child, index) => {
 				return openBlock(), createBlock(_component_OutlineNode, {
 					key: index,
 					node: child,
@@ -28914,16 +29000,16 @@ var OutlineNode_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			}), 128))])) : createCommentVNode("", true)]);
 		};
 	}
-}, [["__scopeId", "data-v-151d997a"]]);
+}, [["__scopeId", "data-v-d28e7e9b"]]);
 //#endregion
 //#region src/components/mindmap/OutlinePanel.vue
-var _hoisted_1$4 = { class: "panel-header" };
-var _hoisted_2$4 = { class: "panel-body customScrollbar" };
-var _hoisted_3$4 = {
+var _hoisted_1$10 = { class: "panel-header" };
+var _hoisted_2$10 = { class: "panel-body customScrollbar" };
+var _hoisted_3$9 = {
 	key: 0,
 	class: "outline-tree"
 };
-var _hoisted_4$4 = {
+var _hoisted_4$8 = {
 	key: 1,
 	class: "outline-empty"
 };
@@ -28953,30 +29039,30 @@ var OutlinePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				class: "outline-panel",
 				ref_key: "panelRef",
 				ref: panelRef
-			}, [createBaseVNode("div", _hoisted_1$4, [_cache[2] || (_cache[2] = createBaseVNode("span", { class: "panel-title" }, "大纲", -1)), createBaseVNode("button", {
+			}, [createBaseVNode("div", _hoisted_1$10, [_cache[2] || (_cache[2] = createBaseVNode("span", { class: "panel-title" }, "大纲", -1)), createBaseVNode("button", {
 				class: "panel-close",
 				onClick: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("close"))
-			}, "×")]), createBaseVNode("div", _hoisted_2$4, [__props.tree ? (openBlock(), createElementBlock("div", _hoisted_3$4, [createVNode(OutlineNode_default, {
+			}, "×")]), createBaseVNode("div", _hoisted_2$10, [__props.tree ? (openBlock(), createElementBlock("div", _hoisted_3$9, [createVNode(OutlineNode_default, {
 				node: __props.tree,
 				depth: 0,
 				onFocusNode: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("focus-node", $event))
-			}, null, 8, ["node"])])) : (openBlock(), createElementBlock("div", _hoisted_4$4, "暂无内容"))])], 512);
+			}, null, 8, ["node"])])) : (openBlock(), createElementBlock("div", _hoisted_4$8, "暂无内容"))])], 512);
 		};
 	}
-}, [["__scopeId", "data-v-63b6dce7"]]);
+}, [["__scopeId", "data-v-6426fde7"]]);
 //#endregion
 //#region src/components/mindmap/BaseStylePanel.vue
-var _hoisted_1$3 = { class: "panel-body customScrollbar" };
-var _hoisted_2$3 = { class: "style-section" };
-var _hoisted_3$3 = { class: "section-group-item" };
-var _hoisted_4$3 = { class: "color-row" };
-var _hoisted_5$3 = ["value"];
-var _hoisted_6$3 = { class: "section-group-item" };
-var _hoisted_7$3 = { class: "style-section" };
-var _hoisted_8$3 = { class: "section-group-item" };
-var _hoisted_9$3 = { class: "btn-group" };
-var _hoisted_10$3 = { class: "section-group-item" };
-var _hoisted_11$3 = { class: "toggle-row" };
+var _hoisted_1$9 = { class: "panel-body customScrollbar" };
+var _hoisted_2$9 = { class: "style-section" };
+var _hoisted_3$8 = { class: "section-group-item" };
+var _hoisted_4$7 = { class: "color-row" };
+var _hoisted_5$7 = ["value"];
+var _hoisted_6$5 = { class: "section-group-item" };
+var _hoisted_7$4 = { class: "style-section" };
+var _hoisted_8$4 = { class: "section-group-item" };
+var _hoisted_9$4 = { class: "btn-group" };
+var _hoisted_10$4 = { class: "section-group-item" };
+var _hoisted_11$4 = { class: "toggle-row" };
 var _hoisted_12$3 = { class: "toggle-switch" };
 var _hoisted_13$2 = ["checked"];
 var _hoisted_14$1 = { class: "toggle-hint" };
@@ -28990,14 +29076,14 @@ var _hoisted_21$1 = { class: "style-section" };
 var _hoisted_22$1 = { class: "section-group-item" };
 var _hoisted_23$1 = { class: "color-row" };
 var _hoisted_24$1 = ["value"];
-var _hoisted_25$1 = { class: "section-group-item" };
-var _hoisted_26$1 = { class: "style-section" };
-var _hoisted_27$1 = { class: "section-group-item" };
-var _hoisted_28$1 = { class: "section-group-item full-width" };
-var _hoisted_29$1 = { class: "style-section" };
-var _hoisted_30$1 = { class: "section-group-item" };
-var _hoisted_31$1 = { class: "color-row" };
-var _hoisted_32$1 = ["value"];
+var _hoisted_25 = { class: "section-group-item" };
+var _hoisted_26 = { class: "style-section" };
+var _hoisted_27 = { class: "section-group-item" };
+var _hoisted_28 = { class: "section-group-item full-width" };
+var _hoisted_29 = { class: "style-section" };
+var _hoisted_30 = { class: "section-group-item" };
+var _hoisted_31 = { class: "color-row" };
+var _hoisted_32 = ["value"];
 var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "BaseStylePanel",
 	props: { getThemeConfig: {
@@ -29220,13 +29306,13 @@ var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				class: "style-panel",
 				ref_key: "panelRef",
 				ref: panelRef
-			}, [_cache[41] || (_cache[41] = createBaseVNode("div", { class: "panel-header" }, [createBaseVNode("span", { class: "panel-title" }, "基础样式")], -1)), createBaseVNode("div", _hoisted_1$3, [
-				createBaseVNode("div", _hoisted_2$3, [createBaseVNode("div", _hoisted_3$3, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "section-label" }, "线条颜色", -1)), createBaseVNode("div", _hoisted_4$3, [createBaseVNode("input", {
+			}, [_cache[41] || (_cache[41] = createBaseVNode("div", { class: "panel-header" }, [createBaseVNode("span", { class: "panel-title" }, "基础样式")], -1)), createBaseVNode("div", _hoisted_1$9, [
+				createBaseVNode("div", _hoisted_2$9, [createBaseVNode("div", _hoisted_3$8, [_cache[22] || (_cache[22] = createBaseVNode("label", { class: "section-label" }, "线条颜色", -1)), createBaseVNode("div", _hoisted_4$7, [createBaseVNode("input", {
 					type: "color",
 					class: "color-input",
 					value: currentLineColor.value,
 					onInput: _cache[0] || (_cache[0] = (e) => emitSetConfig("lineColor", e.target.value))
-				}, null, 40, _hoisted_5$3)])]), createBaseVNode("div", _hoisted_6$3, [_cache[23] || (_cache[23] = createBaseVNode("label", { class: "section-label" }, "线条粗细", -1)), createVNode(SliderInput_default, {
+				}, null, 40, _hoisted_5$7)])]), createBaseVNode("div", _hoisted_6$5, [_cache[23] || (_cache[23] = createBaseVNode("label", { class: "section-label" }, "线条粗细", -1)), createVNode(SliderInput_default, {
 					modelValue: currentLineWidth.value,
 					"onUpdate:modelValue": [_cache[1] || (_cache[1] = ($event) => currentLineWidth.value = $event), _cache[2] || (_cache[2] = (val) => emitSetConfig("lineWidth", val))],
 					label: "",
@@ -29235,12 +29321,12 @@ var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					max: 10,
 					showInput: false
 				}, null, 8, ["modelValue"])])]),
-				createBaseVNode("div", _hoisted_7$3, [createBaseVNode("div", _hoisted_8$3, [_cache[24] || (_cache[24] = createBaseVNode("label", { class: "section-label" }, "连线风格", -1)), createBaseVNode("div", _hoisted_9$3, [createVNode(Dropdown_default, {
+				createBaseVNode("div", _hoisted_7$4, [createBaseVNode("div", _hoisted_8$4, [_cache[24] || (_cache[24] = createBaseVNode("label", { class: "section-label" }, "连线风格", -1)), createBaseVNode("div", _hoisted_9$4, [createVNode(Dropdown_default, {
 					modelValue: currentLineStyle.value,
 					"onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => currentLineStyle.value = $event),
 					options: lineStyleOptions,
 					onChange: _cache[4] || (_cache[4] = (item) => emitSetConfig("lineStyle", item.value))
-				}, null, 8, ["modelValue"])])]), createBaseVNode("div", _hoisted_10$3, [_cache[26] || (_cache[26] = createBaseVNode("label", { class: "section-label" }, "显示箭头标记", -1)), createBaseVNode("div", _hoisted_11$3, [createBaseVNode("label", _hoisted_12$3, [createBaseVNode("input", {
+				}, null, 8, ["modelValue"])])]), createBaseVNode("div", _hoisted_10$4, [_cache[26] || (_cache[26] = createBaseVNode("label", { class: "section-label" }, "显示箭头标记", -1)), createBaseVNode("div", _hoisted_11$4, [createBaseVNode("label", _hoisted_12$3, [createBaseVNode("input", {
 					type: "checkbox",
 					checked: currentShowLineMarker.value,
 					onChange: _cache[5] || (_cache[5] = (e) => emitSetConfig("showLineMarker", e.target.checked))
@@ -29289,7 +29375,7 @@ var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					class: "color-input",
 					value: currentAssocLineColor.value,
 					onInput: _cache[14] || (_cache[14] = (e) => emitSetConfig("associativeLineColor", e.target.value))
-				}, null, 40, _hoisted_24$1)])]), createBaseVNode("div", _hoisted_25$1, [_cache[32] || (_cache[32] = createBaseVNode("label", { class: "section-label" }, "线条粗细", -1)), createVNode(SliderInput_default, {
+				}, null, 40, _hoisted_24$1)])]), createBaseVNode("div", _hoisted_25, [_cache[32] || (_cache[32] = createBaseVNode("label", { class: "section-label" }, "线条粗细", -1)), createVNode(SliderInput_default, {
 					modelValue: currentAssocLineWidth.value,
 					"onUpdate:modelValue": [_cache[15] || (_cache[15] = ($event) => currentAssocLineWidth.value = $event), _cache[16] || (_cache[16] = (val) => emitSetConfig("associativeLineWidth", val))],
 					label: "",
@@ -29298,7 +29384,7 @@ var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					max: 10,
 					showInput: false
 				}, null, 8, ["modelValue"])])]),
-				createBaseVNode("div", _hoisted_26$1, [createBaseVNode("div", _hoisted_27$1, [_cache[33] || (_cache[33] = createBaseVNode("label", { class: "section-label" }, "字号", -1)), createVNode(SliderInput_default, {
+				createBaseVNode("div", _hoisted_26, [createBaseVNode("div", _hoisted_27, [_cache[33] || (_cache[33] = createBaseVNode("label", { class: "section-label" }, "字号", -1)), createVNode(SliderInput_default, {
 					modelValue: currentAssocTextFontSize.value,
 					"onUpdate:modelValue": [_cache[17] || (_cache[17] = ($event) => currentAssocTextFontSize.value = $event), _cache[18] || (_cache[18] = (val) => emitSetConfig("associativeLineTextFontSize", val))],
 					label: "",
@@ -29306,38 +29392,38 @@ var BaseStylePanel_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					min: 10,
 					max: 32,
 					showInput: false
-				}, null, 8, ["modelValue"])]), createBaseVNode("div", _hoisted_28$1, [_cache[34] || (_cache[34] = createBaseVNode("label", { class: "section-label" }, "字体类型", -1)), createVNode(Dropdown_default, {
+				}, null, 8, ["modelValue"])]), createBaseVNode("div", _hoisted_28, [_cache[34] || (_cache[34] = createBaseVNode("label", { class: "section-label" }, "字体类型", -1)), createVNode(Dropdown_default, {
 					modelValue: currentAssocTextFontFamily.value,
 					"onUpdate:modelValue": _cache[19] || (_cache[19] = ($event) => currentAssocTextFontFamily.value = $event),
 					options: fontFamilyOptions,
 					onChange: _cache[20] || (_cache[20] = (item) => emitSetConfig("associativeLineTextFontFamily", item.value))
 				}, null, 8, ["modelValue"])])]),
-				createBaseVNode("div", _hoisted_29$1, [createBaseVNode("div", _hoisted_30$1, [_cache[35] || (_cache[35] = createBaseVNode("label", { class: "section-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_31$1, [createBaseVNode("input", {
+				createBaseVNode("div", _hoisted_29, [createBaseVNode("div", _hoisted_30, [_cache[35] || (_cache[35] = createBaseVNode("label", { class: "section-label" }, "文字颜色", -1)), createBaseVNode("div", _hoisted_31, [createBaseVNode("input", {
 					type: "color",
 					class: "color-input",
 					value: currentAssocTextColor.value,
 					onInput: _cache[21] || (_cache[21] = (e) => emitSetConfig("associativeLineTextColor", e.target.value))
-				}, null, 40, _hoisted_32$1)])])])
+				}, null, 40, _hoisted_32)])])])
 			])], 512);
 		};
 	}
-}, [["__scopeId", "data-v-d4053039"]]);
+}, [["__scopeId", "data-v-35c8dd3c"]]);
 //#endregion
 //#region src/components/ImageViewer.vue
-var _hoisted_1$2 = {
+var _hoisted_1$8 = {
 	key: 0,
 	class: "image-viewer"
 };
-var _hoisted_2$2 = ["disabled"];
-var _hoisted_3$2 = ["disabled"];
-var _hoisted_4$2 = ["src"];
-var _hoisted_5$2 = { class: "imageAttribution" };
-var _hoisted_6$2 = { key: 0 };
-var _hoisted_7$2 = { key: 1 };
-var _hoisted_8$2 = { key: 2 };
-var _hoisted_9$2 = { key: 3 };
-var _hoisted_10$2 = { class: "toolbar-left" };
-var _hoisted_11$2 = { class: "image-counter" };
+var _hoisted_2$8 = ["disabled"];
+var _hoisted_3$7 = ["disabled"];
+var _hoisted_4$6 = ["src"];
+var _hoisted_5$6 = { class: "imageAttribution" };
+var _hoisted_6$4 = { key: 0 };
+var _hoisted_7$3 = { key: 1 };
+var _hoisted_8$3 = { key: 2 };
+var _hoisted_9$3 = { key: 3 };
+var _hoisted_10$3 = { class: "toolbar-left" };
+var _hoisted_11$3 = { class: "image-counter" };
 var _hoisted_12$2 = { class: "toolbar-center" };
 var _hoisted_13$1 = { class: "zoom-level" };
 var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
@@ -29493,7 +29579,7 @@ var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		});
 		return (_ctx, _cache) => {
 			return openBlock(), createBlock(Teleport, { to: "body" }, [createVNode(Transition, { name: "viewer-fade" }, {
-				default: withCtx(() => [visible.value ? (openBlock(), createElementBlock("div", _hoisted_1$2, [
+				default: withCtx(() => [visible.value ? (openBlock(), createElementBlock("div", _hoisted_1$8, [
 					createBaseVNode("div", {
 						class: "viewer-overlay",
 						onClick: withModifiers(close, ["stop"])
@@ -29509,14 +29595,14 @@ var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onClick: withModifiers(prevImage, ["stop"]),
 						disabled: localIndex.value === 0,
 						title: "上一张 (←)"
-					}, [..._cache[4] || (_cache[4] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])], 8, _hoisted_2$2)) : createCommentVNode("", true),
+					}, [..._cache[4] || (_cache[4] = [createBaseVNode("i", { class: "fa-solid fa-chevron-left" }, null, -1)])], 8, _hoisted_2$8)) : createCommentVNode("", true),
 					__props.images.length > 1 ? (openBlock(), createElementBlock("button", {
 						key: 1,
 						class: "viewer-nav viewer-next",
 						onClick: withModifiers(nextImage, ["stop"]),
 						disabled: localIndex.value >= __props.images.length - 1,
 						title: "下一张 (→)"
-					}, [..._cache[5] || (_cache[5] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])], 8, _hoisted_3$2)) : createCommentVNode("", true),
+					}, [..._cache[5] || (_cache[5] = [createBaseVNode("i", { class: "fa-solid fa-chevron-right" }, null, -1)])], 8, _hoisted_3$7)) : createCommentVNode("", true),
 					createBaseVNode("div", {
 						class: "viewer-content",
 						onClick: _cache[1] || (_cache[1] = withModifiers(() => {}, ["stop"]))
@@ -29529,17 +29615,17 @@ var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						onWheel: withModifiers(handleWheel, ["prevent"]),
 						onMousedown: startDrag,
 						onDragstart: _cache[0] || (_cache[0] = withModifiers(() => {}, ["prevent"]))
-					}, null, 40, _hoisted_4$2)], 4), createBaseVNode("div", _hoisted_5$2, [
-						imageTitle.value ? (openBlock(), createElementBlock("span", _hoisted_6$2, toDisplayString(imageTitle.value), 1)) : createCommentVNode("", true),
-						imgText.value ? (openBlock(), createElementBlock("span", _hoisted_7$2, toDisplayString(imgText.value), 1)) : createCommentVNode("", true),
-						imageSize.value && imageSize.value.width && imageSize.value.height ? (openBlock(), createElementBlock("span", _hoisted_8$2, toDisplayString(imageSize.value.width) + "x" + toDisplayString(imageSize.value.height), 1)) : createCommentVNode("", true),
-						fileSizeText.value ? (openBlock(), createElementBlock("span", _hoisted_9$2, toDisplayString(fileSizeText.value), 1)) : createCommentVNode("", true)
+					}, null, 40, _hoisted_4$6)], 4), createBaseVNode("div", _hoisted_5$6, [
+						imageTitle.value ? (openBlock(), createElementBlock("span", _hoisted_6$4, toDisplayString(imageTitle.value), 1)) : createCommentVNode("", true),
+						imgText.value ? (openBlock(), createElementBlock("span", _hoisted_7$3, toDisplayString(imgText.value), 1)) : createCommentVNode("", true),
+						imageSize.value && imageSize.value.width && imageSize.value.height ? (openBlock(), createElementBlock("span", _hoisted_8$3, toDisplayString(imageSize.value.width) + "x" + toDisplayString(imageSize.value.height), 1)) : createCommentVNode("", true),
+						fileSizeText.value ? (openBlock(), createElementBlock("span", _hoisted_9$3, toDisplayString(fileSizeText.value), 1)) : createCommentVNode("", true)
 					])]),
 					createBaseVNode("div", {
 						class: "viewer-toolbar",
 						onClick: _cache[2] || (_cache[2] = withModifiers(() => {}, ["stop"]))
 					}, [
-						createBaseVNode("div", _hoisted_10$2, [createBaseVNode("span", _hoisted_11$2, toDisplayString(localIndex.value + 1) + " / " + toDisplayString(__props.images.length), 1)]),
+						createBaseVNode("div", _hoisted_10$3, [createBaseVNode("span", _hoisted_11$3, toDisplayString(localIndex.value + 1) + " / " + toDisplayString(__props.images.length), 1)]),
 						createBaseVNode("div", _hoisted_12$2, [
 							createBaseVNode("button", {
 								class: "tool-btn",
@@ -29579,67 +29665,723 @@ var ImageViewer_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			})]);
 		};
 	}
-}, [["__scopeId", "data-v-de9c2f14"]]);
+}, [["__scopeId", "data-v-c39e02c5"]]);
+//#endregion
+//#region src/components/mindmap/FileList.vue
+var _hoisted_1$7 = {
+	class: "style-panel",
+	ref: "panelRef"
+};
+var _hoisted_2$7 = { class: "panel-header" };
+var _hoisted_3$6 = { class: "panel-actions" };
+var _hoisted_4$5 = { class: "panel-body customScrollbar" };
+var _hoisted_5$5 = { class: "file-list" };
+var _hoisted_6$3 = ["onClick"];
+var _hoisted_7$2 = { class: "file-name" };
+var _hoisted_8$2 = { class: "file-time" };
+var _hoisted_9$2 = { class: "file-size" };
+var _hoisted_10$2 = ["onClick"];
+var _hoisted_11$2 = {
+	key: 0,
+	class: "file-empty"
+};
+var FileList_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "FileList",
+	props: {
+		FileList: {
+			type: Array,
+			default: () => []
+		},
+		activeIndex: {
+			type: Number,
+			default: -1
+		}
+	},
+	emits: [
+		"close",
+		"load-file",
+		"remove-file",
+		"add-files"
+	],
+	setup(__props) {
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$7, [createBaseVNode("div", _hoisted_2$7, [_cache[3] || (_cache[3] = createBaseVNode("span", { class: "panel-title" }, "文件列表", -1)), createBaseVNode("div", _hoisted_3$6, [createBaseVNode("button", {
+				class: "panel-action-btn",
+				onClick: _cache[0] || (_cache[0] = ($event) => _ctx.$emit("add-files")),
+				title: "增量添加文件"
+			}, [..._cache[2] || (_cache[2] = [createStaticVNode("<svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-fb7bc160><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-fb7bc160></path><polyline points=\"14 2 14 8 20 8\" data-v-fb7bc160></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-fb7bc160></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-fb7bc160></line></svg>", 1)])]), createBaseVNode("button", {
+				class: "panel-close",
+				onClick: _cache[1] || (_cache[1] = ($event) => _ctx.$emit("close"))
+			}, "×")])]), createBaseVNode("div", _hoisted_4$5, [createBaseVNode("div", _hoisted_5$5, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.FileList, (file) => {
+				return openBlock(), createElementBlock("div", {
+					class: normalizeClass(["file-item", { active: file.id === __props.activeIndex }]),
+					key: file.id,
+					onClick: ($event) => _ctx.$emit("load-file", file),
+					style: { "cursor": "pointer" }
+				}, [
+					_cache[5] || (_cache[5] = createBaseVNode("div", { class: "file-icon" }, [createBaseVNode("i", { class: "fa fa-file" })], -1)),
+					createBaseVNode("div", _hoisted_7$2, toDisplayString(file.name), 1),
+					createBaseVNode("div", _hoisted_8$2, toDisplayString(file.time), 1),
+					createBaseVNode("div", _hoisted_9$2, toDisplayString(file.size), 1),
+					createBaseVNode("button", {
+						class: "file-remove",
+						onClick: withModifiers(($event) => _ctx.$emit("remove-file", file.id), ["stop"]),
+						title: "移除"
+					}, [..._cache[4] || (_cache[4] = [createBaseVNode("svg", {
+						viewBox: "0 0 24 24",
+						width: "14",
+						height: "14",
+						fill: "none",
+						stroke: "currentColor",
+						"stroke-width": "2"
+					}, [createBaseVNode("line", {
+						x1: "18",
+						y1: "6",
+						x2: "6",
+						y2: "18"
+					}), createBaseVNode("line", {
+						x1: "6",
+						y1: "6",
+						x2: "18",
+						y2: "18"
+					})], -1)])], 8, _hoisted_10$2)
+				], 10, _hoisted_6$3);
+			}), 128)), !__props.FileList || __props.FileList.length === 0 ? (openBlock(), createElementBlock("div", _hoisted_11$2, " 暂无文件，请先点击「加载列表」打开文件 ")) : createCommentVNode("", true)])])], 512);
+		};
+	}
+}, [["__scopeId", "data-v-fb7bc160"]]);
+//#endregion
+//#region src/components/mindmap/MindMapOverlay.vue
+var _hoisted_1$6 = {
+	class: "mindmap-overlay",
+	ref: "overlayRef"
+};
+var _hoisted_2$6 = ["onDblclick", "title"];
+var _hoisted_3$5 = ["onDblclick", "title"];
+var MindMapOverlay_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "MindMapOverlay",
+	props: {
+		hyperlinks: {
+			type: Array,
+			default: () => []
+		},
+		notes: {
+			type: Array,
+			default: () => []
+		}
+	},
+	emits: ["edit-hyperlink", "edit-note"],
+	setup(__props, { expose: __expose, emit: __emit }) {
+		const props = __props;
+		const hyperlinkIndicators = computed(() => props.hyperlinks);
+		const noteIndicators = computed(() => props.notes);
+		function refresh() {
+			nextTick$1(() => {});
+		}
+		__expose({ refresh });
+		return (_ctx, _cache) => {
+			return openBlock(), createElementBlock("div", _hoisted_1$6, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(hyperlinkIndicators.value, (ind) => {
+				return openBlock(), createElementBlock("div", {
+					key: ind.id,
+					class: "overlay-indicator overlay-hyperlink",
+					style: normalizeStyle(ind.style),
+					onDblclick: withModifiers(($event) => _ctx.$emit("edit-hyperlink", ind.nodeId), ["stop"]),
+					title: "超链接: " + (ind.title || ind.url)
+				}, [..._cache[0] || (_cache[0] = [createBaseVNode("svg", {
+					viewBox: "0 0 16 16",
+					width: "14",
+					height: "14",
+					fill: "none",
+					stroke: "#4a90d9",
+					"stroke-width": "1.5"
+				}, [createBaseVNode("path", { d: "M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" }), createBaseVNode("path", { d: "M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" })], -1)])], 44, _hoisted_2$6);
+			}), 128)), (openBlock(true), createElementBlock(Fragment$1, null, renderList(noteIndicators.value, (ind) => {
+				return openBlock(), createElementBlock("div", {
+					key: ind.id,
+					class: "overlay-indicator overlay-note",
+					style: normalizeStyle(ind.style),
+					onDblclick: withModifiers(($event) => _ctx.$emit("edit-note", ind.nodeId), ["stop"]),
+					title: "备注: " + ind.preview
+				}, [..._cache[1] || (_cache[1] = [createBaseVNode("svg", {
+					viewBox: "0 0 16 16",
+					width: "14",
+					height: "14",
+					fill: "none",
+					stroke: "#f39c12",
+					"stroke-width": "1.5"
+				}, [createBaseVNode("path", { d: "M14 10a2 2 0 0 1-2 2H5l-3 3V3a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" })], -1)])], 44, _hoisted_3$5);
+			}), 128))], 512);
+		};
+	}
+}, [["__scopeId", "data-v-57ddde27"]]);
+//#endregion
+//#region src/components/mindmap/HyperlinkDialog.vue
+var _hoisted_1$5 = { class: "dialog" };
+var _hoisted_2$5 = { class: "dialog-header" };
+var _hoisted_3$4 = { class: "dialog-body" };
+var _hoisted_4$4 = { class: "form-group" };
+var _hoisted_5$4 = { class: "form-group" };
+var _hoisted_6$2 = { class: "dialog-footer" };
+var HyperlinkDialog_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "HyperlinkDialog",
+	props: {
+		visible: {
+			type: Boolean,
+			default: false
+		},
+		defaultUrl: {
+			type: String,
+			default: ""
+		},
+		defaultTitle: {
+			type: String,
+			default: ""
+		}
+	},
+	emits: [
+		"update:visible",
+		"confirm",
+		"remove"
+	],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const url = /* @__PURE__ */ ref("");
+		const title = /* @__PURE__ */ ref("");
+		const isEdit = /* @__PURE__ */ ref(false);
+		watch(() => props.visible, (val) => {
+			if (val) {
+				url.value = props.defaultUrl;
+				title.value = props.defaultTitle;
+				isEdit.value = !!props.defaultUrl;
+			}
+		});
+		function close() {
+			emit("update:visible", false);
+		}
+		function confirm() {
+			const u = url.value.trim();
+			if (!u) {
+				alert("请输入链接地址");
+				return;
+			}
+			emit("confirm", {
+				url: u,
+				title: title.value.trim() || "链接"
+			});
+			close();
+		}
+		function remove() {
+			emit("remove");
+			close();
+		}
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(Teleport, { to: "body" }, [__props.visible ? (openBlock(), createElementBlock("div", {
+				key: 0,
+				class: "dialog-overlay",
+				onClick: withModifiers(close, ["self"])
+			}, [createBaseVNode("div", _hoisted_1$5, [
+				createBaseVNode("div", _hoisted_2$5, [createBaseVNode("span", null, toDisplayString(isEdit.value ? "编辑超链接" : "插入超链接"), 1), createBaseVNode("button", {
+					class: "dialog-close",
+					onClick: close
+				}, "×")]),
+				createBaseVNode("div", _hoisted_3$4, [createBaseVNode("div", _hoisted_4$4, [_cache[2] || (_cache[2] = createBaseVNode("label", null, "链接地址", -1)), withDirectives(createBaseVNode("input", {
+					"onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => url.value = $event),
+					class: "form-input",
+					placeholder: "https://example.com",
+					onKeydown: withKeys(confirm, ["enter"])
+				}, null, 544), [[vModelText, url.value]])]), createBaseVNode("div", _hoisted_5$4, [_cache[3] || (_cache[3] = createBaseVNode("label", null, "显示名称", -1)), withDirectives(createBaseVNode("input", {
+					"onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => title.value = $event),
+					class: "form-input",
+					placeholder: "链接名称（可选）",
+					onKeydown: withKeys(confirm, ["enter"])
+				}, null, 544), [[vModelText, title.value]])])]),
+				createBaseVNode("div", _hoisted_6$2, [
+					isEdit.value ? (openBlock(), createElementBlock("button", {
+						key: 0,
+						class: "btn btn--danger",
+						onClick: remove
+					}, "移除")) : createCommentVNode("", true),
+					_cache[4] || (_cache[4] = createBaseVNode("div", { style: { "flex": "1" } }, null, -1)),
+					createBaseVNode("button", {
+						class: "btn btn--ghost",
+						onClick: close
+					}, "取消"),
+					createBaseVNode("button", {
+						class: "btn btn--primary",
+						onClick: confirm
+					}, "确认")
+				])
+			])])) : createCommentVNode("", true)]);
+		};
+	}
+}, [["__scopeId", "data-v-c6f68339"]]);
+//#endregion
+//#region src/components/mindmap/NoteDialog.vue
+var _hoisted_1$4 = { class: "dialog" };
+var _hoisted_2$4 = { class: "dialog-header" };
+var _hoisted_3$3 = { class: "dialog-body" };
+var _hoisted_4$3 = { class: "form-group" };
+var _hoisted_5$3 = { class: "dialog-footer" };
+var NoteDialog_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "NoteDialog",
+	props: {
+		visible: {
+			type: Boolean,
+			default: false
+		},
+		defaultContent: {
+			type: String,
+			default: ""
+		}
+	},
+	emits: [
+		"update:visible",
+		"confirm",
+		"remove"
+	],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const content = /* @__PURE__ */ ref("");
+		const isEdit = /* @__PURE__ */ ref(false);
+		watch(() => props.visible, (val) => {
+			if (val) {
+				content.value = props.defaultContent;
+				isEdit.value = !!props.defaultContent;
+			}
+		});
+		function close() {
+			emit("update:visible", false);
+		}
+		function confirm() {
+			const c = content.value.trim();
+			if (!c) {
+				alert("请输入备注内容");
+				return;
+			}
+			emit("confirm", { content: c });
+			close();
+		}
+		function remove() {
+			emit("remove");
+			close();
+		}
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(Teleport, { to: "body" }, [__props.visible ? (openBlock(), createElementBlock("div", {
+				key: 0,
+				class: "dialog-overlay",
+				onClick: withModifiers(close, ["self"])
+			}, [createBaseVNode("div", _hoisted_1$4, [
+				createBaseVNode("div", _hoisted_2$4, [createBaseVNode("span", null, toDisplayString(isEdit.value ? "编辑备注" : "插入备注"), 1), createBaseVNode("button", {
+					class: "dialog-close",
+					onClick: close
+				}, "×")]),
+				createBaseVNode("div", _hoisted_3$3, [createBaseVNode("div", _hoisted_4$3, [_cache[1] || (_cache[1] = createBaseVNode("label", null, "备注内容", -1)), withDirectives(createBaseVNode("textarea", {
+					"onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => content.value = $event),
+					class: "form-textarea",
+					rows: "6",
+					placeholder: "输入备注文字..."
+				}, null, 512), [[vModelText, content.value]])])]),
+				createBaseVNode("div", _hoisted_5$3, [
+					_cache[2] || (_cache[2] = createTextVNode(" 0, 0, 0.06); ", -1)),
+					isEdit.value ? (openBlock(), createElementBlock("button", {
+						key: 0,
+						class: "btn btn--danger",
+						onClick: remove
+					}, "移除")) : createCommentVNode("", true),
+					_cache[3] || (_cache[3] = createBaseVNode("div", { style: { "flex": "1" } }, null, -1)),
+					createBaseVNode("button", {
+						class: "btn btn--ghost",
+						onClick: close
+					}, "取消"),
+					createBaseVNode("button", {
+						class: "btn btn--primary",
+						onClick: confirm
+					}, "确认")
+				])
+			])])) : createCommentVNode("", true)]);
+		};
+	}
+}, [["__scopeId", "data-v-6be702a4"]]);
+//#endregion
+//#region src/components/mindmap/ImageDialog.vue
+var _hoisted_1$3 = { class: "dialog image-dialog" };
+var _hoisted_2$3 = { class: "image-tabs" };
+var _hoisted_3$2 = { class: "dialog-body" };
+var _hoisted_4$2 = { class: "tab-content" };
+var _hoisted_5$2 = ["src"];
+var _hoisted_6$1 = { class: "drop-file-name" };
+var _hoisted_7$1 = { class: "drop-file-size" };
+var _hoisted_8$1 = {
+	key: 0,
+	class: "compress-section"
+};
+var _hoisted_9$1 = { class: "compress-options" };
+var _hoisted_10$1 = { class: "radio-item" };
+var _hoisted_11$1 = { class: "radio-item" };
+var _hoisted_12$1 = { class: "radio-item" };
+var _hoisted_13 = {
+	key: 0,
+	class: "compress-slider-row"
+};
+var _hoisted_14 = { class: "slider-value" };
+var _hoisted_15 = { class: "dialog-footer" };
+var _hoisted_16 = ["disabled"];
+var _hoisted_17 = { class: "tab-content" };
+var _hoisted_18 = { class: "url-input-row" };
+var _hoisted_19 = {
+	key: 0,
+	class: "url-preview-area"
+};
+var _hoisted_20 = ["src"];
+var _hoisted_21 = {
+	key: 1,
+	class: "url-preview-area url-loading"
+};
+var _hoisted_22 = {
+	key: 2,
+	class: "url-preview-area url-error"
+};
+var _hoisted_23 = { class: "dialog-footer" };
+var _hoisted_24 = ["disabled"];
+var ImageDialog_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ImageDialog",
+	props: { visible: {
+		type: Boolean,
+		default: false
+	} },
+	emits: ["update:visible", "confirm"],
+	setup(__props, { emit: __emit }) {
+		const props = __props;
+		const emit = __emit;
+		const tab = /* @__PURE__ */ ref("local");
+		const fileInputRef = /* @__PURE__ */ ref(null);
+		const localFile = /* @__PURE__ */ ref(null);
+		const localPreview = /* @__PURE__ */ ref("");
+		const isDragOver = /* @__PURE__ */ ref(false);
+		const compressMode = /* @__PURE__ */ ref("none");
+		const compressQuality = /* @__PURE__ */ ref(80);
+		const imageUrl = /* @__PURE__ */ ref("");
+		const urlPreview = /* @__PURE__ */ ref("");
+		const urlLoading = /* @__PURE__ */ ref(false);
+		const urlError = /* @__PURE__ */ ref("");
+		watch(() => props.visible, (val) => {
+			if (val) reset();
+		});
+		function reset() {
+			tab.value = "local";
+			localFile.value = null;
+			localPreview.value = "";
+			isDragOver.value = false;
+			compressMode.value = "none";
+			compressQuality.value = 80;
+			imageUrl.value = "";
+			urlPreview.value = "";
+			urlLoading.value = false;
+			urlError.value = "";
+		}
+		function close() {
+			emit("update:visible", false);
+		}
+		function triggerFileInput() {
+			fileInputRef.value?.click();
+		}
+		function handleFileSelect(e) {
+			const file = e.target.files[0];
+			if (file) loadFile(file);
+			e.target.value = "";
+		}
+		function handleDrop(e) {
+			isDragOver.value = false;
+			const file = e.dataTransfer?.files?.[0];
+			if (file && file.type.startsWith("image/")) loadFile(file);
+		}
+		function loadFile(file) {
+			localFile.value = file;
+			const reader = new FileReader();
+			reader.onload = (ev) => {
+				localPreview.value = ev.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+		function formatSize(bytes) {
+			if (!bytes) return "0 B";
+			if (bytes < 1024) return bytes + " B";
+			if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+			return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+		}
+		async function confirmLocal() {
+			if (!localPreview.value) return;
+			emit("confirm", {
+				url: localPreview.value,
+				title: localFile.value?.name || "图片"
+			});
+			close();
+		}
+		async function fetchUrl() {
+			const url = imageUrl.value.trim();
+			if (!url) return;
+			urlLoading.value = true;
+			urlError.value = "";
+			urlPreview.value = "";
+			try {
+				const img = new Image();
+				img.onload = () => {
+					urlPreview.value = url;
+					urlLoading.value = false;
+				};
+				img.onerror = () => {
+					urlError.value = "图片加载失败";
+					urlLoading.value = false;
+				};
+				img.src = url;
+			} catch (e) {
+				urlError.value = "加载失败";
+				urlLoading.value = false;
+			}
+		}
+		async function confirmUrl() {
+			if (!urlPreview.value) return;
+			emit("confirm", {
+				url: urlPreview.value,
+				title: imageUrl.value
+			});
+			close();
+		}
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(Teleport, { to: "body" }, [__props.visible ? (openBlock(), createElementBlock("div", {
+				key: 0,
+				class: "dialog-overlay",
+				onClick: withModifiers(close, ["self"])
+			}, [createBaseVNode("div", _hoisted_1$3, [
+				createBaseVNode("div", { class: "dialog-header" }, [_cache[9] || (_cache[9] = createBaseVNode("span", null, "插入图片", -1)), createBaseVNode("button", {
+					class: "dialog-close",
+					onClick: close
+				}, "×")]),
+				createBaseVNode("div", _hoisted_2$3, [createBaseVNode("div", {
+					class: normalizeClass(["image-tab", { active: tab.value === "local" }]),
+					onClick: _cache[0] || (_cache[0] = ($event) => tab.value = "local")
+				}, "本地图片", 2), createBaseVNode("div", {
+					class: normalizeClass(["image-tab", { active: tab.value === "url" }]),
+					onClick: _cache[1] || (_cache[1] = ($event) => tab.value = "url")
+				}, "在线URL", 2)]),
+				createBaseVNode("div", _hoisted_3$2, [withDirectives(createBaseVNode("div", _hoisted_4$2, [
+					createBaseVNode("div", {
+						class: normalizeClass(["drop-zone", {
+							"drag-over": isDragOver.value,
+							"has-file": !!localFile.value
+						}]),
+						onDragover: _cache[2] || (_cache[2] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
+						onDragleave: _cache[3] || (_cache[3] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
+						onDrop: withModifiers(handleDrop, ["prevent"]),
+						onClick: triggerFileInput
+					}, [localPreview.value ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
+						createBaseVNode("img", {
+							src: localPreview.value,
+							class: "drop-preview"
+						}, null, 8, _hoisted_5$2),
+						createBaseVNode("div", _hoisted_6$1, toDisplayString(localFile.value?.name), 1),
+						createBaseVNode("div", _hoisted_7$1, toDisplayString(formatSize(localFile.value?.size)), 1)
+					], 64)) : (openBlock(), createElementBlock(Fragment$1, { key: 1 }, [
+						_cache[10] || (_cache[10] = createBaseVNode("svg", {
+							class: "drop-icon",
+							viewBox: "0 0 24 24",
+							width: "32",
+							height: "32",
+							fill: "none",
+							stroke: "currentColor",
+							"stroke-width": "1.5"
+						}, [
+							createBaseVNode("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+							createBaseVNode("polyline", { points: "17 8 12 3 7 8" }),
+							createBaseVNode("line", {
+								x1: "12",
+								y1: "3",
+								x2: "12",
+								y2: "15"
+							})
+						], -1)),
+						_cache[11] || (_cache[11] = createBaseVNode("div", { class: "drop-text" }, "拖拽图片到此处，或点击选择文件", -1)),
+						_cache[12] || (_cache[12] = createBaseVNode("div", { class: "drop-hint" }, "支持 JPG、PNG、GIF、WebP 格式", -1))
+					], 64))], 34),
+					createBaseVNode("input", {
+						ref_key: "fileInputRef",
+						ref: fileInputRef,
+						type: "file",
+						accept: "image/*",
+						style: { "display": "none" },
+						onChange: handleFileSelect
+					}, null, 544),
+					localFile.value ? (openBlock(), createElementBlock("div", _hoisted_8$1, [
+						_cache[17] || (_cache[17] = createBaseVNode("div", { class: "compress-title" }, "图片压缩", -1)),
+						createBaseVNode("div", _hoisted_9$1, [
+							createBaseVNode("label", _hoisted_10$1, [withDirectives(createBaseVNode("input", {
+								type: "radio",
+								"onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => compressMode.value = $event),
+								value: "none"
+							}, null, 512), [[vModelRadio, compressMode.value]]), _cache[13] || (_cache[13] = createBaseVNode("span", null, "不压缩", -1))]),
+							createBaseVNode("label", _hoisted_11$1, [withDirectives(createBaseVNode("input", {
+								type: "radio",
+								"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => compressMode.value = $event),
+								value: "auto"
+							}, null, 512), [[vModelRadio, compressMode.value]]), _cache[14] || (_cache[14] = createBaseVNode("span", null, "压缩至 500KB 以下", -1))]),
+							createBaseVNode("label", _hoisted_12$1, [withDirectives(createBaseVNode("input", {
+								type: "radio",
+								"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => compressMode.value = $event),
+								value: "custom"
+							}, null, 512), [[vModelRadio, compressMode.value]]), _cache[15] || (_cache[15] = createBaseVNode("span", null, "自定义", -1))])
+						]),
+						compressMode.value === "custom" ? (openBlock(), createElementBlock("div", _hoisted_13, [
+							_cache[16] || (_cache[16] = createBaseVNode("span", { class: "slider-label" }, "质量", -1)),
+							withDirectives(createBaseVNode("input", {
+								type: "range",
+								class: "compress-slider",
+								min: "10",
+								max: "100",
+								step: "5",
+								"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => compressQuality.value = $event)
+							}, null, 512), [[
+								vModelText,
+								compressQuality.value,
+								void 0,
+								{ number: true }
+							]]),
+							createBaseVNode("span", _hoisted_14, toDisplayString(compressQuality.value) + "%", 1)
+						])) : createCommentVNode("", true)
+					])) : createCommentVNode("", true),
+					createBaseVNode("div", _hoisted_15, [createBaseVNode("button", {
+						class: "btn btn--ghost",
+						onClick: close
+					}, "取消"), createBaseVNode("button", {
+						class: "btn btn--primary",
+						disabled: !localPreview.value,
+						onClick: confirmLocal
+					}, "确认", 8, _hoisted_16)])
+				], 512), [[vShow, tab.value === "local"]]), withDirectives(createBaseVNode("div", _hoisted_17, [
+					createBaseVNode("div", _hoisted_18, [withDirectives(createBaseVNode("input", {
+						"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => imageUrl.value = $event),
+						class: "form-input url-input",
+						placeholder: "输入图片地址",
+						onKeydown: withKeys(fetchUrl, ["enter"])
+					}, null, 544), [[vModelText, imageUrl.value]]), createBaseVNode("button", {
+						class: "btn btn--primary btn--sm",
+						onClick: fetchUrl
+					}, "获取")]),
+					urlPreview.value ? (openBlock(), createElementBlock("div", _hoisted_19, [createBaseVNode("img", {
+						src: urlPreview.value,
+						class: "url-preview-img"
+					}, null, 8, _hoisted_20)])) : urlLoading.value ? (openBlock(), createElementBlock("div", _hoisted_21, "加载中...")) : urlError.value ? (openBlock(), createElementBlock("div", _hoisted_22, toDisplayString(urlError.value), 1)) : createCommentVNode("", true),
+					createBaseVNode("div", _hoisted_23, [createBaseVNode("button", {
+						class: "btn btn--ghost",
+						onClick: close
+					}, "取消"), createBaseVNode("button", {
+						class: "btn btn--primary",
+						disabled: !urlPreview.value,
+						onClick: confirmUrl
+					}, "确认", 8, _hoisted_24)])
+				], 512), [[vShow, tab.value === "url"]])])
+			])])) : createCommentVNode("", true)]);
+		};
+	}
+}, [["__scopeId", "data-v-749bae59"]]);
+//#endregion
+//#region src/components/mindmap/ExportDialog.vue
+var _hoisted_1$2 = { class: "export-dialog" };
+var _hoisted_2$2 = { class: "dialog-body" };
+var _hoisted_3$1 = { class: "downloadTypeList customScrollbar" };
+var _hoisted_4$1 = ["onClick"];
+var _hoisted_5$1 = { class: "name" };
+var ExportDialog_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
+	__name: "ExportDialog",
+	props: {
+		visible: {
+			type: Boolean,
+			default: false
+		},
+		options: {
+			type: Array,
+			default: () => [
+				{
+					type: "png",
+					name: "图片"
+				},
+				{
+					type: "jpg",
+					name: "JPG"
+				},
+				{
+					type: "pdf",
+					name: "PDF"
+				},
+				{
+					type: "md",
+					name: "Markdown"
+				},
+				{
+					type: "txt",
+					name: "TXT"
+				},
+				{
+					type: "json",
+					name: "JSON"
+				}
+			]
+		}
+	},
+	emits: ["update:visible", "select"],
+	setup(__props, { emit: __emit }) {
+		const emit = __emit;
+		function close() {
+			emit("update:visible", false);
+		}
+		function select(type) {
+			emit("select", type);
+			close();
+		}
+		return (_ctx, _cache) => {
+			return openBlock(), createBlock(Teleport, { to: "body" }, [__props.visible ? (openBlock(), createElementBlock("div", {
+				key: 0,
+				class: "dialog-overlay",
+				onClick: withModifiers(close, ["self"])
+			}, [createBaseVNode("div", _hoisted_1$2, [createBaseVNode("div", { class: "dialog-header" }, [_cache[0] || (_cache[0] = createBaseVNode("span", null, "导出", -1)), createBaseVNode("button", {
+				class: "dialog-close",
+				onClick: close
+			}, "×")]), createBaseVNode("div", _hoisted_2$2, [createBaseVNode("div", _hoisted_3$1, [(openBlock(true), createElementBlock(Fragment$1, null, renderList(__props.options, (item) => {
+				return openBlock(), createElementBlock("div", {
+					key: item.type,
+					class: "downloadTypeItem",
+					onClick: ($event) => select(item.type)
+				}, [
+					createBaseVNode("div", { class: normalizeClass(["typeIcon", item.type]) }, null, 2),
+					createBaseVNode("div", _hoisted_5$1, toDisplayString(item.name), 1),
+					_cache[1] || (_cache[1] = createBaseVNode("div", { class: "checked-icon" }, [createBaseVNode("svg", {
+						viewBox: "0 0 24 24",
+						width: "16",
+						height: "16",
+						fill: "none",
+						stroke: "currentColor",
+						"stroke-width": "3"
+					}, [createBaseVNode("polyline", { points: "20 6 9 17 4 12" })])], -1))
+				], 8, _hoisted_4$1);
+			}), 128))])])])])) : createCommentVNode("", true)]);
+		};
+	}
+}, [["__scopeId", "data-v-ddc81084"]]);
 //#endregion
 //#region src/views/MindMap.vue
 var _hoisted_1$1 = { class: "mind-map-view" };
 var _hoisted_2$1 = { class: "main-area" };
-var _hoisted_3$1 = { class: "dialog image-dialog" };
-var _hoisted_4$1 = { class: "image-tabs" };
-var _hoisted_5$1 = { class: "dialog-body" };
-var _hoisted_6$1 = { class: "tab-content" };
-var _hoisted_7$1 = ["src"];
-var _hoisted_8$1 = { class: "drop-file-name" };
-var _hoisted_9$1 = { class: "drop-file-size" };
-var _hoisted_10$1 = {
-	key: 0,
-	class: "compress-section"
-};
-var _hoisted_11$1 = { class: "compress-options" };
-var _hoisted_12$1 = { class: "radio-item" };
-var _hoisted_13 = { class: "radio-item" };
-var _hoisted_14 = { class: "radio-item" };
-var _hoisted_15 = {
-	key: 0,
-	class: "compress-slider-row"
-};
-var _hoisted_16 = { class: "slider-value" };
-var _hoisted_17 = { class: "compress-estimate" };
-var _hoisted_18 = { class: "estimate-value" };
-var _hoisted_19 = { class: "dialog-footer" };
-var _hoisted_20 = ["disabled"];
-var _hoisted_21 = { class: "tab-content" };
-var _hoisted_22 = { class: "url-input-row" };
-var _hoisted_23 = {
-	key: 0,
-	class: "url-preview-area"
-};
-var _hoisted_24 = ["src"];
-var _hoisted_25 = {
-	key: 1,
-	class: "url-preview-area url-loading"
-};
-var _hoisted_26 = {
-	key: 2,
-	class: "url-preview-area url-error"
-};
-var _hoisted_27 = { class: "dialog-footer" };
-var _hoisted_28 = ["disabled"];
-var _hoisted_29 = { class: "dialog" };
-var _hoisted_30 = { class: "dialog-header" };
-var _hoisted_31 = { class: "dialog-body" };
-var _hoisted_32 = { class: "downloadTypeSelectBox" };
-var _hoisted_33 = { class: "downloadTypeList customScrollbar" };
-var _hoisted_34 = ["onClick"];
-var _hoisted_35 = { class: "name" };
 var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "MindMap",
 	setup(__props) {
-		const { canUndo, canRedo, activeNodes, isReadonly, currentTheme, lightThemeList, darkThemeList, themePreviewMap, undo, redo, insertChildNode, insertSiblingNode, removeNode, setNodeStyle, setThemeConfig, getThemeConfig, setTheme, insertImageToNode, openLocalFile, saveAsJSON, importFile, exportFile, hasUnsavedChanges, isAssociativeLineMode, newFile, toggleAssociativeLineMode, getOutlineTree, imageDblClickData, collectAllImages } = useMindMap();
+		const { canUndo, canRedo, activeNodes, isReadonly, currentTheme, lightThemeList, darkThemeList, themePreviewMap, undo, redo, insertChildNode, insertSiblingNode, removeNode, setNodeStyle, setThemeConfig, getThemeConfig, setTheme, insertImageToNode, openLocalFile, importFile, exportFile, hasUnsavedChanges, isAssociativeLineMode, newFile, toggleAssociativeLineMode, getOutlineTree, imageDblClickData, collectAllImages, setData, getData, render, saveToLocalFile } = useMindMap();
+		const overlayRef = /* @__PURE__ */ ref(null);
 		const activePanel = /* @__PURE__ */ ref(null);
 		const showOutline = computed(() => activePanel.value === "outline");
 		const showBaseStyle = computed(() => activePanel.value === "basestyle");
 		const showNodeStyle = computed(() => activePanel.value === "node" && activeNodes.value.length > 0 && !isReadonly.value);
+		const showFileList = computed(() => activePanel.value === "filelist");
 		function closePanel() {
 			activePanel.value = null;
 		}
@@ -29655,13 +30397,197 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		let lastNodeCount = 0;
 		watch(activeNodes, (nodes) => {
 			const currentCount = nodes.length;
-			if (currentCount > 0) {
-				if (lastNodeCount === 0) activePanel.value = "node";
-			} else if (currentCount === 0 && lastNodeCount > 0) {
-				if (activePanel.value === "node") activePanel.value = null;
-			}
+			if (currentCount > 0 && lastNodeCount === 0) activePanel.value = "node";
+			else if (currentCount === 0 && lastNodeCount > 0 && activePanel.value === "node") activePanel.value = null;
 			lastNodeCount = currentCount;
 		});
+		const fileList = /* @__PURE__ */ ref([]);
+		const currentFileIndex = /* @__PURE__ */ ref(-1);
+		async function handleOpen() {
+			const files = await openLocalFile();
+			if (!files || files.length === 0) return;
+			fileList.value = files;
+			currentFileIndex.value = -1;
+			activePanel.value = "filelist";
+		}
+		function handleLoadFile(file) {
+			if (file._raw?.data) {
+				setData(file._raw.data);
+				currentFileIndex.value = file.id;
+			}
+		}
+		async function handleAddFiles() {
+			const newFiles = await openLocalFile();
+			if (!newFiles || newFiles.length === 0) return;
+			const existingNames = new Set(fileList.value.map((f) => f.name));
+			const duplicates = newFiles.filter((f) => existingNames.has(f.name));
+			if (duplicates.length > 0) {
+				const names = duplicates.map((f) => f.name).join("、");
+				if (!confirm(`以下文件已存在：\n${names}\n\n是否覆盖？\n\n点"确定"覆盖，点"取消"跳过重复文件。`)) {
+					const nonDuplicates = newFiles.filter((f) => !existingNames.has(f.name));
+					if (nonDuplicates.length === 0) return;
+					appendFiles(nonDuplicates);
+					return;
+				}
+				const newNames = new Set(newFiles.map((f) => f.name));
+				fileList.value = fileList.value.filter((f) => !newNames.has(f.name));
+			}
+			appendFiles(newFiles);
+		}
+		function appendFiles(files) {
+			const offset = fileList.value.reduce((max, f) => Math.max(max, f.id), -1) + 1;
+			const formatted = files.map((f, i) => ({
+				id: offset + i,
+				name: f.name,
+				time: f.time,
+				size: f.size,
+				_raw: f._raw
+			}));
+			fileList.value = [...fileList.value, ...formatted];
+		}
+		function handleRemoveFile(id) {
+			fileList.value = fileList.value.filter((f) => f.id !== id);
+			if (currentFileIndex.value === id) currentFileIndex.value = -1;
+		}
+		function getCurrentFileHandle() {
+			if (currentFileIndex.value < 0) return null;
+			return fileList.value.find((f) => f.id === currentFileIndex.value)?._raw?.fileHandle || null;
+		}
+		async function handleSave() {
+			const fileHandle = getCurrentFileHandle();
+			if (!fileHandle) {
+				const data = getData();
+				if (!data) return;
+				const pureData = {
+					data: data.data,
+					children: data.children || []
+				};
+				const json = JSON.stringify(pureData, null, 2);
+				const blob = new Blob([json], { type: "application/json" });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = (/* @__PURE__ */ new Date()).toLocaleString() + ".json";
+				a.click();
+				URL.revokeObjectURL(url);
+				return;
+			}
+			if (await saveToLocalFile(fileHandle)) console.log("保存成功");
+		}
+		function handleKeydown(e) {
+			if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+				e.preventDefault();
+				handleSave();
+			}
+		}
+		onMounted(() => {
+			document.addEventListener("keydown", handleKeydown);
+		});
+		onBeforeUnmount(() => {
+			document.removeEventListener("keydown", handleKeydown);
+		});
+		const hyperlinkPositions = computed(() => {
+			const items = [];
+			for (const node of activeNodes.value) {
+				const data = node.nodeData?.data || {};
+				if (!data.hyperlink) continue;
+				const left = node.left || 0;
+				const top = node.top || 0;
+				const w = node.width || 100;
+				const h = node.height || 40;
+				items.push({
+					id: "hl_" + (node.uid || ""),
+					nodeId: node.uid || "",
+					url: data.hyperlink,
+					title: data.hyperlinkTitle || "",
+					style: {
+						left: left + w - 18 + "px",
+						top: top + h - 18 + "px"
+					}
+				});
+			}
+			return items;
+		});
+		const notePositions = computed(() => {
+			const items = [];
+			for (const node of activeNodes.value) {
+				const data = node.nodeData?.data || {};
+				if (!data.note) continue;
+				const left = node.left || 0;
+				const top = node.top || 0;
+				const w = node.width || 100;
+				const h = node.height || 40;
+				items.push({
+					id: "note_" + (node.uid || ""),
+					nodeId: node.uid || "",
+					preview: String(data.note).slice(0, 30),
+					style: {
+						left: left + w - 18 + "px",
+						top: top + h - 18 + "px"
+					}
+				});
+			}
+			return items;
+		});
+		const showHyperlinkDlg = /* @__PURE__ */ ref(false);
+		const hyperlinkDefaultUrl = /* @__PURE__ */ ref("");
+		const hyperlinkDefaultTitle = /* @__PURE__ */ ref("");
+		function openHyperlinkDialog() {
+			if (!activeNodes.value.length) {
+				alert("请先选中一个节点");
+				return;
+			}
+			const node = activeNodes.value[0];
+			hyperlinkDefaultUrl.value = node.getData?.("hyperlink") || "";
+			hyperlinkDefaultTitle.value = node.getData?.("hyperlinkTitle") || "";
+			showHyperlinkDlg.value = true;
+		}
+		function handleHyperlinkConfirm({ url, title }) {
+			activeNodes.value.forEach((node) => {
+				if (typeof node.setHyperlink === "function") node.setHyperlink(url, title);
+			});
+			nextTick$1(() => overlayRef.value?.refresh());
+		}
+		function handleHyperlinkRemove() {
+			activeNodes.value.forEach((node) => {
+				if (typeof node.setHyperlink === "function") node.setHyperlink("", "");
+			});
+			nextTick$1(() => overlayRef.value?.refresh());
+		}
+		const showNoteDlg = /* @__PURE__ */ ref(false);
+		const noteDefaultContent = /* @__PURE__ */ ref("");
+		function openNoteDialog() {
+			if (!activeNodes.value.length) {
+				alert("请先选中一个节点");
+				return;
+			}
+			noteDefaultContent.value = activeNodes.value[0].getData?.("note") || "";
+			showNoteDlg.value = true;
+		}
+		function handleNoteConfirm({ content }) {
+			activeNodes.value.forEach((node) => {
+				if (typeof node.setNote === "function") node.setNote(content);
+			});
+			nextTick$1(() => overlayRef.value?.refresh());
+		}
+		function handleNoteRemove() {
+			activeNodes.value.forEach((node) => {
+				if (typeof node.setNote === "function") node.setNote("");
+			});
+			nextTick$1(() => overlayRef.value?.refresh());
+		}
+		const showImageDlg = /* @__PURE__ */ ref(false);
+		function handleImageConfirm({ url, title }) {
+			insertImageToNode(url, title);
+		}
+		function handleInsertImage() {
+			if (!activeNodes.value.length) {
+				alert("请先选中一个节点");
+				return;
+			}
+			showImageDlg.value = true;
+		}
+		const showExportDlg = /* @__PURE__ */ ref(false);
 		const showImageViewer = /* @__PURE__ */ ref(false);
 		const viewerImages = /* @__PURE__ */ ref([]);
 		const viewerIndex = /* @__PURE__ */ ref(0);
@@ -29674,10 +30600,7 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			showImageViewer.value = true;
 		});
 		const hasNode = computed(() => activeNodes.value.length > 0);
-		const outlineTree = computed(() => {
-			if (!showOutline.value) return null;
-			return getOutlineTree();
-		});
+		const outlineTree = computed(() => showOutline.value ? getOutlineTree() : null);
 		const lineTextRef = /* @__PURE__ */ ref(null);
 		onMounted(() => {
 			const timer = setInterval(() => {
@@ -29685,9 +30608,7 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				if (mindMap && mindMap.value) {
 					clearInterval(timer);
 					try {
-						mindMap.value.on("line_text_edit", (data) => {
-							lineTextRef.value?.show(data);
-						});
+						mindMap.value.on("line_text_edit", (data) => lineTextRef.value?.show(data));
 					} catch (e) {}
 				}
 			}, 200);
@@ -29695,230 +30616,9 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 		});
 		function handleNewFile() {
 			if (hasUnsavedChanges.value) {
-				if (confirm("当前画布有未保存的修改，是否先保存？\n\n点\"确定\"保存后新建，点\"取消\"直接新建。")) saveAsJSON();
+				if (confirm("当前画布有未保存的修改，是否先保存？")) saveAsJSON();
 			}
 			newFile();
-		}
-		function handleInsertImage() {
-			if (!activeNodes.value.length) {
-				alert("请先选中一个节点");
-				return;
-			}
-			openImageDialog();
-		}
-		function handleOpen() {
-			openLocalFile();
-		}
-		function handleSaveAs() {
-			saveAsJSON();
-		}
-		function handleImport() {
-			importFile();
-		}
-		const showImageDialog = /* @__PURE__ */ ref(false);
-		const imageTab = /* @__PURE__ */ ref("local");
-		const fileInputRef = /* @__PURE__ */ ref(null);
-		const localFile = /* @__PURE__ */ ref(null);
-		const localPreview = /* @__PURE__ */ ref("");
-		const isDragOver = /* @__PURE__ */ ref(false);
-		const compressMode = /* @__PURE__ */ ref("none");
-		const compressQuality = /* @__PURE__ */ ref(80);
-		const compressedBlob = /* @__PURE__ */ ref(null);
-		const imageUrl = /* @__PURE__ */ ref("");
-		const urlPreview = /* @__PURE__ */ ref("");
-		const urlLoading = /* @__PURE__ */ ref(false);
-		const urlError = /* @__PURE__ */ ref("");
-		const estimatedSize = computed(() => {
-			if (!localFile.value) return "0 KB";
-			if (compressMode.value === "none") return formatSize(localFile.value.size);
-			const quality = compressMode.value === "auto" ? .7 : compressQuality.value / 100;
-			return formatSize(Math.round(localFile.value.size * quality * .6));
-		});
-		function formatSize(bytes) {
-			if (!bytes) return "0 KB";
-			if (bytes < 1024) return bytes + " B";
-			if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-			return (bytes / (1024 * 1024)).toFixed(2) + " MB";
-		}
-		function openImageDialog() {
-			if (!activeNodes.value.length) {
-				alert("请先选中一个节点");
-				return;
-			}
-			resetImageDialog();
-			showImageDialog.value = true;
-		}
-		function resetImageDialog() {
-			imageTab.value = "local";
-			localFile.value = null;
-			localPreview.value = "";
-			compressedBlob.value = null;
-			isDragOver.value = false;
-			compressMode.value = "none";
-			compressQuality.value = 80;
-			imageUrl.value = "";
-			urlPreview.value = "";
-			urlLoading.value = false;
-			urlError.value = "";
-		}
-		function closeImageDialog() {
-			showImageDialog.value = false;
-			resetImageDialog();
-		}
-		function triggerFileInput() {
-			fileInputRef.value?.click();
-		}
-		function handleFileSelect(e) {
-			const file = e.target.files[0];
-			if (file) loadLocalFile(file);
-			e.target.value = "";
-		}
-		function handleDrop(e) {
-			isDragOver.value = false;
-			const file = e.dataTransfer?.files?.[0];
-			if (file && file.type.startsWith("image/")) loadLocalFile(file);
-		}
-		function loadLocalFile(file) {
-			localFile.value = file;
-			compressedBlob.value = null;
-			const reader = new FileReader();
-			reader.onload = (ev) => {
-				localPreview.value = ev.target.result;
-			};
-			reader.readAsDataURL(file);
-		}
-		async function compressImage(file) {
-			if (compressMode.value === "none") return file;
-			const quality = compressMode.value === "auto" ? .7 : compressQuality.value / 100;
-			return new Promise((resolve) => {
-				const img = new Image();
-				img.onload = () => {
-					const canvas = document.createElement("canvas");
-					canvas.width = img.naturalWidth;
-					canvas.height = img.naturalHeight;
-					canvas.getContext("2d").drawImage(img, 0, 0);
-					canvas.toBlob((blob) => {
-						if (blob && compressMode.value === "auto" && blob.size > 500 * 1024) canvas.toBlob((blob2) => resolve(blob2 || file), "image/jpeg", .4);
-						else resolve(blob || file);
-					}, "image/jpeg", quality);
-				};
-				img.onerror = () => resolve(file);
-				img.src = URL.createObjectURL(file);
-			});
-		}
-		async function confirmLocalImage() {
-			if (!localPreview.value) return;
-			let finalUrl = localPreview.value;
-			if (compressMode.value !== "none") finalUrl = await blobToDataURL(await compressImage(localFile.value));
-			insertImageToNode(finalUrl, localFile.value?.name || "图片");
-			closeImageDialog();
-		}
-		function blobToDataURL(blob) {
-			return new Promise((resolve) => {
-				const reader = new FileReader();
-				reader.onload = (ev) => resolve(ev.target.result);
-				reader.readAsDataURL(blob);
-			});
-		}
-		async function fetchUrlImage() {
-			const url = imageUrl.value.trim();
-			if (!url) return;
-			urlLoading.value = true;
-			urlError.value = "";
-			urlPreview.value = "";
-			try {
-				urlPreview.value = await loadImageViaElement(url);
-			} catch (err) {
-				urlError.value = err.message || "获取图片失败，请检查链接";
-			} finally {
-				urlLoading.value = false;
-			}
-		}
-		function loadImageViaElement(url) {
-			return new Promise((resolve, reject) => {
-				const img = new Image();
-				img.onload = () => {
-					resolve(url);
-				};
-				img.onerror = () => {
-					reject(/* @__PURE__ */ new Error("图片加载失败，请检查链接是否有效"));
-				};
-				img.src = url;
-			});
-		}
-		function urlToDataURL(url) {
-			return new Promise((resolve, reject) => {
-				const img = new Image();
-				img.crossOrigin = "anonymous";
-				img.onload = () => {
-					try {
-						const canvas = document.createElement("canvas");
-						canvas.width = img.naturalWidth;
-						canvas.height = img.naturalHeight;
-						canvas.getContext("2d").drawImage(img, 0, 0);
-						resolve(canvas.toDataURL("image/png"));
-					} catch (e) {
-						resolve(null);
-					}
-				};
-				img.onerror = () => resolve(null);
-				img.src = url + (url.includes("?") ? "&" : "?") + "t=" + Date.now();
-			});
-		}
-		async function confirmUrlImage() {
-			if (!urlPreview.value) return;
-			try {
-				const dataUrl = await urlToDataURL(urlPreview.value);
-				if (dataUrl) insertImageToNode(dataUrl, imageUrl.value);
-				else {
-					const response = await fetch(urlPreview.value);
-					if (response.ok) {
-						const blob = await response.blob();
-						const reader = new FileReader();
-						reader.onload = (ev) => {
-							insertImageToNode(ev.target.result, imageUrl.value);
-						};
-						reader.readAsDataURL(blob);
-						closeImageDialog();
-						return;
-					}
-					insertImageToNode(urlPreview.value, imageUrl.value);
-				}
-			} catch (err) {
-				insertImageToNode(urlPreview.value, imageUrl.value);
-			}
-			closeImageDialog();
-		}
-		const showExportDialog = /* @__PURE__ */ ref(false);
-		const exportOptions = [
-			{
-				type: "png",
-				name: "图片"
-			},
-			{
-				type: "jpg",
-				name: "JPG"
-			},
-			{
-				type: "pdf",
-				name: "PDF"
-			},
-			{
-				type: "md",
-				name: "Markdown"
-			},
-			{
-				type: "txt",
-				name: "TXT"
-			},
-			{
-				type: "json",
-				name: "JSON"
-			}
-		];
-		function confirmExport(type) {
-			showExportDialog.value = false;
-			exportFile(type);
 		}
 		return (_ctx, _cache) => {
 			return openBlock(), createElementBlock("div", _hoisted_1$1, [
@@ -29938,10 +30638,12 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					onInsertChild: unref(insertChildNode),
 					onRemove: unref(removeNode),
 					onInsertImage: handleInsertImage,
+					onInsertHyperlink: openHyperlinkDialog,
+					onInsertNote: openNoteDialog,
 					onOpen: handleOpen,
-					onSaveAs: handleSaveAs,
-					onImport: handleImport,
-					onExport: _cache[0] || (_cache[0] = ($event) => showExportDialog.value = true),
+					onSaveAs: _ctx.saveAsJSON,
+					onImport: unref(importFile),
+					onExport: _cache[0] || (_cache[0] = ($event) => showExportDlg.value = true),
 					onSetTheme: unref(setTheme),
 					onToggleOutline: handleToggleOutline,
 					onToggleBasestyle: handleToggleBaseStyle,
@@ -29960,11 +30662,21 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					"onInsertSibling",
 					"onInsertChild",
 					"onRemove",
+					"onSaveAs",
+					"onImport",
 					"onSetTheme",
 					"onToggleAssociativeLine"
 				]),
 				createBaseVNode("div", _hoisted_2$1, [
 					createVNode(MindMapCore_default),
+					createVNode(MindMapOverlay_default, {
+						ref_key: "overlayRef",
+						ref: overlayRef,
+						hyperlinks: hyperlinkPositions.value,
+						notes: notePositions.value,
+						onEditHyperlink: openHyperlinkDialog,
+						onEditNote: openNoteDialog
+					}, null, 8, ["hyperlinks", "notes"]),
 					showOutline.value ? (openBlock(), createBlock(OutlinePanel_default, {
 						key: 0,
 						tree: outlineTree.value,
@@ -29980,180 +30692,60 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						key: 2,
 						"active-nodes": unref(activeNodes),
 						onSetStyle: unref(setNodeStyle)
-					}, null, 8, ["active-nodes", "onSetStyle"])) : createCommentVNode("", true)
+					}, null, 8, ["active-nodes", "onSetStyle"])) : createCommentVNode("", true),
+					showFileList.value ? (openBlock(), createBlock(FileList_default, {
+						key: 3,
+						onClose: closePanel,
+						FileList: fileList.value,
+						"active-index": currentFileIndex.value,
+						onLoadFile: handleLoadFile,
+						onRemoveFile: handleRemoveFile,
+						onAddFiles: handleAddFiles
+					}, null, 8, ["FileList", "active-index"])) : createCommentVNode("", true)
 				]),
-				(openBlock(), createBlock(Teleport, { to: "body" }, [showImageDialog.value ? (openBlock(), createElementBlock("div", {
-					key: 0,
-					class: "dialog-overlay",
-					onClick: withModifiers(closeImageDialog, ["self"])
-				}, [createBaseVNode("div", _hoisted_3$1, [
-					createBaseVNode("div", { class: "dialog-header" }, [_cache[13] || (_cache[13] = createBaseVNode("span", null, "插入图片", -1)), createBaseVNode("button", {
-						class: "dialog-close",
-						onClick: closeImageDialog
-					}, "×")]),
-					createBaseVNode("div", _hoisted_4$1, [createBaseVNode("div", {
-						class: normalizeClass(["image-tab", { active: imageTab.value === "local" }]),
-						onClick: _cache[1] || (_cache[1] = ($event) => imageTab.value = "local")
-					}, " 本地图片 ", 2), createBaseVNode("div", {
-						class: normalizeClass(["image-tab", { active: imageTab.value === "url" }]),
-						onClick: _cache[2] || (_cache[2] = ($event) => imageTab.value = "url")
-					}, " 在线URL ", 2)]),
-					createBaseVNode("div", _hoisted_5$1, [withDirectives(createBaseVNode("div", _hoisted_6$1, [
-						createBaseVNode("div", {
-							class: normalizeClass(["drop-zone", {
-								"drag-over": isDragOver.value,
-								"has-file": !!localFile.value
-							}]),
-							onDragover: _cache[3] || (_cache[3] = withModifiers(($event) => isDragOver.value = true, ["prevent"])),
-							onDragleave: _cache[4] || (_cache[4] = withModifiers(($event) => isDragOver.value = false, ["prevent"])),
-							onDrop: withModifiers(handleDrop, ["prevent"]),
-							onClick: triggerFileInput
-						}, [localPreview.value ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [
-							createBaseVNode("img", {
-								src: localPreview.value,
-								class: "drop-preview"
-							}, null, 8, _hoisted_7$1),
-							createBaseVNode("div", _hoisted_8$1, toDisplayString(localFile.value?.name), 1),
-							createBaseVNode("div", _hoisted_9$1, toDisplayString(formatSize(localFile.value?.size)), 1)
-						], 64)) : (openBlock(), createElementBlock(Fragment$1, { key: 1 }, [
-							_cache[14] || (_cache[14] = createBaseVNode("svg", {
-								class: "drop-icon",
-								viewBox: "0 0 24 24",
-								width: "32",
-								height: "32",
-								fill: "none",
-								stroke: "currentColor",
-								"stroke-width": "1.5"
-							}, [
-								createBaseVNode("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
-								createBaseVNode("polyline", { points: "17 8 12 3 7 8" }),
-								createBaseVNode("line", {
-									x1: "12",
-									y1: "3",
-									x2: "12",
-									y2: "15"
-								})
-							], -1)),
-							_cache[15] || (_cache[15] = createBaseVNode("div", { class: "drop-text" }, "拖拽图片到此处，或点击选择文件", -1)),
-							_cache[16] || (_cache[16] = createBaseVNode("div", { class: "drop-hint" }, "支持 JPG、PNG、GIF、WebP 格式", -1))
-						], 64))], 34),
-						createBaseVNode("input", {
-							ref_key: "fileInputRef",
-							ref: fileInputRef,
-							type: "file",
-							accept: "image/*",
-							style: { "display": "none" },
-							onChange: handleFileSelect
-						}, null, 544),
-						localFile.value ? (openBlock(), createElementBlock("div", _hoisted_10$1, [
-							_cache[22] || (_cache[22] = createBaseVNode("div", { class: "compress-title" }, "图片压缩", -1)),
-							createBaseVNode("div", _hoisted_11$1, [
-								createBaseVNode("label", _hoisted_12$1, [withDirectives(createBaseVNode("input", {
-									type: "radio",
-									"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => compressMode.value = $event),
-									value: "none"
-								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[17] || (_cache[17] = createBaseVNode("span", null, "不压缩", -1))]),
-								createBaseVNode("label", _hoisted_13, [withDirectives(createBaseVNode("input", {
-									type: "radio",
-									"onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => compressMode.value = $event),
-									value: "auto"
-								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[18] || (_cache[18] = createBaseVNode("span", null, "压缩至 500KB 以下", -1))]),
-								createBaseVNode("label", _hoisted_14, [withDirectives(createBaseVNode("input", {
-									type: "radio",
-									"onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => compressMode.value = $event),
-									value: "custom"
-								}, null, 512), [[vModelRadio, compressMode.value]]), _cache[19] || (_cache[19] = createBaseVNode("span", null, "自定义", -1))])
-							]),
-							compressMode.value === "custom" ? (openBlock(), createElementBlock("div", _hoisted_15, [
-								_cache[20] || (_cache[20] = createBaseVNode("span", { class: "slider-label" }, "质量", -1)),
-								withDirectives(createBaseVNode("input", {
-									type: "range",
-									class: "compress-slider",
-									min: "10",
-									max: "100",
-									step: "5",
-									"onUpdate:modelValue": _cache[8] || (_cache[8] = ($event) => compressQuality.value = $event)
-								}, null, 512), [[
-									vModelText,
-									compressQuality.value,
-									void 0,
-									{ number: true }
-								]]),
-								createBaseVNode("span", _hoisted_16, toDisplayString(compressQuality.value) + "%", 1)
-							])) : createCommentVNode("", true),
-							createBaseVNode("div", _hoisted_17, [createTextVNode(" 原始大小：" + toDisplayString(formatSize(localFile.value?.size)) + " ", 1), compressMode.value !== "none" ? (openBlock(), createElementBlock(Fragment$1, { key: 0 }, [_cache[21] || (_cache[21] = createTextVNode(" → 预估压缩后：", -1)), createBaseVNode("span", _hoisted_18, toDisplayString(estimatedSize.value), 1)], 64)) : createCommentVNode("", true)])
-						])) : createCommentVNode("", true),
-						createBaseVNode("div", _hoisted_19, [createBaseVNode("button", {
-							class: "btn btn--ghost",
-							onClick: closeImageDialog
-						}, "取消"), createBaseVNode("button", {
-							class: "btn btn--primary",
-							disabled: !localPreview.value,
-							onClick: confirmLocalImage
-						}, "确认", 8, _hoisted_20)])
-					], 512), [[vShow, imageTab.value === "local"]]), withDirectives(createBaseVNode("div", _hoisted_21, [
-						createBaseVNode("div", _hoisted_22, [withDirectives(createBaseVNode("input", {
-							"onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => imageUrl.value = $event),
-							class: "form-input url-input",
-							placeholder: "输入图片地址，如 https://example.com/image.png",
-							onKeydown: withKeys(fetchUrlImage, ["enter"])
-						}, null, 544), [[vModelText, imageUrl.value]]), createBaseVNode("button", {
-							class: "btn btn--primary btn--sm",
-							onClick: fetchUrlImage
-						}, "获取")]),
-						urlPreview.value ? (openBlock(), createElementBlock("div", _hoisted_23, [createBaseVNode("img", {
-							src: urlPreview.value,
-							class: "url-preview-img"
-						}, null, 8, _hoisted_24)])) : urlLoading.value ? (openBlock(), createElementBlock("div", _hoisted_25, "加载中...")) : urlError.value ? (openBlock(), createElementBlock("div", _hoisted_26, toDisplayString(urlError.value), 1)) : createCommentVNode("", true),
-						createBaseVNode("div", _hoisted_27, [createBaseVNode("button", {
-							class: "btn btn--ghost",
-							onClick: closeImageDialog
-						}, "取消"), createBaseVNode("button", {
-							class: "btn btn--primary",
-							disabled: !urlPreview.value,
-							onClick: confirmUrlImage
-						}, "确认", 8, _hoisted_28)])
-					], 512), [[vShow, imageTab.value === "url"]])])
-				])])) : createCommentVNode("", true)])),
+				createVNode(HyperlinkDialog_default, {
+					visible: showHyperlinkDlg.value,
+					"onUpdate:visible": _cache[1] || (_cache[1] = ($event) => showHyperlinkDlg.value = $event),
+					"default-url": hyperlinkDefaultUrl.value,
+					"default-title": hyperlinkDefaultTitle.value,
+					onConfirm: handleHyperlinkConfirm,
+					onRemove: handleHyperlinkRemove
+				}, null, 8, [
+					"visible",
+					"default-url",
+					"default-title"
+				]),
+				createVNode(NoteDialog_default, {
+					visible: showNoteDlg.value,
+					"onUpdate:visible": _cache[2] || (_cache[2] = ($event) => showNoteDlg.value = $event),
+					"default-content": noteDefaultContent.value,
+					onConfirm: handleNoteConfirm,
+					onRemove: handleNoteRemove
+				}, null, 8, ["visible", "default-content"]),
+				createVNode(ImageDialog_default, {
+					visible: showImageDlg.value,
+					"onUpdate:visible": _cache[3] || (_cache[3] = ($event) => showImageDlg.value = $event),
+					onConfirm: handleImageConfirm
+				}, null, 8, ["visible"]),
+				createVNode(ExportDialog_default, {
+					visible: showExportDlg.value,
+					"onUpdate:visible": _cache[4] || (_cache[4] = ($event) => showExportDlg.value = $event),
+					onSelect: unref(exportFile)
+				}, null, 8, ["visible", "onSelect"]),
 				createVNode(ImageViewer_default, {
 					modelValue: showImageViewer.value,
-					"onUpdate:modelValue": _cache[10] || (_cache[10] = ($event) => showImageViewer.value = $event),
+					"onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => showImageViewer.value = $event),
 					images: viewerImages.value,
 					"viewer-index": viewerIndex.value
 				}, null, 8, [
 					"modelValue",
 					"images",
 					"viewer-index"
-				]),
-				(openBlock(), createBlock(Teleport, { to: "body" }, [showExportDialog.value ? (openBlock(), createElementBlock("div", {
-					key: 0,
-					class: "dialog-overlay",
-					onClick: _cache[12] || (_cache[12] = withModifiers(($event) => showExportDialog.value = false, ["self"]))
-				}, [createBaseVNode("div", _hoisted_29, [createBaseVNode("div", _hoisted_30, [_cache[23] || (_cache[23] = createBaseVNode("span", null, "导出", -1)), createBaseVNode("button", {
-					class: "dialog-close",
-					onClick: _cache[11] || (_cache[11] = ($event) => showExportDialog.value = false)
-				}, "×")]), createBaseVNode("div", _hoisted_31, [createBaseVNode("div", _hoisted_32, [createBaseVNode("div", _hoisted_33, [(openBlock(), createElementBlock(Fragment$1, null, renderList(exportOptions, (item) => {
-					return createBaseVNode("div", {
-						key: item.type,
-						class: "downloadTypeItem",
-						onClick: ($event) => confirmExport(item.type)
-					}, [
-						createBaseVNode("div", { class: normalizeClass(["typeIcon", item.type]) }, null, 2),
-						createBaseVNode("div", _hoisted_35, toDisplayString(item.name), 1),
-						_cache[24] || (_cache[24] = createBaseVNode("div", { class: "checked-icon" }, [createBaseVNode("svg", {
-							viewBox: "0 0 24 24",
-							width: "16",
-							height: "16",
-							fill: "none",
-							stroke: "currentColor",
-							"stroke-width": "3"
-						}, [createBaseVNode("polyline", { points: "20 6 9 17 4 12" })])], -1))
-					], 8, _hoisted_34);
-				}), 64))])])])])])) : createCommentVNode("", true)]))
+				])
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-d07cfc83"]]);
+}, [["__scopeId", "data-v-7859b262"]]);
 //#endregion
 //#region src/composables/useTheme.js
 var THEME_KEY = "subtitle-extractor-theme";
@@ -30252,25 +30844,25 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 					createBaseVNode("div", _hoisted_3, [_cache[15] || (_cache[15] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-closed-captioning" }), createTextVNode(" 字幕处理 ")], -1)), createBaseVNode("div", _hoisted_4, [createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[0] || (_cache[0] = ($event) => showVideo.value = true)
-					}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-film\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>视频字幕提取</span><span class=\"entry-desc\" data-v-2ff81ffd>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])]), createBaseVNode("button", {
+					}, [..._cache[13] || (_cache[13] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-film\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>视频字幕提取</span><span class=\"entry-desc\" data-v-3bf1d84a>上传视频，框选字幕区域，自动逐帧提取拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])]), createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[1] || (_cache[1] = ($event) => showImageSub.value = true)
-					}, [..._cache[14] || (_cache[14] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-scissors\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>图片截取字幕</span><span class=\"entry-desc\" data-v-2ff81ffd>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])])])]),
+					}, [..._cache[14] || (_cache[14] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-scissors\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>图片截取字幕</span><span class=\"entry-desc\" data-v-3bf1d84a>拖动红/蓝裁剪线，精准裁切字幕区域并拼接</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
 					createBaseVNode("div", _hoisted_5, [_cache[18] || (_cache[18] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-image" }), createTextVNode(" 图片处理 ")], -1)), createBaseVNode("div", _hoisted_6, [createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[2] || (_cache[2] = ($event) => showStitch.value = true)
-					}, [..._cache[16] || (_cache[16] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-table-cells\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>图片拼接</span><span class=\"entry-desc\" data-v-2ff81ffd>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])]), createBaseVNode("button", {
+					}, [..._cache[16] || (_cache[16] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-table-cells\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>图片拼接</span><span class=\"entry-desc\" data-v-3bf1d84a>水平 / 垂直 / 网格布局，自由组合多张图片</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])]), createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[3] || (_cache[3] = ($event) => showSeg.value = true)
-					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-grip\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-2ff81ffd>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])])])]),
+					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-grip\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>智能切片（九宫格）</span><span class=\"entry-desc\" data-v-3bf1d84a>把一张大图智能切成多张，用于 Instagram / 小红书 九宫格</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
 					createBaseVNode("div", _hoisted_7, [_cache[20] || (_cache[20] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-clapperboard" }), createTextVNode(" 动图剪辑 ")], -1)), createBaseVNode("div", _hoisted_8, [createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[4] || (_cache[4] = ($event) => showGif.value = true)
-					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-film\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>视频剪辑转GIF</span><span class=\"entry-desc\" data-v-2ff81ffd>选择视频片段，自定义参数，生成高质量GIF动图</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])])])]),
+					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-film\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>视频剪辑转GIF</span><span class=\"entry-desc\" data-v-3bf1d84a>选择视频片段，自定义参数，生成高质量GIF动图</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])]),
 					createBaseVNode("div", _hoisted_9, [_cache[22] || (_cache[22] = createBaseVNode("h2", { class: "group-title" }, [createBaseVNode("i", { class: "fa-solid fa-diagram-project" }), createTextVNode(" 思维导图 ")], -1)), createBaseVNode("div", _hoisted_10, [createBaseVNode("button", {
 						class: "entry-card",
 						onClick: _cache[5] || (_cache[5] = ($event) => showMindMap.value = true)
-					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<div class=\"entry-icon\" data-v-2ff81ffd><i class=\"fa-solid fa-brain\" data-v-2ff81ffd></i></div><div class=\"entry-info\" data-v-2ff81ffd><span class=\"entry-title\" data-v-2ff81ffd>思维导图</span><span class=\"entry-desc\" data-v-2ff81ffd>创建和编辑思维导图，支持插入图片、导出 PNG/SVG</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-2ff81ffd></i>", 3)])])])])
+					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<div class=\"entry-icon\" data-v-3bf1d84a><i class=\"fa-solid fa-brain\" data-v-3bf1d84a></i></div><div class=\"entry-info\" data-v-3bf1d84a><span class=\"entry-title\" data-v-3bf1d84a>思维导图</span><span class=\"entry-desc\" data-v-3bf1d84a>创建和编辑思维导图，支持插入图片、导出 PNG/SVG</span></div><i class=\"fa-solid fa-arrow-right entry-arrow\" data-v-3bf1d84a></i>", 3)])])])])
 				]),
 				createBaseVNode("button", {
 					class: "theme-toggle",
@@ -30354,6 +30946,6 @@ createApp(/* @__PURE__ */ _plugin_vue_export_helper_default({
 			])]);
 		};
 	}
-}, [["__scopeId", "data-v-2ff81ffd"]])).mount("#app");
+}, [["__scopeId", "data-v-3bf1d84a"]])).mount("#app");
 //#endregion
 export { __require as n, __commonJSMin as t };
