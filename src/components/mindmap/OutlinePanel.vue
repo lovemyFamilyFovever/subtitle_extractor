@@ -96,13 +96,6 @@ onBeforeUnmount(() => {
   padding: 10px 8px;
 }
 
-.customScrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,0.08) transparent;
-}
-.customScrollbar::-webkit-scrollbar { width: 4px; }
-.customScrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
-
 .outline-empty {
   text-align: center;
   color: #ccc;

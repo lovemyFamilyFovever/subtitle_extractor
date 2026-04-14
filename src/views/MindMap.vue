@@ -11,12 +11,12 @@
     <div class="main-area">
       <MindMapCore />
 
-      <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="showOutline = false" />
+      <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="closePanel" />
 
-      <BaseStylePanel v-if="showBaseStyle" @close="showBaseStyle = false" @set-theme-config="setThemeConfig"
+      <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
         :get-theme-config="getThemeConfig" />
 
-      <NodeStylePanel v-if="activeNodes.length > 0 && !isReadonly" :active-nodes="activeNodes"
+      <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes"
         @set-style="setNodeStyle" />
     </div>
 
@@ -100,9 +100,7 @@
               <!-- 按钮 -->
               <div class="dialog-footer">
                 <button class="btn btn--ghost" @click="closeImageDialog">取消</button>
-                <button class="btn btn--primary" :disabled="!localPreview" @click="confirmLocalImage">
-                  确认
-                </button>
+                <button class="btn btn--primary" :disabled="!localPreview" @click="confirmLocalImage">确认</button>
               </div>
             </div>
 
@@ -111,28 +109,20 @@
               <div class="url-input-row">
                 <input v-model="imageUrl" class="form-input url-input"
                   placeholder="输入图片地址，如 https://example.com/image.png" @keydown.enter="fetchUrlImage" />
-                <button class="btn btn--primary btn--sm" @click="fetchUrlImage">
-                  获取
-                </button>
+                <button class="btn btn--primary btn--sm" @click="fetchUrlImage">获取</button>
               </div>
 
               <!-- URL 预览 -->
               <div v-if="urlPreview" class="url-preview-area">
                 <img :src="urlPreview" class="url-preview-img" />
               </div>
-              <div v-else-if="urlLoading" class="url-preview-area url-loading">
-                加载中...
-              </div>
-              <div v-else-if="urlError" class="url-preview-area url-error">
-                {{ urlError }}
-              </div>
+              <div v-else-if="urlLoading" class="url-preview-area url-loading">加载中...</div>
+              <div v-else-if="urlError" class="url-preview-area url-error">{{ urlError }}</div>
 
               <!-- 按钮 -->
               <div class="dialog-footer">
                 <button class="btn btn--ghost" @click="closeImageDialog">取消</button>
-                <button class="btn btn--primary" :disabled="!urlPreview" @click="confirmUrlImage">
-                  确认
-                </button>
+                <button class="btn btn--primary" :disabled="!urlPreview" @click="confirmUrlImage">确认</button>
               </div>
             </div>
           </div>
@@ -211,9 +201,64 @@ const {
   newFile,
   toggleAssociativeLineMode,
   getOutlineTree,
-  imageDblClickData, collectAllImages
+  imageDblClickData,
+  collectAllImages
 } = useMindMap()
 
+
+// ============================================================
+// 面板互斥逻辑
+// ============================================================
+// 可选值: 'node' | 'outline' | 'basestyle' | null
+const activePanel = ref(null)
+
+const showOutline = computed(() => activePanel.value === 'outline')
+const showBaseStyle = computed(() => activePanel.value === 'basestyle')
+const showNodeStyle = computed(() => activePanel.value === 'node' && activeNodes.value.length > 0 && !isReadonly.value)
+
+// 统一关闭面板
+function closePanel() {
+  activePanel.value = null
+}
+
+// 切换面板 - 再次点击同一个按钮则关闭
+function togglePanel(panelName) {
+  activePanel.value = activePanel.value === panelName ? null : panelName
+}
+
+// 大纲按钮
+function handleToggleOutline() {
+  togglePanel('outline')
+}
+
+// 基础样式按钮
+function handleToggleBaseStyle() {
+  togglePanel('basestyle')
+}
+
+// 监听节点选中变化 - 选中节点时自动切换到节点样式面板
+// 但只在用户点击节点时触发，避免初始化时误触发
+let lastNodeCount = 0
+watch(activeNodes, (nodes) => {
+  const currentCount = nodes.length
+
+  // 有节点被选中
+  if (currentCount > 0) {
+    // 从无选中变为有选中，自动打开节点面板
+    if (lastNodeCount === 0) {
+      activePanel.value = 'node'
+    }
+  }
+  // 所有节点取消选中
+  else if (currentCount === 0 && lastNodeCount > 0) {
+    // 只在之前是节点面板时才关闭
+    if (activePanel.value === 'node') {
+      activePanel.value = null
+    }
+  }
+
+  lastNodeCount = currentCount
+})
 
 
 // ===== 图片查看器状态 =====
@@ -235,22 +280,12 @@ watch(imageDblClickData, (data) => {
 
 // ===== 大纲 =====
 const hasNode = computed(() => activeNodes.value.length > 0)
-const showOutline = ref(false)
-
-function handleToggleOutline() {
-  showOutline.value = !showOutline.value
-}
 
 const outlineTree = computed(() => {
   if (!showOutline.value) return null
   return getOutlineTree()
 })
 
-// ===== 基础样式 =====
-const showBaseStyle = ref(false)
-function handleToggleBaseStyle() {
-  showBaseStyle.value = !showBaseStyle.value
-}
 
 // ===== 关联线 =====
 const lineTextRef = ref(null)
@@ -300,14 +335,14 @@ function handleImport() { importFile() }
 
 // ===== 图片弹窗 =====
 const showImageDialog = ref(false)
-const imageTab = ref('local') // 'local' | 'url'
+const imageTab = ref('local')
 
 // 本地图片
 const fileInputRef = ref(null)
 const localFile = ref(null)
 const localPreview = ref('')
 const isDragOver = ref(false)
-const compressMode = ref('none') // 'none' | 'auto' | 'custom'
+const compressMode = ref('none')
 const compressQuality = ref(80)
 const compressedBlob = ref(null)
 
@@ -513,8 +548,7 @@ function urlToDataURL(url) {
         canvas.height = img.naturalHeight
         const ctx = canvas.getContext('2d')
         ctx.drawImage(img, 0, 0)
-        const dataUrl = canvas.toDataURL('image/png')
-        resolve(dataUrl)
+        resolve(canvas.toDataURL('image/png'))
       } catch (e) {
         // canvas 被污染（CORS 限制），回退到直接用 URL
         resolve(null)

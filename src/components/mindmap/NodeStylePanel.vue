@@ -5,7 +5,7 @@
             <span class="panel-badge">{{ activeNodes.length }} 个节点</span>
         </div>
 
-        <div class="panel-body">
+        <div class="panel-body customScrollbar">
 
             <!-- 字体 -->
             <div class="style-section">
@@ -39,11 +39,21 @@
 
                     <label class="section-label">字型</label>
                     <div class="btn-group font-weight-group">
-                        <button v-for="w in fontWeights" :key="w.value" class="style-btn"
-                            :class="{ active: currentFontWeight === w.value }"
-                            @click="$emit('set-style', 'fontWeight', w.value)">
-                            <i :class="w.icon" />
+
+                        <button  class="style-btn"
+                            :class="{ active: currentFontWeight === 'normal' }"
+                            @click="$emit('set-style', 'fontWeight', 'normal')">A
                         </button>
+                              <button  class="style-btn"
+                            :class="{ active: currentFontWeight === 'bold' }"
+                            @click="$emit('set-style', 'fontWeight', 'bold')">B
+                        </button>
+                              <button  class="style-btn"
+                            :class="{ active: currentFontStyle === 'italic' }"
+                            @click="$emit('set-style', 'fontStyle', 'italic')">I
+                        </button>
+
+
                     </div>
                 </div>
 
@@ -81,7 +91,7 @@
                 <!-- 圆角 -->
                 <div class="section-group-item" :style="{ opacity: currentShape === 'rectangle' ? 1 : 0 }">
                     <label class="section-label">圆角 </label>
-                    <SliderInput v-model="currentBorderRadius" label="" unit="" :min="10" :max="30" :showSlider=false
+                    <SliderInput v-model="currentBorderRadius" label="" unit="" :min="0" :max="20" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'borderRadius', val)" />
 
                 </div>
@@ -97,7 +107,7 @@
 
                 <div class="section-group-item">
                     <label class="section-label">宽度</label>
-                    <SliderInput v-model="currentBorderWidth" label="" unit="" :min="10" :max="30" :showSlider=false
+                    <SliderInput v-model="currentBorderWidth" label="" unit="" :min="1" :max="10" :showSlider=false
                         @update:model-value="(val) => $emit('set-style', 'borderWidth', val)" />
                 </div>
             </div>
@@ -119,7 +129,7 @@
                 </div>
             </div>
 
-           
+
         </div>
 
     </div>
@@ -139,9 +149,6 @@ const props = defineProps({
 
 const emit = defineEmits(['set-style', 'set-theme-config'])
 
-const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
-const currentFontWeight = computed(() => getNodeStyle('fontWeight', 'normal'))
-
 const currentFontFamily = computed(() => getNodeStyle('fontFamily', '微软雅黑, Microsoft YaHei'))
 const fontFamilies = [
     { label: '微软雅黑', value: '微软雅黑, Microsoft YaHei' },
@@ -150,13 +157,14 @@ const fontFamilies = [
     { label: '楷体', value: '楷体, KaiTi' },
     { label: 'Arial', value: 'Arial' },
 ]
+
 const currentFontSize = computed(() => getNodeStyle('fontSize', 16))
-const fontWeights = [
-    { label: '常规', value: 'normal', icon: 'fas fa-font' },
-    { label: '加粗', value: 'bold', icon: 'fas fa-bold' },
-    { label: '斜体', value: 'italic', icon: 'fas fa-italic' },
-    { label: '斜体加粗', value: 'bold italic', icon: 'fas fa-bold fa-italic' },
-]
+
+const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
+
+const currentFontWeight = computed(() => getNodeStyle('fontWeight', 'normal'))
+
+const currentFontStyle = computed(() => getNodeStyle('fontStyle', 'bold'))
 
 const currentBg = computed(() => getNodeStyle('background', '#ffffff'))
 const bgColors = ['#f5f5f5', '#fff3e0', '#e3f2fd', '#e8f5e9', '#fce4ec']
@@ -175,7 +183,8 @@ const shapeOptions = [
 
 const currentBorderRadius = computed(() => getNodeStyle('borderRadius', 5))
 
-const currentBorderColor = computed(() => getNodeStyle('borderColor', '#000'))
+const currentBorderColor = computed(() => getNodeStyle('borderColor', 'transparent'))
+
 const currentBorderWidth = computed(() => getNodeStyle('borderWidth', 1))
 
 const currentPaddingX = computed(() => getNodeStyle('paddingX', 10))
@@ -185,9 +194,9 @@ const currentPaddingY = computed(() => getNodeStyle('paddingY', 10))
 function getNodeStyle(key, defaultVal) {
     if (!props.activeNodes.length) return defaultVal
     const node = props.activeNodes[0]
-    if (typeof node.getData === 'function') {
+    if (typeof node.getStyle === 'function') {
         try {
-            const val = node.getData(key)
+            const val = node.getStyle(key)
             if (val !== undefined && val !== null) return val
         } catch (e) { /* ignore */ }
     }

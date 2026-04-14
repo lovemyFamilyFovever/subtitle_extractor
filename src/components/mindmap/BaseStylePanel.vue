@@ -1,30 +1,22 @@
 <template>
-    <div class="style-panel">
+    <div class="style-panel" ref="panelRef">
         <div class="panel-header">
             <span class="panel-title">基础样式</span>
         </div>
 
-        <div class="panel-body">
+        <div class="panel-body customScrollbar">
 
-            <!-- ====== 连线设置 ====== -->
-            <div class="section-title">
-                <span class="section-title-icon line-icon">—</span>
-                连线设置
-            </div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">线条颜色</label>
                     <div class="color-row">
                         <input type="color" class="color-input" :value="currentLineColor"
                             @input="(e) => emitSetConfig('lineColor', e.target.value)" />
-                        <div class="preset-color" v-for="color in presetLineColors" :key="color"
-                            :style="{ background: color, borderColor: color }"
-                            @click="emitSetConfig('lineColor', color)"></div>
                     </div>
                 </div>
                 <div class="section-group-item">
                     <label class="section-label">线条粗细</label>
-                    <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10" :showSlider="true"
+                    <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10" :showInput="false"
                         @update:model-value="(val) => emitSetConfig('lineWidth', val)" />
                 </div>
             </div>
@@ -54,35 +46,33 @@
 
             <!-- ====== 节点外边距 ====== -->
             <div class="section-title">
-                <span class="section-title-icon">2</span>
                 二级节点外边距
             </div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">水平间距</label>
-                    <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showSlider="true"
+                    <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('second', 'marginX', val)" />
                 </div>
                 <div class="section-group-item">
                     <label class="section-label">垂直间距</label>
-                    <SliderInput v-model="secondMarginY" label="" unit="px" :min="5" :max="100" :showSlider="true"
+                    <SliderInput v-model="secondMarginY" label="" unit="px" :min="5" :max="100" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('second', 'marginY', val)" />
                 </div>
             </div>
 
             <div class="section-title">
-                <span class="section-title-icon">3+</span>
                 三级及以下节点外边距
             </div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">水平间距</label>
-                    <SliderInput v-model="nodeMarginX" label="" unit="px" :min="20" :max="200" :showSlider="true"
+                    <SliderInput v-model="nodeMarginX" label="" unit="px" :min="20" :max="200" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('node', 'marginX', val)" />
                 </div>
                 <div class="section-group-item">
                     <label class="section-label">垂直间距</label>
-                    <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="100" :showSlider="true"
+                    <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="100" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('node', 'marginY', val)" />
                 </div>
             </div>
@@ -104,35 +94,21 @@
                 </div>
                 <div class="section-group-item">
                     <label class="section-label">线条粗细</label>
-                    <SliderInput v-model="currentAssocLineWidth" label="" unit="px" :min="1" :max="10" :showSlider="true"
-                        @update:model-value="(val) => emitSetConfig('associativeLineWidth', val)" />
+                    <SliderInput v-model="currentAssocLineWidth" label="" unit="px" :min="1" :max="10"
+                        :showInput="false" @update:model-value="(val) => emitSetConfig('associativeLineWidth', val)" />
                 </div>
             </div>
 
-            <div class="divider"></div>
 
-            <!-- ====== 关联线文字 ====== -->
-            <div class="section-title">
-                <span class="section-title-icon text-icon">A</span>
-                关联线文字
-            </div>
             <div class="style-section">
-                <div class="section-group-item">
-                    <label class="section-label">文字颜色</label>
-                    <div class="color-row">
-                        <input type="color" class="color-input" :value="currentAssocTextColor"
-                            @input="(e) => emitSetConfig('associativeLineTextColor', e.target.value)" />
-                    </div>
-                </div>
+
                 <div class="section-group-item">
                     <label class="section-label">字号</label>
                     <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
-                        :showSlider="true"
+                        :showInput="false"
                         @update:model-value="(val) => emitSetConfig('associativeLineTextFontSize', val)" />
                 </div>
-            </div>
 
-            <div class="style-section">
                 <div class="section-group-item full-width">
                     <label class="section-label">字体类型</label>
                     <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
@@ -140,24 +116,17 @@
                 </div>
             </div>
 
-            <div class="divider"></div>
-
-            <!-- ====== 图片显示尺寸 ====== -->
-            <div class="section-title">
-                <span class="section-title-icon img-icon">▣</span>
-                图片显示尺寸
-            </div>
             <div class="style-section">
+
+
                 <div class="section-group-item">
-                    <label class="section-label">最大宽度</label>
-                    <SliderInput v-model="currentImgMaxWidth" label="" unit="px" :min="50" :max="500" :showSlider="true"
-                        @update:model-value="(val) => emitSetConfig('imgMaxWidth', val)" />
+                    <label class="section-label">文字颜色</label>
+                    <div class="color-row">
+                        <input type="color" class="color-input" :value="currentAssocTextColor"
+                            @input="(e) => emitSetConfig('associativeLineTextColor', e.target.value)" />
+                    </div>
                 </div>
-                <div class="section-group-item">
-                    <label class="section-label">最大高度</label>
-                    <SliderInput v-model="currentImgMaxHeight" label="" unit="px" :min="30" :max="300" :showSlider="true"
-                        @update:model-value="(val) => emitSetConfig('imgMaxHeight', val)" />
-                </div>
+
             </div>
 
         </div>
@@ -165,7 +134,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import SliderInput from '../SliderInput.vue';
 import Dropdown from '../Dropdown.vue';
 
@@ -176,7 +145,22 @@ const props = defineProps({
     }
 })
 
-const emit = defineEmits(['set-theme-config'])
+const emit = defineEmits(['close', 'set-theme-config'])
+
+
+const panelRef = ref(null)
+
+function handleOutsideClick(e) {
+    if (panelRef.value && !panelRef.value.contains(e.target)) {
+        emit('close')
+    }
+}
+
+onMounted(() => {
+    setTimeout(() => {
+        document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
+})
 
 // ===== 核心：正确获取主题配置对象 =====
 const themeConfig = computed(() => {
@@ -203,7 +187,6 @@ function emitSetNestedConfig(parentKey, childKey, value) {
 
 // ==================== 连线颜色 ====================
 const currentLineColor = computed(() => themeConfig.value.lineColor || '#549688')
-const presetLineColors = ['#549688', '#4a90d9', '#e74c3c', '#f39c12', '#2ecc71', '#9b59b6', '#333333']
 
 // ==================== 连线粗细 ====================
 const lineWidthLocal = ref(1)
@@ -228,9 +211,9 @@ const currentLineStyle = computed({
 })
 
 const lineStyleOptions = [
-    { label: '直线', value: 'straight' },
-    { label: '曲线', value: 'curve' },
-    { label: '直连', value: 'direct' }
+    { label: '直线', value: 'straight',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L30,5L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L30,23L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
+    { label: '曲线', value: 'curve',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14A12,-9 0 0 1 42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14A12,9 0 0 0 42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
+    { label: '直连', value: 'direct',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' }
 ]
 
 // ==================== 显示箭头标记 ====================
@@ -376,7 +359,7 @@ const currentImgMaxHeight = computed({
     top: 50px;
     right: 0px;
     width: 300px;
-    max-height: calc(100vh - 70px);
+    height: calc(100vh - 250px);
     overflow-y: auto;
     background: rgba(255, 255, 255, 0);
     backdrop-filter: blur(20px) saturate(1.8);
@@ -631,5 +614,9 @@ const currentImgMaxHeight = computed({
     font-size: 12px;
     color: #666;
     font-weight: 500;
+}
+
+.slider {
+    width: 100%;
 }
 </style>

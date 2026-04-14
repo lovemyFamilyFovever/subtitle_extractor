@@ -55,3 +55,11 @@ body,
 .smm-line {
   transition: stroke 0.3s ease;
 }
+
+
+.customScrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.08) transparent;
+}
+.customScrollbar::-webkit-scrollbar { width: 4px; }
+.customScrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
