@@ -4,6 +4,7 @@
 
             <!-- 第一组：编辑操作 -->
             <div class="toolbar-block">
+                <!-- ★ 原有的回退、前进、同级节点、子节点、删除节点、图片按钮保持不变 ★ -->
                 <div class="toolbar-btn" :class="{ disabled: !canUndo }" @click="canUndo && $emit('undo')">
                     <span class="icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
@@ -79,6 +80,28 @@
                     <span class="text">图片</span>
                 </div>
 
+                <!-- ★★★ 新增：超链接 ★★★ -->
+                <div class="toolbar-btn" :class="{ disabled: !hasNode }" @click="hasNode && $emit('insert-hyperlink')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                    </span>
+                    <span class="text">超链接</span>
+                </div>
+
+                <!-- ★★★ 新增：备注 ★★★ -->
+                <div class="toolbar-btn" :class="{ disabled: !hasNode }" @click="hasNode && $emit('insert-note')">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        </svg>
+                    </span>
+                    <span class="text">备注</span>
+                </div>
             </div>
 
             <div class="divider" />
@@ -152,10 +175,10 @@
 
                 <div class="toolbar-btn" @click="$emit('toggle-basestyle')">
                     <span class="icon">
-                        <svg  viewBox="0 0 1024 1024" width="16" height="16" fill="none" stroke="currentColor">
+                        <svg viewBox="0 0 1024 1024" width="16" height="16" fill="none" stroke="currentColor">
                             <path
                                 d="M595.590747 733.833404a17.049549 17.049549 0 0 1-17.083683-16.725283l-0.494931-35.106028a16.895949 16.895949 0 0 1 17.083682-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283v35.123094a16.861816 16.861816 0 0 1-16.964216 16.725283c-6.195181-0.1024-143.342503-0.1024-411.441965 0z m-0.819198 153.855538a17.049549 17.049549 0 0 1-17.083682-16.725283l0.341332-35.071895a16.895949 16.895949 0 0 1 17.066616-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283l-0.341332 34.952429a17.049549 17.049549 0 0 1-16.947149 16.844749H594.771549zM595.112881 1024a17.049549 17.049549 0 0 1-17.100748-16.725283v-34.59403a16.895949 16.895949 0 0 1 17.083682-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283v34.474564c-0.119466 9.284239-7.679977 16.725283-16.964216 16.844749H595.112881z m-91.391725-297.91484c-119.978307 0-217.667614-96.085045-217.667614-214.20309s97.569841-214.203091 217.667614-214.203091c119.978307 0 217.667614 96.085045 217.667613 214.203091 0 25.002592-4.33492 49.783317-12.987694 73.181647h-83.711749a136.959589 136.959589 0 0 0 21.299136-73.181647c0-77.021636-63.880342-139.792647-142.267306-139.792648-78.250432 0-142.130774 62.771012-142.130774 139.792648 0 77.141102 63.760875 139.912114 142.130774 139.912113v74.290977zM511.998464 972.800154v34.474563c-0.119466 9.796237-7.321578 16.605817-17.220215 16.605817h-85.281877c-33.791899 0.375466-49.441985-34.474563-51.302247-68.164062l-17.407947-68.266462c-31.044174-12.987694-60.415819-28.023383-87.551738-47.95719l-71.04832 28.620714c-30.207909 15.359954-67.105932 4.710386-84.445613-24.40526L8.584508 692.310328a62.105414 62.105414 0 0 1 20.684738-84.20668l60.927817-46.421194a371.318353 371.318353 0 0 1 0-99.430102l-60.808351-46.438261a62.003014 62.003014 0 0 1-20.804204-83.831215l89.036532-151.671012a64.34114 64.34114 0 0 1 84.309081-24.524726l71.20192 28.603647a409.649971 409.649971 0 0 1 87.53467-49.527318l10.410636-75.024841A63.044078 63.044078 0 0 1 414.684623 0.003072h177.919466c34.184431 0 62.037147 26.128988 63.658476 59.681954l10.393568 75.161375a419.019543 419.019543 0 0 1 87.654137 49.527318l71.20192-28.467115a64.528873 64.528873 0 0 1 84.309081 24.388194l88.780533 151.551545a62.088347 62.088347 0 0 1-20.565271 84.206681 1143.036571 1143.036571 0 0 1-56.541697 45.055865c0 21.964734 0.409599 61.781148 1.211729 119.500441h-86.596007l-0.95573-149.844884 92.876521-70.689921-79.359762-135.457727-107.485544 45.448397-17.578614-14.745556a338.123786 338.123786 0 0 0-104.259954-58.931023l-21.418602-7.679977-15.837819-114.397523h-156.87633l-15.854885 114.397523-21.418603 7.679977a343.056037 343.056037 0 0 0-104.37942 59.05049l-17.459148 14.506623-108.338875-43.588136-78.489364 133.460933 92.859455 70.706988-4.095988 22.169533a325.801689 325.801689 0 0 0-5.683183 59.05049c0.119466 19.831407 1.979727 39.765214 5.563717 59.204089l3.976521 22.152467-92.739988 70.706988 79.615761 135.457727 97.689307-47.80359 153.019274 84.906412L426.665387 955.716472c43.946535-0.085333 66.6622-0.085333 68.112862 0C496.962776 955.904204 511.998464 964.198579 511.998464 972.800154z"
-                                fill="#121649" ></path>
+                                fill="#121649"></path>
                         </svg>
                     </span>
                     <span class="text">基础样式</span>
@@ -201,22 +224,8 @@
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                         </svg>
                     </span>
-                    <span class="text">打开</span>
+                    <span class="text">加载列表</span>
                 </div>
-
-                <div class="toolbar-btn" @click="$emit('save-as')">
-                    <span class="icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                            <polyline points="17 21 17 13 7 13 7 21" />
-                            <polyline points="7 3 7 8 15 8" />
-                        </svg>
-                    </span>
-                    <span class="text">另存为</span>
-                </div>
-
-                <div class="divider" />
 
                 <div class="toolbar-btn" @click="$emit('import')">
                     <span class="icon">
@@ -265,46 +274,33 @@ const emit = defineEmits([
     'new-file', 'open', 'save-as', 'import', 'export',
     'undo', 'redo',
     'insert-sibling', 'insert-child', 'remove',
-    'insert-image', 'insert-hyperlink',
+    'insert-image', 'insert-hyperlink', 'insert-note',  // ★ 新增 insert-note
     'set-theme', 'toggle-outline',
     'toggle-associative-line',
 ])
 
+// ★ 后面所有原有代码保持不变 ★
 const showThemeDropdown = ref(false)
 const themeDropRef = ref(null)
-
 const currentTheme = ref('light')
 const themeConfig = [
     { label: '浅色', value: 'light' },
     { label: '深色', value: 'dark' }
 ]
 
-function changeTheme(value) {
-    currentTheme.value = value
-}
-
-function getPreview(value) {
-    return props.themePreviewMap[value] || ''
-}
-
+function changeTheme(value) { currentTheme.value = value }
+function getPreview(value) { return props.themePreviewMap[value] || '' }
 function handleThemeSelect(value) {
     emit('set-theme', value)
     showThemeDropdown.value = false
 }
-
 function handleClickOutside(e) {
     if (themeDropRef.value && !themeDropRef.value.contains(e.target)) {
         showThemeDropdown.value = false
     }
 }
-
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside)
-})
+onMounted(() => { document.addEventListener('click', handleClickOutside) })
+onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside) })
 </script>
 
 <style scoped>

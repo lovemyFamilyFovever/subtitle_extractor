@@ -4,7 +4,6 @@ import Themes from 'simple-mind-map-plugin-themes'
 import themeList from 'simple-mind-map-plugin-themes/themeList'
 import themeImgMap from 'simple-mind-map-plugin-themes/themeImgMap'
 import Export from 'simple-mind-map/src/plugins/Export.js'
-// 修复：正确的关联线插件路径
 import AssociativeLine from 'simple-mind-map/src/plugins/AssociativeLine.js'
 
 try { Themes.init(MindMap) } catch (e) { /* ignore */ }
@@ -43,18 +42,28 @@ const defaultData = {
       data: { text: '分支主题 1' },
       children: [
         { data: { text: '子主题 1-1' }, children: [] },
-        { data: { text: '子主题 1-2' }, children: [] },
       ],
     },
     {
       data: { text: '分支主题 2' },
       children: [{ data: { text: '子主题 2-1' }, children: [] }],
     },
-    { data: { text: '分支主题 3' }, children: [] },
   ],
 }
 
+// ========== 工具函数 ==========
+function formatTime(timestamp) {
+  if (!timestamp) return ''
+  const d = new Date(timestamp)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 
+function formatFileSize(bytes) {
+  if (!bytes) return '0 B'
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}
 
 function updateHistoryStatus() {
   if (!mindMapInstance) return
@@ -94,8 +103,6 @@ function bindEvents() {
         imageDblClickData.value = { node, imgSrc, imgNode }
       }
     })
-
-
   } catch (e) { /* ignore */ }
 }
 
@@ -122,14 +129,10 @@ function traverseCollectImages(node, images) {
   if (imgSrc) {
     const fileSize = calcBase64Size(imgSrc)
     images.push({
-      imgSrc,
-      imgTitle,
-      imgText,
-      imgSize,
-      fileSize,        // 原始字节数
-      fileSizeText: formatFileSize(fileSize),  // 格式化文本
+      imgSrc, imgTitle, imgText, imgSize,
+      fileSize,
+      fileSizeText: formatFileSize(fileSize),
     })
-
   }
   if (node.children && node.children.length) {
     node.children.forEach((child) => {
@@ -155,20 +158,8 @@ function calcBase64Size(dataUrl) {
   // 减去末尾的 padding 字符（=）
   if (base64.endsWith('==')) bytes -= 2
   else if (base64.endsWith('=')) bytes -= 1
-
   return Math.round(bytes)
 }
-
-/**
- * 格式化大小
- */
-function formatFileSize(bytes) {
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
-}
-
-
 
 function getActiveNodeList() {
   if (!mindMapInstance) return []
@@ -225,6 +216,7 @@ export function useMindMap() {
       defaultInsertBelowSecondLevelNodeText: '子主题',
       isShowWatermark: false,
       mousewheelAction: 'zoom',
+      showNumber: false,
     })
 
     markRaw(mindMapInstance)
@@ -373,6 +365,7 @@ export function useMindMap() {
     })
     mindMapInstance.render()
   }
+
   function removeHyperlink() {
     if (!mindMapInstance) return
     const nodeList = getActiveNodeList()
@@ -386,47 +379,135 @@ export function useMindMap() {
   }
 
   // ========== 文件操作 ==========
-  function openLocalFile() {
+
+  /**
+   * 打开本地文件
+   * 返回格式化后的数组: [{ id, name, time, size, _raw }]
+   * 如果浏览器不支持 File System API，回退到传统模式
+   */
+  async function openLocalFile() {
+    // 检查浏览器是否支持 File System Access API
+    if (!('showOpenFilePicker' in window)) {
+      console.warn('当前浏览器不支持 File System Access API，使用传统模式')
+      return openLocalFileLegacy()
+    }
+
+    try {
+      // 打开文件选择器，获取读写权限
+      const fileHandles = await window.showOpenFilePicker({
+        types: [
+          {
+            description: '思维导图文件',
+            accept: {
+              'application/json': ['.json', '.smm']
+            }
+          }
+        ],
+        excludeAcceptAllOption: false,
+        multiple: true  // 开启多选
+      })
+
+      if (!fileHandles || fileHandles.length === 0) {
+        return null
+      }
+
+      // 逐个读取文件内容
+      const results = []
+      for (let i = 0; i < fileHandles.length; i++) {
+        const fileHandle = fileHandles[i]
+        try {
+          const file = await fileHandle.getFile()
+          const content = await file.text()
+
+          try {
+            const data = JSON.parse(content)
+
+            results.push({
+              id: i,
+              name: fileHandle.name,
+              time: formatTime(file.lastModified),
+              size: formatFileSize(file.size),
+              _raw: {
+                data,
+                fileName: fileHandle.name,
+                fileHandle,
+                index: i,
+                lastModified: file.lastModified,
+                size: file.size,
+              }
+            })
+
+            console.log(`已打开文件: ${fileHandle.name}`)
+
+          } catch (err) {
+            console.error(`文件 ${fileHandle.name} 解析失败:`, err)
+          }
+        } catch (err) {
+          console.error(`读取文件 ${fileHandle.name} 失败:`, err)
+        }
+      }
+
+      if (results.length > 0) {
+        console.log(`[MindMap] 共加载 ${results.length} 个文件`)
+        return results
+      } else {
+        return null
+      }
+
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('打开文件失败:', err)
+      }
+      return null
+    }
+  }
+
+  /**
+   * 传统模式（不支持 File System API 的浏览器）
+   */
+  function openLocalFileLegacy() {
     return new Promise((resolve) => {
       const input = document.createElement('input')
       input.type = 'file'
       input.accept = '.json,.smm'
-      input.onchange = (e) => {
-        const file = e.target.files[0]
-        if (!file) { resolve(null); return }
-        const reader = new FileReader()
-        reader.onload = (ev) => {
+      input.multiple = true
+      input.onchange = async (e) => {
+        const files = Array.from(e.target.files)
+        if (!files.length) { resolve(null); return }
+
+        const results = []
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
           try {
-            const data = JSON.parse(ev.target.result)
-            setData(data)
-            resolve(data)
+            const content = await file.text()
+            const data = JSON.parse(content)
+
+            results.push({
+              id: i,
+              name: file.name,
+              time: formatTime(file.lastModified),
+              size: formatFileSize(file.size),
+              _raw: {
+                data,
+                fileName: file.name,
+                fileHandle: null,
+                index: i,
+                lastModified: file.lastModified,
+                size: file.size,
+              }
+            })
+
+            console.log(`已打开文件: ${file.name}`)
+
           } catch (err) {
-            alert('文件格式不正确')
-            resolve(null)
+            console.error(`文件 ${file.name} 解析失败:`, err)
           }
         }
-        reader.readAsText(file)
+
+        resolve(results.length > 0 ? results : null)
       }
       input.click()
     })
-  }
-
-  function saveAsJSON() {
-    const data = getData()
-    if (!data) return
-    const pureData = {
-      data: data.data,
-      children: data.children || [],
-    }
-    const json = JSON.stringify(pureData, null, 2)
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = '思维导图.json'
-    a.click()
-    URL.revokeObjectURL(url)
-    hasUnsavedChanges.value = false
   }
 
   function importFile() {
@@ -459,11 +540,8 @@ export function useMindMap() {
     if (!mindMapInstance) return
     try {
       if (type === 'json') {
-        const data = mindMapInstance.getData()
-        const pureData = {
-          data: data.data,
-          children: data.children || [],
-        }
+        const data = getData()
+        const pureData = { data: data.data, children: data.children || [] }
         const json = JSON.stringify(pureData, null, 2)
         const blob = new Blob([json], { type: 'application/json' })
         const url = URL.createObjectURL(blob)
@@ -476,7 +554,7 @@ export function useMindMap() {
       }
 
       if (type === 'txt') {
-        const data = mindMapInstance.getData()
+        const data = getData()
         const text = nodeToText(data, 0)
         const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
         const url = URL.createObjectURL(blob)
@@ -516,7 +594,7 @@ export function useMindMap() {
     return result
   }
 
-  // ========== 关联线模式 ==========
+  // ========== 关联线 ==========
   function toggleAssociativeLineMode() {
     if (!mindMapInstance) return
     isAssociativeLineMode.value = !isAssociativeLineMode.value
@@ -528,6 +606,7 @@ export function useMindMap() {
       }
     } catch (e) { /* ignore */ }
   }
+
   function deleteActiveLine() {
     if (!mindMapInstance) return
     try { mindMapInstance.associativeLine?.removeLine?.() } catch (e) { /* ignore */ }
@@ -664,7 +743,6 @@ export function useMindMap() {
     }
   }
 
-
   return {
     isReady,
     activeNodes,
@@ -714,12 +792,10 @@ export function useMindMap() {
     toggleReadonly,
     render,
     openLocalFile,
-    saveAsJSON,
     importFile,
     getActiveNodeList,
     getOutlineTree,
     imageDblClickData,
     collectAllImages,
-
   }
 }
