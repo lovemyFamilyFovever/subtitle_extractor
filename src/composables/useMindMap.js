@@ -539,10 +539,6 @@ export function useMindMap() {
   function exportFile(type = 'png') {
     if (!mindMapInstance) return
     try {
-
-      const date = new Date()
-      const filename = date.toLocaleString() + '思维导图.' + type
-
       if (type === 'json') {
         const data = getData()
         const pureData = { data: data.data, children: data.children || [] }
@@ -551,8 +547,7 @@ export function useMindMap() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        const date = new Date()
-        a.download = filename
+        a.download = '思维导图.json'
         a.click()
         URL.revokeObjectURL(url)
         return
@@ -565,7 +560,7 @@ export function useMindMap() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = filename
+        a.download = '思维导图.txt'
         a.click()
         URL.revokeObjectURL(url)
         return
@@ -575,7 +570,7 @@ export function useMindMap() {
         mindMapInstance.doExport[type]().then((data) => {
           const a = document.createElement('a')
           a.href = data
-          a.download =filename
+          a.download = '思维导图.' + type
           a.click()
         }).catch((err) => {
           console.error('[MindMap] 导出失败', err)
@@ -586,7 +581,7 @@ export function useMindMap() {
     }
   }
 
-  // ========== 保存到本地文件 ==========
+    // ========== 保存到本地文件 ==========
   async function saveToLocalFile(fileHandle) {
     if (!mindMapInstance || !fileHandle) return false
     try {
