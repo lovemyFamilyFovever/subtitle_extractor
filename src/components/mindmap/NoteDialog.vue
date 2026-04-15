@@ -13,7 +13,6 @@
           </div>
         </div>
         <div class="dialog-footer">
- 0, 0, 0.06);
           <button v-if="isEdit" class="btn btn--danger" @click="remove">移除</button>
           <div style="flex:1"></div>
           <button class="btn btn--ghost" @click="close">取消</button>

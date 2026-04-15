@@ -76,6 +76,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .dropdown {
   position: relative;
+  width: 100%;
 }
 
 .dropdown-toggle {

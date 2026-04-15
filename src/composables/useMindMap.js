@@ -399,7 +399,7 @@ export function useMindMap() {
           {
             description: '思维导图文件',
             accept: {
-              'application/json': ['.json', '.smm']
+              'application/json': ['.json'],  // 支持多种扩展名
             }
           }
         ],

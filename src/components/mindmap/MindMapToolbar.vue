@@ -486,6 +486,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 8px 10px 4px;
+    cursor: pointer;
 }
 
 .theme-section-title.active {

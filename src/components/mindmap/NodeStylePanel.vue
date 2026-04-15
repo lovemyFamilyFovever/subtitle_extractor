@@ -10,54 +10,63 @@
             <!-- 字体 -->
             <div class="style-section">
 
-                <div class="section-group-item">
+                <label class="section-label">字体</label>
 
-                    <label class="section-label">字体</label>
-                    <div class="btn-group">
+                <div class="section-group-row">
+
+                    <div class="section-group-item">
                         <Dropdown v-model="currentFontFamily" :options="fontFamilies"
                             @change="(item) => { $emit('set-style', 'fontFamily', item.value) }" />
                     </div>
-                </div>
 
-                <div class="section-group-item">
-                    <label class="section-label">文字颜色</label>
-                    <div class="color-row">
+                    <div class="section-group-item">
                         <input type="color" class="color-input" :value="currentColor"
                             @input="(e) => $emit('set-style', 'color', e.target.value)" />
-                    </div>
-                </div>
-            </div>
 
-            <div class="style-section">
-
-                <div class="section-group-item">
-                    <label class="section-label">字号</label>
-                    <SliderInput v-model="currentFontSize" label="" unit="" :min="10" :max="48" :showSlider=false
-                        @update:model-value="(val) => $emit('set-style', 'fontSize', val)" />
-                </div>
-                <div class="section-group-item">
-
-                    <label class="section-label">字型</label>
-                    <div class="btn-group font-weight-group">
-
-                        <button  class="style-btn"
-                            :class="{ active: currentFontWeight === 'normal' }"
-                            @click="$emit('set-style', 'fontWeight', 'normal')">A
-                        </button>
-                              <button  class="style-btn"
-                            :class="{ active: currentFontWeight === 'bold' }"
-                            @click="$emit('set-style', 'fontWeight', 'bold')">B
-                        </button>
-                              <button  class="style-btn"
-                            :class="{ active: currentFontStyle === 'italic' }"
-                            @click="$emit('set-style', 'fontStyle', 'italic')">I
-                        </button>
-
-
+                        <SliderInput v-model="currentFontSize" label="" unit="" :min="10" :max="48" :showSlider=false
+                            @update:model-value="(val) => $emit('set-style', 'fontSize', val)" />
                     </div>
                 </div>
 
+                <div class="section-group-row">
+
+
+
+                    <div class="section-group-item">
+
+                        <div class="btn-group">
+
+                            <button class="style-btn" :class="{ active: currentFontWeight === 'normal' }" title="正常"
+                                @click="$emit('set-style', 'fontWeight', 'normal')">A
+                            </button>
+                            <button class="style-btn" :class="{ active: currentFontWeight === 'bold' }" title="粗体"
+                                @click="$emit('set-style', 'fontWeight', 'bold')">B
+                            </button>
+                            <button class="style-btn" :class="{ active: currentFontStyle === 'italic' }" title="斜体"
+                                @click="$emit('set-style', 'fontStyle', 'italic')">I
+                            </button>
+                            <button class="style-btn" :class="{ active: currentTextDecoration === 'underline' }"
+                                title="下划线" @click="$emit('set-style', 'textDecoration', 'underline')"> <span
+                                    style="text-decoration: underline;">U</span>
+                            </button>
+
+                            <button class="style-btn" :class="{ active: currentTextDecoration === 'line-through' }"
+                                title="删除线" @click="$emit('set-style', 'textDecoration', 'line-through')"> <span
+                                    style="text-decoration: line-through;">U</span>
+                            </button>
+
+                            <button class="style-btn" :class="{ active: currentTextDecoration === 'overline' }"
+                                title="上划线" @click="$emit('set-style', 'textDecoration', 'overline')"> <span
+                                    style="text-decoration: overline;">U</span>
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+
 
             <div class="divider"></div>
 
@@ -158,13 +167,16 @@ const fontFamilies = [
     { label: 'Arial', value: 'Arial' },
 ]
 
+const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
+
 const currentFontSize = computed(() => getNodeStyle('fontSize', 16))
 
-const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
 
 const currentFontWeight = computed(() => getNodeStyle('fontWeight', 'normal'))
 
 const currentFontStyle = computed(() => getNodeStyle('fontStyle', 'bold'))
+
+const currentTextDecoration = computed(() => getNodeStyle('textDecoration', 'none'))
 
 const currentBg = computed(() => getNodeStyle('background', '#ffffff'))
 const bgColors = ['#f5f5f5', '#fff3e0', '#e3f2fd', '#e8f5e9', '#fce4ec']
@@ -274,6 +286,7 @@ function getNodeStyle(key, defaultVal) {
 .style-section {
     display: flex;
     gap: 12px;
+    flex-direction: column;
 }
 
 .section-label {
@@ -322,7 +335,6 @@ function getNodeStyle(key, defaultVal) {
 
 /* 滑块 */
 .range-input {
-    -webkit-appearance: none;
     width: 100%;
     height: 4px;
     border-radius: 2px;
@@ -362,10 +374,7 @@ function getNodeStyle(key, defaultVal) {
     display: flex;
     gap: 4px;
     flex-direction: column;
-}
-
-.btn-group.font-weight-group {
-    flex-direction: row;
+    width: 100%;
 }
 
 .style-btn {
@@ -417,13 +426,15 @@ function getNodeStyle(key, defaultVal) {
     gap: 10px;
 }
 
+.section-group-row {
+    display: flex;
+    gap: 10px;
+}
 
 .section-group-item {
     flex: 1;
     display: flex;
-    flex-direction: column;
     gap: 10px;
-    width: 50%;
 }
 
 .divider {

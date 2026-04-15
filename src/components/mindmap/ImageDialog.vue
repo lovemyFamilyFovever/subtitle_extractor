@@ -13,7 +13,6 @@
         </div>
 
         <div class="dialog-body">
-          <!-- 本地图片 -->
           <div v-show="tab === 'local'" class="tab-content">
             <div class="drop-zone" :class="{ 'drag-over': isDragOver, 'has-file': !!localFile }"
               @dragover.prevent="isDragOver = true" @dragleave.prevent="isDragOver = false" @drop.prevent="handleDrop"
@@ -39,18 +38,30 @@
             <div class="compress-section" v-if="localFile">
               <div class="compress-title">图片压缩</div>
               <div class="compress-options">
-                <label class="radio-item"><input type="radio" v-model="compressMode"
-                    value="none" /><span>不压缩</span></label>
-                <label class="radio-item"><input type="radio" v-model="compressMode" value="auto" /><span>压缩至 500KB
-                    以下</span></label>
-                <label class="radio-item"><input type="radio" v-model="compressMode"
-                    value="custom" /><span>自定义</span></label>
+                <label class="radio-item">
+                  <input type="radio" v-model="compressMode" value="none" />
+                  <span>不压缩</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" v-model="compressMode" value="auto" />
+                  <span>压缩至 500KB 以下</span>
+                </label>
+                <label class="radio-item">
+                  <input type="radio" v-model="compressMode" value="custom" />
+                  <span>自定义</span>
+                </label>
               </div>
               <div v-if="compressMode === 'custom'" class="compress-slider-row">
                 <span class="slider-label">质量</span>
                 <input type="range" class="compress-slider" min="10" max="100" step="5"
                   v-model.number="compressQuality" />
                 <span class="slider-value">{{ compressQuality }}%</span>
+              </div>
+              <div class="compress-estimate" v-if="compressMode !== 'none'">
+                原始大小：{{ formatSize(localFile?.size) }}
+                <template v-if="estimatedSize">
+                  → 预估：<span class="estimate-value">{{ estimatedSize }}</span>
+                </template>
               </div>
             </div>
 
@@ -60,13 +71,14 @@
             </div>
           </div>
 
-          <!-- 在线URL -->
           <div v-show="tab === 'url'" class="tab-content">
             <div class="url-input-row">
               <input v-model="imageUrl" class="form-input url-input" placeholder="输入图片地址" @keydown.enter="fetchUrl" />
               <button class="btn btn--primary btn--sm" @click="fetchUrl">获取</button>
             </div>
-            <div v-if="urlPreview" class="url-preview-area"><img :src="urlPreview" class="url-preview-img" /></div>
+            <div v-if="urlPreview" class="url-preview-area">
+              <img :src="urlPreview" class="url-preview-img" />
+            </div>
             <div v-else-if="urlLoading" class="url-preview-area url-loading">加载中...</div>
             <div v-else-if="urlError" class="url-preview-area url-error">{{ urlError }}</div>
             <div class="dialog-footer">
@@ -80,8 +92,9 @@
   </Teleport>
 </template>
 
+
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -100,6 +113,13 @@ const imageUrl = ref('')
 const urlPreview = ref('')
 const urlLoading = ref(false)
 const urlError = ref('')
+
+const estimatedSize = computed(() => {
+  if (!localFile.value || compressMode.value === 'none') return ''
+  const quality = compressMode.value === 'auto' ? 0.7 : compressQuality.value / 100
+  const estimated = Math.round(localFile.value.size * quality * 0.6)
+  return formatSize(estimated)
+})
 
 watch(() => props.visible, (val) => {
   if (val) reset()
@@ -122,7 +142,9 @@ function close() {
   emit('update:visible', false)
 }
 
-function triggerFileInput() { fileInputRef.value?.click() }
+function triggerFileInput() {
+  fileInputRef.value?.click()
+}
 
 function handleFileSelect(e) {
   const file = e.target.files[0]
@@ -139,7 +161,9 @@ function handleDrop(e) {
 function loadFile(file) {
   localFile.value = file
   const reader = new FileReader()
-  reader.onload = (ev) => { localPreview.value = ev.target.result }
+  reader.onload = (ev) => {
+    localPreview.value = ev.target.result
+  }
   reader.readAsDataURL(file)
 }
 
@@ -152,20 +176,80 @@ function formatSize(bytes) {
 
 async function confirmLocal() {
   if (!localPreview.value) return
-  emit('confirm', { url: localPreview.value, title: localFile.value?.name || '图片' })
+  let finalUrl = localPreview.value
+  if (compressMode.value !== 'none') {
+    finalUrl = await compressImage(localPreview.value)
+  }
+  emit('confirm', { url: finalUrl, title: localFile.value?.name || '图片' })
   close()
+}
+
+function compressImage(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      let width = img.naturalWidth
+      let height = img.naturalHeight
+
+      if (compressMode.value === 'auto') {
+        const maxPixels = (500 * 1024) / 3
+        if (width * height > maxPixels) {
+          const ratio = Math.sqrt(maxPixels / (width * height))
+          width = Math.round(width * ratio)
+          height = Math.round(height * ratio)
+        }
+      }
+
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(img, 0, 0, width, height)
+
+      let quality = compressMode.value === 'auto' ? 0.7 : compressQuality.value / 100
+      let result = canvas.toDataURL('image/jpeg', quality)
+
+      if (compressMode.value === 'auto' && calcBase64Size(result) > 500 * 1024) {
+        result = canvas.toDataURL('image/jpeg', 0.4)
+      }
+
+      resolve(result)
+    }
+    img.onerror = () => resolve(dataUrl)
+    img.src = dataUrl
+  })
+}
+
+function calcBase64Size(dataUrl) {
+  const base64 = dataUrl.split(',')[1]
+  if (!base64) return 0
+  let bytes = base64.length * 3 / 4
+  if (base64.endsWith('==')) bytes -= 2
+  else if (base64.endsWith('=')) bytes -= 1
+  return Math.round(bytes)
 }
 
 async function fetchUrl() {
   const url = imageUrl.value.trim()
   if (!url) return
-  urlLoading.value = true; urlError.value = ''; urlPreview.value = ''
+  urlLoading.value = true
+  urlError.value = ''
+  urlPreview.value = ''
   try {
     const img = new Image()
-    img.onload = () => { urlPreview.value = url; urlLoading.value = false }
-    img.onerror = () => { urlError.value = '图片加载失败'; urlLoading.value = false }
+    img.onload = () => {
+      urlPreview.value = url
+      urlLoading.value = false
+    }
+    img.onerror = () => {
+      urlError.value = '图片加载失败'
+      urlLoading.value = false
+    }
     img.src = url
-  } catch (e) { urlError.value = '加载失败'; urlLoading.value = false }
+  } catch (e) {
+    urlError.value = '加载失败'
+    urlLoading.value = false
+  }
 }
 
 async function confirmUrl() {
@@ -174,6 +258,7 @@ async function confirmUrl() {
   close()
 }
 </script>
+
 
 <style scoped>
 .dialog-overlay {
@@ -422,6 +507,16 @@ async function confirmUrl() {
   font-weight: 600;
   min-width: 36px;
   text-align: right;
+}
+
+.compress-estimate {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.estimate-value {
+  color: #4a90d9;
+  font-weight: 600;
 }
 
 .url-input-row {

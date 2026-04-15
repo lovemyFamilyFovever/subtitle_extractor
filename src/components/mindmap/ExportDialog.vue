@@ -32,7 +32,6 @@ const props = defineProps({
     default: () => [
       { type: 'png', name: '图片' },
       { type: 'jpg', name: 'JPG' },
-      { type: 'pdf', name: 'PDF' },
       { type: 'md', name: 'Markdown' },
       { type: 'txt', name: 'TXT' },
       { type: 'json', name: 'JSON' },
@@ -171,6 +170,10 @@ function select(type) {
   background: linear-gradient(135deg, #5dade2, #2e86c1);
 }
 
+.typeIcon.jpg {
+  background: linear-gradient(135deg, #f5b041, #e67e22);
+}
+
 .typeIcon.md {
   background: linear-gradient(135deg, #58d68d, #28b463);
 }
@@ -191,9 +194,6 @@ function select(type) {
   content: 'JPG';
 }
 
-.typeIcon.pdf::after {
-  content: 'PDF';
-}
 
 .typeIcon.md::after {
   content: 'MD';

@@ -361,7 +361,7 @@ const currentImgMaxHeight = computed({
     width: 300px;
     height: calc(100vh - 250px);
     overflow-y: auto;
-    background: rgba(255, 255, 255, 0);
+    background: rgba(255, 255, 255);
     backdrop-filter: blur(20px) saturate(1.8);
     -webkit-backdrop-filter: blur(20px) saturate(1.8);
     border-radius: 14px;
