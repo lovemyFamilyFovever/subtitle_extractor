@@ -44,10 +44,7 @@
 
             <div class="divider"></div>
 
-            <!-- ====== 节点外边距 ====== -->
-            <div class="section-title">
-                二级节点外边距
-            </div>
+            <div class="section-title">二级节点外边距</div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">水平间距</label>
@@ -61,9 +58,7 @@
                 </div>
             </div>
 
-            <div class="section-title">
-                三级及以下节点外边距
-            </div>
+            <div class="section-title">三级及以下节点外边距</div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">水平间距</label>
@@ -79,11 +74,7 @@
 
             <div class="divider"></div>
 
-            <!-- ====== 关联线设置 ====== -->
-            <div class="section-title">
-                <span class="section-title-icon assoc-icon">⇔</span>
-                关联线设置
-            </div>
+            <div class="section-title">关联线设置</div>
             <div class="style-section">
                 <div class="section-group-item">
                     <label class="section-label">线条颜色</label>
@@ -99,26 +90,7 @@
                 </div>
             </div>
 
-
             <div class="style-section">
-
-                <div class="section-group-item">
-                    <label class="section-label">字号</label>
-                    <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
-                        :showInput="false"
-                        @update:model-value="(val) => emitSetConfig('associativeLineTextFontSize', val)" />
-                </div>
-
-                <div class="section-group-item full-width">
-                    <label class="section-label">字体类型</label>
-                    <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
-                        @change="(item) => emitSetConfig('associativeLineTextFontFamily', item.value)" />
-                </div>
-            </div>
-
-            <div class="style-section">
-
-
                 <div class="section-group-item">
                     <label class="section-label">文字颜色</label>
                     <div class="color-row">
@@ -126,7 +98,20 @@
                             @input="(e) => emitSetConfig('associativeLineTextColor', e.target.value)" />
                     </div>
                 </div>
+                <div class="section-group-item">
+                    <label class="section-label">字号</label>
+                    <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
+                        :showInput="false"
+                        @update:model-value="(val) => emitSetConfig('associativeLineTextFontSize', val)" />
+                </div>
+            </div>
 
+            <div class="style-section">
+                <div class="section-group-item full-width">
+                    <label class="section-label">字体类型</label>
+                    <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
+                        @change="(item) => emitSetConfig('associativeLineTextFontFamily', item.value)" />
+                </div>
             </div>
 
         </div>
@@ -134,7 +119,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import SliderInput from '../SliderInput.vue';
 import Dropdown from '../Dropdown.vue';
 
@@ -146,7 +131,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'set-theme-config'])
-
 
 const panelRef = ref(null)
 
@@ -162,7 +146,12 @@ onMounted(() => {
     }, 100)
 })
 
-// ===== 核心：正确获取主题配置对象 =====
+onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleOutsideClick)
+})
+
+// ===== 核心：正确获取主题配置 =====
+// getThemeConfig() 返回的是 mindMap.getThemeConfig() 的结果（引用）
 const themeConfig = computed(() => {
     try {
         return props.getThemeConfig() || {}
@@ -171,12 +160,10 @@ const themeConfig = computed(() => {
     }
 })
 
-// 统一emit方法 - 顶层配置
 function emitSetConfig(key, value) {
     emit('set-theme-config', key, value)
 }
 
-// 嵌套配置 - 针对 second / node 下的子属性
 function emitSetNestedConfig(parentKey, childKey, value) {
     const parent = themeConfig.value[parentKey] || {}
     emit('set-theme-config', parentKey, {
@@ -211,9 +198,9 @@ const currentLineStyle = computed({
 })
 
 const lineStyleOptions = [
-    { label: '直线', value: 'straight',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L30,5L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L30,23L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
-    { label: '曲线', value: 'curve',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14A12,-9 0 0 1 42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14A12,9 0 0 0 42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
-    { label: '直连', value: 'direct',svg:'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' }
+    { label: '直线', value: 'straight', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L30,5L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L30,23L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
+    { label: '曲线', value: 'curve', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14A12,-9 0 0 1 42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14A12,9 0 0 0 42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
+    { label: '直连', value: 'direct', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' }
 ]
 
 // ==================== 显示箭头标记 ====================
@@ -265,8 +252,7 @@ const nodeMarginY = computed({
     set: (val) => { nodeMarginYLocal.value = val }
 })
 
-// ==================== 关联线 - 线条 ====================
-// default.js: associativeLineColor: 'rgb(51, 51, 51)', associativeLineWidth: 2
+// ==================== 关联线 ====================
 const assocLineColorLocal = ref('rgb(51, 51, 51)')
 const assocLineWidthLocal = ref(2)
 
@@ -288,8 +274,7 @@ const currentAssocLineWidth = computed({
     set: (val) => { assocLineWidthLocal.value = val }
 })
 
-// ==================== 关联线 - 文字 ====================
-// default.js: associativeLineTextColor: 'rgb(51, 51, 51)', associativeLineTextFontSize: 14, associativeLineTextFontFamily: '微软雅黑, Microsoft YaHei'
+// ==================== 关联线文字 ====================
 const assocTextColorLocal = ref('rgb(51, 51, 51)')
 const assocTextFontSizeLocal = ref(14)
 const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
@@ -329,29 +314,8 @@ const fontFamilyOptions = [
     { label: 'Arial', value: 'Arial' },
 ]
 
-// ==================== 图片显示尺寸 ====================
-// default.js: imgMaxWidth: 200, imgMaxHeight: 100
-const imgMaxWidthLocal = ref(200)
-const imgMaxHeightLocal = ref(100)
-
-watch(() => themeConfig.value.imgMaxWidth, (val) => {
-    if (typeof val === 'number') imgMaxWidthLocal.value = val
-}, { immediate: true })
-
-watch(() => themeConfig.value.imgMaxHeight, (val) => {
-    if (typeof val === 'number') imgMaxHeightLocal.value = val
-}, { immediate: true })
-
-const currentImgMaxWidth = computed({
-    get: () => imgMaxWidthLocal.value,
-    set: (val) => { imgMaxWidthLocal.value = val }
-})
-
-const currentImgMaxHeight = computed({
-    get: () => imgMaxHeightLocal.value,
-    set: (val) => { imgMaxHeightLocal.value = val }
-})
 </script>
+
 
 <style scoped>
 .style-panel {
@@ -365,7 +329,7 @@ const currentImgMaxHeight = computed({
     backdrop-filter: blur(20px) saturate(1.8);
     -webkit-backdrop-filter: blur(20px) saturate(1.8);
     border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     box-shadow:
         0 1px 3px rgba(0, 0, 0, 0.04),
         0 8px 24px rgba(0, 0, 0, 0.08);
@@ -502,7 +466,7 @@ const currentImgMaxHeight = computed({
 .color-input {
     height: 30px;
     width: 40px;
-    border: 2px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 8px;
     cursor: pointer;
     background: transparent;

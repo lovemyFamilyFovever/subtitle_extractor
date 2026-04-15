@@ -264,7 +264,7 @@ async function confirmUrl() {
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -280,7 +280,7 @@ async function confirmUrl() {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 12px 40px rgba(0, 0, 0, 0.1);
   animation: dialogIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -327,7 +327,7 @@ async function confirmUrl() {
 
 .image-tabs {
   display: flex;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
   padding: 0 20px;
 }
 
@@ -395,7 +395,7 @@ async function confirmUrl() {
 
 .drop-zone.has-file {
   border-style: solid;
-  border-color: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.25);
   padding: 16px;
 }
 

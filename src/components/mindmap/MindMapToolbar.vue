@@ -328,7 +328,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
     backdrop-filter: blur(20px) saturate(1.8);
     -webkit-backdrop-filter: blur(20px) saturate(1.8);
     border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
@@ -371,7 +371,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
 }
 
 .toolbar-btn.active {
-    background: rgba(0, 0, 0, 0.06);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 .toolbar-btn.disabled {
@@ -434,9 +434,9 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
     background: rgba(255, 255, 255);
     backdrop-filter: blur(24px) saturate(1.8);
     -webkit-backdrop-filter: blur(24px) saturate(1.8);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 16px 48px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.12);
     padding: 10px;
     z-index: 200;
     animation: themeDropIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
@@ -535,7 +535,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
     width: 72px;
     height: 44px;
     border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.25);
     object-fit: cover;
     flex-shrink: 0;
     transition: box-shadow 0.15s ease;

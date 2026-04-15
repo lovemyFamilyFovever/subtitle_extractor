@@ -52,7 +52,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px) saturate(1.8);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
   display: flex;

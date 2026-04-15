@@ -764,7 +764,7 @@ onUnmounted(() => {
 .image-item:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 
 .image-item.dragging {

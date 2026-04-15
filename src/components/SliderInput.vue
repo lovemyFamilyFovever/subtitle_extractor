@@ -93,7 +93,7 @@ const onTextFocus = (e) => {
   flex-direction: row;
   align-items: center;
   gap: 0.4rem;
-  width: 100%;
+  flex: 1;
   min-height: 30px;
 }
 
@@ -129,7 +129,7 @@ const onTextFocus = (e) => {
   font-size: 0.8rem;
   height: 30px;
   width: 50px;
-  border: 2px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 8px;
   cursor: pointer;
   background: transparent;

@@ -13,6 +13,8 @@ MindMap.usePlugin(AssociativeLine)
 // ========== 模块级单例 ==========
 let mindMapInstance = null
 
+let exposedMindMap = null  // ← 新增：暴露给外部访问
+
 const isReady = ref(false)
 const activeNodes = ref([])
 const canUndo = ref(false)
@@ -199,6 +201,8 @@ export function useMindMap() {
       layout: currentLayout.value,
       themeConfig: {
         lineStyle: 'curve',
+
+        borderWidth: 1,
         background: '#f0f2f5',
         // 二级节点样式
         second: {
@@ -220,6 +224,8 @@ export function useMindMap() {
     })
 
     markRaw(mindMapInstance)
+    exposedMindMap = mindMapInstance  // ← 新增：暴露
+    window.__mindMap = mindMapInstance // ← 新增：全局暴露方便调试
     bindEvents()
     isReady.value = true
     hasUnsavedChanges.value = false
@@ -232,6 +238,8 @@ export function useMindMap() {
       try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
       mindMapInstance = null
     }
+    exposedMindMap = null     // ← 新增
+    window.__mindMap = null   // ← 新增
     resetState()
     console.log('[MindMap] 已销毁')
   }
@@ -300,15 +308,17 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
-  function setThemeConfig(key, value) {
+// 修改 setThemeConfig 函数：深拷贝后再修改
+function setThemeConfig(key, value) {
     if (!mindMapInstance) return
     try {
-      const config = getThemeConfig()
-      config[key] = value
-      mindMapInstance.setThemeConfig(config)
-      mindMapInstance.render()
+        const config = JSON.parse(JSON.stringify(mindMapInstance.getThemeConfig() || {}))
+        config[key] = value
+        mindMapInstance.setThemeConfig(config)
+        mindMapInstance.render()
     } catch (e) { /* ignore */ }
-  }
+}
+
 
   function getThemeConfig() {
     if (!mindMapInstance) return {}
@@ -581,7 +591,7 @@ export function useMindMap() {
     }
   }
 
-    // ========== 保存到本地文件 ==========
+  // ========== 保存到本地文件 ==========
   async function saveToLocalFile(fileHandle) {
     if (!mindMapInstance || !fileHandle) return false
     try {
@@ -785,6 +795,7 @@ export function useMindMap() {
     lightThemeList,
     darkThemeList,
     themePreviewMap,
+    mindMap: exposedMindMap,  // ← 新增：暴露实例引用
     init,
     destroy,
     newFile,

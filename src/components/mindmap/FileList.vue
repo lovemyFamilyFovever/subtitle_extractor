@@ -65,7 +65,7 @@ defineEmits(['close', 'load-file', 'remove-file', 'add-files'])
   max-height: calc(100vh - 100px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   z-index: 50;
@@ -79,7 +79,7 @@ defineEmits(['close', 'load-file', 'remove-file', 'add-files'])
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .panel-title {

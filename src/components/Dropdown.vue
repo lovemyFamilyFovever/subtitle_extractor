@@ -76,7 +76,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .dropdown {
   position: relative;
-  width: 100%;
+  flex: 1;
 }
 
 .dropdown-toggle {
@@ -88,11 +88,11 @@ onBeforeUnmount(() => {
   align-items: center;
 
   height: 30px;
-  border: 2px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 8px;
   cursor: pointer;
   background: transparent;
-  padding: 0px 10px;
+  padding: 0px 5px;
   flex-shrink: 0;
   transition: border-color 0.15s ease;
 
@@ -113,6 +113,7 @@ onBeforeUnmount(() => {
 }
 
 .dropdown-menu {
+  z-index: 2;
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -153,7 +154,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 60px;
 }
 
 .dropdown-menu li:hover {

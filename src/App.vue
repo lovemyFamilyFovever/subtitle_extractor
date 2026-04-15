@@ -491,7 +491,7 @@ const handleGlobalKeydown = (e) => {
   border-radius: 50px;
   font-size: 0.875rem;
   font-weight: 500;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   color: var(--fg);
   white-space: nowrap;
 }
