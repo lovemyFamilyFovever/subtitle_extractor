@@ -210,3 +210,52 @@ export const compressToTargetSize = async (file, targetSizeKB = 500) => {
     maxHeight: 600
   })
 }
+
+// src/utils/index.js
+/**
+ * 根据原始图片宽高比，计算拖拽后的实际宽高（保持等比例）
+ * 用于 NodeImgAdjust 插件的右下角拖拽功能
+ */
+export function resizeImgSizeByOriginRatio(originWidth, originHeight, targetWidth, targetHeight) {
+  if (!originWidth || !originHeight || originWidth <= 0 || originHeight <= 0) {
+    return [targetWidth, targetHeight]
+  }
+
+  const originRatio = originWidth / originHeight
+  let actWidth = targetWidth
+  let actHeight = targetHeight
+
+  // 目标框比例比原始比例更宽 → 按宽度撑满，高度按比例
+  if (targetWidth / targetHeight > originRatio) {
+    actHeight = Math.round(targetWidth / originRatio)
+  } 
+  // 否则按高度撑满，宽度按比例
+  else {
+    actWidth = Math.round(targetHeight * originRatio)
+  }
+
+  return [actWidth, actHeight]
+}
+
+
+// src/svg/btns.js
+const btnsSvg = {
+  // 右下角拖拽图标
+  imgAdjust: `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 22L15 15M22 22L15 22M22 22L22 15"/>
+      <path d="M2 22L22 2" stroke-dasharray="4 4"/>
+    </svg>
+  `,
+
+  // 右上角删除图标
+  remove: `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  `
+}
+
+export default btnsSvg
+

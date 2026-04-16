@@ -20,7 +20,7 @@
       <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
         :get-theme-config="getThemeConfig" />
 
-      <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle" />
+      <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle" @set-styles="setStyles" />
 
       <FileList v-if="showFileList" @close="closePanel" :FileList="fileList" :active-index="currentFileIndex"
         @load-file="handleLoadFile" @remove-file="handleRemoveFile" @add-files="handleAddFiles" />
@@ -66,7 +66,7 @@ const {
   canUndo, canRedo, activeNodes, isReadonly, currentTheme,
   lightThemeList, darkThemeList, themePreviewMap,
   undo, redo, insertChildNode, insertSiblingNode, removeNode,
-  setNodeStyle, setThemeConfig, getThemeConfig, setTheme,
+  setNodeStyle,setStyles, setThemeConfig, getThemeConfig, setTheme,
   insertImageToNode, openLocalFile, importFile, exportFile,
   hasUnsavedChanges, isAssociativeLineMode, newFile,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,

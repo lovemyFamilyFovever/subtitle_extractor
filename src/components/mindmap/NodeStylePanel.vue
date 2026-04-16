@@ -1,7 +1,7 @@
 <template>
     <div class="style-panel">
         <div class="panel-header">
-            <span class="panel-title">节点样式</span>
+            <span class="panel-title">📦 节点样式</span>
             <span class="panel-badge">{{ activeNodes.length }} 个节点</span>
         </div>
 
@@ -172,8 +172,7 @@
             <!-- 节点内边距 -->
             <div class="style-section">
 
-                <label class="section-label-title">边距</label>
-
+                <label class="section-label-title">节点内边距</label>
 
                 <div class="section-group-row">
 
@@ -188,6 +187,25 @@
                         <SliderInput v-model="currentPaddingX" label="" unit="" :min="10" :max="80" :showSlider=false
                             @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                     </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="style-section">
+
+                <label class="section-label-title">预设主题风格</label>
+
+                <div class="section-group-row">
+                    <button class="preset-btn default" @click="handlePresetTheme('default')"><span>默认</span></button>
+                    <button class="preset-btn blue" @click="handlePresetTheme('blue')"><span>蓝色系</span></button>
+                    <button class="preset-btn red" @click="handlePresetTheme('red')"><span>红色系</span></button>
+                </div>
+
+                <div class="section-group-row">
+                    <button class="preset-btn green" @click="handlePresetTheme('green')"><span>绿色系</span></button>
+                    <button class="preset-btn light" @click="handlePresetTheme('light')"><span>浅色系</span></button>
+                    <button class="preset-btn dark" @click="handlePresetTheme('dark')"><span>深色系</span></button>
                 </div>
             </div>
 
@@ -208,7 +226,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['set-style', 'set-theme-config'])
+const emit = defineEmits(['set-style', 'set-styles', 'set-theme-config'])
 
 
 // ========================== 字体 ==========================
@@ -304,278 +322,54 @@ function generateDashSvg(dashArray, color = '#333', width = 60, height = 20) {
                       stroke="${color}" stroke-width="2" stroke-dasharray="${dashValue}" />
             </svg>`
 }
+
+const presetThemes = {
+    default: {
+        fontFamily: '微软雅黑, Microsoft YaHei',
+        color: '#1a1a2e',
+        fontSize: 16,
+        fillColor: '#ffffff',
+        borderColor: 'transparent',
+        borderWidth: 1,
+        shape: 'rectangle',
+        borderRadius: 5,
+        borderDasharray: 'none',
+        lineDasharray: 'none',
+        paddingX: 10,
+        paddingY: 10,
+    },
+    blue: {
+        fillColor: '#e3f2fd',
+        color: '#0d47a1',
+    },
+    red: {
+        fillColor: '#ffebee',
+        color: '#b71c1c',
+    },
+    green: {
+        fillColor: '#e8f5e9',
+        color: '#1b5e20',
+    },
+    light: {
+        fillColor: '#fce4ec',
+        color: '#880e4f',
+    },
+    dark: {
+        fillColor: '#000',
+        color: '#fff',
+    }
+}
+
+function handlePresetTheme(themeName) {
+    emit('set-styles', presetThemes[themeName])
+    return
+
+}
+
+
+
+
+
 </script>
 
-
-<style scoped>
-.style-panel {
-    position: absolute;
-    top: 50px;
-    right: 0px;
-    width: 300px;
-    background: rgba(255, 255, 255, 0);
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
-    border-radius: 14px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.04),
-        0 8px 24px rgba(0, 0, 0, 0.08);
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    z-index: 100;
-    animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(12px) scale(0.97);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.panel-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    letter-spacing: 0.02em;
-}
-
-.panel-badge {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.05);
-    color: #888;
-    font-weight: 500;
-}
-
-.panel-body {
-    padding: 14px 16px 50px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.style-section {
-    display: flex;
-    gap: 12px;
-    flex-direction: column;
-}
-
-.section-label-title {
-    font-size: 14px;
-    color: #000;
-    font-weight: bold;
-}
-
-.section-label {
-    font-size: 13px;
-    color: #0e0202;
-    font-weight: 500;
-}
-
-.label-value {
-    color: #666;
-    font-weight: 600;
-    font-size: 13px;
-}
-
-/* 颜色行 */
-
-.color-input {
-    flex: 1;
-    height: 30px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 8px;
-    cursor: pointer;
-    background: transparent;
-    padding: 0;
-    flex-shrink: 0;
-    transition: border-color 0.15s ease;
-}
-
-.color-input:hover {
-    border-color: rgba(0, 0, 0, 0.15);
-}
-
-.color-input::-webkit-color-swatch-wrapper {
-    padding: 2px;
-}
-
-.color-input::-webkit-color-swatch {
-    border-radius: 5px;
-    border: none;
-}
-
-/* 滑块 */
-.range-input {
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.08);
-    outline: none;
-    cursor: pointer;
-}
-
-.range-input::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    border: 2px solid #4a90d9;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-    transition: box-shadow 0.15s ease;
-}
-
-.range-input::-webkit-slider-thumb:hover {
-    box-shadow: 0 2px 8px rgba(74, 144, 217, 0.3);
-}
-
-.range-input::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #fff;
-    cursor: pointer;
-    border: 2px solid #4a90d9;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-/* 按钮组 */
-.btn-group {
-    display: flex;
-    gap: 4px;
-    flex-direction: row;
-    width: 100%;
-}
-
-.style-btn {
-    flex: 1;
-    padding: 10px 0;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 8px;
-    background: transparent;
-    color: #000000;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    font-weight: 500;
-}
-
-.style-btn:hover {
-    background: rgba(0, 0, 0, 0.03);
-    color: #555;
-    border-color: rgba(0, 0, 0, 0.1);
-}
-
-.style-btn.active {
-    background: rgba(74, 144, 217, 0.08);
-    border-color: rgba(74, 144, 217, 0.25);
-    color: #4a90d9;
-    font-weight: 600;
-}
-
-.font-select {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
-    background: #fff;
-    color: #555;
-    font-size: 12px;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.15s ease;
-}
-
-.font-select:focus {
-    border-color: #4a90d9;
-}
-
-.section-group {
-    display: flex;
-    padding: 10px 0;
-    gap: 10px;
-}
-
-.section-group-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.section-group-item {
-    flex: 0 0 50%;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.divider {
-    width: 100%;
-    height: 1px;
-    background: rgb(0 0 0 / 5%);
-    margin: 0 4px;
-    flex-shrink: 0;
-}
-
-.preset-bg-color {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border-style: dashed;
-    border-width: 1px;
-    cursor: pointer;
-}
-
-.preset-bg-color:hover {
-    border-color: rgb(0, 0, 0) !important;
-}
-
-
-.color-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.transparent-btn {
-    width: 30px;
-    height: 30px;
-    border: 2px solid rgba(0, 0, 0, 0.06);
-    border-radius: 8px;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.15s ease;
-    padding: 0;
-}
-
-.transparent-btn:hover {
-    border-color: rgba(0, 0, 0, 0.15);
-}
-
-.transparent-btn.active {
-    border-color: #4a90d9;
-    background: rgba(74, 144, 217, 0.08);
-}
-</style>
+<style src="@/styles/mindmap.css" scoped></style>

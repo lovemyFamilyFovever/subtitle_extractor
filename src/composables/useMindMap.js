@@ -5,10 +5,16 @@ import themeList from 'simple-mind-map-plugin-themes/themeList'
 import themeImgMap from 'simple-mind-map-plugin-themes/themeImgMap'
 import Export from 'simple-mind-map/src/plugins/Export.js'
 import AssociativeLine from 'simple-mind-map/src/plugins/AssociativeLine.js'
+import RichText from 'simple-mind-map/src/plugins/RichText.js'
+import NodeImgAdjust from './NodeImgAdjust.js'
 
 try { Themes.init(MindMap) } catch (e) { /* ignore */ }
 MindMap.usePlugin(Export)
 MindMap.usePlugin(AssociativeLine)
+
+
+MindMap.usePlugin(NodeImgAdjust)  // 【新增】注册图片拖拽插件
+MindMap.usePlugin(RichText) //注册 RichText 插件
 
 // ========== 模块级单例 ==========
 let mindMapInstance = null
@@ -219,6 +225,25 @@ export function useMindMap() {
       defaultInsertSecondLevelNodeText: '分支主题',
       defaultInsertBelowSecondLevelNodeText: '子主题',
       isShowWatermark: false,
+      // ==================== 【新增】节点宽度拖拽调整（官方内置功能） ====================
+      enableDragModifyNodeWidth: true,          // 开启拖拽调整节点宽度
+      minNodeTextModifyWidth: 100,               // 最小宽度（推荐 50~80，根据你的主题调整）
+      maxNodeTextModifyWidth: -1,               // 最大宽度（-1 = 不限制）
+
+      // ==================== 【新增】NodeImgAdjust 图片拖拽插件配置 ====================
+      imgResizeBtnSize: 24,                    // 拖拽按钮大小（推荐 18~24）
+      minImgResizeWidth: 40,                   // 最小宽度
+      minImgResizeHeight: 40,                  // 最小高度
+      maxImgResizeWidthInheritTheme: false,     // 推荐开启：最大尺寸跟随主题配置
+      maxImgResizeWidth: 2000,              // 如果上面设为 false 才需要手动写
+      maxImgResizeHeight: 2000,
+      beforeDeleteNodeImg: async (node) => {
+        // 删除前确认（可删掉这整个函数就直接删除）
+        return confirm(`确定删除节点「${node.getData('text') || '未知'}」的图片吗？`)
+      },
+      // customResizeBtnInnerHTML: '<svg>...</svg>',   // 可自定义拖拽图标 SVG
+      // customDeleteBtnInnerHTML: '<svg>...</svg>',   // 可自定义删除按钮 SVG
+
       mousewheelAction: 'zoom',
       showNumber: false,
     })
@@ -308,16 +333,40 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
-// 修改 setThemeConfig 函数：深拷贝后再修改
-function setThemeConfig(key, value) {
+
+  //  修改多个样式
+  function setStyles(style) {
+
     if (!mindMapInstance) return
     try {
-        const config = JSON.parse(JSON.stringify(mindMapInstance.getThemeConfig() || {}))
-        config[key] = value
-        mindMapInstance.setThemeConfig(config)
-        mindMapInstance.render()
+      const nodeList = getActiveNodeList()
+      if (!nodeList.length) return
+      nodeList.forEach((node) => {
+        if (typeof node.setStyle === 'function') {
+
+          mindMapInstance.execCommand('SET_NODE_STYLES', node, style)
+
+          node.setStyle(key, value, true)
+        } else {
+          const nodeData = node.nodeData?.data || {}
+          nodeData[key] = value
+        }
+      })
+      mindMapInstance.render()
     } catch (e) { /* ignore */ }
-}
+  }
+
+
+  // 修改 setThemeConfig 函数：深拷贝后再修改
+  function setThemeConfig(key, value) {
+    if (!mindMapInstance) return
+    try {
+      const config = JSON.parse(JSON.stringify(mindMapInstance.getThemeConfig() || {}))
+      config[key] = value
+      mindMapInstance.setThemeConfig(config)
+      mindMapInstance.render()
+    } catch (e) { /* ignore */ }
+  }
 
 
   function getThemeConfig() {
@@ -807,6 +856,7 @@ function setThemeConfig(key, value) {
     removeNode,
     insertGeneralization,
     setNodeStyle,
+    setStyles,
     setThemeConfig,
     getThemeConfig,
     insertImageToNode,
