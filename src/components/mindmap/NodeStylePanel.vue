@@ -90,7 +90,7 @@
                         <input type="color" class="color-input" :value="currentBg"
                             @input="(e) => $emit('set-style', 'fillColor', e.target.value)" />
                         <div class="preset-bg-color" v-for="color in bgColors"
-                            :style="{ background: color, borderColor: color }"
+                            :style="{ background: color, borderColor: 'rgb(63 63 63 / 21%)' }"
                             @click="$emit('set-style', 'fillColor', color)"></div>
                     </div>
                 </div>

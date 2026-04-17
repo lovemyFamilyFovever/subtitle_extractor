@@ -8,6 +8,48 @@
 
             <div class="style-section">
 
+                <label class="section-label-title">背景</label>
+
+
+                <div class="preset-bg-types">
+                    <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
+                        :class="{ active: currentBackgroundIndex == index }" @click="currentBackgroundIndex = index">
+                        <span v-html="bgType.svg"></span>
+                        <span>{{ bgType.label }}</span>
+                    </div>
+                </div>
+                <!-- 无背景 -->
+                <div class="section-group-row" v-if="currentBackgroundIndex === '-1'"></div>
+
+                <!-- 纯色 -->
+                <div class="section-group-row" v-if="currentBackgroundIndex === '-1'">
+                    <label class="section-label">纯色背景颜色</label>
+                    <input type="color" class="color-input" :value="currentBackgroundColor"
+                        @input="(e) => emitSetThemeConfig('backgroundColor', e.target.value)" />
+                </div>
+
+                <!-- 渐变 -->
+                <div class="section-group-row" v-if="currentBackgroundIndex === '1'">
+
+                </div>
+
+                <!-- 网格 -->
+                <div class="section-group-row" v-if="currentBackgroundIndex === '2'">
+                    <label class="section-label">网格颜色</label>
+                    <input type="color" class="color-input" :value="currentBackgroundColor"
+                        @input="(e) => emitSetThemeConfig('backgroundColor', e.target.value)" />
+                </div>
+
+                <!-- 图片 -->
+                <div class="section-group-row" v-if="currentBackgroundIndex === '3'">
+                    <label class="section-label">背景图片</label>
+                    <input type="file" accept="image/*" @change="handleBgImageChange" />
+                </div>
+
+            </div>
+
+            <div class="style-section">
+
                 <label class="section-label-title">连线</label>
 
                 <div class="section-group-row">
@@ -15,13 +57,13 @@
                     <div class="section-group-item">
                         <label class="section-label">颜色</label>
                         <input type="color" class="color-input" :value="currentLineColor"
-                            @input="(e) => emitSetConfig('lineColor', e.target.value)" />
+                            @input="(e) => emitSetThemeConfig('lineColor', e.target.value)" />
                     </div>
 
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
                         <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10" :showInput="false"
-                            @update:model-value="(val) => emitSetConfig('lineWidth', val)" />
+                            @update:model-value="(val) => emitSetThemeConfig('lineWidth', val)" />
                     </div>
 
                 </div>
@@ -31,7 +73,7 @@
                     <div class="section-group-item">
                         <label class="section-label">风格</label>
                         <Dropdown v-model="currentLineStyle" :options="lineStyleOptions"
-                            @change="(item) => emitSetConfig('lineStyle', item.value)" />
+                            @change="(item) => emitSetThemeConfig('lineStyle', item.value)" />
                     </div>
 
 
@@ -40,7 +82,7 @@
                         <div class="toggle-row">
                             <label class="toggle-switch">
                                 <input type="checkbox" :checked="currentShowLineMarker"
-                                    @change="(e) => emitSetConfig('showLineMarker', e.target.checked)">
+                                    @change="(e) => emitSetThemeConfig('showLineMarker', e.target.checked)">
                                 <span class="toggle-slider"></span>
                             </label>
                             <span class="toggle-hint">{{ currentShowLineMarker ? '开启' : '关闭' }}</span>
@@ -93,13 +135,13 @@
                     <div class="section-group-item">
                         <label class="section-label">线条颜色</label>
                         <input type="color" class="color-input" :value="currentAssocLineColor"
-                            @input="(e) => emitSetConfig('associativeLineColor', e.target.value)" />
+                            @input="(e) => emitSetThemeConfig('associativeLineColor', e.target.value)" />
                     </div>
 
                     <div class="section-group-item">
                         <label class="section-label">文字颜色</label>
                         <input type="color" class="color-input" :value="currentAssocTextColor"
-                            @input="(e) => emitSetConfig('associativeLineTextColor', e.target.value)" />
+                            @input="(e) => emitSetThemeConfig('associativeLineTextColor', e.target.value)" />
                     </div>
                 </div>
 
@@ -109,20 +151,21 @@
                         <label class="section-label">字号</label>
                         <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
                             :showInput="false"
-                            @update:model-value="(val) => emitSetConfig('associativeLineTextFontSize', val)" />
+                            @update:model-value="(val) => emitSetThemeConfig('associativeLineTextFontSize', val)" />
                     </div>
 
                     <div class="section-group-item">
                         <label class="section-label">字体</label>
                         <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
-                            @change="(item) => emitSetConfig('associativeLineTextFontFamily', item.value)" />
+                            @change="(item) => emitSetThemeConfig('associativeLineTextFontFamily', item.value)" />
                     </div>
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">线宽</label>
                     <SliderInput v-model="currentAssocLineWidth" label="" unit="px" :min="1" :max="10"
-                        :showInput="false" @update:model-value="(val) => emitSetConfig('associativeLineWidth', val)" />
+                        :showInput="false"
+                        @update:model-value="(val) => emitSetThemeConfig('associativeLineWidth', val)" />
                 </div>
             </div>
 
@@ -181,7 +224,7 @@ const themeConfig = computed(() => {
     }
 })
 
-function emitSetConfig(key, value) {
+function emitSetThemeConfig(key, value) {
     emit('set-theme-config', key, value)
 }
 
@@ -191,6 +234,30 @@ function emitSetNestedConfig(parentKey, childKey, value) {
         ...parent,
         [childKey]: value
     })
+}
+
+
+// ==================== 背景颜色 ====================
+const currentBackgroundColor = computed(() => themeConfig.value.backgroundColor || '#fff')
+const currentBackgroundIndex = ref('-1')
+const presetBG = [
+    { label: '无背景', indexe: -1, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
+    { label: '纯色', indexe: 0, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" fill="currentColor"/></svg>' },
+    { label: '渐变', indexe: 1, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:currentColor;stop-opacity:1"/><stop offset="100%" style="stop-color:currentColor;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>' },
+    { label: '图片', indexe: 2, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" fill="white" stroke="currentColor"/><path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2l2 2 3-3 3 5H4v-2z" fill="currentColor"/></svg>' },
+    { label: '网格', indexe: 3, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="currentColor"/></pattern><rect width="16" height="16" fill="url(#grid)"/></svg>' },
+]
+
+// 添加处理背景图片的方法
+const handleBgImageChange = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            emitSetThemeConfig('backgroundImage', e.target.result)
+        }
+        reader.readAsDataURL(file)
+    }
 }
 
 // ==================== 连线颜色 ====================
