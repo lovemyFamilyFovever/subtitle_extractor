@@ -357,7 +357,7 @@ export function useMindMap() {
   }
 
 
-  // 修改 setThemeConfig 函数：深拷贝后再修改
+  // 修改 setThemeConfig 函数：深拷贝后再修改 
   function setThemeConfig(key, value) {
     if (!mindMapInstance) return
     try {
@@ -367,7 +367,6 @@ export function useMindMap() {
       mindMapInstance.render()
     } catch (e) { /* ignore */ }
   }
-
 
   function getThemeConfig() {
     if (!mindMapInstance) return {}

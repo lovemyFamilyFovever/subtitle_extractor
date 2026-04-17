@@ -34,7 +34,7 @@
           <p>这里的内容会被放进 modal-body</p>
         </AppModal>
       -->
-      <div class="modal-body">
+      <div class="modal-body" :class="{'full-screen': fullScreen}">
         <slot />
       </div>
 
@@ -223,9 +223,12 @@ watch(() => props.modelValue, (isOpen) => {
   padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  /* gap: 1.25rem; */
 }
 
+.modal-body.full-screen {
+  padding: 0;
+}
 
 .modal-overlay.full-screen .modal {
   width: 100vw;

@@ -88,4 +88,10 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0;
 }
+
+
+.map-container svg{
+  width: 100%!important;
+  height: 100%!important;
+}
 </style>

@@ -13,40 +13,48 @@
 
                 <div class="preset-bg-types">
                     <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
-                        :class="{ active: currentBackgroundIndex == index }" @click="currentBackgroundIndex = index">
+                        :class="{ active: currentBackgroundIndex == index }"
+                        @click="emitSetThemeConfigBackground(index)">
                         <span v-html="bgType.svg"></span>
                         <span>{{ bgType.label }}</span>
                     </div>
                 </div>
                 <!-- 无背景 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === '-1'"></div>
+                <!-- <div class="section-group-row" v-if="currentBackgroundIndex === 0"></div> -->
 
                 <!-- 纯色 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === '-1'">
-                    <label class="section-label">纯色背景颜色</label>
-                    <input type="color" class="color-input" :value="currentBackgroundColor"
-                        @input="(e) => emitSetThemeConfig('backgroundColor', e.target.value)" />
+                <div class="pure-color-section" v-if="currentBackgroundIndex === 1">
+
+                    <div class="section-group-row" v-for="item in colorArray" :key="item.label">
+                        <label class="section-label">{{ item.label }}</label>
+                        <div class="preset-bg-color" v-for="color in item.colors" :key="color"
+                            :style="{ background: color }" @click="() => emitSetThemeConfigBackground(1, color)"></div>
+                    </div>
                 </div>
 
                 <!-- 渐变 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === '1'">
-
+                <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 2">
+                    <button class="preset-btn" v-for="gradient in gradientArrays" :key="gradient"
+                        :style="{ backgroundImage: gradient }"
+                        @click="() => emitSetThemeConfigBackground(2, gradient)"></button>
                 </div>
 
                 <!-- 网格 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === '2'">
-                    <label class="section-label">网格颜色</label>
-                    <input type="color" class="color-input" :value="currentBackgroundColor"
-                        @input="(e) => emitSetThemeConfig('backgroundColor', e.target.value)" />
-                </div>
+                <!-- <div class="section-group-row" v-if="currentBackgroundIndex === 3"></div> -->
+
 
                 <!-- 图片 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === '3'">
+                <div class="section-group-row" v-if="currentBackgroundIndex === 4">
                     <label class="section-label">背景图片</label>
                     <input type="file" accept="image/*" @change="handleBgImageChange" />
                 </div>
 
+
+
             </div>
+
+
+            <div class="divider"></div>
 
             <div class="style-section">
 
@@ -183,7 +191,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import SliderInput from '../SliderInput.vue';
 import Dropdown from '../Dropdown.vue';
 
@@ -239,14 +247,64 @@ function emitSetNestedConfig(parentKey, childKey, value) {
 
 // ==================== 背景颜色 ====================
 const currentBackgroundColor = computed(() => themeConfig.value.backgroundColor || '#fff')
-const currentBackgroundIndex = ref('-1')
-const presetBG = [
-    { label: '无背景', indexe: -1, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
-    { label: '纯色', indexe: 0, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" fill="currentColor"/></svg>' },
-    { label: '渐变', indexe: 1, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:currentColor;stop-opacity:1"/><stop offset="100%" style="stop-color:currentColor;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>' },
-    { label: '图片', indexe: 2, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><rect width="16" height="16" fill="white" stroke="currentColor"/><path d="M2 2h12v12H2V2zm1 1v10h10V3H3zm2 2l2 2 3-3 3 5H4v-2z" fill="currentColor"/></svg>' },
-    { label: '网格', indexe: 3, svg: '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="currentColor"/></pattern><rect width="16" height="16" fill="url(#grid)"/></svg>' },
+const bgColor = ref(null)
+const currentBackgroundIndex = ref(-1)
+const presetBG = computed(() => [
+    { label: '无背景', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
+    { label: '纯色', svg: `<svg width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="${bgColor.value || '#ccc'}"/></svg>` },
+    { label: '渐变', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1"/><stop offset="100%" style="stop-color:#fad0c4;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>' },
+    { label: '网格', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="#000"/></pattern><rect width="16" height="16" fill="url(#grid)"/></svg>' },
+    { label: '图片', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5.5" r="1.2" fill="#f28c5d"/><path d="M2 12.5l3-3.5 2 2 3-4 4 5.5" fill="none" stroke="#02a7f0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+])
+
+
+const colorArray = [
+    { label: '暖色系', colors: ['#FFF8E1', '#FFEDD5', '#FFCC99', '#FFAB6B', '#FF8A4D'] },
+    { label: '冷色系', colors: ['#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA'] },
+    { label: '蓝色系', colors: ['#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7', '#29B6F6'] },
 ]
+
+// 渐变色
+const gradientArrays = [
+    "linear-gradient(90deg,#ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
+    "linear-gradient(90deg,#a18cd1 0%, #fbc2eb 100%)",
+    "linear-gradient(90deg,#fad0c4 0%, #fad0c4 1%, #ffd1ff 100%)",
+    "linear-gradient(90deg,#96fbc4 0%, #f9f586 100%)",
+    "linear-gradient(90deg,#ebbba7 0%, #cfc7f8 100%)",
+    "linear-gradient(90deg,#e0c3fc 0%, #8ec5fc 100%)",
+    "linear-gradient(90deg,#d299c2 0%, #fef9d7 100%)",
+    "linear-gradient(90deg,#ebc0fd 0%, #d9ded8 100%)",
+    "linear-gradient(90deg,#667eea 0%, #764ba2 100%)",
+    "linear-gradient(90deg,#9890e3 0%, #b1f4cf 100%)",
+    "linear-gradient(90deg,#16d9e3 0%, #30c7ec 47%, #46aef7 100%)",
+    "linear-gradient(90deg,#fff1eb 0%, #ace0f9 100%)",
+]
+
+function emitSetThemeConfigBackground(index, value) {
+
+    currentBackgroundIndex.value = index
+
+    nextTick(() => {
+        const svgEl = __mindMap.el.querySelector('svg')
+        if (svgEl) {
+            if (index === 0) {
+                svgEl.style.background = '#fff'
+                bgColor.value = '#fff'
+            } else if (index === 1) {
+                svgEl.style.background = value
+                bgColor.value = value
+            } else if (index === 2) {
+                svgEl.style.background = value
+                bgColor.value = value
+            } else if (index === 3) {
+                svgEl.style.backgroundImage = "linear-gradient(#e0e0e0 1px, transparent 1px),linear-gradient(90deg, #e0e0e0 1px, transparent 1px)"
+                svgEl.style.backgroundSize = "20px 20px"
+            }
+        }
+    })
+
+}
+
 
 // 添加处理背景图片的方法
 const handleBgImageChange = (event) => {
@@ -254,11 +312,28 @@ const handleBgImageChange = (event) => {
     if (file) {
         const reader = new FileReader()
         reader.onload = (e) => {
-            emitSetThemeConfig('backgroundImage', e.target.result)
+            emit('set-theme-config', 'backgroundImage', e.target.result)
+            emit('set-theme-config', 'backgroundColor', 'transparent')
         }
         reader.readAsDataURL(file)
     }
 }
+
+function rgbToHex(rgb) {
+    if (!rgb) return '#000000'
+    // 已经是 hex 格式，直接返回
+    if (rgb.startsWith('#')) return rgb
+    // 匹配 rgb(r, g, b) 格式
+    const match = rgb.match(/rgb$$(\d+),\s*(\d+),\s*(\d+)$$/)
+    if (match) {
+        const r = parseInt(match[1]).toString(16).padStart(2, '0')
+        const g = parseInt(match[2]).toString(16).padStart(2, '0')
+        const b = parseInt(match[3]).toString(16).padStart(2, '0')
+        return `#${r}${g}${b}`
+    }
+    return '#000000'
+}
+
 
 // ==================== 连线颜色 ====================
 const currentLineColor = computed(() => themeConfig.value.lineColor || '#549688')
@@ -341,7 +416,7 @@ const nodeMarginY = computed({
 })
 
 // ==================== 关联线 ====================
-const assocLineColorLocal = ref('rgb(51, 51, 51)')
+const assocLineColorLocal = ref('#333333')
 const assocLineWidthLocal = ref(2)
 
 watch(() => themeConfig.value.associativeLineColor, (val) => {
@@ -363,7 +438,7 @@ const currentAssocLineWidth = computed({
 })
 
 // ==================== 关联线文字 ====================
-const assocTextColorLocal = ref('rgb(51, 51, 51)')
+const assocTextColorLocal = ref('#333333')
 const assocTextFontSizeLocal = ref(14)
 const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
 

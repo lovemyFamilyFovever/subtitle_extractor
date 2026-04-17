@@ -5,7 +5,7 @@
       :is-associative-line-mode="isAssociativeLineMode" @new-file="handleNewFile" @undo="undo" @redo="redo"
       @insert-sibling="insertSiblingNode" @insert-child="insertChildNode" @remove="removeNode"
       @insert-image="handleInsertImage" @insert-hyperlink="openHyperlinkDialog" @insert-note="openNoteDialog"
-      @open="handleOpen" @save-as="saveAsJSON" @import="importFile" @export="showExportDlg = true" @set-theme="setTheme"
+      @open="handleOpen" @save-as="exportFile" @import="importFile" @export="showExportDlg = true" @set-theme="setTheme"
       @toggle-outline="handleToggleOutline" @toggle-basestyle="handleToggleBaseStyle"
       @toggle-associative-line="toggleAssociativeLineMode" />
 
@@ -972,4 +972,6 @@ form-input {
   color: #aaa;
   margin: 8px 20px 0;
 }
+
+
 </style>
