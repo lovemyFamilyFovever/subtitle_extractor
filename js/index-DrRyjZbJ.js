@@ -8213,7 +8213,7 @@ var ImageSegmentation_default = /* @__PURE__ */ _plugin_vue_export_helper_defaul
 			showToast("正在生成切片…", "info");
 			try {
 				const JSZip = (await __vitePreload(async () => {
-					const { default: __vite_default__ } = await import("./jszip.min-BfLJV6lG.js").then((m) => /* @__PURE__ */ __toESM(m.default));
+					const { default: __vite_default__ } = await import("./jszip.min-NlbHE3GG.js").then((m) => /* @__PURE__ */ __toESM(m.default));
 					return { default: __vite_default__ };
 				}, [])).default;
 				const zip = new JSZip();
@@ -42315,33 +42315,33 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.canUndo }]),
 						onClick: _cache[0] || (_cache[0] = ($event) => __props.canUndo && _ctx.$emit("undo"))
-					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><polyline points=\"1 4 1 10 7 10\" data-v-bcf8a986></polyline><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\" data-v-bcf8a986></path></svg></span><span class=\"text\" data-v-bcf8a986>回退</span>", 2)])], 2),
+					}, [..._cache[17] || (_cache[17] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><polyline points=\"1 4 1 10 7 10\" data-v-5b6b8880></polyline><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\" data-v-5b6b8880></path></svg></span><span class=\"text\" data-v-5b6b8880>回退</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.canRedo }]),
 						onClick: _cache[1] || (_cache[1] = ($event) => __props.canRedo && _ctx.$emit("redo"))
-					}, [..._cache[18] || (_cache[18] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><polyline points=\"23 4 23 10 17 10\" data-v-bcf8a986></polyline><path d=\"M20.49 15a9 9 0 1 1-2.13-9.36L23 10\" data-v-bcf8a986></path></svg></span><span class=\"text\" data-v-bcf8a986>前进</span>", 2)])], 2),
+					}, [..._cache[18] || (_cache[18] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><polyline points=\"23 4 23 10 17 10\" data-v-5b6b8880></polyline><path d=\"M20.49 15a9 9 0 1 1-2.13-9.36L23 10\" data-v-5b6b8880></path></svg></span><span class=\"text\" data-v-5b6b8880>前进</span>", 2)])], 2),
 					_cache[25] || (_cache[25] = createBaseVNode("div", { class: "divider" }, null, -1)),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[2] || (_cache[2] = ($event) => __props.hasNode && _ctx.$emit("insert-sibling"))
-					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><rect x=\"2\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-bcf8a986></rect><rect x=\"14\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-bcf8a986></rect><line x1=\"10\" y1=\"7\" x2=\"14\" y2=\"7\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>同级节点</span>", 2)])], 2),
+					}, [..._cache[19] || (_cache[19] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><rect x=\"2\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-5b6b8880></rect><rect x=\"14\" y=\"4\" width=\"8\" height=\"6\" rx=\"1\" data-v-5b6b8880></rect><line x1=\"10\" y1=\"7\" x2=\"14\" y2=\"7\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>同级节点</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[3] || (_cache[3] = ($event) => __props.hasNode && _ctx.$emit("insert-child"))
-					}, [..._cache[20] || (_cache[20] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><rect x=\"2\" y=\"2\" width=\"8\" height=\"6\" rx=\"1\" data-v-bcf8a986></rect><rect x=\"2\" y=\"14\" width=\"8\" height=\"6\" rx=\"1\" data-v-bcf8a986></rect><line x1=\"6\" y1=\"8\" x2=\"6\" y2=\"14\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>子节点</span>", 2)])], 2),
+					}, [..._cache[20] || (_cache[20] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><rect x=\"2\" y=\"2\" width=\"8\" height=\"6\" rx=\"1\" data-v-5b6b8880></rect><rect x=\"2\" y=\"14\" width=\"8\" height=\"6\" rx=\"1\" data-v-5b6b8880></rect><line x1=\"6\" y1=\"8\" x2=\"6\" y2=\"14\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>子节点</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[4] || (_cache[4] = ($event) => __props.hasNode && _ctx.$emit("remove"))
-					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><polyline points=\"3 6 5 6 21 6\" data-v-bcf8a986></polyline><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\" data-v-bcf8a986></path><path d=\"M10 11v6\" data-v-bcf8a986></path><path d=\"M14 11v6\" data-v-bcf8a986></path></svg></span><span class=\"text\" data-v-bcf8a986>删除节点</span>", 2)])], 2),
+					}, [..._cache[21] || (_cache[21] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><polyline points=\"3 6 5 6 21 6\" data-v-5b6b8880></polyline><path d=\"M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6\" data-v-5b6b8880></path><path d=\"M10 11v6\" data-v-5b6b8880></path><path d=\"M14 11v6\" data-v-5b6b8880></path></svg></span><span class=\"text\" data-v-5b6b8880>删除节点</span>", 2)])], 2),
 					_cache[26] || (_cache[26] = createBaseVNode("div", { class: "divider" }, null, -1)),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[5] || (_cache[5] = ($event) => __props.hasNode && _ctx.$emit("insert-image"))
-					}, [..._cache[22] || (_cache[22] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" data-v-bcf8a986></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\" data-v-bcf8a986></circle><polyline points=\"21 15 16 10 5 21\" data-v-bcf8a986></polyline></svg></span><span class=\"text\" data-v-bcf8a986>图片</span>", 2)])], 2),
+					}, [..._cache[22] || (_cache[22] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\" data-v-5b6b8880></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\" data-v-5b6b8880></circle><polyline points=\"21 15 16 10 5 21\" data-v-5b6b8880></polyline></svg></span><span class=\"text\" data-v-5b6b8880>图片</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[6] || (_cache[6] = ($event) => __props.hasNode && _ctx.$emit("insert-hyperlink"))
-					}, [..._cache[23] || (_cache[23] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" data-v-bcf8a986></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" data-v-bcf8a986></path></svg></span><span class=\"text\" data-v-bcf8a986>超链接</span>", 2)])], 2),
+					}, [..._cache[23] || (_cache[23] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\" data-v-5b6b8880></path><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\" data-v-5b6b8880></path></svg></span><span class=\"text\" data-v-5b6b8880>超链接</span>", 2)])], 2),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { disabled: !__props.hasNode }]),
 						onClick: _cache[7] || (_cache[7] = ($event) => __props.hasNode && _ctx.$emit("insert-note"))
@@ -42359,21 +42359,27 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 					createBaseVNode("div", _hoisted_5$10, [createBaseVNode("div", {
 						class: "toolbar-btn",
 						onClick: _cache[8] || (_cache[8] = ($event) => _ctx.$emit("toggle-theme"))
-					}, [..._cache[27] || (_cache[27] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><circle cx=\"12\" cy=\"12\" r=\"5\" data-v-bcf8a986></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" data-v-bcf8a986></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" data-v-bcf8a986></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" data-v-bcf8a986></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" data-v-bcf8a986></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" data-v-bcf8a986></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>主题</span>", 2)])])], 512),
+					}, [..._cache[27] || (_cache[27] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"#4A90D9\" stroke=\"#E95B56\" stroke-width=\"2\" data-v-5b6b8880><circle cx=\"12\" cy=\"12\" r=\"5\" data-v-5b6b8880></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\" data-v-5b6b8880></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\" data-v-5b6b8880></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\" data-v-5b6b8880></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\" data-v-5b6b8880></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\" data-v-5b6b8880></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>主题</span>", 2)])])], 512),
 					createBaseVNode("div", {
 						class: "toolbar-btn",
 						onClick: _cache[9] || (_cache[9] = ($event) => _ctx.$emit("toggle-outline"))
-					}, [..._cache[28] || (_cache[28] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\" data-v-bcf8a986></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\" data-v-bcf8a986></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>大纲</span>", 2)])]),
+					}, [..._cache[28] || (_cache[28] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"green\" stroke-width=\"2\" data-v-5b6b8880><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\" data-v-5b6b8880></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\" data-v-5b6b8880></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>大纲</span>", 2)])]),
 					createBaseVNode("div", {
 						class: "toolbar-btn",
 						onClick: _cache[10] || (_cache[10] = ($event) => _ctx.$emit("toggle-layout"))
 					}, [..._cache[29] || (_cache[29] = [createBaseVNode("span", { class: "icon" }, [createBaseVNode("svg", {
 						viewBox: "0 0 1024 1024",
 						width: "16",
-						height: "16",
-						fill: "none",
-						stroke: "currentColor"
-					}, [createBaseVNode("path", { d: "M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" })])], -1), createBaseVNode("span", { class: "text" }, "结构", -1)])]),
+						height: "16"
+					}, [createBaseVNode("path", {
+						d: "M736 597.333333v-53.333333h-448V597.333333h-64v-85.333333a32 32 0 0 1 32-32h224V426.666667h64v53.333333H768a32 32 0 0 1 32 32v85.333333h-64z",
+						fill: "#FF9C00",
+						"p-id": "4931"
+					}), createBaseVNode("path", {
+						d: "M853.333333 938.666667h-170.666666a85.333333 85.333333 0 0 1-85.333334-85.333334v-170.666666a85.333333 85.333333 0 0 1 85.333334-85.333334h170.666666a85.333333 85.333333 0 0 1 85.333334 85.333334v170.666666a85.333333 85.333333 0 0 1-85.333334 85.333334z m21.333334-256a21.333333 21.333333 0 0 0-21.333334-21.333334h-170.666666a21.333333 21.333333 0 0 0-21.333334 21.333334v170.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h170.666666a21.333333 21.333333 0 0 0 21.333334-21.333334v-170.666666zM597.333333 426.666667h-170.666666a85.333333 85.333333 0 0 1-85.333334-85.333334V170.666667a85.333333 85.333333 0 0 1 85.333334-85.333334h170.666666a85.333333 85.333333 0 0 1 85.333334 85.333334v170.666666a85.333333 85.333333 0 0 1-85.333334 85.333334z m21.333334-256a21.333333 21.333333 0 0 0-21.333334-21.333334h-170.666666a21.333333 21.333333 0 0 0-21.333334 21.333334v170.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h170.666666a21.333333 21.333333 0 0 0 21.333334-21.333334V170.666667z m-192 512v170.666666a85.333333 85.333333 0 0 1-85.333334 85.333334H170.666667a85.333333 85.333333 0 0 1-85.333334-85.333334v-170.666666a85.333333 85.333333 0 0 1 85.333334-85.333334h170.666666a85.333333 85.333333 0 0 1 85.333334 85.333334zM149.333333 682.666667v170.666666a21.333333 21.333333 0 0 0 21.333334 21.333334h170.666666a21.333333 21.333333 0 0 0 21.333334-21.333334v-170.666666a21.333333 21.333333 0 0 0-21.333334-21.333334H170.666667a21.333333 21.333333 0 0 0-21.333334 21.333334z",
+						fill: "#333333",
+						"p-id": "4932"
+					})])], -1), createBaseVNode("span", { class: "text" }, "结构", -1)])]),
 					createBaseVNode("div", {
 						class: "toolbar-btn",
 						onClick: _cache[11] || (_cache[11] = ($event) => _ctx.$emit("toggle-basestyle"))
@@ -42385,18 +42391,18 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						stroke: "currentColor"
 					}, [createBaseVNode("path", {
 						d: "M595.590747 733.833404a17.049549 17.049549 0 0 1-17.083683-16.725283l-0.494931-35.106028a16.895949 16.895949 0 0 1 17.083682-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283v35.123094a16.861816 16.861816 0 0 1-16.964216 16.725283c-6.195181-0.1024-143.342503-0.1024-411.441965 0z m-0.819198 153.855538a17.049549 17.049549 0 0 1-17.083682-16.725283l0.341332-35.071895a16.895949 16.895949 0 0 1 17.066616-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283l-0.341332 34.952429a17.049549 17.049549 0 0 1-16.947149 16.844749H594.771549zM595.112881 1024a17.049549 17.049549 0 0 1-17.100748-16.725283v-34.59403a16.895949 16.895949 0 0 1 17.083682-16.725283h411.936897c9.284239 0 16.844749 7.441044 16.964216 16.725283v34.474564c-0.119466 9.284239-7.679977 16.725283-16.964216 16.844749H595.112881z m-91.391725-297.91484c-119.978307 0-217.667614-96.085045-217.667614-214.20309s97.569841-214.203091 217.667614-214.203091c119.978307 0 217.667614 96.085045 217.667613 214.203091 0 25.002592-4.33492 49.783317-12.987694 73.181647h-83.711749a136.959589 136.959589 0 0 0 21.299136-73.181647c0-77.021636-63.880342-139.792647-142.267306-139.792648-78.250432 0-142.130774 62.771012-142.130774 139.792648 0 77.141102 63.760875 139.912114 142.130774 139.912113v74.290977zM511.998464 972.800154v34.474563c-0.119466 9.796237-7.321578 16.605817-17.220215 16.605817h-85.281877c-33.791899 0.375466-49.441985-34.474563-51.302247-68.164062l-17.407947-68.266462c-31.044174-12.987694-60.415819-28.023383-87.551738-47.95719l-71.04832 28.620714c-30.207909 15.359954-67.105932 4.710386-84.445613-24.40526L8.584508 692.310328a62.105414 62.105414 0 0 1 20.684738-84.20668l60.927817-46.421194a371.318353 371.318353 0 0 1 0-99.430102l-60.808351-46.438261a62.003014 62.003014 0 0 1-20.804204-83.831215l89.036532-151.671012a64.34114 64.34114 0 0 1 84.309081-24.524726l71.20192 28.603647a409.649971 409.649971 0 0 1 87.53467-49.527318l10.410636-75.024841A63.044078 63.044078 0 0 1 414.684623 0.003072h177.919466c34.184431 0 62.037147 26.128988 63.658476 59.681954l10.393568 75.161375a419.019543 419.019543 0 0 1 87.654137 49.527318l71.20192-28.467115a64.528873 64.528873 0 0 1 84.309081 24.388194l88.780533 151.551545a62.088347 62.088347 0 0 1-20.565271 84.206681 1143.036571 1143.036571 0 0 1-56.541697 45.055865c0 21.964734 0.409599 61.781148 1.211729 119.500441h-86.596007l-0.95573-149.844884 92.876521-70.689921-79.359762-135.457727-107.485544 45.448397-17.578614-14.745556a338.123786 338.123786 0 0 0-104.259954-58.931023l-21.418602-7.679977-15.837819-114.397523h-156.87633l-15.854885 114.397523-21.418603 7.679977a343.056037 343.056037 0 0 0-104.37942 59.05049l-17.459148 14.506623-108.338875-43.588136-78.489364 133.460933 92.859455 70.706988-4.095988 22.169533a325.801689 325.801689 0 0 0-5.683183 59.05049c0.119466 19.831407 1.979727 39.765214 5.563717 59.204089l3.976521 22.152467-92.739988 70.706988 79.615761 135.457727 97.689307-47.80359 153.019274 84.906412L426.665387 955.716472c43.946535-0.085333 66.6622-0.085333 68.112862 0C496.962776 955.904204 511.998464 964.198579 511.998464 972.800154z",
-						fill: "#121649"
+						fill: "#d4237a"
 					})])], -1), createBaseVNode("span", { class: "text" }, "基础样式", -1)])]),
 					createBaseVNode("div", {
 						class: normalizeClass(["toolbar-btn", { active: __props.isAssociativeLineMode }]),
 						onClick: _cache[12] || (_cache[12] = ($event) => _ctx.$emit("toggle-associative-line"))
-					}, [..._cache[31] || (_cache[31] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" data-v-bcf8a986></path><polyline points=\"15 3 21 3 21 9\" data-v-bcf8a986></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>关联线</span>", 2)])], 2)
+					}, [..._cache[31] || (_cache[31] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"orange\" stroke-width=\"2\" data-v-5b6b8880><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\" data-v-5b6b8880></path><polyline points=\"15 3 21 3 21 9\" data-v-5b6b8880></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>关联线</span>", 2)])], 2)
 				])
 			]), createBaseVNode("div", _hoisted_6$9, [createBaseVNode("div", _hoisted_7$7, [
 				createBaseVNode("div", {
 					class: "toolbar-btn",
 					onClick: _cache[13] || (_cache[13] = ($event) => _ctx.$emit("new-file"))
-				}, [..._cache[33] || (_cache[33] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-bcf8a986></path><polyline points=\"14 2 14 8 20 8\" data-v-bcf8a986></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-bcf8a986></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>新建</span>", 2)])]),
+				}, [..._cache[33] || (_cache[33] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\" data-v-5b6b8880></path><polyline points=\"14 2 14 8 20 8\" data-v-5b6b8880></polyline><line x1=\"12\" y1=\"18\" x2=\"12\" y2=\"12\" data-v-5b6b8880></line><line x1=\"9\" y1=\"15\" x2=\"15\" y2=\"15\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>新建</span>", 2)])]),
 				createBaseVNode("div", {
 					class: "toolbar-btn",
 					onClick: _cache[14] || (_cache[14] = ($event) => _ctx.$emit("open"))
@@ -42411,15 +42417,15 @@ var MindMapToolbar_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 				createBaseVNode("div", {
 					class: "toolbar-btn",
 					onClick: _cache[15] || (_cache[15] = ($event) => _ctx.$emit("import"))
-				}, [..._cache[35] || (_cache[35] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-bcf8a986></path><polyline points=\"17 8 12 3 7 8\" data-v-bcf8a986></polyline><line x1=\"12\" y1=\"3\" x2=\"12\" y2=\"15\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>导入</span>", 2)])]),
+				}, [..._cache[35] || (_cache[35] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-5b6b8880></path><polyline points=\"17 8 12 3 7 8\" data-v-5b6b8880></polyline><line x1=\"12\" y1=\"3\" x2=\"12\" y2=\"15\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>导入</span>", 2)])]),
 				createBaseVNode("div", {
 					class: "toolbar-btn",
 					onClick: _cache[16] || (_cache[16] = ($event) => _ctx.$emit("export"))
-				}, [..._cache[36] || (_cache[36] = [createStaticVNode("<span class=\"icon\" data-v-bcf8a986><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-bcf8a986><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-bcf8a986></path><polyline points=\"7 10 12 15 17 10\" data-v-bcf8a986></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" data-v-bcf8a986></line></svg></span><span class=\"text\" data-v-bcf8a986>导出</span>", 2)])])
+				}, [..._cache[36] || (_cache[36] = [createStaticVNode("<span class=\"icon\" data-v-5b6b8880><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" data-v-5b6b8880><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" data-v-5b6b8880></path><polyline points=\"7 10 12 15 17 10\" data-v-5b6b8880></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\" data-v-5b6b8880></line></svg></span><span class=\"text\" data-v-5b6b8880>导出</span>", 2)])])
 			])])]);
 		};
 	}
-}, [["__scopeId", "data-v-bcf8a986"]]);
+}, [["__scopeId", "data-v-5b6b8880"]]);
 //#endregion
 //#region src/components/mindmap/MindMapCore.vue
 var _hoisted_1$15 = { class: "mind-map-core" };
@@ -42532,7 +42538,11 @@ var _hoisted_5$9 = ["onClick"];
 var _hoisted_6$8 = ["src"];
 var Structure_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 	__name: "Structure",
-	emits: ["setLayout", "getLayout"],
+	emits: [
+		"close",
+		"setLayout",
+		"getLayout"
+	],
 	setup(__props, { emit: __emit }) {
 		const layoutImgMap = {
 			logicalStructure: logicalStructure_default,
@@ -42624,7 +42634,7 @@ var Structure_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			}), 64))])])], 512);
 		};
 	}
-}, [["__scopeId", "data-v-b7e0fde1"]]);
+}, [["__scopeId", "data-v-e98ea4a7"]]);
 //#endregion
 //#region src/components/mindmap/ThemePanel.vue
 var _hoisted_1$13 = { class: "panel-body customScrollbar" };
@@ -45313,18 +45323,18 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"dark-theme-list",
 						"theme-preview-map"
 					])) : createCommentVNode("", true),
-					showStructure.value ? (openBlock(), createBlock(Structure_default, {
-						key: 1,
+					withDirectives(createVNode(Structure_default, {
 						onSetLayout: unref(setLayout),
-						onGetLayout: unref(getLayout)
-					}, null, 8, ["onSetLayout", "onGetLayout"])) : createCommentVNode("", true),
+						onGetLayout: unref(getLayout),
+						onClose: closePanel
+					}, null, 8, ["onSetLayout", "onGetLayout"]), [[vShow, showStructure.value]]),
 					showOutline.value ? (openBlock(), createBlock(OutlinePanel_default, {
-						key: 2,
+						key: 1,
 						tree: outlineTree.value,
 						onClose: closePanel
 					}, null, 8, ["tree"])) : createCommentVNode("", true),
 					showBaseStyle.value ? (openBlock(), createBlock(BaseStylePanel_default, {
-						key: 3,
+						key: 2,
 						onClose: closePanel,
 						onSetThemeConfig: unref(setThemeConfig),
 						"get-theme-config": unref(getThemeConfig),
@@ -45335,7 +45345,7 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"set-custom-background"
 					])) : createCommentVNode("", true),
 					showNodeStyle.value ? (openBlock(), createBlock(NodeStylePanel_default, {
-						key: 4,
+						key: 3,
 						"active-nodes": unref(activeNodes),
 						onSetStyle: unref(setNodeStyle),
 						onSetStyles: unref(setStyles)
@@ -45345,7 +45355,7 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 						"onSetStyles"
 					])) : createCommentVNode("", true),
 					showFileList.value ? (openBlock(), createBlock(FileList_default, {
-						key: 5,
+						key: 4,
 						onClose: closePanel,
 						FileList: fileList.value,
 						"active-index": currentFileIndex.value,
@@ -45391,7 +45401,7 @@ var MindMap_default = /* @__PURE__ */ _plugin_vue_export_helper_default({
 			]);
 		};
 	}
-}, [["__scopeId", "data-v-745a35da"]]);
+}, [["__scopeId", "data-v-9297dee4"]]);
 //#endregion
 //#region src/composables/useTheme.js
 var THEME_KEY = "subtitle-extractor-theme";
