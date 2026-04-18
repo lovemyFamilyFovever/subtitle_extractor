@@ -59,7 +59,7 @@ const props = defineProps({
     themePreviewMap: { type: Object, default: () => ({}) },
 })
 
-const emit = defineEmits(['set-theme', 'toggle-theme'])
+const emit = defineEmits(['close','set-theme', 'toggle-theme'])
 
 const showThemeDropdown = ref(false)
 const themeDropRef = ref(null)
@@ -84,7 +84,6 @@ function handleOutsideClick(e) {
         emit('close')
     }
 }
-
 onMounted(() => {
     setTimeout(() => {
         document.addEventListener('mousedown', handleOutsideClick)

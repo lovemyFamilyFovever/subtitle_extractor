@@ -46,7 +46,7 @@ const props = defineProps({
   mindMapInstance: { type: Object, default: null },
 })
 
-const emit = defineEmits(['save', 'delete'])
+const emit = defineEmits(['save'])
 
 const visible = ref(false)
 const isEditing = ref(false)
@@ -125,6 +125,7 @@ function handleBlur() {
 
 // 删除备注
 function handleDelete() {
+  mindMapInstance.removeLine();
   emit('delete', { lineId: lineId.value })
   visible.value = false
 }

@@ -251,8 +251,8 @@ const emit = defineEmits([
     'new-file', 'open', 'import', 'export',
     'undo', 'redo',
     'insert-sibling', 'insert-child', 'remove',
-    'insert-image', 'insert-hyperlink', 'insert-note',  // ★ 新增 insert-note
-    'set-theme', 'toggle-outline', 'toggle-layout',
+    'insert-image', 'insert-hyperlink', 'insert-note',  'toggle-theme',
+    'set-theme', 'toggle-outline', 'toggle-layout', 'toggle-basestyle',
     'toggle-associative-line',
 ])
 

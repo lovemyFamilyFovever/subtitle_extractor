@@ -342,6 +342,15 @@ export function useMindMap() {
     try { mindMapInstance.execCommand('INSERT_NODE') } catch (e) { /* ignore */ }
   }
 
+  function removeLine() {
+    if (!mindMapInstance) return
+    try {
+      
+     const associativeLine = __mindMap.associativeLine
+
+      associativeLine.removeLine() } catch (e) { /* ignore */ }
+  }
+
   function removeNode() {
     if (!mindMapInstance) return
     try { mindMapInstance.execCommand('REMOVE_NODE') } catch (e) { /* ignore */ }
@@ -800,7 +809,6 @@ export function useMindMap() {
     lightThemeList,
     darkThemeList,
     themePreviewMap,
-    mindMap: exposedMindMap,
     customBackground,
     init,
     destroy,
@@ -810,6 +818,7 @@ export function useMindMap() {
     insertChildNode,
     insertSiblingNode,
     removeNode,
+    removeLine,
     setNodeStyle,
     setStyles,
     setThemeConfig,

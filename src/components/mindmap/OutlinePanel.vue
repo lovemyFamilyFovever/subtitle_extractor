@@ -20,7 +20,7 @@ defineProps({
   tree: { type: Object, default: null },
 })
 
-const emit = defineEmits(['focus-node'])
+const emit = defineEmits(['close','focus-node'])
 
 const panelRef = ref(null)
 

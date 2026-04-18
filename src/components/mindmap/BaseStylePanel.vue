@@ -371,7 +371,7 @@ const clearSource = () => {
 }
 
 // ==================== 连线颜色 ====================
-const currentLineColor = computed(() => themeConfig.value.lineColor || '#549688')
+const currentLineColor = computed(() => rgbToHex(themeConfig.value.lineColor) || '#549688')
 
 // ==================== 连线粗细 ====================
 const lineWidthLocal = ref(1)
@@ -463,14 +463,29 @@ watch(() => themeConfig.value.associativeLineWidth, (val) => {
 }, { immediate: true })
 
 const currentAssocLineColor = computed({
-    get: () => assocLineColorLocal.value,
-    set: (val) => { assocLineColorLocal.value = val }
+    get: () => rgbToHex(assocLineColorLocal.value),
+    set: (val) => { assocLineColorLocal.value = rgbToHex(val) }
 })
 
 const currentAssocLineWidth = computed({
     get: () => assocLineWidthLocal.value,
     set: (val) => { assocLineWidthLocal.value = val }
 })
+
+function rgbToHex(rgbString) {
+    const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+    if (!match) throw new Error('无效的 RGB 格式')
+    
+    const toHex = (n) => {
+        const hex = parseInt(n).toString(16)
+        return hex.length === 1 ? '0' + hex : hex
+    }
+    
+    return `#${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`
+}
+
+// 使用
+console.log(rgbToHex("rgb(152, 162, 171)"))  // "#98a2ab"
 
 // ==================== 关联线文字 ====================
 const assocTextColorLocal = ref('#333333')
@@ -490,8 +505,8 @@ watch(() => themeConfig.value.associativeLineTextFontFamily, (val) => {
 }, { immediate: true })
 
 const currentAssocTextColor = computed({
-    get: () => assocTextColorLocal.value,
-    set: (val) => { assocTextColorLocal.value = val }
+    get: () => rgbToHex(assocTextColorLocal.value),
+    set: (val) => { assocTextColorLocal.value = rgbToHex(val) }
 })
 
 const currentAssocTextFontSize = computed({

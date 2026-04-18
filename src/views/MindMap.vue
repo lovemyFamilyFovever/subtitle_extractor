@@ -5,8 +5,8 @@
       @insert-sibling="insertSiblingNode" @insert-child="insertChildNode" @remove="removeNode"
       @insert-image="handleInsertImage" @insert-hyperlink="openHyperlinkDialog" @insert-note="openNoteDialog"
       @open="handleOpen" @import="importFile" @export="exportFile" @toggle-theme="handleToggleTheme"
-      @toggle-outline="handleToggleOutline" @toggle-layout="handleToggleLayout" @toggle-basestyle="handleToggleBaseStyle"
-      @toggle-associative-line="toggleAssociativeLineMode" />
+      @toggle-outline="handleToggleOutline" @toggle-layout="handleToggleLayout"
+      @toggle-basestyle="handleToggleBaseStyle" @toggle-associative-line="toggleAssociativeLineMode" />
 
     <div class="main-area">
       <MindMapCore />
@@ -14,10 +14,10 @@
       <MindMapOverlay ref="overlayRef" :hyperlinks="hyperlinkPositions" :notes="notePositions"
         @edit-hyperlink="openHyperlinkDialog" @edit-note="openNoteDialog" />
 
-      <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme" 
+      <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme"
         :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap" />
 
-      <Structure v-show="showStructure" @set-layout="setLayout" @get-layout="getLayout" @close="closePanel" />
+      <Structure v-if="showStructure" @set-layout="setLayout" @get-layout="getLayout" @close="closePanel" />
 
       <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="closePanel" />
 
@@ -71,7 +71,7 @@ const {
   setNodeStyle, setStyles, setThemeConfig, getThemeConfig, setTheme,
   setLayout, getLayout, setCustomBackground, getCustomBackground,
   insertImageToNode, openLocalFile, importFile, exportFile,
-  hasUnsavedChanges, isAssociativeLineMode, newFile,
+  hasUnsavedChanges, isAssociativeLineMode, newFile, removeLine,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,
   collectAllImages, setData, getData, render, saveToLocalFile
 } = useMindMap()
@@ -210,6 +210,11 @@ function handleKeydown(e) {
     e.preventDefault()
     handleSave()
   }
+
+  if (e.key === 'Delete' ) {
+    removeLine();
+  }
+
 }
 
 onMounted(() => {
