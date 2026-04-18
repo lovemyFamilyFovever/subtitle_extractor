@@ -2,7 +2,6 @@
   <div class="outline-panel" ref="panelRef">
     <div class="panel-header">
       <span class="panel-title">大纲</span>
-      <button class="panel-close" @click="$emit('close')">&times;</button>
     </div>
     <div class="panel-body customScrollbar">
       <div v-if="tree" class="outline-tree">
@@ -21,24 +20,24 @@ defineProps({
   tree: { type: Object, default: null },
 })
 
-const emit = defineEmits(['close', 'focus-node'])
+const emit = defineEmits(['focus-node'])
 
 const panelRef = ref(null)
 
 function handleOutsideClick(e) {
-  if (panelRef.value && !panelRef.value.contains(e.target)) {
-    emit('close')
-  }
+    if (panelRef.value && !panelRef.value.contains(e.target)) {
+        emit('close')
+    }
 }
 
 onMounted(() => {
-  setTimeout(() => {
-    document.addEventListener('mousedown', handleOutsideClick)
-  }, 100)
+    setTimeout(() => {
+        document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleOutsideClick)
+    document.removeEventListener('mousedown', handleOutsideClick)
 })
 </script>
 
@@ -54,7 +53,7 @@ onBeforeUnmount(() => {
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -63,8 +62,15 @@ onBeforeUnmount(() => {
 }
 
 @keyframes panelSlide {
-  from { opacity: 0; transform: translateX(12px) scale(0.97); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateX(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .panel-header {
@@ -76,7 +82,11 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.panel-title { font-size: 13px; font-weight: 600; color: #333; }
+.panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
 
 .panel-close {
   background: none;
@@ -88,7 +98,10 @@ onBeforeUnmount(() => {
   line-height: 1;
   transition: color 0.15s ease;
 }
-.panel-close:hover { color: #666; }
+
+.panel-close:hover {
+  color: #666;
+}
 
 .panel-body {
   flex: 1;

@@ -10,25 +10,21 @@
 
                 <label class="section-label-title">背景</label>
 
-
                 <div class="preset-bg-types">
                     <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
                         :class="{ active: currentBackgroundIndex == index }"
-                        @click="emitSetThemeConfigBackground(index)">
+                        @click="handleBgTypeClick(index)">
                         <span v-html="bgType.svg"></span>
                         <span>{{ bgType.label }}</span>
                     </div>
                 </div>
-                <!-- 无背景 -->
-                <!-- <div class="section-group-row" v-if="currentBackgroundIndex === 0"></div> -->
 
                 <!-- 纯色 -->
                 <div class="pure-color-section" v-if="currentBackgroundIndex === 1">
-
                     <div class="section-group-row" v-for="item in colorArray" :key="item.label">
                         <label class="section-label">{{ item.label }}</label>
                         <div class="preset-bg-color" v-for="color in item.colors" :key="color"
-                            :style="{ background: color }" @click="() => emitSetThemeConfigBackground(1, color)"></div>
+                            :style="{ background: color }" @click="handlePureColorClick(color)"></div>
                     </div>
                 </div>
 
@@ -36,55 +32,64 @@
                 <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 2">
                     <button class="preset-btn" v-for="gradient in gradientArrays" :key="gradient"
                         :style="{ backgroundImage: gradient }"
-                        @click="() => emitSetThemeConfigBackground(2, gradient)"></button>
+                        @click="handleGradientClick(gradient)"></button>
                 </div>
-
-                <!-- 网格 -->
-                <!-- <div class="section-group-row" v-if="currentBackgroundIndex === 3"></div> -->
-
 
                 <!-- 图片 -->
-                <div class="section-group-row" v-if="currentBackgroundIndex === 4">
-                    <label class="section-label">背景图片</label>
-                    <input type="file" accept="image/*" @change="handleBgImageChange" />
+                <div class="section-group-column" v-if="currentBackgroundIndex === 4">
+                    <div class="upload-zone" :class="{ 'drag-over': isDragOver, 'has-images': sourceImage }"
+                        @click="fileInput.click()" @dragover.prevent="isDragOver = true"
+                        @dragleave.prevent="isDragOver = false" @drop.prevent="onDrop">
+                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                        <p class="upload-text">点击或拖拽图片到此处</p>
+                        <p class="upload-hint">支持 JPG / PNG / WebP · 可粘贴</p>
+                        <input ref="fileInput" type="file" accept="image/*" style="display:none"
+                            @change="onFileChange" />
+                    </div>
+
+                    <div v-if="sourceImage" class="source-preview-wrap">
+                        <span class="form-label">已上传图片</span>
+                        <div class="source-preview">
+                            <img :src="sourceImage.url" :alt="sourceImage.name" class="source-thumb" />
+                        </div>
+                    </div>
+
+                    <div v-if="sourceImage" class="nav-bar">
+                          <button class="btn btn-primary" @click="applySource" :disabled="!sourceImage">
+                           <i class="fa fa-check-circle" />应用
+                        </button>
+                        <button class="btn btn-danger" @click="clearSource" :disabled="!sourceImage">
+                            <i class="fa-solid fa-trash" /> 删除
+                        </button>
+                    </div>
                 </div>
 
-
-
             </div>
-
 
             <div class="divider"></div>
 
             <div class="style-section">
-
                 <label class="section-label-title">连线</label>
 
                 <div class="section-group-row">
-
                     <div class="section-group-item">
                         <label class="section-label">颜色</label>
                         <input type="color" class="color-input" :value="currentLineColor"
                             @input="(e) => emitSetThemeConfig('lineColor', e.target.value)" />
                     </div>
-
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
                         <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10" :showInput="false"
                             @update:model-value="(val) => emitSetThemeConfig('lineWidth', val)" />
                     </div>
-
                 </div>
 
                 <div class="section-group-row">
-
                     <div class="section-group-item">
                         <label class="section-label">风格</label>
                         <Dropdown v-model="currentLineStyle" :options="lineStyleOptions"
                             @change="(item) => emitSetThemeConfig('lineStyle', item.value)" />
                     </div>
-
-
                     <div class="section-group-item">
                         <label class="section-label">显示箭头</label>
                         <div class="toggle-row">
@@ -96,15 +101,12 @@
                             <span class="toggle-hint">{{ currentShowLineMarker ? '开启' : '关闭' }}</span>
                         </div>
                     </div>
-
                 </div>
-
             </div>
 
             <div class="divider"></div>
 
             <div class="style-section">
-
                 <label class="section-label-title">节点外边距</label>
 
                 <div class="section-group-item">
@@ -112,7 +114,6 @@
                     <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('second', 'marginX', val)" />
                 </div>
-
 
                 <div class="section-group-item">
                     <label class="section-label">二级垂直间距</label>
@@ -131,7 +132,6 @@
                     <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="200" :showInput="false"
                         @update:model-value="(val) => emitSetNestedConfig('node', 'marginY', val)" />
                 </div>
-
             </div>
 
             <div class="divider"></div>
@@ -145,7 +145,6 @@
                         <input type="color" class="color-input" :value="currentAssocLineColor"
                             @input="(e) => emitSetThemeConfig('associativeLineColor', e.target.value)" />
                     </div>
-
                     <div class="section-group-item">
                         <label class="section-label">文字颜色</label>
                         <input type="color" class="color-input" :value="currentAssocTextColor"
@@ -154,14 +153,12 @@
                 </div>
 
                 <div class="section-group-row">
-
                     <div class="section-group-item">
                         <label class="section-label">字号</label>
                         <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
                             :showInput="false"
                             @update:model-value="(val) => emitSetThemeConfig('associativeLineTextFontSize', val)" />
                     </div>
-
                     <div class="section-group-item">
                         <label class="section-label">字体</label>
                         <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
@@ -177,19 +174,9 @@
                 </div>
             </div>
 
-            <div class="style-section">
-
-
-            </div>
-
-            <div class="style-section">
-
-            </div>
-
         </div>
     </div>
 </template>
-
 <script setup>
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import SliderInput from '../SliderInput.vue';
@@ -197,6 +184,11 @@ import Dropdown from '../Dropdown.vue';
 
 const props = defineProps({
     getThemeConfig: {
+        type: Function,
+        required: true
+    },
+    // ★★★ 新增：接收设置自定义背景的方法 ★★★
+    setCustomBackground: {
         type: Function,
         required: true
     }
@@ -222,8 +214,6 @@ onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleOutsideClick)
 })
 
-// ===== 核心：正确获取主题配置 =====
-// getThemeConfig() 返回的是 mindMap.getThemeConfig() 的结果（引用）
 const themeConfig = computed(() => {
     try {
         return props.getThemeConfig() || {}
@@ -244,11 +234,11 @@ function emitSetNestedConfig(parentKey, childKey, value) {
     })
 }
 
-
 // ==================== 背景颜色 ====================
 const currentBackgroundColor = computed(() => themeConfig.value.backgroundColor || '#fff')
 const bgColor = ref(null)
 const currentBackgroundIndex = ref(-1)
+
 const presetBG = computed(() => [
     { label: '无背景', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
     { label: '纯色', svg: `<svg width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="${bgColor.value || '#ccc'}"/></svg>` },
@@ -257,14 +247,12 @@ const presetBG = computed(() => [
     { label: '图片', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5.5" r="1.2" fill="#f28c5d"/><path d="M2 12.5l3-3.5 2 2 3-4 4 5.5" fill="none" stroke="#02a7f0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
 ])
 
-
 const colorArray = [
     { label: '暖色系', colors: ['#FFF8E1', '#FFEDD5', '#FFCC99', '#FFAB6B', '#FF8A4D'] },
     { label: '冷色系', colors: ['#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA'] },
     { label: '蓝色系', colors: ['#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7', '#29B6F6'] },
 ]
 
-// 渐变色
 const gradientArrays = [
     "linear-gradient(90deg,#ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
     "linear-gradient(90deg,#a18cd1 0%, #fbc2eb 100%)",
@@ -280,60 +268,107 @@ const gradientArrays = [
     "linear-gradient(90deg,#fff1eb 0%, #ace0f9 100%)",
 ]
 
-function emitSetThemeConfigBackground(index, value) {
-
+// ★★★ 修改：背景类型点击处理 ★★★
+function handleBgTypeClick(index) {
     currentBackgroundIndex.value = index
 
-    nextTick(() => {
-        const svgEl = __mindMap.el.querySelector('svg')
-        if (svgEl) {
-            if (index === 0) {
-                svgEl.style.background = '#fff'
-                bgColor.value = '#fff'
-            } else if (index === 1) {
-                svgEl.style.background = value
-                bgColor.value = value
-            } else if (index === 2) {
-                svgEl.style.background = value
-                bgColor.value = value
-            } else if (index === 3) {
-                svgEl.style.backgroundImage = "linear-gradient(#e0e0e0 1px, transparent 1px),linear-gradient(90deg, #e0e0e0 1px, transparent 1px)"
-                svgEl.style.backgroundSize = "20px 20px"
+    if (index === 0) {
+        // 无背景
+        props.setCustomBackground({ type: 'none' })
+    } else if (index === 3) {
+        // ★★★ 网格背景 ★★★
+        props.setCustomBackground({
+            type: 'grid',
+            value: {
+                backgroundImage: "linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px)",
+                backgroundSize: "20px 20px",
+                backgroundRepeat: "repeat",
+                backgroundPosition: "0 0, 0 0",
             }
+        })
+    }
+    // index 1(纯色)、2(渐变)、4(图片) 由各自的点击函数处理
+}
+
+
+// ★★★ 修改：纯色背景点击处理 ★★★
+function handlePureColorClick(color) {
+    bgColor.value = color
+    currentBackgroundIndex.value = 1
+    props.setCustomBackground({ type: 'pure', value: color })
+}
+
+// ★★★ 修改：渐变背景点击处理 ★★★
+function handleGradientClick(gradient) {
+    currentBackgroundIndex.value = 2
+    props.setCustomBackground({ type: 'gradient', value: gradient })
+}
+
+// ==================== 上传图片 ====================
+const sourceImage = ref(null)
+const isDragOver = ref(false)
+const fileInput = ref(null)
+
+const onFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) loadFile(file)
+    e.target.value = ''
+}
+
+const onDrop = (e) => {
+    isDragOver.value = false
+    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'))
+    if (file) loadFile(file)
+}
+
+const loadFile = (file) => {
+    if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url)
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+        currentBackgroundIndex.value = 4
+
+        // ★★★ 设置图片背景并保存 ★★★
+        props.setCustomBackground({
+            type: 'image',
+            value: {
+                backgroundImage: `url(${url})`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center center',
+                backgroundSize: 'cover',
+                backgroundColor: 'transparent'
+            }
+        })
+
+        sourceImage.value = {
+            id: Date.now(),
+            name: file.name,
+            size: file.size,
+            url,
+            img
+        }
+    }
+    img.src = url
+}
+
+const applySource = () => {
+    props.setCustomBackground({
+        type: 'image',
+        value: {
+            backgroundImage: `url(${sourceImage.value.url})`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center center',
+            backgroundSize: 'cover',
+            backgroundColor: 'transparent'
         }
     })
-
 }
 
-
-// 添加处理背景图片的方法
-const handleBgImageChange = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            emit('set-theme-config', 'backgroundImage', e.target.result)
-            emit('set-theme-config', 'backgroundColor', 'transparent')
-        }
-        reader.readAsDataURL(file)
-    }
+const clearSource = () => {
+    if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url)
+    sourceImage.value = null
+    props.setCustomBackground({ type: 'none' })
 }
-
-function rgbToHex(rgb) {
-    if (!rgb) return '#000000'
-    // 已经是 hex 格式，直接返回
-    if (rgb.startsWith('#')) return rgb
-    // 匹配 rgb(r, g, b) 格式
-    const match = rgb.match(/rgb$$(\d+),\s*(\d+),\s*(\d+)$$/)
-    if (match) {
-        const r = parseInt(match[1]).toString(16).padStart(2, '0')
-        const g = parseInt(match[2]).toString(16).padStart(2, '0')
-        const b = parseInt(match[3]).toString(16).padStart(2, '0')
-        return `#${r}${g}${b}`
-    }
-    return '#000000'
-}
-
 
 // ==================== 连线颜色 ====================
 const currentLineColor = computed(() => themeConfig.value.lineColor || '#549688')
@@ -476,8 +511,6 @@ const fontFamilyOptions = [
     { label: '楷体', value: '楷体, KaiTi' },
     { label: 'Arial', value: 'Arial' },
 ]
-
 </script>
-
 
 <style src="@/styles/mindmap.css" scoped></style>

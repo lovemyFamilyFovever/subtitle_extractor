@@ -4,11 +4,10 @@
       <span class="panel-title">文件列表</span>
       <div class="panel-actions">
         <button class="panel-action-btn" @click="$emit('add-files')" title="增量添加文件">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="12" y1="18" x2="12" y2="12" />
-            <line x1="9" y1="15" x2="15" y2="15" />
+          <svg viewBox="0 0 1024 1024" width="16" height="16">
+            <path
+              d="M640 0a384 384 0 0 1 384 384v256a384 384 0 0 1-384 384H384a384 384 0 0 1-384-384V384a384 384 0 0 1 384-384h256z m-83.498667 242.005333H477.866667c-6.997333 0-10.496 2.005333-10.496 5.973334v207.36h-207.36c-3.968 0-5.973333 2.986667-5.973334 8.96v67.413333c0 5.973333 2.005333 8.96 5.973334 8.96h207.36v235.306667c0 4.010667 3.498667 6.016 10.496 6.016h78.677333c6.997333 0 10.496-2.005333 10.496-5.973334v-235.349333h196.992c4.010667 0 5.973333-2.986667 5.973333-8.96v-67.413333c0-5.973333-1.962667-8.96-5.973333-8.96h-197.034667l0.042667-207.36c0-3.968-3.498667-5.973333-10.496-5.973334z"
+              fill="#29B6B0" opacity=".9" p-id="14198"></path>
           </svg>
         </button>
         <button class="panel-close" @click="$emit('close')">&times;</button>
@@ -17,14 +16,8 @@
 
     <div class="panel-body customScrollbar">
       <div class="file-list">
-        <div
-          class="file-item"
-          v-for="file in FileList"
-          :key="file.id"
-          :class="{ active: file.id === activeIndex }"
-          @click="$emit('load-file', file)"
-          style="cursor: pointer;"
-        >
+        <div class="file-item" v-for="file in FileList" :key="file.id" :class="{ active: file.id === activeIndex }"
+          @click="$emit('load-file', file)" style="cursor: pointer;">
           <div class="file-icon">
             <i class="fa fa-file"></i>
           </div>

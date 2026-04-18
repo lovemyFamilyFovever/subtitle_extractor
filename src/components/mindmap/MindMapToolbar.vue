@@ -108,8 +108,7 @@
             <!-- 第二组：主题/样式/视图 -->
             <div class="toolbar-block">
                 <div class="dropdown" ref="themeDropRef">
-                    <div class="toolbar-btn" :class="{ active: showThemeDropdown }"
-                        @click="showThemeDropdown = !showThemeDropdown">
+                    <div class="toolbar-btn" @click="$emit('toggle-theme')">
                         <span class="icon">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -123,40 +122,6 @@
                             </svg>
                         </span>
                         <span class="text">主题</span>
-                    </div>
-                    <div v-if="showThemeDropdown" class="theme-dropdown">
-                        <div class="theme-section-title-group">
-                            <div class="theme-section-title" v-for="theme in themeConfig"
-                                :class="{ active: currentTheme === theme.value }" @click="changeTheme(theme.value)">{{
-                                    theme.label }}</div>
-                        </div>
-
-                        <div class="theme-section" v-show="currentTheme == 'light'">
-                            <div v-for="item in lightThemeList" :key="item.value" class="theme-item"
-                                :class="{ active: currentTheme === item.value }" @click="handleThemeSelect(item.value)">
-                                <img v-if="getPreview(item.value)" class="theme-thumb" :src="getPreview(item.value)"
-                                    :alt="item.name" />
-                                <div v-else class="theme-thumb fallback" />
-                                <span class="theme-label">{{ item.name }}</span>
-                                <svg v-if="currentTheme === item.value" class="theme-check" viewBox="0 0 24 24"
-                                    width="14" height="14" fill="none" stroke="currentColor" stroke-width="3">
-                                    <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="theme-section" v-show="currentTheme == 'dark'">
-                            <div v-for="item in darkThemeList" :key="item.value" class="theme-item"
-                                :class="{ active: currentTheme === item.value }" @click="handleThemeSelect(item.value)">
-                                <img v-if="getPreview(item.value)" class="theme-thumb" :src="getPreview(item.value)"
-                                    :alt="item.name" />
-                                <div v-else class="theme-thumb fallback dark" />
-                                <span class="theme-label">{{ item.name }}</span>
-                                <svg v-if="currentTheme === item.value" class="theme-check" viewBox="0 0 24 24"
-                                    width="14" height="14" fill="none" stroke="currentColor" stroke-width="3">
-                                    <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -172,6 +137,18 @@
                     </span>
                     <span class="text">大纲</span>
                 </div>
+
+                <!-- 结构布局按钮 -->
+                <div class="toolbar-btn" @click="$emit('toggle-layout')">
+                    <span class="icon">
+                        <svg viewBox="0 0 1024 1024" width="16" height="16" fill="none" stroke="currentColor">
+                            <path
+                                d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z" />
+                        </svg>
+                    </span>
+                    <span class="text">结构</span>
+                </div>
+
 
                 <div class="toolbar-btn" @click="$emit('toggle-basestyle')">
                     <span class="icon">
@@ -263,44 +240,19 @@ const props = defineProps({
     canUndo: { type: Boolean, default: false },
     canRedo: { type: Boolean, default: false },
     hasNode: { type: Boolean, default: false },
-    currentTheme: { type: String, default: 'default' },
-    lightThemeList: { type: Array, default: () => [] },
-    darkThemeList: { type: Array, default: () => [] },
-    themePreviewMap: { type: Object, default: () => ({}) },
     isAssociativeLineMode: { type: Boolean, default: false },
 })
 
 const emit = defineEmits([
-    'new-file', 'open', 'save-as', 'import', 'export',
+    'new-file', 'open', 'import', 'export',
     'undo', 'redo',
     'insert-sibling', 'insert-child', 'remove',
     'insert-image', 'insert-hyperlink', 'insert-note',  // ★ 新增 insert-note
-    'set-theme', 'toggle-outline',
+    'set-theme', 'toggle-outline', 'toggle-layout',
     'toggle-associative-line',
 ])
 
-// ★ 后面所有原有代码保持不变 ★
-const showThemeDropdown = ref(false)
-const themeDropRef = ref(null)
-const currentTheme = ref('light')
-const themeConfig = [
-    { label: '浅色', value: 'light' },
-    { label: '深色', value: 'dark' }
-]
 
-function changeTheme(value) { currentTheme.value = value }
-function getPreview(value) { return props.themePreviewMap[value] || '' }
-function handleThemeSelect(value) {
-    emit('set-theme', value)
-    showThemeDropdown.value = false
-}
-function handleClickOutside(e) {
-    if (themeDropRef.value && !themeDropRef.value.contains(e.target)) {
-        showThemeDropdown.value = false
-    }
-}
-onMounted(() => { document.addEventListener('click', handleClickOutside) })
-onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside) })
 </script>
 
 <style scoped>
@@ -342,7 +294,7 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
 .divider {
     width: 1px;
     height: 24px;
-    background: rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.1);
     margin: 0 4px;
     flex-shrink: 0;
 }
@@ -421,140 +373,5 @@ onBeforeUnmount(() => { document.removeEventListener('click', handleClickOutside
 
 .dropdown {
     position: relative;
-}
-
-.theme-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 280px;
-    max-height: 520px;
-    overflow-y: auto;
-    background: rgba(255, 255, 255);
-    backdrop-filter: blur(24px) saturate(1.8);
-    -webkit-backdrop-filter: blur(24px) saturate(1.8);
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 16px 48px rgba(0, 0, 0, 0.12);
-    padding: 10px;
-    z-index: 200;
-    animation: themeDropIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.08) transparent;
-}
-
-.theme-dropdown::-webkit-scrollbar {
-    width: 4px;
-}
-
-.theme-dropdown::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 2px;
-}
-
-@keyframes themeDropIn {
-    from {
-        opacity: 0;
-        transform: translateX(-50%) translateY(-8px) scale(0.96);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
-    }
-}
-
-.theme-section {
-    margin-bottom: 6px;
-}
-
-.theme-section:last-child {
-    margin-bottom: 0;
-}
-
-.theme-section-title-group {
-    display: flex;
-    justify-content: space-around;
-    line-height: 27px;
-}
-
-.theme-section-title {
-    font-size: 12px;
-    color: #000000;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 8px 10px 4px;
-    cursor: pointer;
-}
-
-.theme-section-title.active {
-    color: #005bea;
-    font-size: 16px;
-    border-bottom: 2px solid #005bea;
-}
-
-.theme-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-.theme-item:hover {
-    background: rgba(0, 0, 0, 0.04);
-}
-
-.theme-item.active {
-    background: rgba(74, 144, 217, 0.08);
-}
-
-.theme-label {
-    flex: 1;
-    font-size: 13px;
-    color: #555;
-    font-weight: 500;
-}
-
-.theme-item.active .theme-label {
-    color: #333;
-    font-weight: 600;
-}
-
-.theme-check {
-    color: #4a90d9;
-    flex-shrink: 0;
-}
-
-.theme-thumb {
-    width: 72px;
-    height: 44px;
-    border-radius: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.25);
-    object-fit: cover;
-    flex-shrink: 0;
-    transition: box-shadow 0.15s ease;
-}
-
-.theme-item:hover .theme-thumb {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.theme-item.active .theme-thumb {
-    box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.3);
-}
-
-.theme-thumb.fallback {
-    background: #f5f5f5;
-}
-
-.theme-thumb.fallback.dark {
-    background: #1e1e30;
-    border-color: rgba(255, 255, 255, 0.08);
 }
 </style>

@@ -19,7 +19,7 @@ function handleKeyDown(e) {
   const hasNode = getActiveNodeList().length > 0
 
   if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (hasNode) {
+    if (hasNode) { 
       e.preventDefault()
       e.stopPropagation()
       removeNode()
@@ -90,8 +90,5 @@ onBeforeUnmount(() => {
 }
 
 
-.map-container svg{
-  width: 100%!important;
-  height: 100%!important;
-}
+
 </style>

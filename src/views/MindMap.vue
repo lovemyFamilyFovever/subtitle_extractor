@@ -1,12 +1,11 @@
 <template>
   <div class="mind-map-view">
-    <MindMapToolbar :can-undo="canUndo" :can-redo="canRedo" :has-node="hasNode" :current-theme="currentTheme"
-      :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap"
+    <MindMapToolbar :can-undo="canUndo" :can-redo="canRedo" :has-node="hasNode"
       :is-associative-line-mode="isAssociativeLineMode" @new-file="handleNewFile" @undo="undo" @redo="redo"
       @insert-sibling="insertSiblingNode" @insert-child="insertChildNode" @remove="removeNode"
       @insert-image="handleInsertImage" @insert-hyperlink="openHyperlinkDialog" @insert-note="openNoteDialog"
-      @open="handleOpen" @save-as="exportFile" @import="importFile" @export="showExportDlg = true" @set-theme="setTheme"
-      @toggle-outline="handleToggleOutline" @toggle-basestyle="handleToggleBaseStyle"
+      @open="handleOpen" @import="importFile" @export="exportFile" @toggle-theme="handleToggleTheme"
+      @toggle-outline="handleToggleOutline" @toggle-layout="handleToggleLayout" @toggle-basestyle="handleToggleBaseStyle"
       @toggle-associative-line="toggleAssociativeLineMode" />
 
     <div class="main-area">
@@ -15,19 +14,25 @@
       <MindMapOverlay ref="overlayRef" :hyperlinks="hyperlinkPositions" :notes="notePositions"
         @edit-hyperlink="openHyperlinkDialog" @edit-note="openNoteDialog" />
 
+      <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme" 
+        :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap" />
+
+      <Structure v-if="showStructure" @set-layout="setLayout" @get-layout="getLayout" />
+
       <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="closePanel" />
 
+      <!-- ★★★ 修改：传递 setCustomBackground prop ★★★ -->
       <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
-        :get-theme-config="getThemeConfig" />
+        :get-theme-config="getThemeConfig" :set-custom-background="setCustomBackground" />
 
-      <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle" @set-styles="setStyles" />
+      <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle"
+        @set-styles="setStyles" />
 
       <FileList v-if="showFileList" @close="closePanel" :FileList="fileList" :active-index="currentFileIndex"
         @load-file="handleLoadFile" @remove-file="handleRemoveFile" @add-files="handleAddFiles" />
 
     </div>
 
-    <!-- ★ 四个弹窗组件 ★ -->
     <HyperlinkDialog v-model:visible="showHyperlinkDlg" :default-url="hyperlinkDefaultUrl"
       :default-title="hyperlinkDefaultTitle" @confirm="handleHyperlinkConfirm" @remove="handleHyperlinkRemove" />
 
@@ -36,21 +41,18 @@
 
     <ImageDialog v-model:visible="showImageDlg" @confirm="handleImageConfirm" />
 
-    <ExportDialog v-model:visible="showExportDlg" @select="exportFile" />
-
     <ImageViewer v-model="showImageViewer" :images="viewerImages" :viewer-index="viewerIndex" />
-
 
   </div>
 </template>
-
 <script setup>
-
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
 import { useMindMap } from '@/composables/useMindMap'
 import MindMapToolbar from '@/components/mindmap/MindMapToolbar.vue'
 import MindMapCore from '@/components/mindmap/MindMapCore.vue'
+import Structure from '@/components/mindmap/Structure.vue'
+import ThemePanel from '@/components/mindmap/ThemePanel.vue'
 import NodeStylePanel from '@/components/mindmap/NodeStylePanel.vue'
 import OutlinePanel from '@/components/mindmap/OutlinePanel.vue'
 import BaseStylePanel from '@/components/mindmap/BaseStylePanel.vue'
@@ -60,13 +62,14 @@ import MindMapOverlay from '@/components/mindmap/MindMapOverlay.vue'
 import HyperlinkDialog from '@/components/mindmap/HyperlinkDialog.vue'
 import NoteDialog from '@/components/mindmap/NoteDialog.vue'
 import ImageDialog from '@/components/mindmap/ImageDialog.vue'
-import ExportDialog from '@/components/mindmap/ExportDialog.vue'
+
 
 const {
   canUndo, canRedo, activeNodes, isReadonly, currentTheme,
   lightThemeList, darkThemeList, themePreviewMap,
   undo, redo, insertChildNode, insertSiblingNode, removeNode,
-  setNodeStyle,setStyles, setThemeConfig, getThemeConfig, setTheme,
+  setNodeStyle, setStyles, setThemeConfig, getThemeConfig, setTheme,
+  setLayout, getLayout, setCustomBackground, getCustomBackground,
   insertImageToNode, openLocalFile, importFile, exportFile,
   hasUnsavedChanges, isAssociativeLineMode, newFile,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,
@@ -79,13 +82,19 @@ const overlayRef = ref(null)
 // 面板
 // ============================================================
 const activePanel = ref(null)
+const showThemePanel = computed(() => activePanel.value === 'theme')
+const showStructure = computed(() => activePanel.value === 'structure')
 const showOutline = computed(() => activePanel.value === 'outline')
 const showBaseStyle = computed(() => activePanel.value === 'basestyle')
 const showNodeStyle = computed(() => activePanel.value === 'node' && activeNodes.value.length > 0 && !isReadonly.value)
 const showFileList = computed(() => activePanel.value === 'filelist')
 
 function closePanel() { activePanel.value = null }
+
 function togglePanel(panelName) { activePanel.value = activePanel.value === panelName ? null : panelName }
+
+function handleToggleTheme() { togglePanel('theme') }
+function handleToggleLayout() { togglePanel('structure') }
 function handleToggleOutline() { togglePanel('outline') }
 function handleToggleBaseStyle() { togglePanel('basestyle') }
 
@@ -160,44 +169,42 @@ function handleRemoveFile(id) {
 }
 
 // ============================================================
-// ★★★ Ctrl+S 自动保存 ★★★
+// Ctrl+S 自动保存
 // ============================================================
-
-// 获取当前文件的 fileHandle
 function getCurrentFileHandle() {
   if (currentFileIndex.value < 0) return null
   const file = fileList.value.find(f => f.id === currentFileIndex.value)
   return file?._raw?.fileHandle || null
 }
 
-// 保存当前画布
+// ★ 简化 handleSave 中的降级路径
 async function handleSave() {
   const fileHandle = getCurrentFileHandle()
 
   if (!fileHandle) {
-    // 没有 fileHandle（传统模式或未选择文件），降级为导出 JSON
-    const data = getData()
+    const data = getData()  // 已经包含 customBackground
     if (!data) return
-    const pureData = { data: data.data, children: data.children || [] }
-    const json = JSON.stringify(pureData, null, 2)
+    const saveData = {
+      data: data.data,
+      children: data.children || [],
+      customBackground: data.customBackground || null,
+    }
+    const json = JSON.stringify(saveData, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    const date = new Date()
-    a.download = date.toLocaleString() + '.json'
+    a.download = new Date().toLocaleString() + '.json'
     a.click()
     URL.revokeObjectURL(url)
     return
   }
 
   const success = await saveToLocalFile(fileHandle)
-  if (success) {
-    console.log('保存成功')
-  }
+  if (success) console.log('保存成功')
 }
 
-// 键盘事件监听
+
 function handleKeydown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault()
@@ -212,7 +219,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleKeydown)
 })
-
 
 // ============================================================
 // Overlay 坐标
@@ -321,16 +327,10 @@ function handleImageConfirm({ url, title }) {
   insertImageToNode(url, title)
 }
 
-// ★ 图片：新增 ★
 function handleInsertImage() {
   if (!activeNodes.value.length) { alert('请先选中一个节点'); return }
   showImageDlg.value = true
 }
-
-// ============================================================
-// 导出
-// ============================================================
-const showExportDlg = ref(false)
 
 // ============================================================
 // 图片查看器
@@ -354,21 +354,9 @@ watch(imageDblClickData, (data) => {
 const hasNode = computed(() => activeNodes.value.length > 0)
 const outlineTree = computed(() => showOutline.value ? getOutlineTree() : null)
 
-const lineTextRef = ref(null)
-onMounted(() => {
-  const timer = setInterval(() => {
-    const { mindMap } = useMindMap()
-    if (mindMap && mindMap.value) {
-      clearInterval(timer)
-      try { mindMap.value.on('line_text_edit', (data) => lineTextRef.value?.show(data)) } catch (e) { }
-    }
-  }, 200)
-  setTimeout(() => clearInterval(timer), 5000)
-})
-
 function handleNewFile() {
   if (hasUnsavedChanges.value) {
-    if (confirm('当前画布有未保存的修改，是否先保存？')) saveAsJSON()
+    if (confirm('当前画布有未保存的修改，是否先保存？')) handleSave()
   }
   newFile()
 }
@@ -972,6 +960,4 @@ form-input {
   color: #aaa;
   margin: 8px 20px 0;
 }
-
-
 </style>

@@ -245,6 +245,11 @@ body,
     cursor: pointer;
     transition: all 0.15s ease;
     font-weight: 500;
+    max-width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .style-btn:hover {
@@ -289,6 +294,14 @@ body,
     align-items: center;
 }
 
+
+.section-group-column {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-direction: column;
+}
+
 .section-group-item {
     flex: 0 0 calc(50% - 5px);
     display: flex;
@@ -299,7 +312,7 @@ body,
 .divider {
     width: 100%;
     height: 1px;
-    background: rgb(0 0 0 / 5%);
+    background: rgb(0 0 0 / 10%);
     margin: 0 4px;
     flex-shrink: 0;
 }
@@ -353,7 +366,6 @@ body,
     display: inline-block;
     height: 30px;
     line-height: 30px;
-    margin-bottom: 8px;
     text-align: center;
     width: 30%;
 }
@@ -411,18 +423,19 @@ body,
     padding: 5px;
     border-radius: 10px;
     transition: all 0.2s ease-in;
-      border: 1px solid transparent;
+    border: 1px solid transparent;
 }
 
 .preset-bg-types {
     display: flex;
     justify-content: space-between;
-    background: rgb(234, 235, 236);
+    background: #e4f2ff;
     padding: 7px;
     border-radius: 10px;
 }
 
-.preset-select-bg:hover,.preset-select-bg.active {
+.preset-select-bg:hover,
+.preset-select-bg.active {
     background: #fff;
     border: 1px solid #0075ff;
 }
@@ -442,3 +455,105 @@ body,
     border-radius: 10px;
 }
 
+
+
+
+/* ===== 上传区 ===== */
+.upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-zone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-dim);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+    border-color: var(--accent);
+}
+
+.upload-zone:hover::before,
+.upload-zone.drag-over::before {
+    opacity: 1;
+}
+
+.upload-zone i {
+    position: relative;
+    font-size: 1.75rem;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.upload-text {
+    position: relative;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--fg);
+}
+
+.upload-hint {
+    position: relative;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+}
+
+/* ===== 源图预览 ===== */
+.source-preview-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.source-preview {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.source-thumb {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    background: var(--bg);
+    display: block;
+}
+
+.nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+/* 有图片时：隐藏 icon 和 hint，只保留 text，缩小 padding */
+.upload-zone.has-images .upload-icon {
+    display: none;
+}
+
+.upload-zone.has-images .upload-hint {
+    display: none;
+}
+
+.upload-zone.has-images {
+    padding: 0.6rem 1rem;
+    border-style: solid;
+    border-width: 1px;
+    width: 100%;
+}

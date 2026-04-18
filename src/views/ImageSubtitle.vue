@@ -843,6 +843,7 @@ onUnmounted(() => {
   padding: 0.6rem 1rem;
   border-style: solid;
   border-width: 1px;
+  width: 100%;
 }
 
 /* 隐藏文件输入 */

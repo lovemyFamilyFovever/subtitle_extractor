@@ -74,6 +74,53 @@
 
                 </div>
 
+                <div class="section-group-row">
+
+                    <div class="btn-group">
+
+                        <button class="style-btn" :class="{ active: currentTextAlignment === 'left' }" title="左对齐"
+                            @click="$emit('set-style', 'textAlign', 'left')">
+                          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" id="map-align-left" dark="false"
+                                    linearid="1776527550424">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 5H17V6.5H3V5ZM3 9H11V10.5H3V9ZM13 13H3V14.5H13V13Z"></path>
+                                </svg>
+                        </button>
+
+                        <button class="style-btn" :class="{ active: currentTextAlignment === 'center' }" title="居中"
+                            @click="$emit('set-style', 'textAlign', 'center')">
+                            <span><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" id="map-align-center" dark="false"
+                                    linearid="1776527550424">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 5H17V6.5H3V5ZM3 9H17V10.5H3V9ZM3 13H17V14.5H3V13Z"></path>
+                                </svg></span>
+                        </button>
+
+                        <button class="style-btn" :class="{ active: currentTextAlignment === 'right' }" title="右对齐"
+                            @click="$emit('set-style', 'textAlign', 'right')">
+                            <span><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" id="map-align-right" dark="false"
+                                    linearid="1776527550424">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 5H17V6.5H3V5ZM3 9H11V10.5H3V9ZM13 13H3V14.5H13V13Z"></path>
+                                </svg></span>
+                        </button>
+
+                        <button class="style-btn" :class="{ active: currentTextAlignment === 'justify' }" title="两端对齐"
+                            @click="$emit('set-style', 'textAlign', 'justify')">
+                            <span><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg" id="map-align-justify" dark="false"
+                                    linearid="1776527550424">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M3 5H17V6.5H3V5ZM3 9H17V10.5H3V9ZM3 13H17V14.5H3V13Z"></path>
+                                </svg></span>
+                        </button>
+
+                    </div>
+                </div>
+
             </div>
 
             <div class="divider"></div>
@@ -249,6 +296,9 @@ const currentFontStyle = computed(() => getNodeStyle('fontStyle', 'normal'))
 
 const currentTextDecoration = computed(() => getNodeStyle('textDecoration', 'none'))
 
+const currentTextAlignment = computed(() => getNodeStyle('textAlign', 'left'))
+
+
 function handleNormalClick() {
     emit('set-style', 'fontWeight', 'normal')
     emit('set-style', 'fontStyle', 'normal')
@@ -365,7 +415,6 @@ function handlePresetTheme(themeName) {
     return
 
 }
-
 
 
 
