@@ -17,7 +17,7 @@
       <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme" 
         :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap" />
 
-      <Structure v-if="showStructure" @set-layout="setLayout" @get-layout="getLayout" />
+      <Structure v-show="showStructure" @set-layout="setLayout" @get-layout="getLayout" @close="closePanel" />
 
       <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="closePanel" />
 

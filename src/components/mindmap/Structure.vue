@@ -26,7 +26,7 @@
 
 
 <script setup>
-import {ref, computed,onMounted, onBeforeUnmountoy } from 'vue'
+import {ref, computed,onMounted, onBeforeUnmount } from 'vue'
 
 // 导入所有结构图片
 import logicalStructureImg from '@/assets/structures/logicalStructure.jpg'
@@ -83,7 +83,7 @@ const layoutGroupList = [
     { name: '鱼骨图', list: ['fishbone'] }
 ]
 
-const emit = defineEmits(['setLayout', 'getLayout'])
+const emit = defineEmits(['close','setLayout', 'getLayout'])
 
 const layout = emit('getLayout')
 
