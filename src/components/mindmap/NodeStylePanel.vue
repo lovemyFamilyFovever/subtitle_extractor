@@ -225,13 +225,13 @@
 
                     <div class="section-group-item">
                         <label class="section-label">垂直</label>
-                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="10" :max="80" :showSlider=false
+                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="150" :showInput=false
                             @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
                     </div>
 
                     <div class="section-group-item">
                         <label class="section-label">水平</label>
-                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="10" :max="80" :showSlider=false
+                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="150" :showInput=false
                             @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                     </div>
                 </div>
@@ -241,7 +241,7 @@
 
             <div class="style-section">
 
-                <label class="section-label-title">预设主题风格</label>
+                <label class="section-label-title">预设节点风格</label>
 
                 <div class="section-group-row">
                     <button class="preset-btn default" @click="handlePresetTheme('default')"><span>默认</span></button>

@@ -269,8 +269,6 @@ const emit = defineEmits([
     pointer-events: none;
     display: flex;
     gap: 20px;
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
     background: rgba(255, 255, 255, 0);
 }
 

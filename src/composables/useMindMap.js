@@ -242,17 +242,39 @@ export function useMindMap() {
       theme: currentTheme.value,
       layout: currentLayout.value,
       themeConfig: {
-        lineStyle: 'curve',
+
+        paddingX: 5,
+        paddingY: 5,
+        // 图片显示的最大宽度
+        imgMaxWidth: 300,
+        // 图片显示的最大高度
+        imgMaxHeight: 100,
+
+        lineStyle: 'straight',
         borderWidth: 1,
         background: '#f0f2f5',
-        second: {
-          marginX: 130,
-          marginY: 20
-        },
         node: {
+          fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontSize: 16,
           marginX: 100,
           marginY: 80
-        }
+        },
+        second: {
+          fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontFamily: '微软雅黑, Microsoft YaHei',
+          fontSize: 14,
+          fontWeight: 'noraml',
+          fontStyle: 'normal', 
+          borderColor: '#f96628',
+          borderWidth: 1,
+          borderRadius: 5,
+          textAlign: 'center',
+          marginX: 130,
+          marginY: 20,
+        },
+
       },
       openRealtimeRenderOnNodeTextEdit: true,
       defaultInsertSecondLevelNodeText: '分支主题',
@@ -267,9 +289,6 @@ export function useMindMap() {
       maxImgResizeWidthInheritTheme: false,
       maxImgResizeWidth: 2000,
       maxImgResizeHeight: 2000,
-      beforeDeleteNodeImg: async (node) => {
-        return confirm(`确定删除节点「${node.getData('text') || '未知'}」的图片吗？`)
-      },
       mousewheelAction: 'zoom',
       showNumber: false,
     })
@@ -345,10 +364,11 @@ export function useMindMap() {
   function removeLine() {
     if (!mindMapInstance) return
     try {
-      
-     const associativeLine = __mindMap.associativeLine
 
-      associativeLine.removeLine() } catch (e) { /* ignore */ }
+      const associativeLine = __mindMap.associativeLine
+
+      associativeLine.removeLine()
+    } catch (e) { /* ignore */ }
   }
 
   function removeNode() {
@@ -424,7 +444,7 @@ export function useMindMap() {
     if (!nodeList.length) return
     const img = new Image()
     img.onload = () => {
-      const maxWidth = 200
+      const maxWidth = 310
       let width = img.naturalWidth
       let height = img.naturalHeight
       if (width > maxWidth) {
