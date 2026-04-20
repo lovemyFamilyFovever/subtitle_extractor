@@ -20,11 +20,7 @@
                     </div>
 
                     <div class="section-group-item">
-                        <input type="color" class="color-input" :value="currentColor"
-                            @input="(e) => $emit('set-style', 'color', e.target.value)" />
-
-                        <SliderInput v-model="currentFontSize" label="" unit="" :min="10" :max="48" :showSlider=false
-                            @update:model-value="(val) => $emit('set-style', 'fontSize', val)" />
+                        <ColorInput v-model="currentColor" />
                     </div>
                 </div>
 
@@ -75,6 +71,9 @@
                 </div>
 
                 <div class="section-group-row">
+                    <label class="section-label">字号</label>
+                    <SliderInput v-model="currentFontSize" label="" unit="" :min="10" :max="48" :showSlider=false
+                        @update:model-value="(val) => $emit('set-style', 'fontSize', val)" />
 
                     <div class="btn-group">
 
@@ -174,7 +173,7 @@
 
             <div class="divider"></div>
 
-              <!-- 背景颜色 -->
+            <!-- 背景颜色 -->
             <div class="style-section">
 
                 <label class="section-label-title">背景</label>
@@ -182,12 +181,7 @@
                 <div class="section-group-row">
 
                     <div class="section-group-item">
-
-                        <input type="color" class="color-input" :value="currentBg"
-                            @input="(e) => $emit('set-style', 'fillColor', e.target.value)" />
-                        <div class="preset-bg-color" v-for="color in bgColors"
-                            :style="{ background: color, borderColor: 'rgb(63 63 63 / 21%)' }"
-                            @click="$emit('set-style', 'fillColor', color)"></div>
+                        <ColorInput v-model="currentBg" />
                     </div>
                 </div>
             </div>
@@ -279,7 +273,14 @@ const fontFamilies = [
     { label: 'Arial', value: 'Arial' },
 ]
 
-const currentColor = computed(() => getNodeStyle('color', '#1a1a2e'))
+const currentColor = computed({
+    get() {
+        return getNodeStyle('color', '#333333')
+    },
+    set(val) {
+        emit('set-style', 'color', val)
+    }
+})
 
 const currentFontSize = computed(() => getNodeStyle('fontSize', 16))
 
@@ -298,8 +299,15 @@ function handleNormalClick() {
 }
 
 // ========================== 背景颜色 ==========================
-const bgColors = ['#f5f5f5', '#fff3e0', '#e3f2fd', '#e8f5e9', '#fce4ec']
-const currentBg = computed(() => getNodeStyle('fillColor', '#ffffff'))
+const currentBg = computed({
+    get() {
+        const val= getNodeStyle('fillColor', '#ffffff')
+        return val === 'transparent' ? '#ffffff' : val
+    },
+    set(val) {
+        emit('set-style', 'fillColor', val)
+    }
+})
 
 // ========================== 边框 ==========================
 const currentBorderRadius = computed(() => getNodeStyle('borderRadius', 5))
@@ -387,14 +395,20 @@ const presetThemes = {
     blue: {
         fillColor: '#e3f2fd',
         color: '#0d47a1',
+        paddingX: 15,
+        paddingY: 10,
     },
     red: {
         fillColor: '#ffebee',
         color: '#b71c1c',
+        paddingX: 25,
+        paddingY: 20,
     },
     green: {
         fillColor: '#e8f5e9',
         color: '#1b5e20',
+        paddingX: 35,
+        paddingY: 30,
     },
     light: {
         fillColor: '#fce4ec',
@@ -409,11 +423,7 @@ const presetThemes = {
 function handlePresetTheme(themeName) {
     emit('set-styles', presetThemes[themeName])
     return
-
 }
-
-
-
 
 </script>
 

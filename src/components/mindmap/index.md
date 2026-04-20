@@ -51,110 +51,106 @@ demo
             </ul>
         </div>
     </div>
-    <div class="color_transparent">
-        <span class="colourless default-color"></span>
-        无填充
-    </div>
     <div class="color_group">
-        <div class="color_item" name="" original-title="#EFECEB" style="color:rgba(239,236,235,1);background:#EFECEB;">
+        <div class="color_item" name="" style="color:rgba(239,236,235,1);background:#EFECEB;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F2F2F2" style="color:rgba(242,242,242,1);background:#F2F2F2;">
+        <div class="color_item" name="" style="color:rgba(242,242,242,1);background:#F2F2F2;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#E7EBED" style="color:rgba(231,235,237,1);background:#E7EBED;">
+        <div class="color_item" name="" style="color:rgba(231,235,237,1);background:#E7EBED;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#FADCDB" style="color:rgba(250,220,219,1);background:#FADCDB;">
+        <div class="color_item" name="" style="color:rgba(250,220,219,1);background:#FADCDB;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#FBEADA" style="color:rgba(251,234,218,1);background:#FBEADA;">
+        <div class="color_item" name="" style="color:rgba(251,234,218,1);background:#FBEADA;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#FCF9EA" style="color:rgba(252,249,234,1);background:#FCF9EA;">
+        <div class="color_item" name="" style="color:rgba(252,249,234,1);background:#FCF9EA;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#E5F6DA" style="color:rgba(229,246,218,1);background:#E5F6DA;">
+        <div class="color_item" name="" style="color:rgba(229,246,218,1);background:#E5F6DA;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#DBF5F5" style="color:rgba(219,245,245,1);background:#DBF5F5;">
+        <div class="color_item" name="" style="color:rgba(219,245,245,1);background:#DBF5F5;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#D2D6F9" style="color:rgba(210,214,249,1);background:#D2D6F9;">
+        <div class="color_item" name="" style="color:rgba(210,214,249,1);background:#D2D6F9;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#FADDED" style="color:rgba(250,221,237,1);background:#FADDED;">
+        <div class="color_item" name="" style="color:rgba(250,221,237,1);background:#FADDED;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#DED9D7" style="color:rgba(222,217,215,1);background:#DED9D7;">
+        <div class="color_item" name="" style="color:rgba(222,217,215,1);background:#DED9D7;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#D9D9D9" style="color:rgba(217,217,217,1);background:#D9D9D9;">
+        <div class="color_item" name="" style="color:rgba(217,217,217,1);background:#D9D9D9;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#E0E0E0" style="color:rgba(224,224,224,1);background:#E0E0E0;">
+        <div class="color_item" name="" style="color:rgba(224,224,224,1);background:#E0E0E0;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F5B9B7" style="color:rgba(245,185,183,1);background:#F5B9B7;">
+        <div class="color_item" name="" style="color:rgba(245,185,183,1);background:#F5B9B7;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F8D5B5" style="color:rgba(248,213,181,1);background:#F8D5B5;">
+        <div class="color_item" name="" style="color:rgba(248,213,181,1);background:#F8D5B5;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F6EDC1" style="color:rgba(246,237,193,1);background:#F6EDC1;">
+        <div class="color_item" name="" style="color:rgba(246,237,193,1);background:#F6EDC1;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#CAEDB4" style="color:rgba(202,237,180,1);background:#CAEDB4;">
+        <div class="color_item" name="" style="color:rgba(202,237,180,1);background:#CAEDB4;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#B7EAEB" style="color:rgba(183,234,235,1);background:#B7EAEB;">
+        <div class="color_item" name="" style="color:rgba(183,234,235,1);background:#B7EAEB;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A6AEF3" style="color:rgba(166,174,243,1);background:#A6AEF3;">
+        <div class="color_item" name="" style="color:rgba(166,174,243,1);background:#A6AEF3;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F6BBDB" style="color:rgba(246,187,219,1);background:#F6BBDB;">
+        <div class="color_item" name="" style="color:rgba(246,187,219,1);background:#F6BBDB;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#BEB3AF" style="color:rgba(190,179,175,1);background:#BEB3AF;">
+        <div class="color_item" name="" style="color:rgba(190,179,175,1);background:#BEB3AF;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#BFBFBF" style="color:rgba(191,191,191,1);background:#BFBFBF;">
+        <div class="color_item" name="" style="color:rgba(191,191,191,1);background:#BFBFBF;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#9E9E9E" style="color:rgba(158,158,158,1);background:#9E9E9E;">
+        <div class="color_item" name="" style="color:rgba(158,158,158,1);background:#9E9E9E;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F19594" style="color:rgba(241,149,148,1);background:#F19594;">
+        <div class="color_item" name="" style="color:rgba(241,149,148,1);background:#F19594;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F4C18F" style="color:rgba(244,193,143,1);background:#F4C18F;">
+        <div class="color_item" name="" style="color:rgba(244,193,143,1);background:#F4C18F;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F1E4A2" style="color:rgba(241,228,162,1);background:#F1E4A2;">
+        <div class="color_item" name="" style="color:rgba(241,228,162,1);background:#F1E4A2;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#B0E38F" style="color:rgba(176,227,143,1);background:#B0E38F;">
+        <div class="color_item" name="" style="color:rgba(176,227,143,1);background:#B0E38F;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#94E0E1" style="color:rgba(148,224,225,1);background:#94E0E1;">
+        <div class="color_item" name="" style="color:rgba(148,224,225,1);background:#94E0E1;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#7985EC" style="color:rgba(121,133,236,1);background:#7985EC;">
+        <div class="color_item" name="" style="color:rgba(121,133,236,1);background:#7985EC;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F199C8" style="color:rgba(241,153,200,1);background:#F199C8;">
+        <div class="color_item" name="" style="color:rgba(241,153,200,1);background:#F199C8;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#9D8C88" style="color:rgba(157,140,136,1);background:#9D8C88;">
+        <div class="color_item" name="" style="color:rgba(157,140,136,1);background:#9D8C88;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A6A6A6" style="color:rgba(166,166,166,1);background:#A6A6A6;">
+        <div class="color_item" name="" style="color:rgba(166,166,166,1);background:#A6A6A6;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#616161" style="color:rgba(97,97,97,1);background:#616161;">
+        <div class="color_item" name="" style="color:rgba(97,97,97,1);background:#616161;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#EC7270" style="color:rgba(236,114,112,1);background:#EC7270;">
+        <div class="color_item" name="" style="color:rgba(236,114,112,1);background:#EC7270;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#F1AC6A" style="color:rgba(241,172,106,1);background:#F1AC6A;">
+        <div class="color_item" name="" style="color:rgba(241,172,106,1);background:#F1AC6A;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#E9D66F" style="color:rgba(233,214,111,1);background:#E9D66F;">
+        <div class="color_item" name="" style="color:rgba(233,214,111,1);background:#E9D66F;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#95DA69" style="color:rgba(149,218,105,1);background:#95DA69;">
+        <div class="color_item" name="" style="color:rgba(149,218,105,1);background:#95DA69;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#70D5D7" style="color:rgba(112,213,215,1);background:#70D5D7;">
+        <div class="color_item" name="" style="color:rgba(112,213,215,1);background:#70D5D7;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#5B79E8" style="color:rgba(91,121,232,1);background:#5B79E8;">
+        <div class="color_item" name="" style="color:rgba(91,121,232,1);background:#5B79E8;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#ED77B6" style="color:rgba(237,119,182,1);background:#ED77B6;">
+        <div class="color_item" name="" style="color:rgba(237,119,182,1);background:#ED77B6;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#5C4038" style="color:rgba(92,64,56,1);background:#5C4038;">
+        <div class="color_item" name="" style="color:rgba(92,64,56,1);background:#5C4038;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#7F7F7F" style="color:rgba(127,127,127,1);background:#7F7F7F;">
+        <div class="color_item" name="" style="color:rgba(127,127,127,1);background:#7F7F7F;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#262626" style="color:rgba(38,38,38,1);background:#262626;">
+        <div class="color_item" name="" style="color:rgba(38,38,38,1);background:#262626;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A23735" style="color:rgba(162,55,53,1);background:#A23735;">
+        <div class="color_item" name="" style="color:rgba(162,55,53,1);background:#A23735;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A66A30" style="color:rgba(166,106,48,1);background:#A66A30;">
+        <div class="color_item" name="" style="color:rgba(166,106,48,1);background:#A66A30;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A7932C" style="color:rgba(167,147,44,1);background:#A7932C;">
+        <div class="color_item" name="" style="color:rgba(167,147,44,1);background:#A7932C;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#569230" style="color:rgba(86,146,48,1);background:#569230;">
+        <div class="color_item" name="" style="color:rgba(86,146,48,1);background:#569230;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#358E90" style="color:rgba(53,142,144,1);background:#358E90;">
+        <div class="color_item" name="" style="color:rgba(53,142,144,1);background:#358E90;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#314AA4" style="color:rgba(49,74,164,1);background:#314AA4;">
+        <div class="color_item" name="" style="color:rgba(49,74,164,1);background:#314AA4;">
             <span></span></div>
-        <div class="color_item" name="" original-title="#A23C73" style="color:rgba(162,60,115,1);background:#A23C73;">
+        <div class="color_item" name="" style="color:rgba(162,60,115,1);background:#A23C73;">
             <span></span></div>
     </div>
     <div class="color_base">

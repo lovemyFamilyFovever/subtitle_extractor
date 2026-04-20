@@ -243,8 +243,8 @@ export function useMindMap() {
       layout: currentLayout.value,
       themeConfig: {
 
-        paddingX: 5,
-        paddingY: 5,
+        paddingX: 15,
+        paddingY: 15,
         // 图片显示的最大宽度
         imgMaxWidth: 300,
         // 图片显示的最大高度
@@ -253,6 +253,10 @@ export function useMindMap() {
         lineStyle: 'straight',
         borderWidth: 1,
         background: '#f0f2f5',
+        root: {
+          paddingX: 25,
+          paddingY: 15,
+        },
         node: {
           fillColor: 'rgb(255, 255, 255)',
           color: 'rgb(9, 7, 1)',
@@ -266,7 +270,7 @@ export function useMindMap() {
           fontFamily: '微软雅黑, Microsoft YaHei',
           fontSize: 14,
           fontWeight: 'noraml',
-          fontStyle: 'normal', 
+          fontStyle: 'normal',
           borderColor: '#f96628',
           borderWidth: 1,
           borderRadius: 5,
@@ -275,12 +279,12 @@ export function useMindMap() {
           marginY: 20,
         },
         node: {
-           fillColor: 'rgb(255, 255, 255)',
+          fillColor: 'rgb(255, 255, 255)',
           color: 'rgb(9, 7, 1)',
           fontFamily: '微软雅黑, Microsoft YaHei',
           fontSize: 14,
           fontWeight: 'noraml',
-          fontStyle: 'normal', 
+          fontStyle: 'normal',
           borderColor: '#f96628',
           borderWidth: 1,
           borderRadius: 5,

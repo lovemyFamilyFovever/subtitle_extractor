@@ -5,28 +5,23 @@
         </div>
 
         <div class="panel-body customScrollbar">
-
             <div class="layoutGroupList">
                 <div class="layoutGroup" v-for="group in layoutGroupList" :key="group.name">
                     <div class="groupName">{{ group.name }}</div>
                     <div class="layoutList">
                         <div class="layoutItem" v-for="item in group.list" :key="item"
-                            @click="() => emit('setLayout', item)" :class="{ active: item === layout }">
+                            @click="() => handleSetLayout(item)" :class="{ active: item === localLayout }">
                             <img :src="layoutImgMap[item]" alt="" />
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
-
-
 </template>
 
-
 <script setup>
-import {ref, computed,onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 // 导入所有结构图片
 import logicalStructureImg from '@/assets/structures/logicalStructure.jpg'
@@ -43,8 +38,6 @@ import rightFishbone2Img from '@/assets/structures/rightFishbone2.jpg'
 import verticalTimelineImg from '@/assets/structures/verticalTimeline.jpg'
 import verticalTimeline2Img from '@/assets/structures/verticalTimeline2.jpg'
 import verticalTimeline3Img from '@/assets/structures/verticalTimeline3.jpg'
-
-
 
 // 图片路径映射
 const layoutImgMap = {
@@ -64,16 +57,6 @@ const layoutImgMap = {
     verticalTimeline3: verticalTimeline3Img
 }
 
-// 提取文件名作为 key
-const layoutImgMapProcessed = computed(() => {
-    const map = {}
-    for (const [path, mod] of Object.entries(layoutImgMap)) {
-        const filename = path.split('/').pop().replace('.jpg', '')
-        map[filename] = mod.default
-    }
-    return map
-})
-
 const layoutGroupList = [
     { name: '逻辑结构图', list: ['logicalStructure', 'logicalStructureLeft'] },
     { name: '思维导图', list: ['mindMap'] },
@@ -83,10 +66,31 @@ const layoutGroupList = [
     { name: '鱼骨图', list: ['fishbone'] }
 ]
 
-const emit = defineEmits(['close','setLayout', 'getLayout'])
+const emit = defineEmits(['close', 'setLayout'])
 
-const layout = emit('getLayout')
+const props = defineProps({
+    getLayout: {
+        type: Function,
+        required: true
+    }
+})
 
+const localLayout = ref('logicalStructure')
+
+onMounted(() => {
+    // 初始化当前布局
+    localLayout.value = props.getLayout()
+    // 绑定外部点击事件
+    setTimeout(() => {
+        document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
+})
+
+// ✅ 点击时立即更新本地状态，同时通知父组件
+const handleSetLayout = (item) => {
+    localLayout.value = item  // 立即更新 UI
+    emit('setLayout', item)   // 通知父组件更新实际布局
+}
 const panelRef = ref(null)
 
 function handleOutsideClick(e) {
@@ -95,16 +99,9 @@ function handleOutsideClick(e) {
     }
 }
 
-onMounted(() => {
-    setTimeout(() => {
-        document.addEventListener('mousedown', handleOutsideClick)
-    }, 100)
-})
-
 onBeforeUnmount(() => {
     document.removeEventListener('mousedown', handleOutsideClick)
 })
-
 </script>
 
 <style scoped>
@@ -222,7 +219,7 @@ onBeforeUnmount(() => {
 }
 
 .layoutGroupList .layoutGroup .layoutList .layoutItem.active {
-    border: 1px solid #409eff;
+    border: 2px solid #ff7f83;
 }
 
 .layoutGroupList .layoutGroup .layoutList .layoutItem img {

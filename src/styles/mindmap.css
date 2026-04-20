@@ -134,9 +134,6 @@ body,
     display: flex;
     flex-direction: column;
     gap: 18px;
-    max-height: calc(100vh - 150px);
-    overflow-x: hidden;
-    overflow-y: auto;
 }
 
 .style-section {
@@ -155,6 +152,7 @@ body,
     font-size: 13px;
     color: #0e0202;
     font-weight: 500;
+    min-width: 27px;
 }
 
 .label-value {

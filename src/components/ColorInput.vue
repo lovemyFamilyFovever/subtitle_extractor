@@ -21,15 +21,35 @@
         </div>
       </div>
 
-      <!-- 预设颜色 -->
+      <!-- 预设颜色（改为下拉选择主题） -->
       <div class="color-preset">
-        <div class="color-preset-title">预设颜色</div>
+        <div class="color-preset-header">
+          <div class="color-preset-title">预设颜色</div>
+          <div class="color-theme-selector" ref="themeSelectorRef">
+            <div class="color-theme-trigger" @click.stop="toggleThemeList">
+              <span class="theme-name">{{ activeTheme }}</span>
+              <span class="theme-arrow" :class="{ open: isThemeListOpen }">▼</span>
+            </div>
+            <ul class="color-theme-dropdown" :class="{ show: isThemeListOpen }">
+              <li
+                v-for="(colors, themeName) in colorThemes"
+                :key="themeName"
+                class="color-theme-item"
+                :class="{ active: activeTheme === themeName }"
+                @click.stop="selectTheme(themeName)"
+              >
+                {{ themeName }}
+              </li>
+            </ul>
+          </div>
+        </div>
         <div class="color-preset-grid">
           <div
-            v-for="color in presetColors"
+            v-for="color in currentThemeColors"
             :key="color"
             class="color-preset-item"
             :style="{ background: color }"
+            :title="color"
             @click="selectColor(color)"
           ></div>
         </div>
@@ -41,7 +61,7 @@
         <div class="color-custom-input">
           <div class="color-canvas-wrapper" @click="handleCanvasClick">
             <div class="color-canvas-bg"></div>
-            <canvas class="color-canvas" ref="colorCanvas" width="50" height="50"></canvas>
+            <canvas class="color-canvas" ref="colorCanvas" width="80" height="80"></canvas>
             <div class="color-cursor" :style="cursorStyle"></div>
           </div>
           <div class="color-input-group">
@@ -69,11 +89,6 @@
         </div>
       </div>
 
-      <!-- 操作按钮 -->
-      <div class="color-actions">
-        <button class="color-btn color-btn-secondary" @click="closeDropdown">取消</button>
-        <button class="color-btn color-btn-primary" @click="confirmColor">确认</button>
-      </div>
     </div>
   </div>
 </template>
@@ -90,30 +105,66 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-// 预设颜色
-const presetColors = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-  '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-  '#BB8FCE', '#85C1E9', '#F8B500', '#FF8C00',
-  '#E74C3C', '#9B59B6', '#3498DB', '#2ECC71',
-  '#1ABC9C', '#16A085', '#27AE60', '#229954',
-  '#F39C12', '#E67E22', '#D35400', '#C0392B',
-  '#2980B9', '#8E44AD', '#2C3E50', '#34495E',
-  '#ECF0F1', '#BDC3C7', '#95A5A6', '#7F8C8D'
-];
+// 预设颜色主题数据（来源于参考内容）
+const colorThemes = {
+  '系统色': [
+    '#EFECEB', '#F2F2F2', '#E7EBED', '#FADCDB', '#FBEADA', '#FCF9EA', '#E5F6DA', '#DBF5F5',
+    '#D2D6F9', '#FADDED', '#DED9D7', '#D9D9D9', '#E0E0E0', '#F5B9B7', '#F8D5B5', '#F6EDC1',
+    '#CAEDB4', '#B7EAEB', '#A6AEF3', '#F6BBDB', '#BEB3AF', '#BFBFBF', '#9E9E9E', '#F19594',
+    '#F4C18F', '#F1E4A2', '#B0E38F', '#94E0E1', '#7985EC', '#F199C8', '#9D8C88', '#A6A6A6',
+    '#616161', '#EC7270', '#F1AC6A', '#E9D66F', '#95DA69', '#70D5D7', '#5B79E8', '#ED77B6',
+    '#5C4038', '#7F7F7F', '#262626', '#A23735', '#A66A30', '#A7932C', '#569230', '#358E90',
+    '#314AA4', '#A23C73'
+  ],
+  '莫兰迪': [
+    '#F1F1E8', '#ECECED', '#F3FAF9', '#F4F0EA', '#F9FAEE', '#F8F9F5', '#F5E9ED', '#FCE7EB',
+    '#F9EEE1', '#FEF5EF', '#E3E2D1', '#D9DADB', '#E8F5F4', '#E9E1D5', '#F3F6DD', '#F0F3EC',
+    '#EBD2DC', '#F9CFD7', '#F3DDC3', '#FDEBDF', '#D6D4BA', '#C5C7CA', '#DCEFEE', '#DDD1C1',
+    '#EEF1CB', '#E9ECE2', '#E0BCCA', '#F6B6C4', '#EDCCA5', '#FCE2CF', '#C8C5A3', '#B2B5B8',
+    '#D1EAE9', '#D2C2AC', '#E8EDBA', '#E1E6D9', '#D6A5B9', '#F39EB0', '#E7BB87', '#FBD8BF',
+    '#959270', '#7F8285', '#9EB7B6', '#9F8F79', '#B5BA87', '#AEB3A6', '#A37286', '#C06B7D',
+    '#B48854', '#C8A58C'
+  ],
+  '中国风': [
+    '#866B50', '#705138', '#5A5645', '#5C3719', '#775550', '#5A1216', '#B0913E', '#964D22',
+    '#E28342', '#C37940', '#2C2305', '#645822', '#6B5E4C', '#556980', '#70887D', '#5B8483',
+    '#975F42', '#A2825E', '#DDAB4C', '#91A45A', '#4D5255', '#587D8C', '#737C7B', '#B1AD94',
+    '#ADB4A9', '#467E7D', '#94B68E', '#894276', '#C36077', '#D59482', '#144A74', '#495C69',
+    '#314656', '#134857', '#7E8489', '#8F927F', '#B2BBBE', '#67907C', '#539271', '#D2B116',
+    '#322F3B', '#525288', '#8076A3', '#1A94BC', '#5D3131', '#314A43', '#C1651A', '#DE9E44',
+    '#D2B116', '#D2D97A'
+  ],
+  '潘通色': [
+    '#E3F0E1', '#EEE7F1', '#E4D5D8', '#FDF8DC', '#DFE3F5', '#FFF1D5', '#DFE5DB', '#E2EFF5',
+    '#DEE6E6', '#F9DDD6', '#C7E1C3', '#DED0E4', '#CAAAB1', '#FBF1B8', '#BFC7EA', '#FEE2AB',
+    '#BFCAB6', '#C6DFEA', '#BDCECD', '#F3BBAD', '#ABD1A6', '#CDB8D6', '#AF808A', '#F8EB95',
+    '#9EAAE0', '#FED480', '#A0B092', '#A9CEE0', '#9DB5B5', '#ED9984', '#8FC288', '#BDA1C9',
+    '#955563', '#F6E471', '#7E8ED5', '#FDC556', '#80956D', '#8DBED5', '#7C9D9C', '#E7775B',
+    '#5C8F55', '#8A6E96', '#622230', '#C3B13E', '#4B5BA2', '#CA9223', '#4D623A', '#5A8BA2',
+    '#496A69', '#B44428'
+  ]
+};
 
 // 响应式状态
 const pickerRef = ref(null);
+const themeSelectorRef = ref(null);
 const colorCanvas = ref(null);
 const isPanelOpen = ref(false);
+const isThemeListOpen = ref(false);
 const selectedColor = ref(props.modelValue || '#4A90E2');
 const colorHistory = ref(['#4A90E2', '#FF6B6B', '#2ECC71', '#F39C12']);
+const activeTheme = ref('系统色');
+
+// 当前主题的颜色列表
+const currentThemeColors = computed(() => {
+  return colorThemes[activeTheme.value] || [];
+});
 
 // 输入框绑定
 const rgbInput = reactive({ r: 74, g: 144, b: 226 });
 const hexInput = ref('4A90E2');
 
-// 光标位置（简化处理，点击画布时更新）
+// 光标位置
 const cursorStyle = computed(() => ({
   left: '25px',
   top: '25px'
@@ -145,12 +196,24 @@ function updateInputs(color) {
     rgbInput.b = rgb.b;
     hexInput.value = color.replace('#', '');
   }
+  confirmColor();
 }
 
 // 选择颜色
 function selectColor(color) {
   selectedColor.value = color;
   updateInputs(color);
+}
+
+// 切换主题列表
+function toggleThemeList() {
+  isThemeListOpen.value = !isThemeListOpen.value;
+}
+
+// 选择主题
+function selectTheme(themeName) {
+  activeTheme.value = themeName;
+  isThemeListOpen.value = false;
 }
 
 // 从RGB输入更新
@@ -200,7 +263,6 @@ function initCanvas() {
 
   const ctx = canvas.getContext('2d');
 
-  // 创建渐变
   const gradientH = ctx.createLinearGradient(0, 0, canvas.width, 0);
   gradientH.addColorStop(0, '#ff0000');
   gradientH.addColorStop(1/6, '#ffff00');
@@ -225,18 +287,17 @@ function initCanvas() {
 function toggleDropdown() {
   isPanelOpen.value = !isPanelOpen.value;
   if (isPanelOpen.value) {
-    // 在下一个tick初始化画布，确保DOM已更新
     setTimeout(initCanvas, 0);
   }
 }
 
 function closeDropdown() {
   isPanelOpen.value = false;
+  isThemeListOpen.value = false;
 }
 
 // 确认选择
 function confirmColor() {
-  // 添加到历史记录
   if (!colorHistory.value.includes(selectedColor.value)) {
     colorHistory.value.unshift(selectedColor.value);
     if (colorHistory.value.length > 8) {
@@ -252,6 +313,9 @@ function handleClickOutside(e) {
   if (pickerRef.value && !pickerRef.value.contains(e.target)) {
     closeDropdown();
   }
+  if (themeSelectorRef.value && !themeSelectorRef.value.contains(e.target)) {
+    isThemeListOpen.value = false;
+  }
 }
 
 // 生命周期
@@ -265,7 +329,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
 
-// 监听props.modelValue变化，保持外部绑定同步
 watch(
   () => props.modelValue,
   (newValue) => {
@@ -275,14 +338,12 @@ watch(
   }
 );
 
-// 监听selectedColor变化，同步输入框
 watch(selectedColor, (newColor) => {
   updateInputs(newColor);
 });
 </script>
 
 <style scoped>
-/* 复制原HTML中的所有CSS样式，添加scoped避免污染 */
 * {
   margin: 0;
   padding: 0;
@@ -342,9 +403,9 @@ watch(selectedColor, (newColor) => {
 /* 展开面板 */
 .color-dropdown-panel {
   position: absolute;
-  width: 237px;
+  width: 320px;
   top: 100%;
-  left: 0;
+  left: -100px;
   right: 0;
   margin-top: 4px;
   background: #fff;
@@ -403,34 +464,128 @@ watch(selectedColor, (newColor) => {
   transform: scale(1.1);
 }
 
-/* 预设颜色网格 */
+/* 预设颜色区域 */
 .color-preset {
   padding: 10px 12px;
   border-bottom: 1px solid #eee;
 }
 
-.color-preset-title {
-  font-size: 11px;
-  color: #999;
+.color-preset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 8px;
 }
 
+.color-preset-title {
+  font-size: 11px;
+  color: #999;
+}
+
+/* 主题选择器 */
+.color-theme-selector {
+  position: relative;
+}
+
+.color-theme-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #333;
+  transition: all 0.15s;
+}
+
+.color-theme-trigger:hover {
+  border-color: #999;
+  background: #eee;
+}
+
+.theme-name {
+  min-width: 48px;
+  text-align: center;
+}
+
+.theme-arrow {
+  font-size: 8px;
+  color: #999;
+  transition: transform 0.2s;
+}
+
+.theme-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* 主题下拉列表 */
+.color-theme-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  min-width: 80px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  list-style: none;
+  z-index: 10;
+  display: none;
+  overflow: hidden;
+}
+
+.color-theme-dropdown.show {
+  display: block;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.color-theme-item {
+  padding: 6px 12px;
+  font-size: 11px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+
+.color-theme-item:hover {
+  background: #f5f5f5;
+}
+
+.color-theme-item.active {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+/* 预设颜色网格 */
 .color-preset-grid {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 5px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  max-height: 150px;
 }
 
 .color-preset-item {
   aspect-ratio: 1;
-  border-radius: 4px;
+  border-radius: 3px;
   border: 1px solid rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .color-preset-item:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
 /* 自定义颜色区域 */
@@ -452,12 +607,13 @@ watch(selectedColor, (newColor) => {
 
 .color-canvas-wrapper {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   border-radius: 4px;
   border: 1px solid #ddd;
   overflow: hidden;
   cursor: crosshair;
+  flex-shrink: 0;
 }
 
 .color-canvas-bg {
@@ -491,18 +647,18 @@ watch(selectedColor, (newColor) => {
 
 .color-input-row {
   display: flex;
-  gap: 6px;
+  gap: 10px;
 }
 
 .color-input-wrapper {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 10px;
 }
 
 .color-input-label {
-  font-size: 10px;
+  font-size: 14px;
   color: #999;
   width: 10px;
   flex-shrink: 0;
@@ -510,11 +666,11 @@ watch(selectedColor, (newColor) => {
 
 .color-input-field {
   width: 100%;
-  height: 22px;
+  height: 33px;
   border: 1px solid #ddd;
   border-radius: 3px;
   padding: 0 4px;
-  font-size: 11px;
+  font-size: 14px;
   font-family: monospace;
 }
 
@@ -558,5 +714,24 @@ watch(selectedColor, (newColor) => {
 
 .color-btn-primary:hover {
   background: #0056b3;
+}
+
+/* 滚动条样式 */
+.color-preset-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.color-preset-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.color-preset-grid::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+.color-preset-grid::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
 }
 </style>

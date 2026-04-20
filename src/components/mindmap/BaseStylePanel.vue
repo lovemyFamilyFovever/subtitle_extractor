@@ -12,8 +12,7 @@
 
                 <div class="preset-bg-types">
                     <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
-                        :class="{ active: currentBackgroundIndex == index }"
-                        @click="handleBgTypeClick(index)">
+                        :class="{ active: currentBackgroundIndex == index }" @click="handleBgTypeClick(index)">
                         <span v-html="bgType.svg"></span>
                         <span>{{ bgType.label }}</span>
                     </div>
@@ -31,8 +30,7 @@
                 <!-- 渐变 -->
                 <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 2">
                     <button class="preset-btn" v-for="gradient in gradientArrays" :key="gradient"
-                        :style="{ backgroundImage: gradient }"
-                        @click="handleGradientClick(gradient)"></button>
+                        :style="{ backgroundImage: gradient }" @click="handleGradientClick(gradient)"></button>
                 </div>
 
                 <!-- 图片 -->
@@ -55,8 +53,8 @@
                     </div>
 
                     <div v-if="sourceImage" class="nav-bar">
-                          <button class="btn btn-primary" @click="applySource" :disabled="!sourceImage">
-                           <i class="fa fa-check-circle" />应用
+                        <button class="btn btn-primary" @click="applySource" :disabled="!sourceImage">
+                            <i class="fa fa-check-circle" />应用
                         </button>
                         <button class="btn btn-danger" @click="clearSource" :disabled="!sourceImage">
                             <i class="fa-solid fa-trash" /> 删除
@@ -74,8 +72,11 @@
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">颜色</label>
-                        <input type="color" class="color-input" :value="currentLineColor"
-                            @input="(e) => emitSetThemeConfig('lineColor', e.target.value)" />
+
+                        <ColorInput v-model="currentLineColor" />
+
+                        <!-- <input type="color" class="color-input" :value="currentLineColor"
+                            @input="(e) => emitSetThemeConfig('lineColor', e.target.value)" /> -->
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
@@ -141,14 +142,18 @@
 
                 <div class="section-group-row">
                     <div class="section-group-item">
-                        <label class="section-label">线条颜色</label>
-                        <input type="color" class="color-input" :value="currentAssocLineColor"
-                            @input="(e) => emitSetThemeConfig('associativeLineColor', e.target.value)" />
+                        <label class="section-label">线条</label>
+
+                        <ColorInput v-model="currentAssocLineColor" />
+                        <!-- <input type="color" class="color-input" :value="currentAssocTextColor"
+                            @input="(e) => emitSetThemeConfig('associativeLineColor', e.target.value)" />-->
+
                     </div>
                     <div class="section-group-item">
-                        <label class="section-label">文字颜色</label>
-                        <input type="color" class="color-input" :value="currentAssocTextColor"
-                            @input="(e) => emitSetThemeConfig('associativeLineTextColor', e.target.value)" />
+                        <label class="section-label">文字</label>
+                        <ColorInput v-model="currentAssocTextColor" />
+                        <!-- <input type="color" class="color-input" :value="currentAssocTextColor"
+                            @input="(e) => emitSetThemeConfig('associativeLineTextColor', e.target.value)" /> -->
                     </div>
                 </div>
 
@@ -181,6 +186,7 @@
 import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import SliderInput from '../SliderInput.vue';
 import Dropdown from '../Dropdown.vue';
+import ColorInput from '../ColorInput.vue'
 
 const props = defineProps({
     getThemeConfig: {
@@ -371,7 +377,14 @@ const clearSource = () => {
 }
 
 // ==================== 连线颜色 ====================
-const currentLineColor = computed(() => rgbToHex(themeConfig.value.lineColor) || '#549688')
+const localLineColor = ref('#4A90E2')
+onMounted(()=>{
+    localLineColor.value = themeConfig.value.lineColor
+})
+const currentLineColor = computed({
+    get: () => themeConfig.value.lineColor,
+    set: (val) => {  emitSetThemeConfig('lineColor', val) }
+})
 
 // ==================== 连线粗细 ====================
 const lineWidthLocal = ref(1)
@@ -392,7 +405,7 @@ watch(() => themeConfig.value.lineStyle, (val) => {
 
 const currentLineStyle = computed({
     get: () => lineStyleLocal.value,
-    set: (val) => { lineStyleLocal.value = val }
+    set: (val) => {  emitSetThemeConfig('lineStyle', val) }
 })
 
 const lineStyleOptions = [
@@ -409,7 +422,7 @@ watch(() => themeConfig.value.showLineMarker, (val) => {
 
 const currentShowLineMarker = computed({
     get: () => showLineMarkerLocal.value,
-    set: (val) => { showLineMarkerLocal.value = val }
+    set: (val) => { emitSetThemeConfig('showLineMarker', val) }
 })
 
 // ==================== 二级节点外边距 ====================
@@ -454,47 +467,39 @@ const nodeMarginY = computed({
 const assocLineColorLocal = ref('#333333')
 const assocLineWidthLocal = ref(2)
 
-watch(() => themeConfig.value.associativeLineColor, (val) => {
-    if (val) assocLineColorLocal.value = val
-}, { immediate: true })
+onMounted(() => {
+     assocLineColorLocal.value = themeConfig.value.associativeLineColor
+})
+const currentAssocLineColor = computed({
+    get: () => assocLineColorLocal.value,
+    set: (val) => { emitSetThemeConfig('associativeLineColor', val) }
+})
+
 
 watch(() => themeConfig.value.associativeLineWidth, (val) => {
     if (typeof val === 'number') assocLineWidthLocal.value = val
 }, { immediate: true })
-
-const currentAssocLineColor = computed({
-    get: () => rgbToHex(assocLineColorLocal.value),
-    set: (val) => { assocLineColorLocal.value = rgbToHex(val) }
-})
-
 const currentAssocLineWidth = computed({
     get: () => assocLineWidthLocal.value,
-    set: (val) => { assocLineWidthLocal.value = val }
+    set: (val) => {  emitSetThemeConfig('associativeLineWidth', val)}
 })
-
-function rgbToHex(rgbString) {
-    const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
-    if (!match) throw new Error('无效的 RGB 格式')
-    
-    const toHex = (n) => {
-        const hex = parseInt(n).toString(16)
-        return hex.length === 1 ? '0' + hex : hex
-    }
-    
-    return `#${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`
-}
-
-// 使用
-console.log(rgbToHex("rgb(152, 162, 171)"))  // "#98a2ab"
 
 // ==================== 关联线文字 ====================
 const assocTextColorLocal = ref('#333333')
 const assocTextFontSizeLocal = ref(14)
 const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
 
-watch(() => themeConfig.value.associativeLineTextColor, (val) => {
-    if (val) assocTextColorLocal.value = val
-}, { immediate: true })
+
+onMounted(() => {
+    assocTextColorLocal.value = themeConfig.value.associativeLineTextColor
+})
+const currentAssocTextColor = computed({
+    get: () => assocTextColorLocal.value,
+    set: (val) => {  emitSetThemeConfig('associativeLineTextColor', val) }
+})
+
+
+
 
 watch(() => themeConfig.value.associativeLineTextFontSize, (val) => {
     if (typeof val === 'number') assocTextFontSizeLocal.value = val
@@ -504,19 +509,15 @@ watch(() => themeConfig.value.associativeLineTextFontFamily, (val) => {
     if (val) assocTextFontFamilyLocal.value = val
 }, { immediate: true })
 
-const currentAssocTextColor = computed({
-    get: () => rgbToHex(assocTextColorLocal.value),
-    set: (val) => { assocTextColorLocal.value = rgbToHex(val) }
-})
 
 const currentAssocTextFontSize = computed({
     get: () => assocTextFontSizeLocal.value,
-    set: (val) => { assocTextFontSizeLocal.value = val }
+    set: (val) => {  emitSetThemeConfig('associativeLineTextFontSize', val)}
 })
 
 const currentAssocTextFontFamily = computed({
     get: () => assocTextFontFamilyLocal.value,
-    set: (val) => { assocTextFontFamilyLocal.value = val }
+    set: (val) => { emitSetThemeConfig('associativeLineTextFontFamily', val) }
 })
 
 const fontFamilyOptions = [

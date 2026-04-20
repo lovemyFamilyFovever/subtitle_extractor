@@ -82,11 +82,10 @@ onBeforeUnmount(() => {
 .dropdown-toggle {
   width: 100%;
   font-size: 14px;
-  text-align: left;
+  text-align: center;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   height: 30px;
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 8px;
@@ -106,6 +105,7 @@ onBeforeUnmount(() => {
 .arrow {
   transition: transform 0.2s ease;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .arrow.rotated {
@@ -175,5 +175,6 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 </style>
