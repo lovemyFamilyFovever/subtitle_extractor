@@ -329,7 +329,7 @@ const emit = defineEmits([
 }
 
 .toolbar-btn.disabled {
-    opacity: 0.3;
+    opacity: 0.9;
     cursor: not-allowed;
 }
 

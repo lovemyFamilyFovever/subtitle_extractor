@@ -274,6 +274,20 @@ export function useMindMap() {
           marginX: 130,
           marginY: 20,
         },
+        node: {
+           fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontFamily: '微软雅黑, Microsoft YaHei',
+          fontSize: 14,
+          fontWeight: 'noraml',
+          fontStyle: 'normal', 
+          borderColor: '#f96628',
+          borderWidth: 1,
+          borderRadius: 5,
+          textAlign: 'center',
+          marginX: 130,
+          marginY: 20,
+        }
 
       },
       openRealtimeRenderOnNodeTextEdit: true,

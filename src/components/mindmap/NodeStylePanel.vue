@@ -80,12 +80,12 @@
 
                         <button class="style-btn" :class="{ active: currentTextAlignment === 'left' }" title="左对齐"
                             @click="$emit('set-style', 'textAlign', 'left')">
-                          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
-                                    xmlns="http://www.w3.org/2000/svg" id="map-align-left" dark="false"
-                                    linearid="1776527550424">
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M3 5H17V6.5H3V5ZM3 9H11V10.5H3V9ZM13 13H3V14.5H13V13Z"></path>
-                                </svg>
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"
+                                xmlns="http://www.w3.org/2000/svg" id="map-align-left" dark="false"
+                                linearid="1776527550424">
+                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                    d="M3 5H17V6.5H3V5ZM3 9H11V10.5H3V9ZM13 13H3V14.5H13V13Z"></path>
+                            </svg>
                         </button>
 
                         <button class="style-btn" :class="{ active: currentTextAlignment === 'center' }" title="居中"
@@ -125,26 +125,6 @@
 
             <div class="divider"></div>
 
-            <!-- 背景颜色 -->
-            <div class="style-section">
-
-                <label class="section-label-title">背景</label>
-
-                <div class="section-group-row">
-
-                    <div class="section-group-item">
-
-                        <input type="color" class="color-input" :value="currentBg"
-                            @input="(e) => $emit('set-style', 'fillColor', e.target.value)" />
-                        <div class="preset-bg-color" v-for="color in bgColors"
-                            :style="{ background: color, borderColor: 'rgb(63 63 63 / 21%)' }"
-                            @click="$emit('set-style', 'fillColor', color)"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
             <div class="style-section">
                 <label class="section-label-title">边框</label>
                 <div class="section-group-row">
@@ -169,18 +149,9 @@
                 <div class="section-group-row">
 
                     <div class="section-group-item">
-                        <label class="section-label">颜色</label>
-                        <div class="color-row">
-                            <input type="color" class="color-input" :value="currentBorderColorForInput"
-                                @input="(e) => $emit('set-style', 'borderColor', e.target.value)" />
-                            <button class="transparent-btn" :class="{ active: currentBorderColor === 'transparent' }"
-                                title="透明" @click="$emit('set-style', 'borderColor', 'transparent')">
-                                <svg width="16" height="16" viewBox="0 0 16 16">
-                                    <line x1="2" y1="2" x2="14" y2="14" stroke="#e74c3c" stroke-width="2" />
-                                    <line x1="14" y1="2" x2="2" y2="14" stroke="#e74c3c" stroke-width="2" />
-                                </svg>
-                            </button>
-                        </div>
+                        <label class="section-label">虚线</label>
+                        <Dropdown v-model="currentBorderDasharray" :options="dasharrayOptions"
+                            @change="(item) => $emit('set-style', 'borderDasharray', item.value)" />
                     </div>
 
                     <div class="section-group-item">
@@ -191,11 +162,32 @@
                 </div>
 
                 <div class="section-group-row">
+                    <label class="section-label">颜色</label>
+                    <div class="color-row">
+                        <ColorInput v-model="currentBorderColor" />
+                        <!--  上面一行代码等效下面这行
+                            <ColorInput :modelValue="currentBorderColor"
+                                @update:modelValue="val => currentBorderColor = val" /> -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+              <!-- 背景颜色 -->
+            <div class="style-section">
+
+                <label class="section-label-title">背景</label>
+
+                <div class="section-group-row">
 
                     <div class="section-group-item">
-                        <label class="section-label">虚线</label>
-                        <Dropdown v-model="currentBorderDasharray" :options="dasharrayOptions"
-                            @change="(item) => $emit('set-style', 'borderDasharray', item.value)" />
+
+                        <input type="color" class="color-input" :value="currentBg"
+                            @input="(e) => $emit('set-style', 'fillColor', e.target.value)" />
+                        <div class="preset-bg-color" v-for="color in bgColors"
+                            :style="{ background: color, borderColor: 'rgb(63 63 63 / 21%)' }"
+                            @click="$emit('set-style', 'fillColor', color)"></div>
                     </div>
                 </div>
             </div>
@@ -219,19 +211,19 @@
             <!-- 节点内边距 -->
             <div class="style-section">
 
-                <label class="section-label-title">节点内边距</label>
+                <label class="section-label-title">宽高</label>
 
                 <div class="section-group-row">
 
                     <div class="section-group-item">
-                        <label class="section-label">垂直</label>
-                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="150" :showInput=false
+                        <label class="section-label">高度</label>
+                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="50" :showInput=false
                             @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
                     </div>
 
                     <div class="section-group-item">
-                        <label class="section-label">水平</label>
-                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="150" :showInput=false
+                        <label class="section-label">长度</label>
+                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="50" :showInput=false
                             @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                     </div>
                 </div>
@@ -265,6 +257,7 @@
 import { computed, ref } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
+import ColorInput from '../ColorInput.vue'
 
 const props = defineProps({
     activeNodes: {
@@ -310,12 +303,15 @@ const currentBg = computed(() => getNodeStyle('fillColor', '#ffffff'))
 
 // ========================== 边框 ==========================
 const currentBorderRadius = computed(() => getNodeStyle('borderRadius', 5))
-const currentBorderColor = computed(() => getNodeStyle('borderColor', 'transparent'))
-
-const currentBorderColorForInput = computed(() => {
-    const val = currentBorderColor.value
-    if (val === 'transparent') return '#ffffff'
-    return val
+const currentBorderColor = computed({
+    get() {
+        const val = getNodeStyle('borderColor', 'transparent')
+        // 处理 transparent 情况，给 color input 一个默认值
+        return val === 'transparent' ? '#ffffff' : val
+    },
+    set(val) {
+        emit('set-style', 'borderColor', val)
+    }
 })
 
 const currentBorderWidth = computed(() => getNodeStyle('borderWidth', 1))
