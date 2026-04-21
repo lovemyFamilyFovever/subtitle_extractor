@@ -17,13 +17,13 @@
       <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme"
         :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap" />
 
-      <Structure v-if="showStructure" @set-layout="setLayout" :get-layout="getLayout" @close="closePanel" />
+      <Structure v-if="showStructure" @close="closePanel" @set-layout="setLayout" :get-layout="getLayout" />
 
-      <OutlinePanel v-if="showOutline" :tree="outlineTree" @close="closePanel" />
+      <OutlinePanel v-if="showOutline" @close="closePanel" :tree="outlineTree" />
 
-      <!-- ★★★ 修改：传递 setCustomBackground prop ★★★ -->
       <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
-        :get-theme-config="getThemeConfig" :set-custom-background="setCustomBackground" />
+        @get-theme-config="getThemeConfig" @set-custom-background="setCustomBackground"
+        @get-custom-background="getCustomBackground" />
 
       <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle"
         @set-styles="setStyles" />
@@ -211,7 +211,7 @@ function handleKeydown(e) {
     handleSave()
   }
 
-  if (e.key === 'Delete' ) {
+  if (e.key === 'Delete') {
     removeLine();
   }
 

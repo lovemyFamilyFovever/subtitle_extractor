@@ -27,9 +27,6 @@ images.forEach((img, i) => {
 ```
 
 
-demo
-``` html
-
 <div id="color_picker" class="po-menu color_picker po-dropdown-menu alpha_disabled"
     style="display: block; top: 257.821px; left: 686.401px; z-index: 12;">
     <div class="color_change">

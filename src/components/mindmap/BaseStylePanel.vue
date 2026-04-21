@@ -7,12 +7,12 @@
         <div class="panel-body customScrollbar">
 
             <div class="style-section">
-
                 <label class="section-label-title">背景</label>
 
                 <div class="preset-bg-types">
                     <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
-                        :class="{ active: currentBackgroundIndex == index }" @click="handleBgTypeClick(index)">
+                        :class="{ active: currentBackgroundIndex == index }"
+                        @click="handleChangeBackgroundTypeClick(index)">
                         <span v-html="bgType.svg"></span>
                         <span>{{ bgType.label }}</span>
                     </div>
@@ -20,11 +20,7 @@
 
                 <!-- 纯色 -->
                 <div class="pure-color-section" v-if="currentBackgroundIndex === 1">
-                    <div class="section-group-row" v-for="item in colorArray" :key="item.label">
-                        <label class="section-label">{{ item.label }}</label>
-                        <div class="preset-bg-color" v-for="color in item.colors" :key="color"
-                            :style="{ background: color }" @click="handlePureColorClick(color)"></div>
-                    </div>
+                    <ColorInput v-model="currentBackgroundColor" />
                 </div>
 
                 <!-- 渐变 -->
@@ -72,31 +68,25 @@
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">颜色</label>
-
                         <ColorInput v-model="currentLineColor" />
-
-                        <!-- <input type="color" class="color-input" :value="currentLineColor"
-                            @input="(e) => emitSetThemeConfig('lineColor', e.target.value)" /> -->
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
-                        <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10" :showInput="false"
-                            @update:model-value="(val) => emitSetThemeConfig('lineWidth', val)" />
+                        <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10"
+                            :showInput="false" />
                     </div>
                 </div>
 
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">风格</label>
-                        <Dropdown v-model="currentLineStyle" :options="lineStyleOptions"
-                            @change="(item) => emitSetThemeConfig('lineStyle', item.value)" />
+                        <Dropdown v-model="currentLineStyle" :options="lineStyleOptions" />
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">显示箭头</label>
                         <div class="toggle-row">
                             <label class="toggle-switch">
-                                <input type="checkbox" :checked="currentShowLineMarker"
-                                    @change="(e) => emitSetThemeConfig('showLineMarker', e.target.checked)">
+                                <input type="checkbox" v-model="currentShowLineMarker">
                                 <span class="toggle-slider"></span>
                             </label>
                             <span class="toggle-hint">{{ currentShowLineMarker ? '开启' : '关闭' }}</span>
@@ -112,26 +102,22 @@
 
                 <div class="section-group-item">
                     <label class="section-label">二级水平间距</label>
-                    <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showInput="false"
-                        @update:model-value="(val) => emitSetNestedConfig('second', 'marginX', val)" />
+                    <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showInput="false" />
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">二级垂直间距</label>
-                    <SliderInput v-model="secondMarginY" label="" unit="px" :min="20" :max="200" :showInput="false"
-                        @update:model-value="(val) => emitSetNestedConfig('second', 'marginY', val)" />
+                    <SliderInput v-model="secondMarginY" label="" unit="px" :min="20" :max="200" :showInput="false" />
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">三级水平间距</label>
-                    <SliderInput v-model="nodeMarginX" label="" unit="px" :min="20" :max="200" :showInput="false"
-                        @update:model-value="(val) => emitSetNestedConfig('node', 'marginX', val)" />
+                    <SliderInput v-model="nodeMarginX" label="" unit="px" :min="20" :max="200" :showInput="false" />
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">三级垂直间距</label>
-                    <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="200" :showInput="false"
-                        @update:model-value="(val) => emitSetNestedConfig('node', 'marginY', val)" />
+                    <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="200" :showInput="false" />
                 </div>
             </div>
 
@@ -143,17 +129,11 @@
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">线条</label>
-
                         <ColorInput v-model="currentAssocLineColor" />
-                        <!-- <input type="color" class="color-input" :value="currentAssocTextColor"
-                            @input="(e) => emitSetThemeConfig('associativeLineColor', e.target.value)" />-->
-
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">文字</label>
                         <ColorInput v-model="currentAssocTextColor" />
-                        <!-- <input type="color" class="color-input" :value="currentAssocTextColor"
-                            @input="(e) => emitSetThemeConfig('associativeLineTextColor', e.target.value)" /> -->
                     </div>
                 </div>
 
@@ -161,103 +141,99 @@
                     <div class="section-group-item">
                         <label class="section-label">字号</label>
                         <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
-                            :showInput="false"
-                            @update:model-value="(val) => emitSetThemeConfig('associativeLineTextFontSize', val)" />
+                            :showInput="false" />
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">字体</label>
-                        <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions"
-                            @change="(item) => emitSetThemeConfig('associativeLineTextFontFamily', item.value)" />
+                        <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions" />
                     </div>
                 </div>
 
                 <div class="section-group-item">
                     <label class="section-label">线宽</label>
                     <SliderInput v-model="currentAssocLineWidth" label="" unit="px" :min="1" :max="10"
-                        :showInput="false"
-                        @update:model-value="(val) => emitSetThemeConfig('associativeLineWidth', val)" />
+                        :showInput="false" />
                 </div>
             </div>
 
         </div>
     </div>
 </template>
+
 <script setup>
-import { computed, ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import SliderInput from '../SliderInput.vue';
-import Dropdown from '../Dropdown.vue';
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import SliderInput from '../SliderInput.vue'
+import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
 
-const props = defineProps({
-    getThemeConfig: {
-        type: Function,
-        required: true
-    },
-    // ★★★ 新增：接收设置自定义背景的方法 ★★★
-    setCustomBackground: {
-        type: Function,
-        required: true
-    }
-})
+const emit = defineEmits([
+    'close',
+    'set-theme-config',
+    'get-theme-config',
+    'set-custom-background',
+    'get-custom-background'
+])
 
-const emit = defineEmits(['close', 'set-theme-config'])
-
-const panelRef = ref(null)
-
-function handleOutsideClick(e) {
-    if (panelRef.value && !panelRef.value.contains(e.target)) {
-        emit('close')
-    }
-}
+// ==================== 主题配置（本地缓存） ====================
+const themeConfig = ref({})
 
 onMounted(() => {
-    setTimeout(() => {
-        document.addEventListener('mousedown', handleOutsideClick)
-    }, 100)
-})
-
-onBeforeUnmount(() => {
-    document.removeEventListener('mousedown', handleOutsideClick)
-})
-
-const themeConfig = computed(() => {
-    try {
-        return props.getThemeConfig() || {}
-    } catch (e) {
-        return {}
+    const config = emit('get-theme-config')
+    if (config && typeof config === 'object') {
+        themeConfig.value = { ...config }
+    }
+    // 同步自定义背景
+    const bg = emit('get-custom-background')
+    if (bg) {
+        syncBackgroundFromParent(bg)
     }
 })
 
-function emitSetThemeConfig(key, value) {
-    emit('set-theme-config', key, value)
-}
-
-function emitSetNestedConfig(parentKey, childKey, value) {
-    const parent = themeConfig.value[parentKey] || {}
-    emit('set-theme-config', parentKey, {
-        ...parent,
-        [childKey]: value
-    })
-}
-
-// ==================== 背景颜色 ====================
-const currentBackgroundColor = computed(() => themeConfig.value.backgroundColor || '#fff')
-const bgColor = ref(null)
+// ==================== 背景相关 ====================
+const bgColor = ref('#ffffff')
 const currentBackgroundIndex = ref(-1)
+
+// 同步父组件的自定义背景到本地
+function syncBackgroundFromParent(bg) {
+    if (!bg || (typeof bg === 'object' && bg.type === 'none')) {
+        currentBackgroundIndex.value = 0
+    } else if (typeof bg === 'object') {
+        if (bg.type === 'pure' && bg.value) {
+            bgColor.value = bg.value
+            currentBackgroundIndex.value = 1
+        } else if (bg.type === 'gradient') {
+            currentBackgroundIndex.value = 2
+        } else if (bg.type === 'grid') {
+            currentBackgroundIndex.value = 3
+        } else if (bg.type === 'image') {
+            currentBackgroundIndex.value = 4
+        }
+    } else if (typeof bg === 'string') {
+        bgColor.value = bg
+        currentBackgroundIndex.value = 1
+    }
+}
+
+// 纯色背景：v-model 绑定到 ColorInput
+// ColorInput 弹窗选中颜色后通过 emit('update:modelValue', hexColor) 回传
+// computed setter 接收 hexColor 字符串，emit 给父组件
+const currentBackgroundColor = computed({
+    get() {
+        return bgColor.value || '#ffffff'
+    },
+    set(value) {
+        bgColor.value = value
+        emit('set-custom-background', { type: 'pure', value })
+    }
+})
 
 const presetBG = computed(() => [
     { label: '无背景', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
     { label: '纯色', svg: `<svg width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="${bgColor.value || '#ccc'}"/></svg>` },
     { label: '渐变', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1"/><stop offset="100%" style="stop-color:#fad0c4;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>' },
-    { label: '网格', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="#000"/></pattern><rect width="16" height="16" fill="url(#grid)"/></svg>' },
+    { label: '网格', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="#000"/></pattern></defs><rect width="16" height="16" fill="url(#grid)"/></svg>' },
     { label: '图片', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5.5" r="1.2" fill="#f28c5d"/><path d="M2 12.5l3-3.5 2 2 3-4 4 5.5" fill="none" stroke="#02a7f0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
 ])
-
-const colorArray = [
-    { label: '暖色系', colors: ['#FFF8E1', '#FFEDD5', '#FFCC99', '#FFAB6B', '#FF8A4D'] },
-    { label: '冷色系', colors: ['#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA'] },
-    { label: '蓝色系', colors: ['#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7', '#29B6F6'] },
-]
 
 const gradientArrays = [
     "linear-gradient(90deg,#ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
@@ -274,40 +250,37 @@ const gradientArrays = [
     "linear-gradient(90deg,#fff1eb 0%, #ace0f9 100%)",
 ]
 
-// ★★★ 修改：背景类型点击处理 ★★★
-function handleBgTypeClick(index) {
+function handleChangeBackgroundTypeClick(index) {
     currentBackgroundIndex.value = index
 
-    if (index === 0) {
-        // 无背景
-        props.setCustomBackground({ type: 'none' })
-    } else if (index === 3) {
-        // ★★★ 网格背景 ★★★
-        props.setCustomBackground({
-            type: 'grid',
-            value: {
-                backgroundImage: "linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
-                backgroundRepeat: "repeat",
-                backgroundPosition: "0 0, 0 0",
-            }
-        })
+    switch (index) {
+        case 0:
+            emit('set-custom-background', { type: 'none' })
+            break
+        case 1:
+            emit('set-custom-background', { type: 'pure', value: bgColor.value || '#ffffff' })
+            break
+        case 2:
+            break
+        case 3:
+            emit('set-custom-background', {
+                type: 'grid',
+                value: {
+                    backgroundImage: "linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                    backgroundRepeat: "repeat",
+                    backgroundPosition: "0 0, 0 0",
+                }
+            })
+            break
+        case 4:
+            break
     }
-    // index 1(纯色)、2(渐变)、4(图片) 由各自的点击函数处理
 }
 
-
-// ★★★ 修改：纯色背景点击处理 ★★★
-function handlePureColorClick(color) {
-    bgColor.value = color
-    currentBackgroundIndex.value = 1
-    props.setCustomBackground({ type: 'pure', value: color })
-}
-
-// ★★★ 修改：渐变背景点击处理 ★★★
 function handleGradientClick(gradient) {
     currentBackgroundIndex.value = 2
-    props.setCustomBackground({ type: 'gradient', value: gradient })
+    emit('set-custom-background', { type: 'gradient', value: gradient })
 }
 
 // ==================== 上传图片 ====================
@@ -333,9 +306,7 @@ const loadFile = (file) => {
     const img = new Image()
     img.onload = () => {
         currentBackgroundIndex.value = 4
-
-        // ★★★ 设置图片背景并保存 ★★★
-        props.setCustomBackground({
+        emit('set-custom-background', {
             type: 'image',
             value: {
                 backgroundImage: `url(${url})`,
@@ -345,7 +316,6 @@ const loadFile = (file) => {
                 backgroundColor: 'transparent'
             }
         })
-
         sourceImage.value = {
             id: Date.now(),
             name: file.name,
@@ -358,7 +328,8 @@ const loadFile = (file) => {
 }
 
 const applySource = () => {
-    props.setCustomBackground({
+    if (!sourceImage.value) return
+    emit('set-custom-background', {
         type: 'image',
         value: {
             backgroundImage: `url(${sourceImage.value.url})`,
@@ -373,17 +344,21 @@ const applySource = () => {
 const clearSource = () => {
     if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url)
     sourceImage.value = null
-    props.setCustomBackground({ type: 'none' })
+    currentBackgroundIndex.value = 0
+    emit('set-custom-background', { type: 'none' })
 }
 
 // ==================== 连线颜色 ====================
 const localLineColor = ref('#4A90E2')
-onMounted(()=>{
-    localLineColor.value = themeConfig.value.lineColor
+onMounted(() => {
+    if (themeConfig.value.lineColor) localLineColor.value = themeConfig.value.lineColor
 })
 const currentLineColor = computed({
-    get: () => themeConfig.value.lineColor,
-    set: (val) => {  emitSetThemeConfig('lineColor', val) }
+    get: () => localLineColor.value,
+    set: (val) => {
+        localLineColor.value = val
+        emit('set-theme-config', 'lineColor', val)
+    }
 })
 
 // ==================== 连线粗细 ====================
@@ -394,7 +369,10 @@ watch(() => themeConfig.value.lineWidth, (val) => {
 
 const currentLineWidth = computed({
     get: () => lineWidthLocal.value,
-    set: (val) => { lineWidthLocal.value = val }
+    set: (val) => {
+        lineWidthLocal.value = val
+        emit('set-theme-config', 'lineWidth', val)
+    }
 })
 
 // ==================== 连线风格 ====================
@@ -405,7 +383,10 @@ watch(() => themeConfig.value.lineStyle, (val) => {
 
 const currentLineStyle = computed({
     get: () => lineStyleLocal.value,
-    set: (val) => {  emitSetThemeConfig('lineStyle', val) }
+    set: (val) => {
+        lineStyleLocal.value = val
+        emit('set-theme-config', 'lineStyle', val)
+    }
 })
 
 const lineStyleOptions = [
@@ -422,7 +403,10 @@ watch(() => themeConfig.value.showLineMarker, (val) => {
 
 const currentShowLineMarker = computed({
     get: () => showLineMarkerLocal.value,
-    set: (val) => { emitSetThemeConfig('showLineMarker', val) }
+    set: (val) => {
+        showLineMarkerLocal.value = val
+        emit('set-theme-config', 'showLineMarker', val)
+    }
 })
 
 // ==================== 二级节点外边距 ====================
@@ -436,12 +420,20 @@ watch(() => themeConfig.value.second, (val) => {
 
 const secondMarginX = computed({
     get: () => secondMarginXLocal.value,
-    set: (val) => { secondMarginXLocal.value = val }
+    set: (val) => {
+        secondMarginXLocal.value = val
+        const parent = themeConfig.value.second || {}
+        emit('set-theme-config', 'second', { ...parent, marginX: val })
+    }
 })
 
 const secondMarginY = computed({
     get: () => secondMarginYLocal.value,
-    set: (val) => { secondMarginYLocal.value = val }
+    set: (val) => {
+        secondMarginYLocal.value = val
+        const parent = themeConfig.value.second || {}
+        emit('set-theme-config', 'second', { ...parent, marginY: val })
+    }
 })
 
 // ==================== 三级及以下节点外边距 ====================
@@ -455,12 +447,20 @@ watch(() => themeConfig.value.node, (val) => {
 
 const nodeMarginX = computed({
     get: () => nodeMarginXLocal.value,
-    set: (val) => { nodeMarginXLocal.value = val }
+    set: (val) => {
+        nodeMarginXLocal.value = val
+        const parent = themeConfig.value.node || {}
+        emit('set-theme-config', 'node', { ...parent, marginX: val })
+    }
 })
 
 const nodeMarginY = computed({
     get: () => nodeMarginYLocal.value,
-    set: (val) => { nodeMarginYLocal.value = val }
+    set: (val) => {
+        nodeMarginYLocal.value = val
+        const parent = themeConfig.value.node || {}
+        emit('set-theme-config', 'node', { ...parent, marginY: val })
+    }
 })
 
 // ==================== 关联线 ====================
@@ -468,20 +468,27 @@ const assocLineColorLocal = ref('#333333')
 const assocLineWidthLocal = ref(2)
 
 onMounted(() => {
-     assocLineColorLocal.value = themeConfig.value.associativeLineColor
-})
-const currentAssocLineColor = computed({
-    get: () => assocLineColorLocal.value,
-    set: (val) => { emitSetThemeConfig('associativeLineColor', val) }
+    if (themeConfig.value.associativeLineColor) assocLineColorLocal.value = themeConfig.value.associativeLineColor
 })
 
+const currentAssocLineColor = computed({
+    get: () => assocLineColorLocal.value,
+    set: (val) => {
+        assocLineColorLocal.value = val
+        emit('set-theme-config', 'associativeLineColor', val)
+    }
+})
 
 watch(() => themeConfig.value.associativeLineWidth, (val) => {
     if (typeof val === 'number') assocLineWidthLocal.value = val
 }, { immediate: true })
+
 const currentAssocLineWidth = computed({
     get: () => assocLineWidthLocal.value,
-    set: (val) => {  emitSetThemeConfig('associativeLineWidth', val)}
+    set: (val) => {
+        assocLineWidthLocal.value = val
+        emit('set-theme-config', 'associativeLineWidth', val)
+    }
 })
 
 // ==================== 关联线文字 ====================
@@ -489,17 +496,17 @@ const assocTextColorLocal = ref('#333333')
 const assocTextFontSizeLocal = ref(14)
 const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
 
-
 onMounted(() => {
-    assocTextColorLocal.value = themeConfig.value.associativeLineTextColor
+    if (themeConfig.value.associativeLineTextColor) assocTextColorLocal.value = themeConfig.value.associativeLineTextColor
 })
+
 const currentAssocTextColor = computed({
     get: () => assocTextColorLocal.value,
-    set: (val) => {  emitSetThemeConfig('associativeLineTextColor', val) }
+    set: (val) => {
+        assocTextColorLocal.value = val
+        emit('set-theme-config', 'associativeLineTextColor', val)
+    }
 })
-
-
-
 
 watch(() => themeConfig.value.associativeLineTextFontSize, (val) => {
     if (typeof val === 'number') assocTextFontSizeLocal.value = val
@@ -509,15 +516,20 @@ watch(() => themeConfig.value.associativeLineTextFontFamily, (val) => {
     if (val) assocTextFontFamilyLocal.value = val
 }, { immediate: true })
 
-
 const currentAssocTextFontSize = computed({
     get: () => assocTextFontSizeLocal.value,
-    set: (val) => {  emitSetThemeConfig('associativeLineTextFontSize', val)}
+    set: (val) => {
+        assocTextFontSizeLocal.value = val
+        emit('set-theme-config', 'associativeLineTextFontSize', val)
+    }
 })
 
 const currentAssocTextFontFamily = computed({
     get: () => assocTextFontFamilyLocal.value,
-    set: (val) => { emitSetThemeConfig('associativeLineTextFontFamily', val) }
+    set: (val) => {
+        assocTextFontFamilyLocal.value = val
+        emit('set-theme-config', 'associativeLineTextFontFamily', val)
+    }
 })
 
 const fontFamilyOptions = [
@@ -527,6 +539,25 @@ const fontFamilyOptions = [
     { label: '楷体', value: '楷体, KaiTi' },
     { label: 'Arial', value: 'Arial' },
 ]
+
+// ==================== 面板关闭 ====================
+const panelRef = ref(null)
+
+function handleOutsideClick(e) {
+    if (panelRef.value && !panelRef.value.contains(e.target)) {
+        emit('close')
+    }
+}
+
+onBeforeUnmount(() => {
+    document.removeEventListener('mousedown', handleOutsideClick)
+})
+
+onMounted(() => {
+    setTimeout(() => {
+        document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
+})
 </script>
 
 <style src="@/styles/mindmap.css" scoped></style>

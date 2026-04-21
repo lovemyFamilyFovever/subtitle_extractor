@@ -252,6 +252,10 @@ import { computed, ref } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
+import {useColorConverter} from '@/composables/utils'
+
+
+const { toHexFormat } = useColorConverter();
 
 const props = defineProps({
     activeNodes: {
@@ -260,7 +264,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['set-style', 'set-styles', 'set-theme-config'])
+const emit = defineEmits(['set-style', 'set-styles'])
 
 
 // ========================== 字体 ==========================
@@ -275,7 +279,7 @@ const fontFamilies = [
 
 const currentColor = computed({
     get() {
-        return getNodeStyle('color', '#333333')
+        return toHexFormat(getNodeStyle('color', '#333333'))
     },
     set(val) {
         emit('set-style', 'color', val)
@@ -301,7 +305,7 @@ function handleNormalClick() {
 // ========================== 背景颜色 ==========================
 const currentBg = computed({
     get() {
-        const val= getNodeStyle('fillColor', '#ffffff')
+        const val= toHexFormat(getNodeStyle('fillColor', '#ffffff'))
         return val === 'transparent' ? '#ffffff' : val
     },
     set(val) {
@@ -346,19 +350,7 @@ const currentPaddingY = computed(() => getNodeStyle('paddingY', 10))
 // 修复：删除了错误的图片 section（emit 名称错误 + getTheme 函数错误）
 // 图片宽高属于主题级配置，应在 BaseStylePanel 中设置
 
-function getNodeStyle(key, defaultVal) {
-    if (!props.activeNodes.length) return defaultVal
-    const node = props.activeNodes[0]
-    if (typeof node.getStyle === 'function') {
-        try {
-            const val = node.getStyle(key)
-            if (val !== undefined && val !== null) return val
-        } catch (e) { /* ignore */ }
-    }
-    const data = node?.nodeData?.data
-    if (data && data[key] !== undefined) return data[key]
-    return defaultVal
-}
+
 
 const dasharrayOptions = [
     { label: '无', value: 'none', svg: generateDashSvg('none') },
@@ -423,6 +415,21 @@ const presetThemes = {
 function handlePresetTheme(themeName) {
     emit('set-styles', presetThemes[themeName])
     return
+}
+
+
+function getNodeStyle(key, defaultVal) {
+    if (!props.activeNodes.length) return defaultVal
+    const node = props.activeNodes[0]
+    if (typeof node.getStyle === 'function') {
+        try {
+            const val = node.getStyle(key)
+            if (val !== undefined && val !== null) return val
+        } catch (e) { /* ignore */ }
+    }
+    const data = node?.nodeData?.data
+    if (data && data[key] !== undefined) return data[key]
+    return defaultVal
 }
 
 </script>

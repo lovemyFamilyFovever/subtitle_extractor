@@ -433,14 +433,11 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
-  function getThemeConfig() {
+  function getThemeConfig(key,value) {
     if (!mindMapInstance) return {}
     try {
-      return mindMapInstance.getThemeConfig() || {}
-    } catch (e) {
-      console.warn('Failed to get theme config:', e)
-      return {}
-    }
+      return mindMapInstance.getThemeConfig(key) || value
+    } catch (e) { }
   }
 
   // ★★★ 新增：设置自定义背景 ★★★

@@ -6,95 +6,84 @@
       <span class="trigger-arrow">▼</span>
     </div>
 
-    <div class="color-dropdown-panel" :class="{ show: isPanelOpen }">
-      <!-- 历史记录 -->
-      <div class="color-history">
-        <div class="color-history-title">最近使用</div>
-        <div class="color-history-list">
-          <div
-            v-for="(color, index) in colorHistory"
-            :key="index"
-            class="color-history-item"
-            :style="{ background: color }"
-            @click="selectColor(color)"
-          ></div>
-        </div>
-      </div>
+    <Teleport to="body">
 
-      <!-- 预设颜色（改为下拉选择主题） -->
-      <div class="color-preset">
-        <div class="color-preset-header">
-          <div class="color-preset-title">预设颜色</div>
-          <div class="color-theme-selector" ref="themeSelectorRef">
-            <div class="color-theme-trigger" @click.stop="toggleThemeList">
-              <span class="theme-name">{{ activeTheme }}</span>
-              <span class="theme-arrow" :class="{ open: isThemeListOpen }">▼</span>
-            </div>
-            <ul class="color-theme-dropdown" :class="{ show: isThemeListOpen }">
-              <li
-                v-for="(colors, themeName) in colorThemes"
-                :key="themeName"
-                class="color-theme-item"
-                :class="{ active: activeTheme === themeName }"
-                @click.stop="selectTheme(themeName)"
-              >
-                {{ themeName }}
-              </li>
-            </ul>
+      <div class="color-dropdown-panel" :class="{ show: isPanelOpen }" :style="modalStyle" ref="modalRef">
+        <!-- 历史记录 -->
+        <div class="color-history">
+          <div class="color-history-title">最近使用</div>
+          <div class="color-history-list">
+            <div v-for="(color, index) in colorHistory" :key="index" class="color-history-item"
+              :style="{ background: color }" @click="selectColor(color)"></div>
           </div>
         </div>
-        <div class="color-preset-grid">
-          <div
-            v-for="color in currentThemeColors"
-            :key="color"
-            class="color-preset-item"
-            :style="{ background: color }"
-            :title="color"
-            @click="selectColor(color)"
-          ></div>
-        </div>
-      </div>
 
-      <!-- 自定义颜色 -->
-      <div class="color-custom">
-        <div class="color-custom-title">自定义颜色</div>
-        <div class="color-custom-input">
-          <div class="color-canvas-wrapper" @click="handleCanvasClick">
-            <div class="color-canvas-bg"></div>
-            <canvas class="color-canvas" ref="colorCanvas" width="80" height="80"></canvas>
-            <div class="color-cursor" :style="cursorStyle"></div>
-          </div>
-          <div class="color-input-group">
-            <div class="color-input-row">
-              <div class="color-input-wrapper">
-                <span class="color-input-label">R</span>
-                <input type="text" class="color-input-field" v-model="rgbInput.r" @change="updateFromRgb">
+        <!-- 预设颜色（改为下拉选择主题） -->
+        <div class="color-preset">
+          <div class="color-preset-header">
+            <div class="color-preset-title">预设颜色</div>
+            <div class="color-theme-selector" ref="themeSelectorRef">
+              <div class="color-theme-trigger" @click.stop="toggleThemeList">
+                <span class="theme-name">{{ activeTheme }}</span>
+                <span class="theme-arrow" :class="{ open: isThemeListOpen }">▼</span>
               </div>
-              <div class="color-input-wrapper">
-                <span class="color-input-label">G</span>
-                <input type="text" class="color-input-field" v-model="rgbInput.g" @change="updateFromRgb">
-              </div>
-              <div class="color-input-wrapper">
-                <span class="color-input-label">B</span>
-                <input type="text" class="color-input-field" v-model="rgbInput.b" @change="updateFromRgb">
-              </div>
+              <ul class="color-theme-dropdown" :class="{ show: isThemeListOpen }">
+                <li v-for="(colors, themeName) in colorThemes" :key="themeName" class="color-theme-item"
+                  :class="{ active: activeTheme === themeName }" @click.stop="selectTheme(themeName)">
+                  {{ themeName }}
+                </li>
+              </ul>
             </div>
-            <div class="color-input-row">
-              <div class="color-input-wrapper">
-                <span class="color-input-label">#</span>
-                <input type="text" class="color-input-field" v-model="hexInput" @change="updateFromHex" style="flex: 1;">
+          </div>
+          <div class="color-preset-grid">
+            <div v-for="color in currentThemeColors" :key="color" class="color-preset-item"
+              :style="{ background: color }" :title="color" @click="selectColor(color)"></div>
+          </div>
+        </div>
+
+        <!-- 自定义颜色 -->
+        <div class="color-custom">
+          <div class="color-custom-title">自定义颜色</div>
+          <div class="color-custom-input">
+            <div class="color-canvas-wrapper" @click="handleCanvasClick">
+              <div class="color-canvas-bg"></div>
+              <canvas class="color-canvas" ref="colorCanvas" width="80" height="80"></canvas>
+              <div class="color-cursor" :style="cursorStyle"></div>
+            </div>
+            <div class="color-input-group">
+              <div class="color-input-row">
+                <div class="color-input-wrapper">
+                  <span class="color-input-label">R</span>
+                  <input type="text" class="color-input-field" v-model="rgbInput.r" @change="updateFromRgb">
+                </div>
+                <div class="color-input-wrapper">
+                  <span class="color-input-label">G</span>
+                  <input type="text" class="color-input-field" v-model="rgbInput.g" @change="updateFromRgb">
+                </div>
+                <div class="color-input-wrapper">
+                  <span class="color-input-label">B</span>
+                  <input type="text" class="color-input-field" v-model="rgbInput.b" @change="updateFromRgb">
+                </div>
+              </div>
+              <div class="color-input-row">
+                <div class="color-input-wrapper">
+                  <span class="color-input-label">#</span>
+                  <input type="text" class="color-input-field" v-model="hexInput" @change="updateFromHex"
+                    style="flex: 1;">
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
 
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch,nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -102,6 +91,8 @@ const props = defineProps({
     default: '#4A90E2'
   }
 });
+
+
 
 const emit = defineEmits(['update:modelValue']);
 
@@ -154,6 +145,9 @@ const isThemeListOpen = ref(false);
 const selectedColor = ref(props.modelValue || '#4A90E2');
 const colorHistory = ref(['#4A90E2', '#FF6B6B', '#2ECC71', '#F39C12']);
 const activeTheme = ref('系统色');
+
+const modalStyle = ref({});
+const modalRef = ref(null);
 
 // 当前主题的颜色列表
 const currentThemeColors = computed(() => {
@@ -265,11 +259,11 @@ function initCanvas() {
 
   const gradientH = ctx.createLinearGradient(0, 0, canvas.width, 0);
   gradientH.addColorStop(0, '#ff0000');
-  gradientH.addColorStop(1/6, '#ffff00');
-  gradientH.addColorStop(2/6, '#00ff00');
-  gradientH.addColorStop(3/6, '#00ffff');
-  gradientH.addColorStop(4/6, '#0000ff');
-  gradientH.addColorStop(5/6, '#ff00ff');
+  gradientH.addColorStop(1 / 6, '#ffff00');
+  gradientH.addColorStop(2 / 6, '#00ff00');
+  gradientH.addColorStop(3 / 6, '#00ffff');
+  gradientH.addColorStop(4 / 6, '#0000ff');
+  gradientH.addColorStop(5 / 6, '#ff00ff');
   gradientH.addColorStop(1, '#ff0000');
 
   ctx.fillStyle = gradientH;
@@ -284,10 +278,32 @@ function initCanvas() {
 }
 
 // 下拉面板控制
-function toggleDropdown() {
+async function toggleDropdown(event) {
   isPanelOpen.value = !isPanelOpen.value;
+
+  await nextTick()
+
+  // 获取点击位置
+  const clickX = event.clientX
+  const clickY = event.clientY
+
   if (isPanelOpen.value) {
     setTimeout(initCanvas, 0);
+
+    const modalRect = modalRef.value.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+
+    const top = clickY + modalRect.height > viewportHeight ? clickY - modalRect.height : clickY;
+    const left = clickX + modalRect.width > viewportWidth ? viewportWidth - modalRect.width : clickX;
+    modalStyle.value = {
+      top: top + 'px',
+      left: left + 'px',
+      position: 'fixed',
+      zIndex: 9999
+    };
+
   }
 }
 
@@ -379,7 +395,7 @@ watch(selectedColor, (newColor) => {
   width: 18px;
   height: 18px;
   border-radius: 3px;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -411,7 +427,7 @@ watch(selectedColor, (newColor) => {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   display: none;
   overflow: hidden;
@@ -427,6 +443,7 @@ watch(selectedColor, (newColor) => {
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -455,7 +472,7 @@ watch(selectedColor, (newColor) => {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.15s;
 }
@@ -531,7 +548,7 @@ watch(selectedColor, (newColor) => {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   list-style: none;
   z-index: 10;
   display: none;
@@ -544,8 +561,13 @@ watch(selectedColor, (newColor) => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .color-theme-item {
@@ -577,14 +599,14 @@ watch(selectedColor, (newColor) => {
 .color-preset-item {
   aspect-ratio: 1;
   border-radius: 3px;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
 .color-preset-item:hover {
   transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
@@ -633,7 +655,7 @@ watch(selectedColor, (newColor) => {
   height: 12px;
   border: 2px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
