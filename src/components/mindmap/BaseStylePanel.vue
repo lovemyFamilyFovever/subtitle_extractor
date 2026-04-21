@@ -3,34 +3,43 @@
         <div class="panel-header">
             <span class="panel-title">🎨 基础样式</span>
         </div>
-
         <div class="panel-body customScrollbar">
-
             <div class="style-section">
                 <label class="section-label-title">背景</label>
-
                 <div class="preset-bg-types">
                     <div class="preset-select-bg" v-for="(bgType, index) in presetBG"
-                        :class="{ active: currentBackgroundIndex == index }"
-                        @click="handleChangeBackgroundTypeClick(index)">
+                        :class="{ active: currentBackgroundIndex === index }" @click="handleBgTypeChange(index)">
                         <span v-html="bgType.svg"></span>
                         <span>{{ bgType.label }}</span>
                     </div>
                 </div>
-
                 <!-- 纯色 -->
-                <div class="pure-color-section" v-if="currentBackgroundIndex === 1">
-                    <ColorInput v-model="currentBackgroundColor" />
+                <div class="pure-color-section" v-if="currentBackgroundIndex === 0">
+                    <ColorInput v-model="localBackgroundColor" />
                 </div>
-
                 <!-- 渐变 -->
-                <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 2">
+                <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 1">
                     <button class="preset-btn" v-for="gradient in gradientArrays" :key="gradient"
                         :style="{ backgroundImage: gradient }" @click="handleGradientClick(gradient)"></button>
                 </div>
-
+                <!-- 网格 -->
+                <div class="section-group-column" v-if="currentBackgroundIndex === 2">
+                    <div class="grid-setting-row">
+                        <label class="section-label">尺寸</label>
+                        <div class="grid-size-options">
+                            <button v-for="size in gridSizeOptions" :key="size"
+                                :class="{ active: currentGridSize === size }" @click="handleGridSizeChange(size)">
+                                {{ size }}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid-setting-row">
+                        <label class="section-label">网格颜色</label>
+                        <ColorInput v-model="currentGridColor" />
+                    </div>
+                </div>
                 <!-- 图片 -->
-                <div class="section-group-column" v-if="currentBackgroundIndex === 4">
+                <div class="section-group-column" v-if="currentBackgroundIndex === 3">
                     <div class="upload-zone" :class="{ 'drag-over': isDragOver, 'has-images': sourceImage }"
                         @click="fileInput.click()" @dragover.prevent="isDragOver = true"
                         @dragleave.prevent="isDragOver = false" @drop.prevent="onDrop">
@@ -40,14 +49,12 @@
                         <input ref="fileInput" type="file" accept="image/*" style="display:none"
                             @change="onFileChange" />
                     </div>
-
                     <div v-if="sourceImage" class="source-preview-wrap">
                         <span class="form-label">已上传图片</span>
                         <div class="source-preview">
                             <img :src="sourceImage.url" :alt="sourceImage.name" class="source-thumb" />
                         </div>
                     </div>
-
                     <div v-if="sourceImage" class="nav-bar">
                         <button class="btn btn-primary" @click="applySource" :disabled="!sourceImage">
                             <i class="fa fa-check-circle" />应用
@@ -57,184 +64,349 @@
                         </button>
                     </div>
                 </div>
-
             </div>
-
             <div class="divider"></div>
-
             <div class="style-section">
                 <label class="section-label-title">连线</label>
-
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">颜色</label>
-                        <ColorInput v-model="currentLineColor" />
+                        <ColorInput v-model="localLineColor" />
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
-                        <SliderInput v-model="currentLineWidth" label="" unit="px" :min="1" :max="10"
+                        <SliderInput v-model="localLineWidth" label="" unit="px" :min="1" :max="10"
                             :showInput="false" />
                     </div>
                 </div>
-
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">风格</label>
-                        <Dropdown v-model="currentLineStyle" :options="lineStyleOptions" />
+                        <Dropdown v-model="localLineStyle" :options="lineStyleOptions" />
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">显示箭头</label>
                         <div class="toggle-row">
                             <label class="toggle-switch">
-                                <input type="checkbox" v-model="currentShowLineMarker">
+                                <input type="checkbox" v-model="localShowLineMarker">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span class="toggle-hint">{{ currentShowLineMarker ? '开启' : '关闭' }}</span>
+                            <span class="toggle-hint">{{ localShowLineMarker ? '开启' : '关闭' }}</span>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="divider"></div>
-
-            <div class="style-section">
-                <label class="section-label-title">节点外边距</label>
-
-                <div class="section-group-item">
-                    <label class="section-label">二级水平间距</label>
-                    <SliderInput v-model="secondMarginX" label="" unit="px" :min="20" :max="200" :showInput="false" />
-                </div>
-
-                <div class="section-group-item">
-                    <label class="section-label">二级垂直间距</label>
-                    <SliderInput v-model="secondMarginY" label="" unit="px" :min="20" :max="200" :showInput="false" />
-                </div>
-
-                <div class="section-group-item">
-                    <label class="section-label">三级水平间距</label>
-                    <SliderInput v-model="nodeMarginX" label="" unit="px" :min="20" :max="200" :showInput="false" />
-                </div>
-
-                <div class="section-group-item">
-                    <label class="section-label">三级垂直间距</label>
-                    <SliderInput v-model="nodeMarginY" label="" unit="px" :min="0" :max="200" :showInput="false" />
-                </div>
-            </div>
-
             <div class="divider"></div>
 
             <div class="style-section">
                 <div class="section-label-title">关联线设置</div>
-
                 <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">线条</label>
-                        <ColorInput v-model="currentAssocLineColor" />
+                        <ColorInput v-model="assocLineColorLocal" />
                     </div>
-                    <div class="section-group-item">
-                        <label class="section-label">文字</label>
-                        <ColorInput v-model="currentAssocTextColor" />
-                    </div>
-                </div>
-
-                <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">字号</label>
-                        <SliderInput v-model="currentAssocTextFontSize" label="" unit="px" :min="10" :max="32"
+                        <SliderInput v-model="assocTextFontSizeLocal" label="" unit="px" :min="10" :max="32"
                             :showInput="false" />
                     </div>
+                </div>
+                <div class="section-group-row">
+                    <div class="section-group-item">
+                        <label class="section-label">文字</label>
+                        <ColorInput v-model="assocTextColorLocal" />
+                    </div>
+                    <div class="section-group-item">
+
+                        <label class="section-label">线宽</label>
+                        <SliderInput v-model="assocLineWidthLocal" label="" unit="px" :min="1" :max="10"
+                            :showInput="false" />
+                    </div>
+                </div>
+                <div class="section-group-row">
                     <div class="section-group-item">
                         <label class="section-label">字体</label>
-                        <Dropdown v-model="currentAssocTextFontFamily" :options="fontFamilyOptions" />
+                        <Dropdown v-model="assocTextFontFamilyLocal" :options="fontFamilyOptions" />
                     </div>
                 </div>
 
-                <div class="section-group-item">
-                    <label class="section-label">线宽</label>
-                    <SliderInput v-model="currentAssocLineWidth" label="" unit="px" :min="1" :max="10"
+            </div>
+
+
+            <div class="divider"></div>
+            <div class="style-section">
+                <label class="section-label-title">节点外边距</label>
+                <div class="section-group-row">
+                    <label class="section-label">二级水平间距</label>
+                    <SliderInput v-model="secondMarginXLocal" label="" unit="px" :min="20" :max="200"
                         :showInput="false" />
+                </div>
+                <div class="section-group-row">
+                    <label class="section-label">二级垂直间距</label>
+                    <SliderInput v-model="secondMarginYLocal" label="" unit="px" :min="20" :max="200"
+                        :showInput="false" />
+                </div>
+                <div class="section-group-row">
+                    <label class="section-label">三级水平间距</label>
+                    <SliderInput v-model="nodeMarginXLocal" label="" unit="px" :min="20" :max="200"
+                        :showInput="false" />
+                </div>
+                <div class="section-group-row">
+                    <label class="section-label">三级垂直间距</label>
+                    <SliderInput v-model="nodeMarginYLocal" label="" unit="px" :min="0" :max="200" :showInput="false" />
                 </div>
             </div>
 
         </div>
     </div>
 </template>
-
 <script setup>
-import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
+import { useColorConverter } from '@/composables/colorConverter.js'
+
+
+const toHexFormat = useColorConverter();
 
 const emit = defineEmits([
     'close',
     'set-theme-config',
-    'get-theme-config',
     'set-custom-background',
-    'get-custom-background'
 ])
 
-// ==================== 主题配置（本地缓存） ====================
-const themeConfig = ref({})
-
-onMounted(() => {
-    const config = emit('get-theme-config')
-    if (config && typeof config === 'object') {
-        themeConfig.value = { ...config }
-    }
-    // 同步自定义背景
-    const bg = emit('get-custom-background')
-    if (bg) {
-        syncBackgroundFromParent(bg)
+const props = defineProps({
+    getThemeConfig: {
+        type: Function,
+        required: true
+    },
+    getCustomBackground: {
+        type: Function,
+        required: true
     }
 })
 
-// ==================== 背景相关 ====================
-const bgColor = ref('#ffffff')
-const currentBackgroundIndex = ref(-1)
+// ==================== 状态变量 ====================
+// 背景
+const currentBackgroundIndex = ref(0)
+const localBackgroundColor = ref('#ffffff')
 
-// 同步父组件的自定义背景到本地
-function syncBackgroundFromParent(bg) {
-    if (!bg || (typeof bg === 'object' && bg.type === 'none')) {
-        currentBackgroundIndex.value = 0
-    } else if (typeof bg === 'object') {
-        if (bg.type === 'pure' && bg.value) {
-            bgColor.value = bg.value
+// 网格
+const gridSizeOptions = [10, 20, 30, 40]
+const currentGridSize = ref(20)
+const currentGridColor = ref('#e5e5e5')
+
+// 图片
+const sourceImage = ref(null)
+const isDragOver = ref(false)
+const fileInput = ref(null)
+
+// 连线
+const localLineColor = ref('#4A90E2')
+const localLineWidth = ref(1)
+const localLineStyle = ref('straight')
+const localShowLineMarker = ref(false)
+
+// 节点外边距
+const secondMarginXLocal = ref(100)
+const secondMarginYLocal = ref(40)
+const nodeMarginXLocal = ref(50)
+const nodeMarginYLocal = ref(0)
+
+// 关联线
+const assocLineColorLocal = ref('#333333')
+const assocLineWidthLocal = ref(2)
+const assocTextColorLocal = ref('#333333')
+const assocTextFontSizeLocal = ref(14)
+const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
+
+// ==================== 工具函数 ====================
+const generateGridBackground = (size, color) => {
+    const safeColor = color.replace('#', '%23')
+    return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'%3E%3Crect width='${size}' height='${size}' fill='none'/%3E%3Cpath d='M ${size} 0 L 0 0 0 ${size}' fill='none' stroke='${safeColor}' stroke-width='1'/%3E%3C/svg%3E")`
+}
+
+// ==================== 配置同步函数 ====================
+const syncBackgroundConfig = () => {
+    const bg = props.getCustomBackground()
+    if (!bg) return
+
+    switch (bg.type) {
+        case 'pure':
+            currentBackgroundIndex.value = 0
+            localBackgroundColor.value = bg.backgroundColor || '#ffffff'
+            break
+        case 'gradient':
             currentBackgroundIndex.value = 1
-        } else if (bg.type === 'gradient') {
+            break
+        case 'grid':
             currentBackgroundIndex.value = 2
-        } else if (bg.type === 'grid') {
+            if (bg.backgroundSize) {
+                const match = bg.backgroundSize.match(/(\d+)px/)
+                if (match) currentGridSize.value = parseInt(match[1])
+            }
+            if (bg.backgroundImage) {
+                currentGridColor.value = '#e5e5e5'
+            }
+            break
+        case 'image':
             currentBackgroundIndex.value = 3
-        } else if (bg.type === 'image') {
-            currentBackgroundIndex.value = 4
-        }
-    } else if (typeof bg === 'string') {
-        bgColor.value = bg
-        currentBackgroundIndex.value = 1
+            if (bg.backgroundImage) {
+                // 从backgroundImage中提取base64数据
+                const match = bg.backgroundImage.match(/url$$["']?(data:image\/.*?;base64,.*?)["']?$$/)
+                if (match && match[1]) {
+                    const base64 = match[1]
+                    sourceImage.value = {
+                        url: base64,
+                        name: '已设置背景图',
+                        // 可以添加更多属性如果需要
+                    }
+                } else {
+                    // 如果是旧的blob URL格式，可能无法恢复，需要提示用户重新上传
+                    console.warn('无法恢复图片，可能是旧的blob URL格式')
+                    sourceImage.value = null
+                }
+            }
+            break
     }
 }
 
-// 纯色背景：v-model 绑定到 ColorInput
-// ColorInput 弹窗选中颜色后通过 emit('update:modelValue', hexColor) 回传
-// computed setter 接收 hexColor 字符串，emit 给父组件
-const currentBackgroundColor = computed({
-    get() {
-        return bgColor.value || '#ffffff'
-    },
-    set(value) {
-        bgColor.value = value
-        emit('set-custom-background', { type: 'pure', value })
+const syncThemeConfig = () => {
+    // 修复：正确调用父组件的getThemeConfig函数
+    const config = props.getThemeConfig() || {}
+
+    // 连线配置
+    // if (config.lineColor) localLineColor.value = config.lineColor
+    if (config.lineColor) localLineColor.value = toHexFormat(config.lineColor)
+    if (config.lineWidth) localLineWidth.value = config.lineWidth
+    if (config.lineStyle) localLineStyle.value = config.lineStyle
+    if (config.showLineMarker !== undefined) localShowLineMarker.value = config.showLineMarker
+
+    // 节点间距配置
+    if (config.second) {
+        secondMarginXLocal.value = config.second.marginX !== undefined ? config.second.marginX : 100
+        secondMarginYLocal.value = config.second.marginY !== undefined ? config.second.marginY : 40
     }
+    if (config.node) {
+        nodeMarginXLocal.value = config.node.marginX !== undefined ? config.node.marginX : 50
+        nodeMarginYLocal.value = config.node.marginY !== undefined ? config.node.marginY : 0
+    }
+
+    // 关联线配置
+    if (config.associativeLineColor) assocLineColorLocal.value = toHexFormat(config.associativeLineColor)
+    if (config.associativeLineWidth) assocLineWidthLocal.value = config.associativeLineWidth
+    if (config.associativeLineTextColor) assocTextColorLocal.value = toHexFormat(config.associativeLineTextColor)
+    if (config.associativeLineTextFontSize) assocTextFontSizeLocal.value = config.associativeLineTextFontSize
+    if (config.associativeLineTextFontFamily) assocTextFontFamilyLocal.value = config.associativeLineTextFontFamily
+}
+
+// ==================== 初始化 ====================
+onMounted(() => {
+    // 1. 同步配置
+    syncBackgroundConfig()
+    syncThemeConfig()
+
+    // 2. 设置监听（使用 flush: 'post' 避免初始化触发）
+    setupWatchers()
+
+    // 3. 绑定点击外部关闭事件
+    setTimeout(() => {
+        document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
 })
 
-const presetBG = computed(() => [
-    { label: '无背景', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 1.5H13C13.1344 1.5 13.2646 1.51767 13.3885 1.55081L1.55081 13.3885C1.51767 13.2646 1.5 13.1344 1.5 13V3C1.5 2.17157 2.17157 1.5 3 1.5ZM2.61147 14.4492C2.73539 14.4823 2.86563 14.5 3 14.5H13C13.8284 14.5 14.5 13.8284 14.5 13V3C14.5 2.86563 14.4823 2.73539 14.4492 2.61147L2.61147 14.4492ZM0 3C0 1.34315 1.34315 0 3 0H13C14.6569 0 16 1.34315 16 3V13C16 14.6569 14.6569 16 13 16H3C1.34315 16 0 14.6569 0 13V3Z"></path></svg>' },
-    { label: '纯色', svg: `<svg width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="${bgColor.value || '#ccc'}"/></svg>` },
-    { label: '渐变', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1"/><stop offset="100%" style="stop-color:#fad0c4;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>' },
-    { label: '网格', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="#000"/></pattern></defs><rect width="16" height="16" fill="url(#grid)"/></svg>' },
-    { label: '图片', svg: '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5.5" r="1.2" fill="#f28c5d"/><path d="M2 12.5l3-3.5 2 2 3-4 4 5.5" fill="none" stroke="#02a7f0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-])
+// ==================== 监听设置 ====================
+const setupWatchers = () => {
+    // 背景相关监听
+    watch(localBackgroundColor, (newVal) => {
+        if (currentBackgroundIndex.value === 0) {
+            emit('set-custom-background', {
+                type: 'pure',
+                backgroundColor: newVal
+            })
+        }
+    }, { flush: 'post' })
 
+    watch(currentGridColor, (newVal) => {
+        if (currentBackgroundIndex.value === 2) {
+            applyGridBackground()
+        }
+    }, { flush: 'post' })
+
+    // 连线配置监听
+    watch(localLineColor, (newVal) => {
+        emit('set-theme-config', 'lineColor', newVal)
+    }, { flush: 'post' })
+
+    watch(localLineWidth, (newVal) => {
+        emit('set-theme-config', 'lineWidth', newVal)
+    }, { flush: 'post' })
+
+    watch(localLineStyle, (newVal) => {
+        emit('set-theme-config', 'lineStyle', newVal)
+    }, { flush: 'post' })
+
+    watch(localShowLineMarker, (newVal) => {
+        emit('set-theme-config', 'showLineMarker', newVal)
+    }, { flush: 'post' })
+
+    // 节点间距监听
+    watch(secondMarginXLocal, (newVal) => {
+        const parent = props.getThemeConfig()?.second || {}
+        emit('set-theme-config', 'second', { ...parent, marginX: newVal })
+    }, { flush: 'post' })
+
+    watch(secondMarginYLocal, (newVal) => {
+        const parent = props.getThemeConfig()?.second || {}
+        emit('set-theme-config', 'second', { ...parent, marginY: newVal })
+    }, { flush: 'post' })
+
+    watch(nodeMarginXLocal, (newVal) => {
+        const parent = props.getThemeConfig()?.node || {}
+        emit('set-theme-config', 'node', { ...parent, marginX: newVal })
+    }, { flush: 'post' })
+
+    watch(nodeMarginYLocal, (newVal) => {
+        const parent = props.getThemeConfig()?.node || {}
+        emit('set-theme-config', 'node', { ...parent, marginY: newVal })
+    }, { flush: 'post' })
+
+    // 关联线配置监听
+    watch(assocLineColorLocal, (newVal) => {
+        emit('set-theme-config', 'associativeLineColor', newVal)
+    }, { flush: 'post' })
+
+    watch(assocLineWidthLocal, (newVal) => {
+        emit('set-theme-config', 'associativeLineWidth', newVal)
+    }, { flush: 'post' })
+
+    watch(assocTextColorLocal, (newVal) => {
+        emit('set-theme-config', 'associativeLineTextColor', newVal)
+    }, { flush: 'post' })
+
+    watch(assocTextFontSizeLocal, (newVal) => {
+        emit('set-theme-config', 'associativeLineTextFontSize', newVal)
+    }, { flush: 'post' })
+
+    watch(assocTextFontFamilyLocal, (newVal) => {
+        emit('set-theme-config', 'associativeLineTextFontFamily', newVal)
+    }, { flush: 'post' })
+}
+
+// ==================== 背景操作逻辑 ====================
+const handleBgTypeChange = (index) => {
+    if (currentBackgroundIndex.value === index) return
+    currentBackgroundIndex.value = index
+
+    // 只有网格类型立即应用背景，其他类型等待具体操作
+    if (index === 2) {
+        applyGridBackground()
+    }
+    // 纯色、渐变、图片类型只切换索引，不立即应用背景
+}
+
+// 渐变
 const gradientArrays = [
     "linear-gradient(90deg,#ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
     "linear-gradient(90deg,#a18cd1 0%, #fbc2eb 100%)",
@@ -250,49 +422,48 @@ const gradientArrays = [
     "linear-gradient(90deg,#fff1eb 0%, #ace0f9 100%)",
 ]
 
-function handleChangeBackgroundTypeClick(index) {
-    currentBackgroundIndex.value = index
+const handleGradientClick = (gradient) => {
+    currentBackgroundIndex.value = 1
+    emit('set-custom-background', {
+        type: 'gradient',
+        backgroundColor: gradient
+    })
+}
 
-    switch (index) {
-        case 0:
-            emit('set-custom-background', { type: 'none' })
-            break
-        case 1:
-            emit('set-custom-background', { type: 'pure', value: bgColor.value || '#ffffff' })
-            break
-        case 2:
-            break
-        case 3:
-            emit('set-custom-background', {
-                type: 'grid',
-                value: {
-                    backgroundImage: "linear-gradient(#e0e0e0 1px, transparent 1px), linear-gradient(90deg, #e0e0e0 1px, transparent 1px)",
-                    backgroundSize: "20px 20px",
-                    backgroundRepeat: "repeat",
-                    backgroundPosition: "0 0, 0 0",
-                }
-            })
-            break
-        case 4:
-            break
+// 网格
+const applyGridBackground = () => {
+    currentBackgroundIndex.value = 2
+    const bgImage = generateGridBackground(currentGridSize.value, currentGridColor.value)
+    emit('set-custom-background', {
+        type: 'grid',
+        backgroundImage: bgImage,
+        backgroundSize: `${currentGridSize.value}px ${currentGridSize.value}px`,
+        backgroundRepeat: 'repeat',
+        backgroundPosition: '0 0'
+    })
+}
+
+const handleGridSizeChange = (size) => {
+    currentGridSize.value = size
+    if (currentBackgroundIndex.value === 2) {
+        applyGridBackground()
     }
 }
 
-function handleGradientClick(gradient) {
-    currentBackgroundIndex.value = 2
-    emit('set-custom-background', { type: 'gradient', value: gradient })
-}
-
-// ==================== 上传图片 ====================
-const sourceImage = ref(null)
-const isDragOver = ref(false)
-const fileInput = ref(null)
-
+// 图片
 const onFileChange = (e) => {
     const file = e.target.files[0]
-    if (file) loadFile(file)
+    if (file) {
+        // 检查文件大小（可选，防止过大图片）
+        if (file.size > 5 * 1024 * 1024) { // 5MB限制
+            alert('图片大小不能超过5MB')
+            return
+        }
+        loadFile(file)
+    }
     e.target.value = ''
 }
+
 
 const onDrop = (e) => {
     isDragOver.value = false
@@ -301,236 +472,96 @@ const onDrop = (e) => {
 }
 
 const loadFile = (file) => {
-    if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url)
-    const url = URL.createObjectURL(file)
-    const img = new Image()
-    img.onload = () => {
-        currentBackgroundIndex.value = 4
-        emit('set-custom-background', {
-            type: 'image',
-            value: {
-                backgroundImage: `url(${url})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center center',
-                backgroundSize: 'cover',
-                backgroundColor: 'transparent'
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+        const base64 = e.target.result
+        const img = new Image()
+
+        img.onload = () => {
+            sourceImage.value = {
+                id: Date.now(),
+                name: file.name,
+                size: file.size,
+                url: base64,  // 使用base64而不是blob URL
+                img
             }
-        })
-        sourceImage.value = {
-            id: Date.now(),
-            name: file.name,
-            size: file.size,
-            url,
-            img
+            applySource()
         }
+
+        img.onerror = () => {
+            alert('图片加载失败，请选择有效的图片文件')
+        }
+
+        img.src = base64
     }
-    img.src = url
+
+    reader.onerror = () => {
+        alert('读取文件失败')
+    }
+
+    reader.readAsDataURL(file)
 }
+
 
 const applySource = () => {
     if (!sourceImage.value) return
+    currentBackgroundIndex.value = 3
+
+    // 确保URL是base64格式
+    let backgroundImage = `url(${sourceImage.value.url})`
+
+    // 如果URL不是base64格式，尝试转换
+    if (!sourceImage.value.url.startsWith('data:image')) {
+        // 如果是blob URL，可能需要重新读取为base64
+        console.warn('图片URL不是base64格式，可能无法持久化')
+    }
+
     emit('set-custom-background', {
         type: 'image',
-        value: {
-            backgroundImage: `url(${sourceImage.value.url})`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center center',
-            backgroundSize: 'cover',
-            backgroundColor: 'transparent'
-        }
+        backgroundImage: backgroundImage,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center center',
+        backgroundSize: 'cover',
+        backgroundColor: 'transparent'
     })
 }
 
+
 const clearSource = () => {
-    if (sourceImage.value) URL.revokeObjectURL(sourceImage.value.url)
     sourceImage.value = null
-    currentBackgroundIndex.value = 0
     emit('set-custom-background', { type: 'none' })
 }
 
-// ==================== 连线颜色 ====================
-const localLineColor = ref('#4A90E2')
-onMounted(() => {
-    if (themeConfig.value.lineColor) localLineColor.value = themeConfig.value.lineColor
-})
-const currentLineColor = computed({
-    get: () => localLineColor.value,
-    set: (val) => {
-        localLineColor.value = val
-        emit('set-theme-config', 'lineColor', val)
-    }
-})
 
-// ==================== 连线粗细 ====================
-const lineWidthLocal = ref(1)
-watch(() => themeConfig.value.lineWidth, (val) => {
-    if (typeof val === 'number') lineWidthLocal.value = val
-}, { immediate: true })
+// 预设图标
+const presetBG = computed(() => [
+    {
+        label: '纯色',
+        svg: `<svg width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="${currentBackgroundIndex.value === 0 ? localBackgroundColor : '#ffffff'}"/></svg>`
+    },
+    {
+        label: '渐变',
+        svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#ff9a9e;stop-opacity:1"/><stop offset="100%" style="stop-color:#fad0c4;stop-opacity:0.5"/></linearGradient></defs><rect width="16" height="16" fill="url(#grad1)"/></svg>'
+    },
+    {
+        label: '网格',
+        svg: '<svg width="16" height="16" viewBox="0 0 16 16"><defs><pattern id="grid" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V1H4V0ZM0 2H4V3H0V2ZM0 4H1V0H0V4ZM2 4H3V0H2V4Z" fill="#000"/></pattern></defs><rect width="16" height="16" fill="url(#grid)"/></svg>'
+    },
+    {
+        label: '图片',
+        svg: sourceImage.value
+            ? `<svg width="16" height="16" viewBox="0 0 16 16"><image href="${sourceImage.value.url}" width="16" height="16" preserveAspectRatio="xMidYMid slice"/></svg>`
+            : '<svg width="16" height="16" viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5.5" r="1.2" fill="#f28c5d"/><path d="M2 12.5l3-3.5 2 2 3-4 4 5.5" fill="none" stroke="#02a7f0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    },
+])
 
-const currentLineWidth = computed({
-    get: () => lineWidthLocal.value,
-    set: (val) => {
-        lineWidthLocal.value = val
-        emit('set-theme-config', 'lineWidth', val)
-    }
-})
-
-// ==================== 连线风格 ====================
-const lineStyleLocal = ref('straight')
-watch(() => themeConfig.value.lineStyle, (val) => {
-    if (val) lineStyleLocal.value = val
-}, { immediate: true })
-
-const currentLineStyle = computed({
-    get: () => lineStyleLocal.value,
-    set: (val) => {
-        lineStyleLocal.value = val
-        emit('set-theme-config', 'lineStyle', val)
-    }
-})
-
+// ==================== 通用配置 ====================
 const lineStyleOptions = [
     { label: '直线', value: 'straight', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L30,5L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L30,23L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
     { label: '曲线', value: 'curve', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14A12,-9 0 0 1 42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14A12,9 0 0 0 42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' },
     { label: '直连', value: 'direct', svg: '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="60" height="26"><path d="M18,14L30,14L42,5" fill="none" stroke="#000" stroke-width="2"></path><path d="M18,14L30,14L42,23" fill="none" stroke="#000" stroke-width="2"></path></svg>' }
 ]
-
-// ==================== 显示箭头标记 ====================
-const showLineMarkerLocal = ref(false)
-watch(() => themeConfig.value.showLineMarker, (val) => {
-    if (typeof val === 'boolean') showLineMarkerLocal.value = val
-}, { immediate: true })
-
-const currentShowLineMarker = computed({
-    get: () => showLineMarkerLocal.value,
-    set: (val) => {
-        showLineMarkerLocal.value = val
-        emit('set-theme-config', 'showLineMarker', val)
-    }
-})
-
-// ==================== 二级节点外边距 ====================
-const secondMarginXLocal = ref(100)
-const secondMarginYLocal = ref(40)
-
-watch(() => themeConfig.value.second, (val) => {
-    if (val && typeof val.marginX === 'number') secondMarginXLocal.value = val.marginX
-    if (val && typeof val.marginY === 'number') secondMarginYLocal.value = val.marginY
-}, { immediate: true, deep: true })
-
-const secondMarginX = computed({
-    get: () => secondMarginXLocal.value,
-    set: (val) => {
-        secondMarginXLocal.value = val
-        const parent = themeConfig.value.second || {}
-        emit('set-theme-config', 'second', { ...parent, marginX: val })
-    }
-})
-
-const secondMarginY = computed({
-    get: () => secondMarginYLocal.value,
-    set: (val) => {
-        secondMarginYLocal.value = val
-        const parent = themeConfig.value.second || {}
-        emit('set-theme-config', 'second', { ...parent, marginY: val })
-    }
-})
-
-// ==================== 三级及以下节点外边距 ====================
-const nodeMarginXLocal = ref(50)
-const nodeMarginYLocal = ref(0)
-
-watch(() => themeConfig.value.node, (val) => {
-    if (val && typeof val.marginX === 'number') nodeMarginXLocal.value = val.marginX
-    if (val && typeof val.marginY === 'number') nodeMarginYLocal.value = val.marginY
-}, { immediate: true, deep: true })
-
-const nodeMarginX = computed({
-    get: () => nodeMarginXLocal.value,
-    set: (val) => {
-        nodeMarginXLocal.value = val
-        const parent = themeConfig.value.node || {}
-        emit('set-theme-config', 'node', { ...parent, marginX: val })
-    }
-})
-
-const nodeMarginY = computed({
-    get: () => nodeMarginYLocal.value,
-    set: (val) => {
-        nodeMarginYLocal.value = val
-        const parent = themeConfig.value.node || {}
-        emit('set-theme-config', 'node', { ...parent, marginY: val })
-    }
-})
-
-// ==================== 关联线 ====================
-const assocLineColorLocal = ref('#333333')
-const assocLineWidthLocal = ref(2)
-
-onMounted(() => {
-    if (themeConfig.value.associativeLineColor) assocLineColorLocal.value = themeConfig.value.associativeLineColor
-})
-
-const currentAssocLineColor = computed({
-    get: () => assocLineColorLocal.value,
-    set: (val) => {
-        assocLineColorLocal.value = val
-        emit('set-theme-config', 'associativeLineColor', val)
-    }
-})
-
-watch(() => themeConfig.value.associativeLineWidth, (val) => {
-    if (typeof val === 'number') assocLineWidthLocal.value = val
-}, { immediate: true })
-
-const currentAssocLineWidth = computed({
-    get: () => assocLineWidthLocal.value,
-    set: (val) => {
-        assocLineWidthLocal.value = val
-        emit('set-theme-config', 'associativeLineWidth', val)
-    }
-})
-
-// ==================== 关联线文字 ====================
-const assocTextColorLocal = ref('#333333')
-const assocTextFontSizeLocal = ref(14)
-const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
-
-onMounted(() => {
-    if (themeConfig.value.associativeLineTextColor) assocTextColorLocal.value = themeConfig.value.associativeLineTextColor
-})
-
-const currentAssocTextColor = computed({
-    get: () => assocTextColorLocal.value,
-    set: (val) => {
-        assocTextColorLocal.value = val
-        emit('set-theme-config', 'associativeLineTextColor', val)
-    }
-})
-
-watch(() => themeConfig.value.associativeLineTextFontSize, (val) => {
-    if (typeof val === 'number') assocTextFontSizeLocal.value = val
-}, { immediate: true })
-
-watch(() => themeConfig.value.associativeLineTextFontFamily, (val) => {
-    if (val) assocTextFontFamilyLocal.value = val
-}, { immediate: true })
-
-const currentAssocTextFontSize = computed({
-    get: () => assocTextFontSizeLocal.value,
-    set: (val) => {
-        assocTextFontSizeLocal.value = val
-        emit('set-theme-config', 'associativeLineTextFontSize', val)
-    }
-})
-
-const currentAssocTextFontFamily = computed({
-    get: () => assocTextFontFamilyLocal.value,
-    set: (val) => {
-        assocTextFontFamilyLocal.value = val
-        emit('set-theme-config', 'associativeLineTextFontFamily', val)
-    }
-})
 
 const fontFamilyOptions = [
     { label: '微软雅黑', value: '微软雅黑, Microsoft YaHei' },
@@ -540,23 +571,22 @@ const fontFamilyOptions = [
     { label: 'Arial', value: 'Arial' },
 ]
 
-// ==================== 面板关闭 ====================
+// ==================== 点击外部关闭 ====================
 const panelRef = ref(null)
-
 function handleOutsideClick(e) {
-    if (panelRef.value && !panelRef.value.contains(e.target)) {
-        emit('close')
-    }
+    if (panelRef.value && panelRef.value.contains(e.target)) return
+    if (e.target.closest('.color-dropdown-panel')) return
+    emit('close')
 }
 
+// ==================== 组件卸载 ====================
 onBeforeUnmount(() => {
+    // 移除事件监听
     document.removeEventListener('mousedown', handleOutsideClick)
-})
-
-onMounted(() => {
-    setTimeout(() => {
-        document.addEventListener('mousedown', handleOutsideClick)
-    }, 100)
+    // 释放图片URL
+    if (sourceImage.value) {
+        URL.revokeObjectURL(sourceImage.value.url)
+    }
 })
 </script>
 

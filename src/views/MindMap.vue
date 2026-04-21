@@ -22,8 +22,8 @@
       <OutlinePanel v-if="showOutline" @close="closePanel" :tree="outlineTree" />
 
       <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
-        @get-theme-config="getThemeConfig" @set-custom-background="setCustomBackground"
-        @get-custom-background="getCustomBackground" />
+        :get-theme-config="getThemeConfig" @set-custom-background="setCustomBackground"
+        :get-custom-background="getCustomBackground" />
 
       <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle"
         @set-styles="setStyles" />

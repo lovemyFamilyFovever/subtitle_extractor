@@ -87,8 +87,8 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   align-items: center;
   height: 30px;
-  border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
   background: transparent;
   padding: 0px 5px;

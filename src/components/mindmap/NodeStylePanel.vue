@@ -252,10 +252,9 @@ import { computed, ref } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
-import {useColorConverter} from '@/composables/utils'
+import {useColorConverter} from '@/composables/colorConverter'
 
-
-const { toHexFormat } = useColorConverter();
+const toHexFormat  = useColorConverter();
 
 const props = defineProps({
     activeNodes: {

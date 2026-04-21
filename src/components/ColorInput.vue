@@ -92,8 +92,6 @@ const props = defineProps({
   }
 });
 
-
-
 const emit = defineEmits(['update:modelValue']);
 
 // 预设颜色主题数据（来源于参考内容）
@@ -377,7 +375,7 @@ watch(selectedColor, (newColor) => {
   gap: 8px;
   width: 100%;
   height: 30px;
-  padding: 0 10px;
+  padding: 0 5px;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;

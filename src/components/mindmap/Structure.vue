@@ -66,7 +66,7 @@ const layoutGroupList = [
     { name: '鱼骨图', list: ['fishbone'] }
 ]
 
-const emit = defineEmits(['close', 'setLayout'])
+const emit = defineEmits(['close', 'setLayout','getLayout'])
 
 const props = defineProps({
     getLayout: {

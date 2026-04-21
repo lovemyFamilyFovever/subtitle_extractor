@@ -175,41 +175,6 @@ function resetState() {
   customBackground.value = null
 }
 
-// ★★★ 新增：应用自定义背景到SVG ★★★
-function applyCustomBackground(bg) {
-  if (!mindMapInstance) return
-  const svgEl = mindMapInstance.el?.querySelector('svg')
-  if (!svgEl) return
-
-  if (!bg || bg.type === 'none') {
-    svgEl.style.background = '#fff'
-    svgEl.style.backgroundImage = ''
-    svgEl.style.backgroundSize = ''
-    svgEl.style.backgroundRepeat = ''
-    svgEl.style.backgroundPosition = ''
-  } else if (bg.type === 'pure') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.value
-  } else if (bg.type === 'gradient') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.value
-  } else if (bg.type === 'grid') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.value.backgroundImage,
-      backgroundSize: bg.value.backgroundSize,
-      backgroundRepeat: bg.value.backgroundRepeat,
-      backgroundPosition: bg.value.backgroundPosition,
-    })
-  } else if (bg.type === 'image') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.value.backgroundImage,
-      backgroundRepeat: bg.value.backgroundRepeat,
-      backgroundPosition: bg.value.backgroundPosition,
-      backgroundSize: bg.value.backgroundSize,
-      backgroundColor: bg.value.backgroundColor || 'transparent',
-    })
-  }
-}
 
 // ========== 导出 ==========
 export function useMindMap() {
@@ -330,6 +295,8 @@ export function useMindMap() {
     console.log('[MindMap] 初始化成功')
   }
 
+
+  
   function destroy() {
     if (mindMapInstance) {
       try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
@@ -433,7 +400,7 @@ export function useMindMap() {
     } catch (e) { /* ignore */ }
   }
 
-  function getThemeConfig(key,value) {
+  function getThemeConfig(key, value) {
     if (!mindMapInstance) return {}
     try {
       return mindMapInstance.getThemeConfig(key) || value
@@ -451,6 +418,36 @@ export function useMindMap() {
   function getCustomBackground() {
     return customBackground.value
   }
+
+    // ★★★ 新增：应用自定义背景到SVG ★★★
+function applyCustomBackground(bg) {
+  if (!mindMapInstance) return
+  const svgEl = mindMapInstance.el?.querySelector('svg')
+  if (!svgEl) return
+
+  if (bg.type === 'pure') {
+    svgEl.style.backgroundImage = ''
+    svgEl.style.background = bg.backgroundColor
+  } else if (bg.type === 'gradient') {
+    svgEl.style.backgroundImage = ''
+    svgEl.style.background = bg.backgroundColor
+  } else if (bg.type === 'grid') {
+    Object.assign(svgEl.style, {
+      backgroundImage: bg.backgroundImage,
+      backgroundSize: bg.backgroundSize,
+      backgroundRepeat: bg.backgroundRepeat,
+      backgroundPosition: bg.backgroundPosition,
+    })
+  } else if (bg.type === 'image') {
+    Object.assign(svgEl.style, {
+      backgroundImage: bg.backgroundImage,
+      backgroundSize: bg.backgroundSize,
+      backgroundRepeat: bg.backgroundRepeat,
+      backgroundPosition: bg.backgroundPosition,
+      backgroundColor: 'transparent',
+    })
+  }
+}
 
   // ========== 插入图片 ==========
   function insertImageToNode(url, title = '') {
@@ -484,6 +481,9 @@ export function useMindMap() {
     }
     img.src = url
   }
+
+
+
 
   // ========== 文件操作 ==========
   async function openLocalFile() {
