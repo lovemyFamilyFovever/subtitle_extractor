@@ -7,12 +7,15 @@ import Export from 'simple-mind-map/src/plugins/Export.js'
 import AssociativeLine from 'simple-mind-map/src/plugins/AssociativeLine.js'
 import RichText from 'simple-mind-map/src/plugins/RichText.js'
 import NodeImgAdjust from './NodeImgAdjust.js'
+import useNodeColorList from './useNodeColorList.js'
+import getDefaultTheme from './defaultTheme.js'
 
 try { Themes.init(MindMap) } catch (e) { /* ignore */ }
 MindMap.usePlugin(Export)
 MindMap.usePlugin(AssociativeLine)
 MindMap.usePlugin(NodeImgAdjust)
 MindMap.usePlugin(RichText)
+console.log('useMindMap');
 
 // ========== 模块级单例 ==========
 let mindMapInstance = null
@@ -32,6 +35,9 @@ const imageDblClickData = ref(null)
 
 // ★★★ 新增：自定义背景状态 ★★★
 const customBackground = ref(null) // { type: 'none'|'pure'|'gradient'|'grid'|'image', value: any }
+
+const currentNodeColorListName = ref('default')
+const colorListIndex = ref(0)
 
 // ========== 主题列表 ==========
 const fullThemeList = [
@@ -201,80 +207,7 @@ export function useMindMap() {
       }
     }
 
-    mindMapInstance = new MindMap({
-      el,
-      data: JSON.parse(JSON.stringify(initData)),
-      theme: currentTheme.value,
-      layout: currentLayout.value,
-      themeConfig: {
-
-        paddingX: 15,
-        paddingY: 15,
-        // 图片显示的最大宽度
-        imgMaxWidth: 300,
-        // 图片显示的最大高度
-        imgMaxHeight: 100,
-
-        lineStyle: 'straight',
-        borderWidth: 1,
-        background: '#f0f2f5',
-        root: {
-          paddingX: 25,
-          paddingY: 15,
-        },
-        node: {
-          fillColor: 'rgb(255, 255, 255)',
-          color: 'rgb(9, 7, 1)',
-          fontSize: 16,
-          marginX: 100,
-          marginY: 80
-        },
-        second: {
-          fillColor: 'rgb(255, 255, 255)',
-          color: 'rgb(9, 7, 1)',
-          fontFamily: '微软雅黑, Microsoft YaHei',
-          fontSize: 14,
-          fontWeight: 'noraml',
-          fontStyle: 'normal',
-          borderColor: '#f96628',
-          borderWidth: 1,
-          borderRadius: 5,
-          textAlign: 'center',
-          marginX: 130,
-          marginY: 20,
-        },
-        node: {
-          fillColor: 'rgb(255, 255, 255)',
-          color: 'rgb(9, 7, 1)',
-          fontFamily: '微软雅黑, Microsoft YaHei',
-          fontSize: 14,
-          fontWeight: 'noraml',
-          fontStyle: 'normal',
-          borderColor: '#f96628',
-          borderWidth: 1,
-          borderRadius: 5,
-          textAlign: 'center',
-          marginX: 130,
-          marginY: 20,
-        }
-
-      },
-      openRealtimeRenderOnNodeTextEdit: true,
-      defaultInsertSecondLevelNodeText: '分支主题',
-      defaultInsertBelowSecondLevelNodeText: '子主题',
-      isShowWatermark: false,
-      enableDragModifyNodeWidth: true,
-      minNodeTextModifyWidth: 100,
-      maxNodeTextModifyWidth: -1,
-      imgResizeBtnSize: 24,
-      minImgResizeWidth: 40,
-      minImgResizeHeight: 40,
-      maxImgResizeWidthInheritTheme: false,
-      maxImgResizeWidth: 2000,
-      maxImgResizeHeight: 2000,
-      mousewheelAction: 'zoom',
-      showNumber: false,
-    })
+    mindMapInstance = new MindMap(getDefaultTheme({ el, initData, currentTheme, currentLayout }))
 
     markRaw(mindMapInstance)
     exposedMindMap = mindMapInstance
@@ -295,8 +228,6 @@ export function useMindMap() {
     console.log('[MindMap] 初始化成功')
   }
 
-
-  
   function destroy() {
     if (mindMapInstance) {
       try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
@@ -336,14 +267,65 @@ export function useMindMap() {
     try { mindMapInstance.execCommand('FORWARD') } catch (e) { /* ignore */ }
   }
 
+  function setCurrentNodeColorList(key) {
+    currentNodeColorListName.value = key
+  }
+
+  function getCurrentNodeColorList() {
+    return currentNodeColorListName.value
+  }
+
+  function removeCurrentNodeColorList() {
+    currentNodeColorListName.value = ''
+  }
+
+  function getNodesCount(node) {
+    let count = 1
+    if (node.children && node.children.length > 0) {
+      node.children.forEach(child => {
+        count += getNodesCount(child)
+      })
+    }
+    return count
+  }
+
   function insertChildNode() {
     if (!mindMapInstance) return
-    try { mindMapInstance.execCommand('INSERT_CHILD_NODE') } catch (e) { /* ignore */ }
+    if (!currentNodeColorListName.value) {
+      mindMapInstance.execCommand('INSERT_CHILD_NODE')
+    } else {
+
+      const totalCount = getNodesCount(mindMapInstance.renderer.root)
+      const colorsArray = useNodeColorList.find(item => item.value === currentNodeColorListName.value)
+      colorListIndex.value = totalCount % colorsArray.colors.length
+      const color = colorsArray.colors[colorListIndex.value]
+
+      mindMapInstance.execCommand('INSERT_CHILD_NODE', false, [], {
+        uid: Date.now().toString(),
+        text: '子主题',
+        ...color
+      })
+    }
   }
 
   function insertSiblingNode() {
     if (!mindMapInstance) return
-    try { mindMapInstance.execCommand('INSERT_NODE') } catch (e) { /* ignore */ }
+    if (!currentNodeColorListName.value) {
+      mindMapInstance.execCommand('INSERT_NODE')
+    } else {
+
+      const totalCount = getNodesCount(mindMapInstance.renderer.root)
+      const colorsArray = useNodeColorList.find(item => item.value === currentNodeColorListName.value)
+      colorListIndex.value = totalCount % colorsArray.colors.length
+      const color = colorsArray.colors[colorListIndex.value]
+
+      mindMapInstance.execCommand('INSERT_NODE', false, [], {
+        uid: Date.now().toString(),
+        text: '子主题',
+        ...color
+      })
+    }
+
   }
 
   function removeLine() {
@@ -419,35 +401,35 @@ export function useMindMap() {
     return customBackground.value
   }
 
-    // ★★★ 新增：应用自定义背景到SVG ★★★
-function applyCustomBackground(bg) {
-  if (!mindMapInstance) return
-  const svgEl = mindMapInstance.el?.querySelector('svg')
-  if (!svgEl) return
+  // ★★★ 新增：应用自定义背景到SVG ★★★
+  function applyCustomBackground(bg) {
+    if (!mindMapInstance) return
+    const svgEl = mindMapInstance.el?.querySelector('svg')
+    if (!svgEl) return
 
-  if (bg.type === 'pure') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.backgroundColor
-  } else if (bg.type === 'gradient') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.backgroundColor
-  } else if (bg.type === 'grid') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.backgroundImage,
-      backgroundSize: bg.backgroundSize,
-      backgroundRepeat: bg.backgroundRepeat,
-      backgroundPosition: bg.backgroundPosition,
-    })
-  } else if (bg.type === 'image') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.backgroundImage,
-      backgroundSize: bg.backgroundSize,
-      backgroundRepeat: bg.backgroundRepeat,
-      backgroundPosition: bg.backgroundPosition,
-      backgroundColor: 'transparent',
-    })
+    if (bg.type === 'pure') {
+      svgEl.style.backgroundImage = ''
+      svgEl.style.background = bg.backgroundColor
+    } else if (bg.type === 'gradient') {
+      svgEl.style.backgroundImage = ''
+      svgEl.style.background = bg.backgroundColor
+    } else if (bg.type === 'grid') {
+      Object.assign(svgEl.style, {
+        backgroundImage: bg.backgroundImage,
+        backgroundSize: bg.backgroundSize,
+        backgroundRepeat: bg.backgroundRepeat,
+        backgroundPosition: bg.backgroundPosition,
+      })
+    } else if (bg.type === 'image') {
+      Object.assign(svgEl.style, {
+        backgroundImage: bg.backgroundImage,
+        backgroundSize: bg.backgroundSize,
+        backgroundRepeat: bg.backgroundRepeat,
+        backgroundPosition: bg.backgroundPosition,
+        backgroundColor: 'transparent',
+      })
+    }
   }
-}
 
   // ========== 插入图片 ==========
   function insertImageToNode(url, title = '') {
@@ -860,6 +842,8 @@ function applyCustomBackground(bg) {
     getThemeConfig,
     setCustomBackground,
     getCustomBackground,
+    setCurrentNodeColorList,
+    getCurrentNodeColorList,
     insertImageToNode,
     toggleAssociativeLineMode,
     setTheme,

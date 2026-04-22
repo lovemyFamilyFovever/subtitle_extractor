@@ -23,7 +23,8 @@
 
       <BaseStylePanel v-if="showBaseStyle" @close="closePanel" @set-theme-config="setThemeConfig"
         :get-theme-config="getThemeConfig" @set-custom-background="setCustomBackground"
-        :get-custom-background="getCustomBackground" />
+        :get-custom-background="getCustomBackground" @setCurrentNodeColorList="setCurrentNodeColorList"
+        :getCurrentNodeColorList="getCurrentNodeColorList" />
 
       <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle"
         @set-styles="setStyles" />
@@ -70,6 +71,7 @@ const {
   undo, redo, insertChildNode, insertSiblingNode, removeNode,
   setNodeStyle, setStyles, setThemeConfig, getThemeConfig, setTheme,
   setLayout, getLayout, setCustomBackground, getCustomBackground,
+  setCurrentNodeColorList, getCurrentNodeColorList,
   insertImageToNode, openLocalFile, importFile, exportFile,
   hasUnsavedChanges, isAssociativeLineMode, newFile, removeLine,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,

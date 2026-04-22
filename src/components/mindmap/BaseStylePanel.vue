@@ -4,6 +4,14 @@
             <span class="panel-title">🎨 基础样式</span>
         </div>
         <div class="panel-body customScrollbar">
+
+            <div class="style-section">
+                <label class="section-label-title">主题颜色</label>
+                <Dropdown v-model="currentNodeColorList" :options="useNodeColorList" />
+            </div>
+            
+            <div class="divider"></div>
+
             <div class="style-section">
                 <label class="section-label-title">背景</label>
                 <div class="preset-bg-types">
@@ -132,7 +140,6 @@
 
             </div>
 
-
             <div class="divider"></div>
             <div class="style-section">
                 <label class="section-label-title">节点外边距</label>
@@ -157,6 +164,7 @@
                 </div>
             </div>
 
+           
         </div>
     </div>
 </template>
@@ -166,7 +174,7 @@ import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
 import { useColorConverter } from '@/composables/colorConverter.js'
-
+import useNodeColorList from '@/composables/useNodeColorList.js'
 
 const toHexFormat = useColorConverter();
 
@@ -174,6 +182,7 @@ const emit = defineEmits([
     'close',
     'set-theme-config',
     'set-custom-background',
+    'setCurrentNodeColorList'
 ])
 
 const props = defineProps({
@@ -182,6 +191,10 @@ const props = defineProps({
         required: true
     },
     getCustomBackground: {
+        type: Function,
+        required: true
+    },
+    getCurrentNodeColorList: {
         type: Function,
         required: true
     }
@@ -220,6 +233,9 @@ const assocLineWidthLocal = ref(2)
 const assocTextColorLocal = ref('#333333')
 const assocTextFontSizeLocal = ref(14)
 const assocTextFontFamilyLocal = ref('微软雅黑, Microsoft YaHei')
+
+//颜色主题
+const currentNodeColorList = ref('default')
 
 // ==================== 工具函数 ====================
 const generateGridBackground = (size, color) => {
@@ -272,6 +288,11 @@ const syncBackgroundConfig = () => {
     }
 }
 
+const syncCurrentNodeColorList = () => {
+    //节点颜色主题设置
+    currentNodeColorList.value = props.getCurrentNodeColorList()
+}
+
 const syncThemeConfig = () => {
     // 修复：正确调用父组件的getThemeConfig函数
     const config = props.getThemeConfig() || {}
@@ -299,12 +320,15 @@ const syncThemeConfig = () => {
     if (config.associativeLineTextColor) assocTextColorLocal.value = toHexFormat(config.associativeLineTextColor)
     if (config.associativeLineTextFontSize) assocTextFontSizeLocal.value = config.associativeLineTextFontSize
     if (config.associativeLineTextFontFamily) assocTextFontFamilyLocal.value = config.associativeLineTextFontFamily
+
+
 }
 
 // ==================== 初始化 ====================
 onMounted(() => {
     // 1. 同步配置
     syncBackgroundConfig()
+    syncCurrentNodeColorList()
     syncThemeConfig()
 
     // 2. 设置监听（使用 flush: 'post' 避免初始化触发）
@@ -392,6 +416,11 @@ const setupWatchers = () => {
     watch(assocTextFontFamilyLocal, (newVal) => {
         emit('set-theme-config', 'associativeLineTextFontFamily', newVal)
     }, { flush: 'post' })
+
+    watch(currentNodeColorList, (newVal) => {
+        emit('setCurrentNodeColorList', newVal)
+    }, { flush: 'post' })
+
 }
 
 // ==================== 背景操作逻辑 ====================
@@ -570,6 +599,9 @@ const fontFamilyOptions = [
     { label: '楷体', value: '楷体, KaiTi' },
     { label: 'Arial', value: 'Arial' },
 ]
+
+
+
 
 // ==================== 点击外部关闭 ====================
 const panelRef = ref(null)

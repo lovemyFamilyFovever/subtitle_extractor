@@ -7,7 +7,7 @@
 
     <div class="dropdown-menu" :class="{ open: isOpen }">
       <ul>
-        <li v-for="item in options" :key="item.value" :class="{ selected: selectedValue === item.value }"
+        <li v-for="(item,index) in options" :key="index" :class="{ selected: selectedValue === item.value }"
           @click="selectOption(item)">
           <span v-if="item.svg" v-html="item.svg" class="option-icon"></span>
           <span class="option-label">{{ item.label }}</span>
