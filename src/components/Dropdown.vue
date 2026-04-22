@@ -1,7 +1,13 @@
 <template>
   <div class="dropdown" ref="dropdownRef">
     <button class="dropdown-toggle" @click="toggleDropdown">
-      <span class="selected-text">{{ selectedLabel }}</span>
+      <span class="selected-text-wrapper">
+        <span v-if="selectedItem && selectedItem.colors" class="selected-colors-preview">
+          <span class="color-preview" v-for="(color, index) in selectedItem.colors" :key="index" 
+                :style="{ backgroundColor: color.fillColor }"></span>
+        </span>
+        <span class="selected-text" v-html="selectedLabel"></span>
+      </span>
       <span class="arrow" :class="{ rotated: isOpen }">▼</span>
     </button>
 
@@ -10,6 +16,11 @@
         <li v-for="(item,index) in options" :key="index" :class="{ selected: selectedValue === item.value }"
           @click="selectOption(item)">
           <span v-if="item.svg" v-html="item.svg" class="option-icon"></span>
+
+          <span v-if="item.colors" class="option-icon">
+            <span class="color-preview" v-for="(color, index) in item.colors" :key="index" :style="{ backgroundColor: color.fillColor }"></span>
+          </span>
+
           <span class="option-label">{{ item.label }}</span>
         </li>
       </ul>
@@ -18,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount,watch } from 'vue'
 
 // 定义选项数据
 const props = defineProps({
@@ -37,12 +48,16 @@ const emit = defineEmits(['update:modelValue', 'change'])
 // 响应式数据
 const isOpen = ref(false)
 const dropdownRef = ref(null)
-const selectedValue = ref(props.modelValue)
+const selectedValue = computed(() => props.modelValue)
 
-// 计算当前选中的标签
+
+// 计算当前选中的项目及其标签
+const selectedItem = computed(() => {
+  return props.options.find(item => item.value === selectedValue.value)
+})
+
 const selectedLabel = computed(() => {
-  const selected = props.options.find(item => item.value === selectedValue.value)
-  return selected ? selected.label : '请选择'
+  return selectedItem.value ? selectedItem.value.label : '请选择'
 })
 
 // 方法
@@ -51,7 +66,6 @@ const toggleDropdown = () => {
 }
 
 const selectOption = (item) => {
-  selectedValue.value = item.value
   emit('update:modelValue', item.value)
   emit('change', item)
   isOpen.value = false
@@ -94,7 +108,6 @@ onBeforeUnmount(() => {
   padding: 0px 5px;
   flex-shrink: 0;
   transition: border-color 0.15s ease;
-
 }
 
 .dropdown-toggle:hover {
@@ -143,6 +156,7 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   margin: 0;
   padding: 0;
+  scrollbar-width: none;
 }
 
 .dropdown-menu li {
@@ -154,7 +168,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 60px;
+  gap: 20px;
 }
 
 .dropdown-menu li:hover {
@@ -171,10 +185,31 @@ onBeforeUnmount(() => {
   border-bottom: 1px solid #f0f0f0;
 }
 
+.selected-text-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.selected-colors-preview {
+  display: flex;
+  margin-right: 8px;
+}
+
 .selected-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+}
+
+.option-icon{
+  display: flex;
+}
+
+.color-preview{
+  width: 20px;
+  height: 20px;
 }
 </style>

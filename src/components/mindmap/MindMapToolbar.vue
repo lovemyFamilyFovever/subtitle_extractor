@@ -166,7 +166,7 @@
                 </div>
 
 
-                <div class="toolbar-btn" :class="{ active: isAssociativeLineMode }"
+                <div class="toolbar-btn" 
                     @click="$emit('toggle-associative-line')">
                     <span class="icon">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"

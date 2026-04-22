@@ -207,7 +207,7 @@ export function useMindMap() {
       }
     }
 
-    mindMapInstance = new MindMap(getDefaultTheme({ el, initData, currentTheme, currentLayout }))
+    mindMapInstance = new MindMap(getDefaultTheme({ el, initData, currentTheme, currentLayout,insertChildNode }))
 
     markRaw(mindMapInstance)
     exposedMindMap = mindMapInstance
