@@ -9,17 +9,16 @@ import RichText from 'simple-mind-map/src/plugins/RichText.js'
 import NodeImgAdjust from './NodeImgAdjust.js'
 import useNodeColorList from './useNodeColorList.js'
 import getDefaultTheme from './defaultTheme.js'
+import { formatTime, formatFileSize, calcBase64Size } from '../utils/commonUtils'
 
 try { Themes.init(MindMap) } catch (e) { /* ignore */ }
 MindMap.usePlugin(Export)
 MindMap.usePlugin(AssociativeLine)
 MindMap.usePlugin(NodeImgAdjust)
 MindMap.usePlugin(RichText)
-console.log('useMindMap');
 
 // ========== 模块级单例 ==========
 let mindMapInstance = null
-let exposedMindMap = null
 
 const isReady = ref(false)
 const activeNodes = ref([])
@@ -53,30 +52,18 @@ const defaultData = {
   data: { text: '中心主题' },
   children: [
     {
-      data: { text: '分支主题 1' },
+      data: { text: '分支主题' },
       children: [
-        { data: { text: '子主题 1-1' }, children: [] },
+        { data: { text: '分支主题' }, children: [] }
       ],
     },
     {
-      data: { text: '分支主题 2' },
-      children: [{ data: { text: '子主题 2-1' }, children: [] }],
+      data: { text: '分支主题' },
+      children: [
+        { data: { text: '分支主题' }, children: [] }
+      ],
     },
   ],
-}
-
-// ========== 工具函数 ==========
-function formatTime(timestamp) {
-  if (!timestamp) return ''
-  const d = new Date(timestamp)
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
-
-function formatFileSize(bytes) {
-  if (!bytes) return '0 B'
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
 }
 
 function updateHistoryStatus() {
@@ -154,14 +141,7 @@ function traverseCollectImages(node, images) {
   }
 }
 
-function calcBase64Size(dataUrl) {
-  const base64 = dataUrl.split(',')[1]
-  if (!base64) return 0
-  let bytes = base64.length * 3 / 4
-  if (base64.endsWith('==')) bytes -= 2
-  else if (base64.endsWith('=')) bytes -= 1
-  return Math.round(bytes)
-}
+
 
 function getActiveNodeList() {
   if (!mindMapInstance) return []
@@ -192,55 +172,98 @@ export function useMindMap() {
       mindMapInstance = null
       resetState()
     }
+    mindMapInstance = mindMapInstance = new MindMap({
+      el,
+      data: JSON.parse(JSON.stringify(defaultData)),
+      theme: currentTheme.value,
+      layout: currentLayout.value,
+      themeConfig: {
 
-    // 支持传入包含 customBackground 的完整数据
-    let initData = defaultData
-    let initBg = null
-    if (data) {
-      if (data.root) {
-        // 完整数据格式 { root: {...}, customBackground: {...} }
-        initData = data.root
-        initBg = data.customBackground || null
-      } else {
-        // 纯节点数据格式
-        initData = data
-      }
-    }
+        paddingX: 15,
+        paddingY: 15,
+        // 图片显示的最大宽度
+        imgMaxWidth: 300,
+        // 图片显示的最大高度
+        imgMaxHeight: 100,
 
-    mindMapInstance = new MindMap(getDefaultTheme({ el, initData, currentTheme, currentLayout,insertChildNode }))
+        lineStyle: 'straight',
+        borderWidth: 1,
+        background: '#f0f2f5',
+        root: {
+          paddingX: 25,
+          paddingY: 15,
+        },
+        node: {
+          fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontSize: 16,
+          marginX: 100,
+          marginY: 80
+        },
+        second: {
+          fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontFamily: '微软雅黑, Microsoft YaHei',
+          fontSize: 14,
+          fontWeight: 'noraml',
+          fontStyle: 'normal',
+          borderColor: '#f96628',
+          borderWidth: 1,
+          borderRadius: 5,
+          textAlign: 'center',
+          marginX: 130,
+          marginY: 20,
+        },
+        node: {
+          fillColor: 'rgb(255, 255, 255)',
+          color: 'rgb(9, 7, 1)',
+          fontFamily: '微软雅黑, Microsoft YaHei',
+          fontSize: 14,
+          fontWeight: 'noraml',
+          fontStyle: 'normal',
+          borderColor: '#f96628',
+          borderWidth: 1,
+          borderRadius: 5,
+          textAlign: 'center',
+          marginX: 130,
+          marginY: 20,
+        }
+
+      },
+      openRealtimeRenderOnNodeTextEdit: true,
+      defaultInsertSecondLevelNodeText: '分支主题',
+      defaultInsertBelowSecondLevelNodeText: '子主题',
+      isShowWatermark: false,
+      enableDragModifyNodeWidth: true,
+      minNodeTextModifyWidth: 100,
+      maxNodeTextModifyWidth: -1,
+      imgResizeBtnSize: 24,
+      minImgResizeWidth: 40,
+      minImgResizeHeight: 40,
+      maxImgResizeWidthInheritTheme: false,
+      maxImgResizeWidth: 2000,
+      maxImgResizeHeight: 2000,
+      mousewheelAction: 'zoom',
+      showNumber: false,
+    })
+
+    window.mindMapInstance = mindMapInstance // 方便调试
 
     markRaw(mindMapInstance)
-    exposedMindMap = mindMapInstance
-    window.__mindMap = mindMapInstance
     bindEvents()
     isReady.value = true
     hasUnsavedChanges.value = false
-
-    // ★★★ 应用自定义背景 ★★★
-    if (initBg) {
-      customBackground.value = initBg
-      // 延迟应用，等待SVG渲染完成
-      setTimeout(() => {
-        applyCustomBackground(initBg)
-      }, 100)
-    }
 
     console.log('[MindMap] 初始化成功')
   }
 
   function destroy() {
-    if (mindMapInstance) {
-      try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
-      mindMapInstance = null
-    }
-    exposedMindMap = null
-    window.__mindMap = null
+    mindMapInstance.destroy()
+    mindMapInstance = null
     resetState()
-    console.log('[MindMap] 已销毁')
   }
 
   function newFile() {
-    if (!mindMapInstance) return
     mindMapInstance.setData(JSON.parse(JSON.stringify(defaultData)))
     mindMapInstance.view.reset()
     mindMapInstance.command.clearHistory?.()
@@ -258,13 +281,11 @@ export function useMindMap() {
 
   // ========== 节点操作 ==========
   function undo() {
-    if (!mindMapInstance) return
-    try { mindMapInstance.execCommand('BACK') } catch (e) { /* ignore */ }
+    mindMapInstance.execCommand('BACK')
   }
 
   function redo() {
-    if (!mindMapInstance) return
-    try { mindMapInstance.execCommand('FORWARD') } catch (e) { /* ignore */ }
+    mindMapInstance.execCommand('FORWARD')
   }
 
   function setCurrentNodeColorList(key) {
@@ -302,7 +323,7 @@ export function useMindMap() {
 
       mindMapInstance.execCommand('INSERT_CHILD_NODE', false, [], {
         uid: Date.now().toString(),
-        text: '子主题',
+        text: '分支主题',
         ...color
       })
     }
@@ -321,7 +342,7 @@ export function useMindMap() {
 
       mindMapInstance.execCommand('INSERT_NODE', false, [], {
         uid: Date.now().toString(),
-        text: '子主题',
+        text: '分支主题',
         ...color
       })
     }

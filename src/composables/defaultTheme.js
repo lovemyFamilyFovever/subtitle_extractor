@@ -8,7 +8,7 @@
  * @param {Function} options.insertChildNode - 插入子节点的自定义方法
  * @returns {Object} 返回完整的主题配置对象
  */
-function getDefaultTheme({ el, initData, currentTheme, currentLayout, insertChildNode }) {
+function getDefaultTheme( el, initData, currentTheme, currentLayout, insertChildNode ) {
     return {
         // 挂载元素
         el,
@@ -35,7 +35,7 @@ function getDefaultTheme({ el, initData, currentTheme, currentLayout, insertChil
         themeConfig: {
             // ========== 通用节点样式 ==========
             // 节点内图片最大宽度
-            imgMaxWidth: 300,
+            imgMaxWidth: 333,
             // 节点内图片最大高度
             imgMaxHeight: 100,
             // 图标尺寸
@@ -86,8 +86,9 @@ function getDefaultTheme({ el, initData, currentTheme, currentLayout, insertChil
             associativeLineTextFontFamily: '微软雅黑, Microsoft YaHei',
 
             // ========== 背景样式 ==========
+            
             // 背景颜色
-            backgroundColor: '#f0f2f5',
+            backgroundColor: '#fff',
             // 背景图片（none表示无背景图）
             backgroundImage: 'none',
             // 背景重复方式

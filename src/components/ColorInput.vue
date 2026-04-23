@@ -2,7 +2,6 @@
   <div class="color-picker-dropdown" ref="pickerRef">
     <div class="color-picker-trigger" :class="{ active: isPanelOpen }" @click="toggleDropdown">
       <div class="color-preview" :style="{ background: selectedColor }"></div>
-      <span class="color-value">{{ selectedColor.toUpperCase() }}</span>
       <span class="trigger-arrow">▼</span>
     </div>
 
@@ -367,6 +366,7 @@ watch(selectedColor, (newColor) => {
 .color-picker-dropdown {
   position: relative;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  flex: 1;
 }
 
 .color-picker-trigger {
@@ -390,7 +390,7 @@ watch(selectedColor, (newColor) => {
 }
 
 .color-preview {
-  width: 18px;
+  width: 75%;
   height: 18px;
   border-radius: 3px;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -405,8 +405,8 @@ watch(selectedColor, (newColor) => {
 }
 
 .trigger-arrow {
-  font-size: 10px;
-  color: #666;
+  font-size: 14px;
+  color: #000;
   transition: transform 0.2s;
 }
 

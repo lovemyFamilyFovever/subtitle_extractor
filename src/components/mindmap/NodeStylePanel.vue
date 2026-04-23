@@ -252,7 +252,7 @@ import { computed, ref } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
-import {useColorConverter} from '@/composables/colorConverter'
+import {useColorConverter} from '@/utils/colorConverter'
 
 const toHexFormat  = useColorConverter();
 

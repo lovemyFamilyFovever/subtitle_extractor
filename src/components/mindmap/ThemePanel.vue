@@ -15,7 +15,7 @@
 
             <div class="theme-section" v-show="currentTheme == 'light'">
                 <div v-for="item in lightThemeList" :key="item.value" class="theme-item"
-                    :class="{ active: currentTheme === item.value }" @click="handleThemeSelect(item.value)">
+                    :class="{ active: props.currentTheme === item.value }" @click="handleThemeSelect(item.value)">
                     <img v-if="getPreview(item.value)" class="theme-thumb" :src="getPreview(item.value)"
                         :alt="item.name" />
                     <div v-else class="theme-thumb fallback" />
@@ -28,7 +28,7 @@
             </div>
             <div class="theme-section" v-show="currentTheme == 'dark'">
                 <div v-for="item in darkThemeList" :key="item.value" class="theme-item"
-                    :class="{ active: currentTheme === item.value }" @click="handleThemeSelect(item.value)">
+                    :class="{ active: props.currentTheme === item.value }" @click="handleThemeSelect(item.value)">
                     <img v-if="getPreview(item.value)" class="theme-thumb" :src="getPreview(item.value)"
                         :alt="item.name" />
                     <div v-else class="theme-thumb fallback dark" />
