@@ -103,8 +103,19 @@ function handleToggleBaseStyle() { togglePanel('basestyle') }
 let lastNodeCount = 0
 watch(activeNodes, (nodes) => {
   const currentCount = nodes.length
-  if (currentCount > 0 && lastNodeCount === 0) activePanel.value = 'node'
-  else if (currentCount === 0 && lastNodeCount > 0 && activePanel.value === 'node') activePanel.value = null
+  // 当从无选中变为有选中时，打开节点样式面板
+  if (currentCount > 0 && lastNodeCount === 0) {
+    activePanel.value = 'node'
+  }
+  // 如果当前是基础样式面板（basestyle）打开，再次点击节点也应切换到节点样式面板
+  else if (currentCount > 0 && activePanel.value === 'basestyle') {
+    activePanel.value = 'node'
+  }
+  // 当从有选中变为无选中时，如果当前是节点面板则关闭
+  else if (currentCount === 0 && lastNodeCount > 0 && activePanel.value === 'node') {
+    activePanel.value = null
+  }
+
   lastNodeCount = currentCount
 })
 

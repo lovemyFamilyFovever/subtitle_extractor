@@ -13,6 +13,8 @@ export function useColorConverter() {
 
         // 去除首尾空格并转为小写
         const trimmedColor = color.trim().toLowerCase();
+        
+        if (trimmedColor === 'transparent') return 'transparent';
 
         // 检测并处理HEX格式
         if (trimmedColor.startsWith('#')) {

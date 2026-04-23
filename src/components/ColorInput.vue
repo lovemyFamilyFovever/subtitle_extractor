@@ -87,7 +87,7 @@ import { ref, reactive, computed, onMounted, onUnmounted, watch,nextTick } from 
 const props = defineProps({
   modelValue: {
     type: String,
-    default: '#4A90E2'
+    default: '#fff'
   }
 });
 
@@ -153,7 +153,7 @@ const currentThemeColors = computed(() => {
 
 // 输入框绑定
 const rgbInput = reactive({ r: 74, g: 144, b: 226 });
-const hexInput = ref('4A90E2');
+const hexInput = ref('fff');
 
 // 光标位置
 const cursorStyle = computed(() => ({

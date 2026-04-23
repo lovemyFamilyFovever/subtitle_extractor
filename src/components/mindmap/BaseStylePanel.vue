@@ -85,8 +85,7 @@
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
-                        <SliderInput v-model="localLineWidth" label="" unit="" :min="1" :max="10"
-                            :showSlider="false" />
+                        <SliderInput v-model="localLineWidth" label="" unit="" :min="1" :max="10" :showSlider="false" />
                     </div>
                 </div>
                 <div class="section-group-row">
@@ -394,6 +393,15 @@ const setupWatchers = () => {
         const parent = props.getThemeConfig()?.node || {}
         emit('set-theme-config', 'node', { ...parent, marginX: newVal })
     }, { flush: 'post' })
+
+    watch(nodeMarginXLocal, (newVal) => {
+        const parent = props.getThemeConfig()?.node || {}
+        emit('set-theme-config', 'node', {
+            marginX: newVal,
+            marginY: parent.marginY,   // 只保留同类字段
+        })
+    }, { flush: 'post' })
+
 
     watch(nodeMarginYLocal, (newVal) => {
         const parent = props.getThemeConfig()?.node || {}

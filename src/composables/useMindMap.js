@@ -23,7 +23,7 @@ const isReady = ref(false)
 const activeNodes = ref([])
 const canUndo = ref(false)
 const canRedo = ref(false)
-const currentTheme = ref('classic7')
+const currentTheme = ref('default')
 const currentLayout = ref('logicalStructure')
 const scale = ref(1)
 const isReadonly = ref(false)
@@ -218,7 +218,11 @@ export function useMindMap() {
       //   }
       // },
       // ========== 节点拖拽配置 ==========
-      themeConfig:{},
+      // themeConfig: {
+      //   node: {
+      //     fillColor: '#fff',
+      //   }
+      // },
       enableDragModifyNodeWidth: true, // 允许拖拽修改节点宽度
       minNodeTextModifyWidth: 100, // 节点最小宽度（文本编辑时）
       maxNodeTextModifyWidth: -1, // 节点最大宽度（-1表示无限制）
@@ -341,10 +345,7 @@ export function useMindMap() {
   function removeLine() {
     if (!mindMapInstance) return
     try {
-
-      const associativeLine = __mindMap.associativeLine
-
-      associativeLine.removeLine()
+      mindMapInstance.associativeLine.removeLine()
     } catch (e) { /* ignore */ }
   }
 
@@ -696,8 +697,8 @@ export function useMindMap() {
   function setTheme(themeValue) {
     currentTheme.value = themeValue
     if (mindMapInstance) {
-      try { 
-        mindMapInstance.setTheme(themeValue) 
+      try {
+        mindMapInstance.setTheme(themeValue)
       } catch (e) { /* ignore */ }
     }
   }
