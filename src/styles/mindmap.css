@@ -547,3 +547,9 @@ body,
     background: #4A90E2;
     color: #fff;
 }
+
+.toggle-switch {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}

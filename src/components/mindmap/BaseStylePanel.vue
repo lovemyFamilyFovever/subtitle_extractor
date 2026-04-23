@@ -9,7 +9,7 @@
                 <label class="section-label-title">主题颜色</label>
                 <Dropdown v-model="currentNodeColorList" :options="useNodeColorList" />
             </div>
-            
+
             <div class="divider"></div>
 
             <div class="style-section">
@@ -23,7 +23,12 @@
                 </div>
                 <!-- 纯色 -->
                 <div class="pure-color-section" v-if="currentBackgroundIndex === 0">
-                    <ColorInput v-model="localBackgroundColor" />
+                    <div class="section-group-row">
+                        <div class="section-group-item">
+                            <label class="section-label">颜色</label>
+                            <ColorInput v-model="localBackgroundColor" />
+                        </div>
+                    </div>
                 </div>
                 <!-- 渐变 -->
                 <div class="section-group-row presetGradientBtns" v-if="currentBackgroundIndex === 1">
@@ -31,20 +36,17 @@
                         :style="{ backgroundImage: gradient }" @click="handleGradientClick(gradient)"></button>
                 </div>
                 <!-- 网格 -->
-                <div class="section-group-column" v-if="currentBackgroundIndex === 2">
-                    <div class="grid-setting-row">
-                        <label class="section-label">尺寸</label>
-                        <div class="grid-size-options">
-                            <button v-for="size in gridSizeOptions" :key="size"
-                                :class="{ active: currentGridSize === size }" @click="handleGridSizeChange(size)">
-                                {{ size }}
-                            </button>
-                        </div>
+                <div class="section-group-row" v-if="currentBackgroundIndex === 2">
+                    <div class="section-group-item">
+                        <label class="section-label">网格线宽</label>
+                        <SliderInput v-model="currentGridSize" label="" unit="" :min="2" :max="80"
+                            :showSlider="false" />
                     </div>
-                    <div class="grid-setting-row">
+                    <div class="section-group-item">
                         <label class="section-label">网格颜色</label>
                         <ColorInput v-model="currentGridColor" />
                     </div>
+
                 </div>
                 <!-- 图片 -->
                 <div class="section-group-column" v-if="currentBackgroundIndex === 3">
@@ -83,7 +85,7 @@
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">线宽</label>
-                        <SliderInput v-model="localLineWidth" label="" unit="px" :min="1" :max="10"
+                        <SliderInput v-model="localLineWidth" label="" unit="" :min="1" :max="10"
                             :showSlider="false" />
                     </div>
                 </div>
@@ -93,13 +95,12 @@
                         <Dropdown v-model="localLineStyle" :options="lineStyleOptions" />
                     </div>
                     <div class="section-group-item">
-                        <label class="section-label">显示箭头</label>
+                        <label class="section-label">箭头</label>
                         <div class="toggle-row">
                             <label class="toggle-switch">
                                 <input type="checkbox" v-model="localShowLineMarker">
-                                <span class="toggle-slider"></span>
+                                <span class="toggle-slider">{{ localShowLineMarker ? '开启' : '关闭' }}</span>
                             </label>
-                            <span class="toggle-hint">{{ localShowLineMarker ? '开启' : '关闭' }}</span>
                         </div>
                     </div>
                 </div>
@@ -115,7 +116,7 @@
                     </div>
                     <div class="section-group-item">
                         <label class="section-label">字号</label>
-                        <SliderInput v-model="assocTextFontSizeLocal" label="" unit="px" :min="10" :max="32"
+                        <SliderInput v-model="assocTextFontSizeLocal" label="" unit="" :min="10" :max="32"
                             :showSlider="false" />
                     </div>
                 </div>
@@ -127,7 +128,7 @@
                     <div class="section-group-item">
 
                         <label class="section-label">线宽</label>
-                        <SliderInput v-model="assocLineWidthLocal" label="" unit="px" :min="1" :max="10"
+                        <SliderInput v-model="assocLineWidthLocal" label="" unit="" :min="1" :max="10"
                             :showSlider="false" />
                     </div>
                 </div>
@@ -145,26 +146,23 @@
                 <label class="section-label-title">节点外边距</label>
                 <div class="section-group-row">
                     <label class="section-label">二级水平间距</label>
-                    <SliderInput v-model="secondMarginXLocal" label="" unit="px" :min="20" :max="200"
-                         />
+                    <SliderInput v-model="secondMarginXLocal" label="" unit="" :min="20" :max="200" />
                 </div>
                 <div class="section-group-row">
                     <label class="section-label">二级垂直间距</label>
-                    <SliderInput v-model="secondMarginYLocal" label="" unit="px" :min="20" :max="200"
-                         />
+                    <SliderInput v-model="secondMarginYLocal" label="" unit="" :min="20" :max="200" />
                 </div>
                 <div class="section-group-row">
                     <label class="section-label">三级水平间距</label>
-                    <SliderInput v-model="nodeMarginXLocal" label="" unit="px" :min="20" :max="200"
-                         />
+                    <SliderInput v-model="nodeMarginXLocal" label="" unit="" :min="20" :max="200" />
                 </div>
                 <div class="section-group-row">
                     <label class="section-label">三级垂直间距</label>
-                    <SliderInput v-model="nodeMarginYLocal" label="" unit="px" :min="0" :max="200"  />
+                    <SliderInput v-model="nodeMarginYLocal" label="" unit="" :min="0" :max="200" />
                 </div>
             </div>
 
-           
+
         </div>
     </div>
 </template>
@@ -206,7 +204,6 @@ const currentBackgroundIndex = ref(0)
 const localBackgroundColor = ref('#ffffff')
 
 // 网格
-const gridSizeOptions = [10, 20, 30, 40]
 const currentGridSize = ref(20)
 const currentGridColor = ref('#e5e5e5')
 
@@ -353,6 +350,12 @@ const setupWatchers = () => {
         }
     }, { flush: 'post' })
 
+    watch(currentGridSize, (newVal) => {
+        if (currentBackgroundIndex.value === 2) {
+            applyGridBackground()
+        }
+    }, { flush: 'post' })
+
     watch(currentGridColor, (newVal) => {
         if (currentBackgroundIndex.value === 2) {
             applyGridBackground()
@@ -471,13 +474,6 @@ const applyGridBackground = () => {
         backgroundRepeat: 'repeat',
         backgroundPosition: '0 0'
     })
-}
-
-const handleGridSizeChange = (size) => {
-    currentGridSize.value = size
-    if (currentBackgroundIndex.value === 2) {
-        applyGridBackground()
-    }
 }
 
 // 图片

@@ -161,12 +161,10 @@
                 </div>
 
                 <div class="section-group-row">
-                    <label class="section-label">颜色</label>
-                    <div class="color-row">
+                    <div class="section-group-item">
+
+                        <label class="section-label">颜色</label>
                         <ColorInput v-model="currentBorderColor" />
-                        <!--  上面一行代码等效下面这行
-                            <ColorInput :modelValue="currentBorderColor"
-                                @update:modelValue="val => currentBorderColor = val" /> -->
                     </div>
                 </div>
             </div>
@@ -181,6 +179,7 @@
                 <div class="section-group-row">
 
                     <div class="section-group-item">
+                        <label class="section-label">颜色</label>
                         <ColorInput v-model="currentBg" />
                     </div>
                 </div>
@@ -211,13 +210,13 @@
 
                     <div class="section-group-item">
                         <label class="section-label">高度</label>
-                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="50" :showInput=false
+                        <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="50" :show-slider=false
                             @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
                     </div>
 
                     <div class="section-group-item">
                         <label class="section-label">长度</label>
-                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="50" :showInput=false
+                        <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="50" :show-slider=false
                             @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
                     </div>
                 </div>
@@ -252,9 +251,9 @@ import { computed, ref } from 'vue'
 import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
-import {useColorConverter} from '@/utils/colorConverter'
+import { useColorConverter } from '@/utils/colorConverter'
 
-const toHexFormat  = useColorConverter();
+const toHexFormat = useColorConverter();
 
 const props = defineProps({
     activeNodes: {
@@ -304,7 +303,7 @@ function handleNormalClick() {
 // ========================== 背景颜色 ==========================
 const currentBg = computed({
     get() {
-        const val= toHexFormat(getNodeStyle('fillColor', '#ffffff'))
+        const val = toHexFormat(getNodeStyle('fillColor', '#ffffff'))
         return val === 'transparent' ? '#ffffff' : val
     },
     set(val) {

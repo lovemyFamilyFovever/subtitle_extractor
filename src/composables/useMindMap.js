@@ -177,47 +177,48 @@ export function useMindMap() {
       theme: currentTheme.value,
       layout: currentLayout.value,
       initRootNodePosition: ['20%', 'center'], // 根节点位置
-      themeConfig: {
-        // ========== 通用节点样式 ==========
-        imgMaxWidth: 333, // 节点内图片最大宽度
-        imgMaxHeight: 100, // 节点内图片最大高度
+      // themeConfig: {
+      //   // ========== 通用节点样式 ==========
+      //   imgMaxWidth: 333, // 节点内图片最大宽度
+      //   imgMaxHeight: 100, // 节点内图片最大高度
 
-        // ========== 根节点样式 ==========
-        root: {
-          paddingX: 35, // 水平内边距（更大）
-          paddingY: 15, // 垂直内边距（更大）
+      //   // ========== 根节点样式 ==========
+      //   root: {
+      //     paddingX: 35, // 水平内边距（更大）
+      //     paddingY: 15, // 垂直内边距（更大）
 
-        },
+      //   },
 
-        // ========== 二级节点样式 ==========
-        second: {
-          marginX: 130, // 水平间距
-          marginY: 20, // 垂直间距
-          paddingX: 35, // 水平内边距
-          paddingY: 15, // 垂直内边距
+      //   // ========== 二级节点样式 ==========
+      //   second: {
+      //     marginX: 130, // 水平间距
+      //     marginY: 20, // 垂直间距
+      //     paddingX: 35, // 水平内边距
+      //     paddingY: 15, // 垂直内边距
 
-          textAlign: 'center', // 文字对齐方式
-        },
+      //     textAlign: 'center', // 文字对齐方式
+      //   },
 
-        // ========== 三级及以下节点样式 ==========
-        node: {
-          marginX: 100, // 水平间距
-          marginY: 80, // 垂直间距
-          paddingX: 35, // 水平内边距
-          paddingY: 15, // 垂直内边距
+      //   // ========== 三级及以下节点样式 ==========
+      //   node: {
+      //     marginX: 100, // 水平间距
+      //     marginY: 80, // 垂直间距
+      //     paddingX: 35, // 水平内边距
+      //     paddingY: 15, // 垂直内边距
 
-          textAlign: 'center', // 文字对齐方式
-        },
+      //     textAlign: 'center', // 文字对齐方式
+      //   },
 
-        // ========== 概要节点样式 ==========
-        generalization: {
-          marginX: 100, // 水平间距
-          marginY: 40, // 垂直间距
+      //   // ========== 概要节点样式 ==========
+      //   generalization: {
+      //     marginX: 100, // 水平间距
+      //     marginY: 40, // 垂直间距
 
-          textAlign: 'center', // 文字对齐方式
-        }
-      },
+      //     textAlign: 'center', // 文字对齐方式
+      //   }
+      // },
       // ========== 节点拖拽配置 ==========
+      themeConfig:{},
       enableDragModifyNodeWidth: true, // 允许拖拽修改节点宽度
       minNodeTextModifyWidth: 100, // 节点最小宽度（文本编辑时）
       maxNodeTextModifyWidth: -1, // 节点最大宽度（-1表示无限制）
@@ -413,7 +414,7 @@ export function useMindMap() {
   // ★★★ 新增：应用自定义背景到SVG ★★★
   function applyCustomBackground(bg) {
     if (!mindMapInstance) return
-    const svgEl = mindMapInstance.el?.querySelector('svg')
+    const svgEl = mindMapInstance.el
     if (!svgEl) return
 
     if (bg.type === 'pure') {
@@ -695,7 +696,9 @@ export function useMindMap() {
   function setTheme(themeValue) {
     currentTheme.value = themeValue
     if (mindMapInstance) {
-      try { mindMapInstance.setTheme(themeValue) } catch (e) { /* ignore */ }
+      try { 
+        mindMapInstance.setTheme(themeValue) 
+      } catch (e) { /* ignore */ }
     }
   }
 

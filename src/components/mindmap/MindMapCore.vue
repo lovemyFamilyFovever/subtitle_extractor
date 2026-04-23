@@ -74,17 +74,12 @@ onBeforeUnmount(() => {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #f0f2f5;
-  background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 .map-container {
   width: 100%;
   height: 100%;
    background: #f0f2f5;
-  background-image: radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 .map-container :deep(*) {
