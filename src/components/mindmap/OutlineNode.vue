@@ -22,8 +22,7 @@
       <span
         class="node-text"
         :class="{ root: depth === 0 }"
-        v-html="nodeText"
-      />
+      >{{ nodeText }}</span>
     </div>
 
     <!-- 子节点 -->

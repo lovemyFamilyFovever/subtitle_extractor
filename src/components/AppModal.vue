@@ -34,7 +34,7 @@
           <p>这里的内容会被放进 modal-body</p>
         </AppModal>
       -->
-      <div class="modal-body" :class="{'full-screen': fullScreen}">
+      <div class="modal-body" :class="{ 'full-screen': fullScreen }">
         <slot />
       </div>
 
@@ -48,7 +48,7 @@
 // 使用 Vue 3 的 <script setup> 语法
 // =============================================
 
-import { onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
+import {ref, onMounted, onUnmounted, watch, nextTick, computed } from 'vue'
 
 // ===== Props：父组件传入的属性 =====
 // defineProps 声明这个组件接受哪些属性
@@ -75,10 +75,12 @@ const props = defineProps({
   }
 })
 
-// ===== Computed =====
-// 生成唯一的标题 ID（用于 ARIA）
-const titleId = computed(() => {
-  return `modal-title-${props.title.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`
+// ★ 修复：使用 ref + onMounted 生成一次固定 ID，不再每次 computed 求值
+const titleId = ref('')
+onMounted(() => {
+  const suffix = Math.random().toString(36).slice(2, 8)
+  const slug = (props.title || 'modal').replace(/\s+/g, '-').toLowerCase()
+  titleId.value = `modal-title-${slug}-${suffix}`
 })
 
 // ===== Emits：这个组件会向父组件发出哪些事件 =====

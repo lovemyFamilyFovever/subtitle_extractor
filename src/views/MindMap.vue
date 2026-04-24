@@ -75,7 +75,7 @@ const {
   insertImageToNode, openLocalFile, importFile, exportFile,
   hasUnsavedChanges, isAssociativeLineMode, newFile, removeLine,
   toggleAssociativeLineMode, getOutlineTree, imageDblClickData,
-  collectAllImages, setData, getData, render, saveToLocalFile
+  collectAllImages, setData, getData, render, saveToLocalFile, buildSaveData
 } = useMindMap()
 
 const overlayRef = ref(null)
@@ -84,6 +84,7 @@ const overlayRef = ref(null)
 // 面板
 // ============================================================
 const activePanel = ref(null)
+
 const showThemePanel = computed(() => activePanel.value === 'theme')
 const showStructure = computed(() => activePanel.value === 'structure')
 const showOutline = computed(() => activePanel.value === 'outline')
@@ -91,33 +92,49 @@ const showBaseStyle = computed(() => activePanel.value === 'basestyle')
 const showNodeStyle = computed(() => activePanel.value === 'node' && activeNodes.value.length > 0 && !isReadonly.value)
 const showFileList = computed(() => activePanel.value === 'filelist')
 
-function closePanel() { activePanel.value = null }
 
-function togglePanel(panelName) { activePanel.value = activePanel.value === panelName ? null : panelName }
+// 统一的面板切换函数，所有面板都走这里
+function openPanel(name) {
+  activePanel.value = name
+}
 
+function closePanel() {
+  activePanel.value = null
+}
+
+function togglePanel(name) {
+  activePanel.value = activePanel.value === name ? null : name
+}
+
+// toolbar 按钮统一走 togglePanel
 function handleToggleTheme() { togglePanel('theme') }
 function handleToggleLayout() { togglePanel('structure') }
 function handleToggleOutline() { togglePanel('outline') }
 function handleToggleBaseStyle() { togglePanel('basestyle') }
 
-let lastNodeCount = 0
-watch(activeNodes, (nodes) => {
-  const currentCount = nodes.length
-  // 当从无选中变为有选中时，打开节点样式面板
-  if (currentCount > 0 && lastNodeCount === 0) {
-    activePanel.value = 'node'
-  }
-  // 如果当前是基础样式面板（basestyle）打开，再次点击节点也应切换到节点样式面板
-  else if (currentCount > 0 && activePanel.value === 'basestyle') {
-    activePanel.value = 'node'
-  }
-  // 当从有选中变为无选中时，如果当前是节点面板则关闭
-  else if (currentCount === 0 && lastNodeCount > 0 && activePanel.value === 'node') {
-    activePanel.value = null
+// ============================================================
+// 节点选中 → 面板联动（统一走 openPanel / closePanel）
+// ============================================================
+watch(activeNodes, (nodes, prevNodes) => {
+  const count = nodes.length
+  const prevCount = prevNodes?.length ?? 0
+  const current = activePanel.value
+
+  // 选中节点时
+  if (count > 0) {
+    // 从无选中 → 有选中，或当前是 basestyle 面板，自动切到节点面板
+    openPanel('node')
+    return
   }
 
-  lastNodeCount = currentCount
+  // 取消选中时（count === 0）
+  // 如果当前是节点面板，自动关闭
+  if (current === 'node') {
+    closePanel()
+  }
+  // 其他面板（theme / structure / outline / basestyle / filelist）不受影响
 })
+
 
 // ============================================================
 // 文件列表
@@ -195,7 +212,7 @@ async function handleSave() {
   const fileHandle = getCurrentFileHandle()
 
   if (!fileHandle) {
-    const data = getData()  // 已经包含 customBackground
+    const data = getData()
     if (!data) return
     const saveData = {
       data: data.data,
@@ -207,7 +224,7 @@ async function handleSave() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = new Date().toLocaleString() + '.json'
+    a.download = generateSafeFileName('json')  // ✅ 安全文件名
     a.click()
     URL.revokeObjectURL(url)
     return
@@ -218,13 +235,21 @@ async function handleSave() {
 }
 
 
+// 统一的文件名生成函数（整个文件复用）
+function generateSafeFileName(ext = 'json') {
+  const d = new Date()
+  const pad = (n, len = 2) => String(n).padStart(len, '0')
+  return `思维导图_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.${ext}`
+}
+
+
+
 function handleKeydown(e) {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
     e.preventDefault()
     handleSave()
   }
-
-  if (e.key === 'Delete') {
+  if (e.key === 'Delete' && isAssociativeLineMode.value) {
     removeLine();
   }
 
@@ -341,8 +366,8 @@ function handleNoteRemove() {
 // ============================================================
 const showImageDlg = ref(false)
 
-function handleImageConfirm({ url, title }) {
-  insertImageToNode(url, title)
+function handleImageConfirm({ url, title, width, height }) {
+  insertImageToNode(url, title, width, height)
 }
 
 function handleInsertImage() {
@@ -374,10 +399,15 @@ const outlineTree = computed(() => showOutline.value ? getOutlineTree() : null)
 
 function handleNewFile() {
   if (hasUnsavedChanges.value) {
-    if (confirm('当前画布有未保存的修改，是否先保存？')) handleSave()
+    const result = confirm('当前画布有未保存的修改，是否先保存？')
+    if (result) {
+      handleSave()
+    } else {
+      newFile()
+    }
   }
-  newFile()
 }
+
 </script>
 
 

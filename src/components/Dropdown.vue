@@ -35,7 +35,7 @@ import { ref, computed, onMounted, onBeforeUnmount,watch } from 'vue'
 const props = defineProps({
   options: {
     type: Array,
-    default: []
+    default: () => []
   },
   modelValue: {
     type: String,
@@ -127,6 +127,7 @@ onBeforeUnmount(() => {
 
 .dropdown-menu {
   z-index: 2;
+  color: #333;
   position: absolute;
   top: calc(100% + 4px);
   left: 0;

@@ -24,6 +24,8 @@ const activeNodes = ref([])
 const canUndo = ref(false)
 const canRedo = ref(false)
 const currentTheme = ref('default')
+const currentNodeColorListName = ref('classic')
+const colorListIndex = ref(0)
 const currentLayout = ref('logicalStructure')
 const scale = ref(1)
 const isReadonly = ref(false)
@@ -31,11 +33,12 @@ const isAssociativeLineMode = ref(false)
 const hasUnsavedChanges = ref(false)
 const imageDblClickData = ref(null)
 
+// ★ 新增：localStorage 缓存
+const STORAGE_KEY = 'mindMapData'
+let saveTimer = null
+
 // ★★★ 新增：自定义背景状态 ★★★
 const customBackground = ref(null) // { type: 'none'|'pure'|'gradient'|'grid'|'image', value: any }
-
-const currentNodeColorListName = ref('default')
-const colorListIndex = ref(0)
 
 // ========== 主题列表 ==========
 const fullThemeList = [
@@ -48,21 +51,30 @@ const themePreviewMap = themeImgMap || {}
 
 // ========== 默认数据 ==========
 const initData = {
-  data: { text: '中心主题' },
-  children: [
-    {
-      data: { text: '分支主题' },
-      children: [
-        { data: { text: '分支主题' }, children: [] }
-      ],
-    },
-    {
-      data: { text: '分支主题' },
-      children: [
-        { data: { text: '分支主题' }, children: [] }
-      ],
-    },
-  ],
+  "data": {
+    "text": "中心主题"
+  },
+  "children": []
+}
+
+function saveToLocalStorage() {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    if (!mindMapInstance) return
+    try {
+      const data = mindMapInstance.getData()
+      if (!data) return
+      const saveData = {
+        data: data.data,
+        children: data.children || [],
+        customBackground: customBackground.value || null,
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
+      console.log('[MindMap] 已自动缓存到 localStorage')
+    } catch (e) {
+      console.warn('[MindMap] 缓存失败:', e)
+    }
+  }, 500) // 500ms 防抖
 }
 
 function updateHistoryStatus() {
@@ -86,6 +98,7 @@ function bindEvents() {
     mindMapInstance.on('data_change', () => {
       updateHistoryStatus()
       hasUnsavedChanges.value = true
+      saveToLocalStorage()
     })
 
     mindMapInstance.on('back_forward', (index, len) => {
@@ -161,6 +174,36 @@ function resetState() {
 }
 
 
+// ★★★ 新增：应用自定义背景到SVG ★★★
+function applyCustomBackground(bg) {
+  if (!mindMapInstance) return
+  const svgEl = mindMapInstance.el
+  if (!svgEl) return
+
+  if (bg.type === 'pure') {
+    svgEl.style.backgroundImage = ''
+    svgEl.style.background = bg.backgroundColor
+  } else if (bg.type === 'gradient') {
+    svgEl.style.backgroundImage = ''
+    svgEl.style.background = bg.backgroundColor
+  } else if (bg.type === 'grid') {
+    Object.assign(svgEl.style, {
+      backgroundImage: bg.backgroundImage,
+      backgroundSize: bg.backgroundSize,
+      backgroundRepeat: bg.backgroundRepeat,
+      backgroundPosition: bg.backgroundPosition,
+    })
+  } else if (bg.type === 'image') {
+    Object.assign(svgEl.style, {
+      backgroundImage: bg.backgroundImage,
+      backgroundSize: bg.backgroundSize,
+      backgroundRepeat: bg.backgroundRepeat,
+      backgroundPosition: bg.backgroundPosition,
+      backgroundColor: 'transparent',
+    })
+  }
+}
+
 // ========== 导出 ==========
 export function useMindMap() {
 
@@ -171,58 +214,92 @@ export function useMindMap() {
       mindMapInstance = null
       resetState()
     }
+
+
+
+    // ★ 优先从 localStorage 恢复
+    let finalData = null
+    if (data) {
+      // 外部传入了数据（如打开文件），优先使用
+      finalData = data
+    } else {
+      // 尝试从 localStorage 恢复
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY)
+        if (saved) {
+          finalData = JSON.parse(saved)
+          console.log('[MindMap] 从 localStorage 恢复数据')
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // 如果没有恢复到数据，使用默认数据
+    if (!finalData) {
+      finalData = JSON.parse(JSON.stringify(initData))
+      // applyColorsToTree(finalData)
+    }
+
     mindMapInstance = new MindMap({
       el,
-      data: JSON.parse(JSON.stringify(initData)),
+      data: finalData,
       theme: currentTheme.value,
       layout: currentLayout.value,
       initRootNodePosition: ['20%', 'center'], // 根节点位置
-      // themeConfig: {
-      //   // ========== 通用节点样式 ==========
-      //   imgMaxWidth: 333, // 节点内图片最大宽度
-      //   imgMaxHeight: 100, // 节点内图片最大高度
+      customQuickCreateChildBtnClick: (node) => {
+        const color = getNextNodeColor()
+        if (!color) {
+          node.mindMap.execCommand('INSERT_CHILD_NODE', false, [node])
+        } else {
+          node.mindMap.execCommand('INSERT_CHILD_NODE', false, [node], {
+            uid: Date.now().toString(),
+            text: '分支主题',
+            ...color
+          })
+        }
+      },
 
-      //   // ========== 根节点样式 ==========
-      //   root: {
-      //     paddingX: 35, // 水平内边距（更大）
-      //     paddingY: 15, // 垂直内边距（更大）
+      themeConfig: {
+        // ========== 通用节点样式 ==========
+        imgMaxWidth: 333, // 节点内图片最大宽度
+        imgMaxHeight: 100, // 节点内图片最大高度
 
-      //   },
+        // ========== 根节点样式 ==========
+        root: {
+          paddingX: 35, // 水平内边距（更大）
+          paddingY: 15, // 垂直内边距（更大）
 
-      //   // ========== 二级节点样式 ==========
-      //   second: {
-      //     marginX: 130, // 水平间距
-      //     marginY: 20, // 垂直间距
-      //     paddingX: 35, // 水平内边距
-      //     paddingY: 15, // 垂直内边距
+        },
 
-      //     textAlign: 'center', // 文字对齐方式
-      //   },
+        // ========== 二级节点样式 ==========
+        second: {
+          marginX: 130, // 水平间距
+          marginY: 20, // 垂直间距
+          paddingX: 35, // 水平内边距
+          paddingY: 15, // 垂直内边距
 
-      //   // ========== 三级及以下节点样式 ==========
-      //   node: {
-      //     marginX: 100, // 水平间距
-      //     marginY: 80, // 垂直间距
-      //     paddingX: 35, // 水平内边距
-      //     paddingY: 15, // 垂直内边距
+          textAlign: 'center', // 文字对齐方式
+        },
 
-      //     textAlign: 'center', // 文字对齐方式
-      //   },
+        // ========== 三级及以下节点样式 ==========
+        node: {
+          marginX: 100, // 水平间距
+          marginY: 80, // 垂直间距
+          paddingX: 35, // 水平内边距
+          paddingY: 15, // 垂直内边距
 
-      //   // ========== 概要节点样式 ==========
-      //   generalization: {
-      //     marginX: 100, // 水平间距
-      //     marginY: 40, // 垂直间距
 
-      //     textAlign: 'center', // 文字对齐方式
-      //   }
-      // },
+          textAlign: 'center', // 文字对齐方式
+        },
+
+        // ========== 概要节点样式 ==========
+        generalization: {
+          marginX: 100, // 水平间距
+          marginY: 40, // 垂直间距
+
+          textAlign: 'center', // 文字对齐方式
+        }
+      },
       // ========== 节点拖拽配置 ==========
-      // themeConfig: {
-      //   node: {
-      //     fillColor: '#fff',
-      //   }
-      // },
       enableDragModifyNodeWidth: true, // 允许拖拽修改节点宽度
       minNodeTextModifyWidth: 100, // 节点最小宽度（文本编辑时）
       maxNodeTextModifyWidth: -1, // 节点最大宽度（-1表示无限制）
@@ -240,52 +317,78 @@ export function useMindMap() {
       showNumber: false // 是否显示节点编号
     })
 
+
+    const _originalRender = mindMapInstance.render.bind(mindMapInstance)
+    mindMapInstance.render = function (...args) {
+      _originalRender(...args)
+      if (customBackground.value) {
+        applyCustomBackground(customBackground.value)
+      }
+    }
+
     window.mindMapInstance = mindMapInstance // 方便调试
 
-    
-
-    
-
+    // ★ 恢复 customBackground
+    if (finalData.customBackground) {
+      customBackground.value = finalData.customBackground
+      setTimeout(() => {
+        applyCustomBackground(finalData.customBackground)
+      }, 100)
+    }
 
     markRaw(mindMapInstance)
     bindEvents()
     isReady.value = true
     hasUnsavedChanges.value = false
-
-    console.log('[MindMap] 初始化成功')
   }
 
+  /**
+   * 根据当前主题获取 colors 数组，未设置则返回 null
+  */
+  function getCurrentColors() {
+    if (!currentNodeColorListName.value) return null
+    const found = useNodeColorList.find(
+      item => item.value === currentNodeColorListName.value
+    )
+    return found?.colors?.length ? found.colors : null
+  }
 
-  function setStyleForAllNodes(styleConfig) {
-    // 1. 获取整棵导图的数据树
-    const treeData = mindMapInstance.getData();
-    if (!treeData) return;
+  /**
+   * 根据节点总数计算下一个颜色（给单个新节点用）
+   */
+  function getNextNodeColor() {
+    const colors = getCurrentColors()
+    if (!colors) return null
+    const data = mindMapInstance.getData()
+    const totalCount = getNodesCount(data)
+    const index = totalCount % colors.length
+    return colors[index]
+  }
 
-    // 2. 递归遍历所有数据节点
-    function traverse(node) {
-        if (!node) return;
-
-        // 3. 通过 uid 找到真实的节点实例
-        const nodeInstance = mindMapInstance.renderer.findNodeByUid(node.data.uid);
-        if (nodeInstance) {
-            // 4. 调用官方 setNodeStyle API 设置样式
-            mindMapInstance.setStyles(styleConfig);
-        }
-        
-        // 5. 递归处理子节点
-        if (node.children && node.children.length) {
-            node.children.forEach(child => traverse(child));
-        }
+  /**
+   * 递归给整棵数据树依次着色（给 init / newFile 用）
+   */
+  function applyColorsToTree(treeData) {
+    const colors = getCurrentColors()
+    if (!colors) return
+    let index = 0
+    function walk(node) {
+      if (!node?.data) return
+      const color = colors[index % colors.length]
+      node.data = { ...node.data, ...color }
+      index++
+      node.children?.forEach(child => walk(child))
     }
+    walk(treeData)
+  }
 
-    traverse(treeData);
-}
 
 
   function destroy() {
     mindMapInstance.destroy()
     mindMapInstance = null
     resetState()
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null }
   }
 
   function newFile() {
@@ -295,8 +398,11 @@ export function useMindMap() {
     hasUnsavedChanges.value = false
     canUndo.value = false
     canRedo.value = false
-    // 重置背景
     customBackground.value = null
+
+    // ★ 新增：清除 localStorage 缓存
+    localStorage.removeItem(STORAGE_KEY)
+
     const svgEl = mindMapInstance.el?.querySelector('svg')
     if (svgEl) {
       svgEl.style.background = '#fff'
@@ -337,15 +443,10 @@ export function useMindMap() {
 
   function insertChildNode() {
     if (!mindMapInstance) return
-    if (!currentNodeColorListName.value) {
+    const color = getNextNodeColor()
+    if (!color) {
       mindMapInstance.execCommand('INSERT_CHILD_NODE')
     } else {
-
-      const totalCount = getNodesCount(mindMapInstance.renderer.root)
-      const colorsArray = useNodeColorList.find(item => item.value === currentNodeColorListName.value)
-      colorListIndex.value = totalCount % colorsArray.colors.length
-      const color = colorsArray.colors[colorListIndex.value]
-
       mindMapInstance.execCommand('INSERT_CHILD_NODE', false, [], {
         uid: Date.now().toString(),
         text: '分支主题',
@@ -354,25 +455,21 @@ export function useMindMap() {
     }
   }
 
+
   function insertSiblingNode() {
     if (!mindMapInstance) return
-    if (!currentNodeColorListName.value) {
+    const color = getNextNodeColor()
+    if (!color) {
       mindMapInstance.execCommand('INSERT_NODE')
     } else {
-
-      const totalCount = getNodesCount(mindMapInstance.renderer.root)
-      const colorsArray = useNodeColorList.find(item => item.value === currentNodeColorListName.value)
-      colorListIndex.value = totalCount % colorsArray.colors.length
-      const color = colorsArray.colors[colorListIndex.value]
-
       mindMapInstance.execCommand('INSERT_NODE', false, [], {
         uid: Date.now().toString(),
         text: '分支主题',
         ...color
       })
     }
-
   }
+
 
   function removeLine() {
     if (!mindMapInstance) return
@@ -437,6 +534,7 @@ export function useMindMap() {
     customBackground.value = bg
     applyCustomBackground(bg)
     hasUnsavedChanges.value = true
+    saveToLocalStorage()
   }
 
   // ★★★ 新增：获取自定义背景 ★★★
@@ -444,54 +542,21 @@ export function useMindMap() {
     return customBackground.value
   }
 
-  // ★★★ 新增：应用自定义背景到SVG ★★★
-  function applyCustomBackground(bg) {
-    if (!mindMapInstance) return
-    const svgEl = mindMapInstance.el
-    if (!svgEl) return
 
-    if (bg.type === 'pure') {
-      svgEl.style.backgroundImage = ''
-      svgEl.style.background = bg.backgroundColor
-    } else if (bg.type === 'gradient') {
-      svgEl.style.backgroundImage = ''
-      svgEl.style.background = bg.backgroundColor
-    } else if (bg.type === 'grid') {
-      Object.assign(svgEl.style, {
-        backgroundImage: bg.backgroundImage,
-        backgroundSize: bg.backgroundSize,
-        backgroundRepeat: bg.backgroundRepeat,
-        backgroundPosition: bg.backgroundPosition,
-      })
-    } else if (bg.type === 'image') {
-      Object.assign(svgEl.style, {
-        backgroundImage: bg.backgroundImage,
-        backgroundSize: bg.backgroundSize,
-        backgroundRepeat: bg.backgroundRepeat,
-        backgroundPosition: bg.backgroundPosition,
-        backgroundColor: 'transparent',
-      })
-    }
-  }
 
   // ========== 插入图片 ==========
-  function insertImageToNode(url, title = '') {
+  function insertImageToNode(url, title = '', width, height) {
     if (!mindMapInstance) return
     const nodeList = getActiveNodeList()
     if (!nodeList.length) return
     const img = new Image()
     img.onload = () => {
-      const maxWidth = 310
-      let width = img.naturalWidth
-      let height = img.naturalHeight
-      if (width > maxWidth) {
-        const ratio = maxWidth / width
-        width = maxWidth
-        height = Math.round(height * ratio)
-      }
+      let finalWidth = width || img.naturalWidth
+      let finalHeight = height || img.naturalHeight
+
       nodeList.forEach((node) => {
         if (typeof node.setImage === 'function') {
-          node.setImage({ url, title: title || '图片', width, height })
+          node.setImage({ url, title: title || '图片', width: finalWidth, height: finalHeight })
         }
       })
       mindMapInstance.render()
@@ -558,7 +623,6 @@ export function useMindMap() {
                 size: file.size,
               }
             })
-            console.log(`已打开文件: ${fileHandle.name}`)
           } catch (err) {
             console.error(`文件 ${fileHandle.name} 解析失败:`, err)
           }
@@ -653,9 +717,8 @@ export function useMindMap() {
 
   // ★ 替换原来的 exportFile 函数
   function exportFile() {
-    if (!mindMapInstance) return
-    const data = mindMapInstance.getData()
-    if (!data) return
+    const saveData = buildSaveData()
+    if (!saveData) return
 
     const d = new Date()
     const name = d.getFullYear() +
@@ -664,13 +727,6 @@ export function useMindMap() {
       String(d.getHours()).padStart(2, '0') +
       String(d.getMinutes()).padStart(2, '0') +
       String(d.getSeconds()).padStart(2, '0')
-
-    // ★ 手动构造包含 customBackground 的完整数据
-    const saveData = {
-      data: data.data,
-      children: data.children || [],
-      customBackground: customBackground.value || null,
-    }
 
     const json = JSON.stringify(saveData, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
@@ -683,33 +739,27 @@ export function useMindMap() {
   }
 
 
+
   // ★ 简化后的 saveToLocalFile
   async function saveToLocalFile(fileHandle) {
     if (!mindMapInstance || !fileHandle) return false
     try {
-      const data = getData()  // ★ 现在 getData 已经包含 customBackground
-      if (!data) return false
+      const saveData = buildSaveData()
+      if (!saveData) return false
 
-      // 去掉 simple-mind-map 内部可能带的多余字段
-      const saveData = {
-        data: data.data,
-        children: data.children || [],
-        customBackground: data.customBackground || null,
-      }
       const json = JSON.stringify(saveData, null, 2)
-
       const writable = await fileHandle.createWritable()
       await writable.write(json)
       await writable.close()
 
       hasUnsavedChanges.value = false
-      console.log(`[MindMap] 已保存到: ${fileHandle.name}`)
       return true
     } catch (err) {
       console.error('[MindMap] 保存失败:', err)
       return false
     }
   }
+
 
 
   // ========== 关联线 ==========
@@ -787,16 +837,7 @@ export function useMindMap() {
 
   // ★ 替换原来的 getData 函数
   function getData() {
-    if (!mindMapInstance) return null
-    try {
-      const data = mindMapInstance.getData()
-      if (!data) return null
-      // ★ 附加 customBackground
-      return {
-        ...data,
-        customBackground: customBackground.value || null,
-      }
-    } catch (e) { return null }
+    return buildSaveData()
   }
 
 
@@ -829,6 +870,9 @@ export function useMindMap() {
         customBackground.value = null
       }
 
+      // ★ 新增：加载文件后立即缓存新数据
+      saveToLocalStorage()
+
     } catch (e) { /* ignore */ }
     hasUnsavedChanges.value = false
   }
@@ -855,6 +899,25 @@ export function useMindMap() {
       return null
     }
   }
+
+
+  // ========== 统一保存数据构造 ==========
+  function buildSaveData() {
+    if (!mindMapInstance) return null
+    try {
+      const data = mindMapInstance.getData()
+      if (!data) return null
+      return {
+        data: data.data,
+        children: data.children || [],
+        customBackground: customBackground.value || null,
+      }
+    } catch (e) {
+      return null
+    }
+  }
+
+
 
   return {
     isReady,
@@ -910,6 +973,7 @@ export function useMindMap() {
     getOutlineTree,
     imageDblClickData,
     collectAllImages,
-    saveToLocalFile
+    saveToLocalFile,
+    buildSaveData,
   }
 }

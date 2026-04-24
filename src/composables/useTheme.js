@@ -1,6 +1,6 @@
 import { ref, onMounted } from 'vue'
 
-const THEME_KEY = 'subtitle-extractor-theme'
+const THEME_KEY = 'mindmap-theme'
 
 // 当前主题状态
 const currentTheme = ref('dark')

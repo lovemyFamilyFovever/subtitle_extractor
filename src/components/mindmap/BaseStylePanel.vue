@@ -260,7 +260,13 @@ const syncBackgroundConfig = () => {
                 if (match) currentGridSize.value = parseInt(match[1])
             }
             if (bg.backgroundImage) {
-                currentGridColor.value = '#e5e5e5'
+                // 从 SVG 数据中提取 stroke 颜色值
+                const colorMatch = bg.backgroundImage.match(/stroke='([^']+)'/)
+                if (colorMatch && colorMatch[1]) {
+                    currentGridColor.value = decodeURIComponent(colorMatch[1])
+                } else {
+                    currentGridColor.value = '#e5e5e5'
+                }
             }
             break
         case 'image':
@@ -393,15 +399,6 @@ const setupWatchers = () => {
         const parent = props.getThemeConfig()?.node || {}
         emit('set-theme-config', 'node', { ...parent, marginX: newVal })
     }, { flush: 'post' })
-
-    watch(nodeMarginXLocal, (newVal) => {
-        const parent = props.getThemeConfig()?.node || {}
-        emit('set-theme-config', 'node', {
-            marginX: newVal,
-            marginY: parent.marginY,   // 只保留同类字段
-        })
-    }, { flush: 'post' })
-
 
     watch(nodeMarginYLocal, (newVal) => {
         const parent = props.getThemeConfig()?.node || {}

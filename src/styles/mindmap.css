@@ -401,6 +401,7 @@ body,
     border-radius: 10px;
     transition: all 0.2s ease-in;
     border: 1px solid transparent;
+    color: #000;
 }
 
 .preset-bg-types {
@@ -530,10 +531,12 @@ body,
     gap: 12px;
     margin-bottom: 12px;
 }
+
 .grid-size-options {
     display: flex;
     gap: 8px;
 }
+
 .grid-size-options button {
     padding: 4px 10px;
     border: 1px solid #ddd;
@@ -542,6 +545,7 @@ body,
     cursor: pointer;
     font-size: 12px;
 }
+
 .grid-size-options button.active {
     border-color: #4A90E2;
     background: #4A90E2;
@@ -552,4 +556,61 @@ body,
     display: flex;
     gap: 5px;
     align-items: center;
+    color: #ccc;
+}
+
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.preset-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 6px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    height: max-content;
+}
+
+.preset-btn:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
+
+.preset-btn:active {
+    transform: scale(0.97);
+}
+
+.preset-swatch {
+    width: 48px;
+    height: 32px;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease;
+}
+
+.preset-btn:hover .preset-swatch {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preset-swatch-text {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.preset-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
 }

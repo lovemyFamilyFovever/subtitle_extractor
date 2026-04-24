@@ -51,13 +51,7 @@ onMounted(async () => {
 
   if (!containerRef.value) return
 
-  let data = null
-  const saved = localStorage.getItem('mindMapData')
-  if (saved) {
-    try { data = JSON.parse(saved) } catch (e) { /* ignore */ }
-  }
-
-  init(containerRef.value, data || undefined)
+  init(containerRef.value)
   document.addEventListener('keydown', handleKeyDown)
 })
 

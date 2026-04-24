@@ -82,18 +82,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted, watch,nextTick } from 'vue';
+
+import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 
 const props = defineProps({
   modelValue: {
     type: String,
-    default: '#fff'
+    default: '#4A90E2'
   }
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-// 预设颜色主题数据（来源于参考内容）
+// 预设颜色主题数据
 const colorThemes = {
   '系统色': [
     '#EFECEB', '#F2F2F2', '#E7EBED', '#FADCDB', '#FBEADA', '#FCF9EA', '#E5F6DA', '#DBF5F5',
@@ -153,14 +154,16 @@ const currentThemeColors = computed(() => {
 
 // 输入框绑定
 const rgbInput = reactive({ r: 74, g: 144, b: 226 });
-const hexInput = ref('fff');
+const hexInput = ref('4A90E2');
 
 // 光标位置
-const cursorStyle = computed(() => ({
-  left: '25px',
-  top: '25px'
-}));
+const cursorX = ref(25)
+const cursorY = ref(25)
 
+const cursorStyle = computed(() => ({
+  left: cursorX.value + 'px',
+  top: cursorY.value + 'px'
+}))
 // 转换函数
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -178,8 +181,8 @@ function rgbToHex(r, g, b) {
   }).join('');
 }
 
-// 更新输入框
-function updateInputs(color) {
+// ★ 仅同步输入框显示，不触发 emit（用于初始化和 watch 外部值变化）
+function syncInputs(color) {
   const rgb = hexToRgb(color);
   if (rgb) {
     rgbInput.r = rgb.r;
@@ -187,10 +190,15 @@ function updateInputs(color) {
     rgbInput.b = rgb.b;
     hexInput.value = color.replace('#', '');
   }
+}
+
+// ★ 同步输入框 + 确认并 emit（用于用户主动选择颜色时）
+function updateInputs(color) {
+  syncInputs(color);
   confirmColor();
 }
 
-// 选择颜色
+// 选择颜色（用户主动点击）
 function selectColor(color) {
   selectedColor.value = color;
   updateInputs(color);
@@ -212,6 +220,7 @@ function updateFromRgb() {
   const hex = rgbToHex(rgbInput.r, rgbInput.g, rgbInput.b);
   selectedColor.value = hex;
   hexInput.value = hex.replace('#', '');
+  confirmColor();
 }
 
 // 从Hex输入更新
@@ -226,6 +235,7 @@ function updateFromHex() {
       rgbInput.g = rgb.g;
       rgbInput.b = rgb.b;
     }
+    confirmColor();
   }
 }
 
@@ -233,18 +243,24 @@ function updateFromHex() {
 function handleCanvasClick(e) {
   const canvas = colorCanvas.value;
   if (!canvas) return;
-
   const ctx = canvas.getContext('2d');
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
+  // 更新光标位置
+  cursorX.value = Math.round(x)
+  cursorY.value = Math.round(y)
+
+  // 读取颜色
   const imageData = ctx.getImageData(x, y, 1, 1).data;
   const color = '#' + [imageData[0], imageData[1], imageData[2]]
     .map(v => v.toString(16).padStart(2, '0'))
     .join('');
 
-  selectColor(color);
+  // 仅更新预览和输入框，不触发 confirmColor / closeDropdown
+  selectedColor.value = color;
+  syncInputs(color);
 }
 
 // 初始化画布
@@ -272,6 +288,9 @@ function initCanvas() {
 
   ctx.fillStyle = gradientV;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  cursorX.value = 25
+  cursorY.value = 25
 }
 
 // 下拉面板控制
@@ -280,7 +299,6 @@ async function toggleDropdown(event) {
 
   await nextTick()
 
-  // 获取点击位置
   const clickX = event.clientX
   const clickY = event.clientY
 
@@ -291,7 +309,6 @@ async function toggleDropdown(event) {
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
 
-
     const top = clickY + modalRect.height > viewportHeight ? clickY - modalRect.height : clickY;
     const left = clickX + modalRect.width > viewportWidth ? viewportWidth - modalRect.width : clickX;
     modalStyle.value = {
@@ -300,7 +317,6 @@ async function toggleDropdown(event) {
       position: 'fixed',
       zIndex: 9999
     };
-
   }
 }
 
@@ -309,7 +325,7 @@ function closeDropdown() {
   isThemeListOpen.value = false;
 }
 
-// 确认选择
+// 确认选择（带历史记录 + emit）
 function confirmColor() {
   if (!colorHistory.value.includes(selectedColor.value)) {
     colorHistory.value.unshift(selectedColor.value);
@@ -321,11 +337,19 @@ function confirmColor() {
   closeDropdown();
 }
 
-// 点击外部关闭
+// ============================================================
+// ★ 修复核心：Teleport 出去的面板也要纳入"内部"判断
+// ============================================================
 function handleClickOutside(e) {
-  if (pickerRef.value && !pickerRef.value.contains(e.target)) {
-    closeDropdown();
-  }
+  // 1. 点击触发器本身 → 不关闭（由 toggleDropdown 处理）
+  if (pickerRef.value && pickerRef.value.contains(e.target)) return;
+
+  // 2. 点击 Teleport 到 body 的面板内部 → 不关闭
+  if (modalRef.value && modalRef.value.contains(e.target)) return;
+
+  // 3. 真正的外部点击 → 关闭
+  closeDropdown();
+
   if (themeSelectorRef.value && !themeSelectorRef.value.contains(e.target)) {
     isThemeListOpen.value = false;
   }
@@ -335,7 +359,7 @@ function handleClickOutside(e) {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   selectedColor.value = props.modelValue || selectedColor.value;
-  updateInputs(selectedColor.value);
+  syncInputs(selectedColor.value);  // ★ 仅同步UI，不触发 emit
 });
 
 onUnmounted(() => {
@@ -347,13 +371,15 @@ watch(
   (newValue) => {
     if (newValue && newValue !== selectedColor.value) {
       selectedColor.value = newValue;
+      syncInputs(newValue);  // ★ 仅同步UI，不触发 emit
     }
   }
 );
 
 watch(selectedColor, (newColor) => {
-  updateInputs(newColor);
+  syncInputs(newColor);  // ★ 仅同步UI，不触发 emit
 });
+
 </script>
 
 <style scoped>

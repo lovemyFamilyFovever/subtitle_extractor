@@ -136,6 +136,7 @@ const onTextFocus = (e) => {
   padding: 0px 8px;
   text-align: center;
   -moz-appearance: textfield;
+  color: rgba(0, 0, 0, 0.75);
 }
 
 .form-input::-webkit-outer-spin-button,

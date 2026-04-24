@@ -20,7 +20,7 @@
               <template v-if="localPreview">
                 <img :src="localPreview" class="drop-preview" />
                 <div class="drop-file-name">{{ localFile?.name }}</div>
-                <div class="drop-file-size">{{ formatSize(localFile?.size) }}</div>
+                <div class="drop-file-size">{{ formatFileSize(localFile?.size) }}</div>
               </template>
               <template v-else>
                 <svg class="drop-icon" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor"
@@ -58,7 +58,7 @@
                 <span class="slider-value">{{ compressQuality }}%</span>
               </div>
               <div class="compress-estimate" v-if="compressMode !== 'none'">
-                原始大小：{{ formatSize(localFile?.size) }}
+                原始大小：{{ formatFileSize(localFile?.size) }}
                 <template v-if="estimatedSize">
                   → 预估：<span class="estimate-value">{{ estimatedSize }}</span>
                 </template>
@@ -95,6 +95,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import { formatFileSize, calcBase64Size } from '@/utils/commonUtils.js'
 
 const props = defineProps({
   visible: { type: Boolean, default: false },
@@ -118,7 +119,7 @@ const estimatedSize = computed(() => {
   if (!localFile.value || compressMode.value === 'none') return ''
   const quality = compressMode.value === 'auto' ? 0.7 : compressQuality.value / 100
   const estimated = Math.round(localFile.value.size * quality * 0.6)
-  return formatSize(estimated)
+  return formatFileSize(estimated)
 })
 
 watch(() => props.visible, (val) => {
@@ -167,20 +168,13 @@ function loadFile(file) {
   reader.readAsDataURL(file)
 }
 
-function formatSize(bytes) {
-  if (!bytes) return '0 B'
-  if (bytes < 1024) return bytes + ' B'
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
-}
-
 async function confirmLocal() {
   if (!localPreview.value) return
   let finalUrl = localPreview.value
   if (compressMode.value !== 'none') {
     finalUrl = await compressImage(localPreview.value)
   }
-  emit('confirm', { url: finalUrl, title: localFile.value?.name || '图片' })
+  emit('confirm', { url: finalUrl, title: localFile.value?.name || '图片', width: 200, height: 260 })
   close()
 }
 
@@ -220,14 +214,7 @@ function compressImage(dataUrl) {
   })
 }
 
-function calcBase64Size(dataUrl) {
-  const base64 = dataUrl.split(',')[1]
-  if (!base64) return 0
-  let bytes = base64.length * 3 / 4
-  if (base64.endsWith('==')) bytes -= 2
-  else if (base64.endsWith('=')) bytes -= 1
-  return Math.round(bytes)
-}
+
 
 async function fetchUrl() {
   const url = imageUrl.value.trim()
@@ -254,7 +241,7 @@ async function fetchUrl() {
 
 async function confirmUrl() {
   if (!urlPreview.value) return
-  emit('confirm', { url: urlPreview.value, title: imageUrl.value })
+  emit('confirm', { url: urlPreview.value, title: imageUrl.value, width: 200, height: 260 })
   close()
 }
 </script>

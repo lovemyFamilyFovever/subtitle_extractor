@@ -273,13 +273,19 @@ const handleKeydown = (e) => {
   }
 }
 
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
+
+watch(visible, (isOpen) => {
+  if (isOpen) {
+    document.addEventListener('keydown', handleKeydown)
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.removeEventListener('keydown', handleKeydown)
+    document.body.style.overflow = ''
+  }
 })
 
+
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeydown)
-  document.body.style.overflow = ''
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDrag)
 })

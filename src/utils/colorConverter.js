@@ -1,56 +1,71 @@
 export function useColorConverter() {
-    /**
-    * 将颜色值统一转换为HEX格式
-    * @param {string} color - 颜色值，支持RGB格式(rgb(0,0,0)或rgb(0, 0, 0))或HEX格式(#000000或000000)
-    * @returns {string} 返回标准的6位HEX颜色值(如#000000)，输入无效时返回空字符串
-    */
+    // 命名颜色和复杂格式的兜底解析
+    const namedColorToHex = (color) => {
+        const temp = document.createElement('div');
+        temp.style.color = color;
+        temp.style.display = 'none';
+        document.body.appendChild(temp);
+
+        const computed = getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+
+        // computed 格式为 rgb(r, g, b) 或 rgba(r, g, b, a)
+        const match = computed.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (match) {
+            const r = parseInt(match[1], 10);
+            const g = parseInt(match[2], 10);
+            const b = parseInt(match[3], 10);
+            return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+        }
+        return '';
+    };
+
     const toHexFormat = (color) => {
-        // 参数有效性检查
         if (!color || typeof color !== 'string') {
             console.warn('Invalid color parameter: expected a non-empty string');
             return '';
         }
 
-        // 去除首尾空格并转为小写
         const trimmedColor = color.trim().toLowerCase();
-        
-        if (trimmedColor === 'transparent') return 'transparent';
 
-        // 检测并处理HEX格式
+        // 处理 transparent
+        if (trimmedColor === 'transparent') {
+            return 'transparent';
+        }
+
+        // HEX 格式
         if (trimmedColor.startsWith('#')) {
             let hex = trimmedColor.slice(1);
-            // 处理3位HEX简写 (#RGB -> #RRGGBB)
             if (hex.length === 3) {
                 hex = hex.split('').map(c => c + c).join('');
             }
-            // 验证6位HEX格式
             if (/^[0-9a-f]{6}$/.test(hex)) {
                 return `#${hex}`;
+            }
+            // 8位 HEX（带透明度），截取前6位
+            if (/^[0-9a-f]{8}$/.test(hex)) {
+                return `#${hex.slice(0, 6)}`;
             }
             console.warn('Invalid HEX color format');
             return '';
         }
 
-        // 检测并处理RGB格式
-        const rgbMatch = trimmedColor.match(/^rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)$/);
+        // RGB / RGBA 格式
+        const rgbMatch = trimmedColor.match(/^rgba?\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})/);
         if (rgbMatch) {
             const r = parseInt(rgbMatch[1], 10);
             const g = parseInt(rgbMatch[2], 10);
             const b = parseInt(rgbMatch[3], 10);
-
             if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
-                const toHex = (num) => {
-                    const hex = num.toString(16);
-                    return hex.length === 1 ? '0' + hex : hex;
-                };
+                const toHex = (num) => num.toString(16).padStart(2, '0');
                 return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
             }
             console.warn('RGB values must be between 0 and 255');
             return '';
         }
 
-        console.warn('Unsupported color format. Please use RGB(r,g,b) or HEX(#RRGGBB/#RGB)');
-        return '';
+        // 命名颜色及其他格式（red, blue, hsl(...) 等）交给浏览器解析
+        return namedColorToHex(trimmedColor);
     };
 
     return toHexFormat;
