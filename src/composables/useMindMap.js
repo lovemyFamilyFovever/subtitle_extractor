@@ -242,6 +242,11 @@ export function useMindMap() {
 
     window.mindMapInstance = mindMapInstance // 方便调试
 
+    
+
+    
+
+
     markRaw(mindMapInstance)
     bindEvents()
     isReady.value = true
@@ -249,6 +254,33 @@ export function useMindMap() {
 
     console.log('[MindMap] 初始化成功')
   }
+
+
+  function setStyleForAllNodes(styleConfig) {
+    // 1. 获取整棵导图的数据树
+    const treeData = mindMapInstance.getData();
+    if (!treeData) return;
+
+    // 2. 递归遍历所有数据节点
+    function traverse(node) {
+        if (!node) return;
+
+        // 3. 通过 uid 找到真实的节点实例
+        const nodeInstance = mindMapInstance.renderer.findNodeByUid(node.data.uid);
+        if (nodeInstance) {
+            // 4. 调用官方 setNodeStyle API 设置样式
+            mindMapInstance.setStyles(styleConfig);
+        }
+        
+        // 5. 递归处理子节点
+        if (node.children && node.children.length) {
+            node.children.forEach(child => traverse(child));
+        }
+    }
+
+    traverse(treeData);
+}
+
 
   function destroy() {
     mindMapInstance.destroy()

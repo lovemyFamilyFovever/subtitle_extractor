@@ -304,8 +304,9 @@ function handleNormalClick() {
 const currentBg = computed({
     get() {
         const val = toHexFormat(getNodeStyle('fillColor', '#ffffff'))
-         if (!val || val === 'transparent') return '#ffffff'
-        return val === 'transparent' ? '#ffffff' : val
+        //  if (!val || val === 'transparent') return 'transparent'
+        // return val === 'transparent' ? '#ffffff' : val
+        return val
     },
     set(val) {
         emit('set-style', 'fillColor', val)
