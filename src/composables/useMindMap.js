@@ -6,9 +6,10 @@ import themeImgMap from 'simple-mind-map-plugin-themes/themeImgMap'
 import Export from 'simple-mind-map/src/plugins/Export.js'
 import AssociativeLine from 'simple-mind-map/src/plugins/AssociativeLine.js'
 import RichText from 'simple-mind-map/src/plugins/RichText.js'
-import NodeImgAdjust from './NodeImgAdjust.js'
-import useNodeColorList from './useNodeColorList.js'
-import { formatTime, formatFileSize, calcBase64Size } from '../utils/commonUtils'
+import NodeImgAdjust from '../plugins/NodeImgAdjust.js'
+import { createMindMapPersistence, loadFromLocalStorage, clearLocalStorage } from './useMindMapPersistence.js'
+import { getNextNodeColor, applyColorsToTree, setNodeStyles, setNodeStylesBatch, setThemeConfig as setThemeConfigHelper, getThemeConfig as getThemeConfigHelper, applyCustomBackground, getCurrentColors } from './useMindMapTheme.js'
+import { collectAllImages as collectImagesFromMindMap, insertImageToNode as insertImageToNodeHelper } from './useMindMapMedia.js'
 
 try { Themes.init(MindMap) } catch (e) { /* ignore */ }
 MindMap.usePlugin(Export)
@@ -18,6 +19,12 @@ MindMap.usePlugin(RichText)
 
 // ========== 模块级单例 ==========
 let mindMapInstance = null
+let saveToLocalStorage = () => {}
+let onNodeActiveListener = null
+let onDataChangeListener = null
+let onBackForwardListener = null
+let onScaleListener = null
+let onNodeImgDblclickListener = null
 
 const isReady = ref(false)
 const activeNodes = ref([])
@@ -34,11 +41,11 @@ const hasUnsavedChanges = ref(false)
 const imageDblClickData = ref(null)
 
 // ★ 新增：localStorage 缓存
-const STORAGE_KEY = 'mindMapData'
-let saveTimer = null
-
 // ★★★ 新增：自定义背景状态 ★★★
 const customBackground = ref(null) // { type: 'none'|'pure'|'gradient'|'grid'|'image', value: any }
+
+// ★ 新增：维护节点计数状态
+const nodeCount = ref(0)
 
 // ========== 主题列表 ==========
 const fullThemeList = [
@@ -57,25 +64,6 @@ const initData = {
   "children": []
 }
 
-function saveToLocalStorage() {
-  if (saveTimer) clearTimeout(saveTimer)
-  saveTimer = setTimeout(() => {
-    if (!mindMapInstance) return
-    try {
-      const data = mindMapInstance.getData()
-      if (!data) return
-      const saveData = {
-        data: data.data,
-        children: data.children || [],
-        customBackground: customBackground.value || null,
-      }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
-      console.log('[MindMap] 已自动缓存到 localStorage')
-    } catch (e) {
-      console.warn('[MindMap] 缓存失败:', e)
-    }
-  }, 500) // 500ms 防抖
-}
 
 function updateHistoryStatus() {
   if (!mindMapInstance) return
@@ -90,70 +78,85 @@ function updateHistoryStatus() {
 
 function bindEvents() {
   if (!mindMapInstance) return
+
+  onNodeActiveListener = (node, nodeList) => {
+    activeNodes.value = nodeList || []
+  }
+
+  onDataChangeListener = () => {
+    updateHistoryStatus()
+    hasUnsavedChanges.value = true
+    updateNodeCount() // ★ 数据改变时更新节点计数
+    saveToLocalStorage()
+  }
+
+  onBackForwardListener = (index, len) => {
+    canUndo.value = index > 0
+    canRedo.value = index < len - 1
+  }
+
+  onScaleListener = (val) => {
+    scale.value = val
+  }
+
+  onNodeImgDblclickListener = (node, e, imgNode) => {
+    const imgSrc = node.getData?.('image') || ''
+    if (imgSrc) {
+      imageDblClickData.value = { node, imgSrc, imgNode }
+    }
+  }
+
   try {
-    mindMapInstance.on('node_active', (node, nodeList) => {
-      activeNodes.value = nodeList || []
-    })
-
-    mindMapInstance.on('data_change', () => {
-      updateHistoryStatus()
-      hasUnsavedChanges.value = true
-      saveToLocalStorage()
-    })
-
-    mindMapInstance.on('back_forward', (index, len) => {
-      canUndo.value = index > 0
-      canRedo.value = index < len - 1
-    })
-
-    mindMapInstance.on('scale', (val) => {
-      scale.value = val
-    })
-
-    mindMapInstance.on('node_img_dblclick', (node, e, imgNode) => {
-      const imgSrc = node.getData?.('image') || ''
-      if (imgSrc) {
-        imageDblClickData.value = { node, imgSrc, imgNode }
-      }
-    })
+    mindMapInstance.on('node_active', onNodeActiveListener)
+    mindMapInstance.on('data_change', onDataChangeListener)
+    mindMapInstance.on('back_forward', onBackForwardListener)
+    mindMapInstance.on('scale', onScaleListener)
+    mindMapInstance.on('node_img_dblclick', onNodeImgDblclickListener)
   } catch (e) { /* ignore */ }
 }
 
+function unbindEvents() {
+  if (!mindMapInstance) return
+  try {
+    mindMapInstance.off?.('node_active', onNodeActiveListener)
+    mindMapInstance.off?.('data_change', onDataChangeListener)
+    mindMapInstance.off?.('back_forward', onBackForwardListener)
+    mindMapInstance.off?.('scale', onScaleListener)
+    mindMapInstance.off?.('node_img_dblclick', onNodeImgDblclickListener)
+  } catch (e) { /* ignore */ }
+
+  onNodeActiveListener = null
+  onDataChangeListener = null
+  onBackForwardListener = null
+  onScaleListener = null
+  onNodeImgDblclickListener = null
+}
+
 function collectAllImages() {
-  if (!mindMapInstance) return []
+  return collectImagesFromMindMap(mindMapInstance)
+}
+
+function updateNodeCount() {
+  if (!mindMapInstance) return
   try {
     const data = mindMapInstance.getData()
-    const images = []
-    traverseCollectImages(data, images)
-    return images
+    nodeCount.value = calculateNodeCount(data)
   } catch (e) {
-    return []
+    // 如果计算失败，重置为1（根节点）
+    nodeCount.value = 1
   }
 }
 
-function traverseCollectImages(node, images) {
-  if (!node) return
-  const imgSrc = node.data?.image
-  const imgTitle = node.data?.imageTitle
-  const imgText = node.data?.text
-  const imgSize = node.data?.imageSize
-
-  if (imgSrc) {
-    const fileSize = calcBase64Size(imgSrc)
-    images.push({
-      imgSrc, imgTitle, imgText, imgSize,
-      fileSize,
-      fileSizeText: formatFileSize(fileSize),
-    })
-  }
+function calculateNodeCount(node) {
+  if (!node) return 0
+  let count = 1
   if (node.children && node.children.length) {
-    node.children.forEach((child) => {
-      traverseCollectImages(child, images)
-    })
+    for (const child of node.children) {
+      count += calculateNodeCount(child)
+    }
   }
+  return count
 }
-
-
 
 function getActiveNodeList() {
   if (!mindMapInstance) return []
@@ -175,68 +178,33 @@ function resetState() {
 
 
 // ★★★ 新增：应用自定义背景到SVG ★★★
-function applyCustomBackground(bg) {
-  if (!mindMapInstance) return
-  const svgEl = mindMapInstance.el
-  if (!svgEl) return
-
-  if (bg.type === 'pure') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.backgroundColor
-  } else if (bg.type === 'gradient') {
-    svgEl.style.backgroundImage = ''
-    svgEl.style.background = bg.backgroundColor
-  } else if (bg.type === 'grid') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.backgroundImage,
-      backgroundSize: bg.backgroundSize,
-      backgroundRepeat: bg.backgroundRepeat,
-      backgroundPosition: bg.backgroundPosition,
-    })
-  } else if (bg.type === 'image') {
-    Object.assign(svgEl.style, {
-      backgroundImage: bg.backgroundImage,
-      backgroundSize: bg.backgroundSize,
-      backgroundRepeat: bg.backgroundRepeat,
-      backgroundPosition: bg.backgroundPosition,
-      backgroundColor: 'transparent',
-    })
-  }
-}
 
 // ========== 导出 ==========
 export function useMindMap() {
+  const persistence = createMindMapPersistence({ getData, setData, buildSaveData })
+  saveToLocalStorage = persistence.saveToLocalStorage
+  const {
+    openLocalFile,
+    importFile,
+    exportFile,
+    saveToLocalFile,
+  } = persistence
 
   function init(el, data) {
     if (!el) return
     if (mindMapInstance) {
-      try { mindMapInstance.destroy() } catch (e) { /* ignore */ }
-      mindMapInstance = null
-      resetState()
+      destroy()
     }
 
-
-
-    // ★ 优先从 localStorage 恢复
     let finalData = null
     if (data) {
-      // 外部传入了数据（如打开文件），优先使用
       finalData = data
     } else {
-      // 尝试从 localStorage 恢复
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY)
-        if (saved) {
-          finalData = JSON.parse(saved)
-          console.log('[MindMap] 从 localStorage 恢复数据')
-        }
-      } catch (e) { /* ignore */ }
+      finalData = loadFromLocalStorage()
     }
 
-    // 如果没有恢复到数据，使用默认数据
     if (!finalData) {
       finalData = JSON.parse(JSON.stringify(initData))
-      // applyColorsToTree(finalData)
     }
 
     mindMapInstance = new MindMap({
@@ -246,7 +214,8 @@ export function useMindMap() {
       layout: currentLayout.value,
       initRootNodePosition: ['20%', 'center'], // 根节点位置
       customQuickCreateChildBtnClick: (node) => {
-        const color = getNextNodeColor()
+        // 使用优化后的逻辑，直接基于当前节点计数获取颜色
+        const color = getNextNodeColorOptimized(currentNodeColorListName.value, node.mindMap)
         if (!color) {
           node.mindMap.execCommand('INSERT_CHILD_NODE', false, [node])
         } else {
@@ -260,12 +229,11 @@ export function useMindMap() {
 
       themeConfig: {
         // ========== 通用节点样式 ==========
-        imgMaxWidth: 333, // 节点内图片最大宽度
-        imgMaxHeight: 100, // 节点内图片最大高度
+     
 
         // ========== 根节点样式 ==========
         root: {
-          paddingX: 35, // 水平内边距（更大）
+          paddingX: 10, // 水平内边距（更大）
           paddingY: 15, // 垂直内边距（更大）
 
         },
@@ -274,7 +242,7 @@ export function useMindMap() {
         second: {
           marginX: 130, // 水平间距
           marginY: 20, // 垂直间距
-          paddingX: 35, // 水平内边距
+          paddingX: 7, // 水平内边距
           paddingY: 15, // 垂直内边距
 
           textAlign: 'center', // 文字对齐方式
@@ -284,9 +252,8 @@ export function useMindMap() {
         node: {
           marginX: 100, // 水平间距
           marginY: 80, // 垂直间距
-          paddingX: 35, // 水平内边距
+          paddingX: 7, // 水平内边距
           paddingY: 15, // 垂直内边距
-
 
           textAlign: 'center', // 文字对齐方式
         },
@@ -326,7 +293,9 @@ export function useMindMap() {
       }
     }
 
-    window.mindMapInstance = mindMapInstance // 方便调试
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      window.mindMapInstance = mindMapInstance // 方便调试，仅开发环境保留
+    }
 
     // ★ 恢复 customBackground
     if (finalData.customBackground) {
@@ -338,61 +307,29 @@ export function useMindMap() {
 
     markRaw(mindMapInstance)
     bindEvents()
+    
+    // 初始化完成后更新节点计数
+    updateNodeCount()
+    
     isReady.value = true
     hasUnsavedChanges.value = false
   }
 
-  /**
-   * 根据当前主题获取 colors 数组，未设置则返回 null
-  */
-  function getCurrentColors() {
-    if (!currentNodeColorListName.value) return null
-    const found = useNodeColorList.find(
-      item => item.value === currentNodeColorListName.value
-    )
-    return found?.colors?.length ? found.colors : null
-  }
-
-  /**
-   * 根据节点总数计算下一个颜色（给单个新节点用）
-   */
-  function getNextNodeColor() {
-    const colors = getCurrentColors()
-    if (!colors) return null
-    const data = mindMapInstance.getData()
-    const totalCount = getNodesCount(data)
-    const index = totalCount % colors.length
-    return colors[index]
-  }
-
-  /**
-   * 递归给整棵数据树依次着色（给 init / newFile 用）
-   */
-  function applyColorsToTree(treeData) {
-    const colors = getCurrentColors()
-    if (!colors) return
-    let index = 0
-    function walk(node) {
-      if (!node?.data) return
-      const color = colors[index % colors.length]
-      node.data = { ...node.data, ...color }
-      index++
-      node.children?.forEach(child => walk(child))
-    }
-    walk(treeData)
-  }
-
-
-
   function destroy() {
-    mindMapInstance.destroy()
-    mindMapInstance = null
+    if (mindMapInstance) {
+      unbindEvents()
+      try {
+        mindMapInstance.destroy()
+      } catch (e) { /* ignore */ }
+      mindMapInstance = null
+    }
     resetState()
-    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null }
   }
 
   function newFile() {
-    mindMapInstance.setData(JSON.parse(JSON.stringify(initData)))
+    const newData = JSON.parse(JSON.stringify(initData))
+    applyColorsToTree(newData, currentNodeColorListName.value)
+    mindMapInstance.setData(newData)
     mindMapInstance.view.reset()
     mindMapInstance.command.clearHistory?.()
     hasUnsavedChanges.value = false
@@ -401,7 +338,10 @@ export function useMindMap() {
     customBackground.value = null
 
     // ★ 新增：清除 localStorage 缓存
-    localStorage.removeItem(STORAGE_KEY)
+    clearLocalStorage()
+
+    // ★ 更新节点计数
+    updateNodeCount()
 
     const svgEl = mindMapInstance.el?.querySelector('svg')
     if (svgEl) {
@@ -431,19 +371,9 @@ export function useMindMap() {
     currentNodeColorListName.value = ''
   }
 
-  function getNodesCount(node) {
-    let count = 1
-    if (node.children && node.children.length > 0) {
-      node.children.forEach(child => {
-        count += getNodesCount(child)
-      })
-    }
-    return count
-  }
-
   function insertChildNode() {
     if (!mindMapInstance) return
-    const color = getNextNodeColor()
+    const color = getNextNodeColorOptimized(currentNodeColorListName.value, mindMapInstance)
     if (!color) {
       mindMapInstance.execCommand('INSERT_CHILD_NODE')
     } else {
@@ -453,12 +383,14 @@ export function useMindMap() {
         ...color
       })
     }
+    // 插入子节点后增加节点计数
+    nodeCount.value++
   }
 
 
   function insertSiblingNode() {
     if (!mindMapInstance) return
-    const color = getNextNodeColor()
+    const color = getNextNodeColorOptimized(currentNodeColorListName.value, mindMapInstance)
     if (!color) {
       mindMapInstance.execCommand('INSERT_NODE')
     } else {
@@ -468,6 +400,8 @@ export function useMindMap() {
         ...color
       })
     }
+    // 插入兄弟节点后增加节点计数
+    nodeCount.value++
   }
 
 
@@ -484,55 +418,25 @@ export function useMindMap() {
   }
 
   function setNodeStyle(key, value) {
-    if (!mindMapInstance) return
-    try {
-      const nodeList = getActiveNodeList()
-      if (!nodeList.length) return
-      nodeList.forEach((node) => {
-        if (typeof node.setStyle === 'function') {
-          node.setStyle(key, value, true)
-        } else {
-          const nodeData = node.nodeData?.data || {}
-          nodeData[key] = value
-        }
-      })
-      mindMapInstance.render()
-    } catch (e) { /* ignore */ }
+    setNodeStyles(mindMapInstance, getActiveNodeList(), key, value)
   }
 
   function setStyles(styleObj) {
-    if (!mindMapInstance) return
-    try {
-      const nodeList = getActiveNodeList()
-      if (!nodeList.length) return
-      nodeList.forEach((node) => {
-        mindMapInstance.execCommand('SET_NODE_STYLES', node, styleObj)
-      })
-      mindMapInstance.render()
-    } catch (e) { /* ignore */ }
+    setNodeStylesBatch(mindMapInstance, getActiveNodeList(), styleObj)
   }
 
   function setThemeConfig(key, value) {
-    if (!mindMapInstance) return
-    try {
-      const config = JSON.parse(JSON.stringify(mindMapInstance.getThemeConfig() || {}))
-      config[key] = value
-      mindMapInstance.setThemeConfig(config)
-      mindMapInstance.render()
-    } catch (e) { /* ignore */ }
+    setThemeConfigHelper(mindMapInstance, key, value)
   }
 
   function getThemeConfig(key, value) {
-    if (!mindMapInstance) return {}
-    try {
-      return mindMapInstance.getThemeConfig(key) || value
-    } catch (e) { }
+    return getThemeConfigHelper(mindMapInstance, key, value)
   }
 
   // ★★★ 新增：设置自定义背景 ★★★
   function setCustomBackground(bg) {
     customBackground.value = bg
-    applyCustomBackground(bg)
+    applyCustomBackground(mindMapInstance, bg)
     hasUnsavedChanges.value = true
     saveToLocalStorage()
   }
@@ -546,219 +450,12 @@ export function useMindMap() {
 
   // ========== 插入图片 ==========
   function insertImageToNode(url, title = '', width, height) {
-    if (!mindMapInstance) return
-    const nodeList = getActiveNodeList()
-    if (!nodeList.length) return
-    const img = new Image()
-    img.onload = () => {
-      let finalWidth = width || img.naturalWidth
-      let finalHeight = height || img.naturalHeight
-
-      nodeList.forEach((node) => {
-        if (typeof node.setImage === 'function') {
-          node.setImage({ url, title: title || '图片', width: finalWidth, height: finalHeight })
-        }
-      })
-      mindMapInstance.render()
-    }
-    img.onerror = () => {
-      nodeList.forEach((node) => {
-        if (typeof node.setImage === 'function') {
-          node.setImage({ url, title: title || '图片', width: 200, height: 150 })
-        }
-      })
-      mindMapInstance.render()
-    }
-    img.src = url
+    return insertImageToNodeHelper(mindMapInstance, getActiveNodeList(), url, title, width, height)
   }
 
 
 
 
-  // ========== 文件操作 ==========
-  async function openLocalFile() {
-    if (!('showOpenFilePicker' in window)) {
-      console.warn('当前浏览器不支持 File System Access API，使用传统模式')
-      return openLocalFileLegacy()
-    }
-
-    try {
-      const fileHandles = await window.showOpenFilePicker({
-        types: [
-          {
-            description: '思维导图文件',
-            accept: {
-              'application/json': ['.json'],
-            }
-          }
-        ],
-        excludeAcceptAllOption: false,
-        multiple: true
-      })
-
-      if (!fileHandles || fileHandles.length === 0) {
-        return null
-      }
-
-      const results = []
-      for (let i = 0; i < fileHandles.length; i++) {
-        const fileHandle = fileHandles[i]
-        try {
-          const file = await fileHandle.getFile()
-          const content = await file.text()
-
-          try {
-            const data = JSON.parse(content)
-            results.push({
-              id: i,
-              name: fileHandle.name,
-              time: formatTime(file.lastModified),
-              size: formatFileSize(file.size),
-              _raw: {
-                data,
-                fileName: fileHandle.name,
-                fileHandle,
-                index: i,
-                lastModified: file.lastModified,
-                size: file.size,
-              }
-            })
-          } catch (err) {
-            console.error(`文件 ${fileHandle.name} 解析失败:`, err)
-          }
-        } catch (err) {
-          console.error(`读取文件 ${fileHandle.name} 失败:`, err)
-        }
-      }
-
-      if (results.length > 0) {
-        console.log(`[MindMap] 共加载 ${results.length} 个文件`)
-        return results
-      } else {
-        return null
-      }
-
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('打开文件失败:', err)
-      }
-      return null
-    }
-  }
-
-  function openLocalFileLegacy() {
-    return new Promise((resolve) => {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = '.json,.smm'
-      input.multiple = true
-      input.onchange = async (e) => {
-        const files = Array.from(e.target.files)
-        if (!files.length) { resolve(null); return }
-
-        const results = []
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i]
-          try {
-            const content = await file.text()
-            const data = JSON.parse(content)
-
-            results.push({
-              id: i,
-              name: file.name,
-              time: formatTime(file.lastModified),
-              size: formatFileSize(file.size),
-              _raw: {
-                data,
-                fileName: file.name,
-                fileHandle: null,
-                index: i,
-                lastModified: file.lastModified,
-                size: file.size,
-              }
-            })
-
-            console.log(`已打开文件: ${file.name}`)
-          } catch (err) {
-            console.error(`文件 ${file.name} 解析失败:`, err)
-          }
-        }
-
-        resolve(results.length > 0 ? results : null)
-      }
-      input.click()
-    })
-  }
-
-  function importFile() {
-    return new Promise((resolve) => {
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.accept = '.json,.smm'
-      input.onchange = (e) => {
-        const file = e.target.files[0]
-        if (!file) { resolve(null); return }
-        const reader = new FileReader()
-        reader.onload = (ev) => {
-          try {
-            const data = JSON.parse(ev.target.result)
-            setData(data)
-            resolve(data)
-          } catch (err) {
-            alert('文件解析失败')
-            resolve(null)
-          }
-        }
-        reader.readAsText(file)
-      }
-      input.click()
-    })
-  }
-
-  // ★ 替换原来的 exportFile 函数
-  function exportFile() {
-    const saveData = buildSaveData()
-    if (!saveData) return
-
-    const d = new Date()
-    const name = d.getFullYear() +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      String(d.getDate()).padStart(2, '0') +
-      String(d.getHours()).padStart(2, '0') +
-      String(d.getMinutes()).padStart(2, '0') +
-      String(d.getSeconds()).padStart(2, '0')
-
-    const json = JSON.stringify(saveData, null, 2)
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = name + '.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-
-
-  // ★ 简化后的 saveToLocalFile
-  async function saveToLocalFile(fileHandle) {
-    if (!mindMapInstance || !fileHandle) return false
-    try {
-      const saveData = buildSaveData()
-      if (!saveData) return false
-
-      const json = JSON.stringify(saveData, null, 2)
-      const writable = await fileHandle.createWritable()
-      await writable.write(json)
-      await writable.close()
-
-      hasUnsavedChanges.value = false
-      return true
-    } catch (err) {
-      console.error('[MindMap] 保存失败:', err)
-      return false
-    }
-  }
 
 
 
@@ -870,6 +567,9 @@ export function useMindMap() {
         customBackground.value = null
       }
 
+      // ★ 更新节点计数
+      updateNodeCount()
+
       // ★ 新增：加载文件后立即缓存新数据
       saveToLocalStorage()
 
@@ -917,7 +617,15 @@ export function useMindMap() {
     }
   }
 
-
+  // ★ 新增：优化版本的获取节点颜色函数
+  function getNextNodeColorOptimized(currentNodeColorListName, mindMapInstance) {
+    const colors = getCurrentColors(currentNodeColorListName)
+    if (!colors || !mindMapInstance) return null
+    
+    // 直接使用维护的节点计数，时间复杂度 O(1)
+    const index = nodeCount.value % colors.length
+    return colors[index]
+  }
 
   return {
     isReady,

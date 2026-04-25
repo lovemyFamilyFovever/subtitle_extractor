@@ -50,7 +50,7 @@
 
 <script setup>
 
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
     currentTheme: { type: String, default: 'default' },
@@ -61,9 +61,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close','set-theme', 'toggle-theme'])
 
-const showThemeDropdown = ref(false)
-const themeDropRef = ref(null)
-const currentTheme = ref('light')
+const currentTheme = ref(props.currentTheme?.startsWith('dark') ? 'dark' : 'light')
 const themeConfig = [
     { label: '浅色', value: 'light' },
     { label: '深色', value: 'dark' }
@@ -73,7 +71,6 @@ function changeTheme(value) { currentTheme.value = value }
 function getPreview(value) { return props.themePreviewMap[value] || '' }
 function handleThemeSelect(value) {
     emit('set-theme', value)
-    showThemeDropdown.value = false
 }
 
 
@@ -84,6 +81,13 @@ function handleOutsideClick(e) {
         emit('close')
     }
 }
+
+watch(
+    () => props.currentTheme,
+    (value) => {
+        currentTheme.value = value?.startsWith('dark') ? 'dark' : 'light'
+    }
+)
 onMounted(() => {
     setTimeout(() => {
         document.addEventListener('mousedown', handleOutsideClick)

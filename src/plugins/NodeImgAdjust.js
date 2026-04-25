@@ -21,6 +21,7 @@ class NodeImgAdjust {
     this.currentImgWidth = 0 // 当前拖拽实时图片的大小
     this.currentImgHeight = 0
     this.isAdjusted = false // 是否是拖拽结束后的渲染期间
+    this.handleElListeners = []
     this.bindEvent()
   }
 
@@ -58,6 +59,21 @@ class NodeImgAdjust {
       this.rect = this.img.rbox()
       this.setHandleElRect()
     }
+  }
+
+  addHandleEventListener(el, event, handler, options) {
+    el.addEventListener(event, handler, options)
+    this.handleElListeners.push({ el, event, handler, options })
+  }
+
+  destroyHandleEl() {
+    if (!this.handleEl) return
+    this.handleElListeners.forEach(({ el, event, handler, options }) => {
+      el.removeEventListener(event, handler, options)
+    })
+    this.handleElListeners.length = 0
+    this.handleEl.remove()
+    this.handleEl = null
   }
 
   // 节点图片鼠标移动事件
@@ -166,28 +182,28 @@ class NodeImgAdjust {
     `
     btnEl.className = 'node-image-resize'
     // 给按钮元素绑定事件
-    btnEl.addEventListener('mouseenter', () => {
+    this.addHandleEventListener(btnEl, 'mouseenter', () => {
       // 移入按钮，会触发节点图片的移出事件，所以需要再次显示按钮
       this.showHandleEl()
     })
-    btnEl.addEventListener('mouseleave', () => {
+    this.addHandleEventListener(btnEl, 'mouseleave', () => {
       // 移除按钮，需要隐藏按钮
       if (this.isMousedown) return
       this.hideHandleEl()
     })
-    btnEl.addEventListener('mousedown', e => {
+    this.addHandleEventListener(btnEl, 'mousedown', (e) => {
       e.stopPropagation()
       e.preventDefault()
       this.onMousedown(e)
     })
-    btnEl.addEventListener('mouseup', e => {
+    this.addHandleEventListener(btnEl, 'mouseup', (e) => {
       setTimeout(() => {
         //点击后直接松开异常处理; 其他事件响应之后处理
         this.hideHandleEl()
         this.isAdjusted = false
       }, 0)
     })
-    btnEl.addEventListener('click', e => {
+    this.addHandleEventListener(btnEl, 'click', (e) => {
       e.stopPropagation()
     })
     this.handleEl.appendChild(btnEl)
@@ -208,14 +224,14 @@ class NodeImgAdjust {
       align-items: center;
       cursor: pointer;
     `
-    btnRemove.addEventListener('mouseenter', e => {
+    this.addHandleEventListener(btnRemove, 'mouseenter', () => {
       this.showHandleEl()
     })
-    btnRemove.addEventListener('mouseleave', e => {
+    this.addHandleEventListener(btnRemove, 'mouseleave', () => {
       if (this.isMousedown) return
       this.hideHandleEl()
     })
-    btnRemove.addEventListener('click', async e => {
+    this.addHandleEventListener(btnRemove, 'click', async (e) => {
       let stop = false
       if (typeof this.mindMap.opt.beforeDeleteNodeImg === 'function') {
         stop = await this.mindMap.opt.beforeDeleteNodeImg(this.node)
@@ -342,11 +358,13 @@ class NodeImgAdjust {
   // 插件被移除前做的事情
   beforePluginRemove() {
     this.unBindEvent()
+    this.destroyHandleEl()
   }
 
   // 插件被卸载前做的事情
   beforePluginDestroy() {
     this.unBindEvent()
+    this.destroyHandleEl()
   }
 }
 

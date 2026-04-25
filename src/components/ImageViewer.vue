@@ -288,6 +288,7 @@ watch(visible, (isOpen) => {
 onUnmounted(() => {
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDrag)
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 

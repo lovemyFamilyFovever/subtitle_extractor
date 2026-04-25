@@ -1,6 +1,8 @@
 <template>
   <Teleport to="body">
+    <!-- 备注对话框遮罩层 -->
     <div v-if="visible" class="dialog-overlay" @click.self="close">
+      <!-- 对话框容器 -->
       <div class="dialog">
         <div class="dialog-header">
           <span>{{ isEdit ? '编辑备注' : '插入备注' }}</span>
@@ -9,7 +11,16 @@
         <div class="dialog-body">
           <div class="form-group">
             <label>备注内容</label>
-            <textarea v-model="content" class="form-textarea" rows="6" placeholder="输入备注文字..."></textarea>
+            <!-- 备注输入文本域，支持回车提交和ESC关闭 -->
+            <textarea 
+              v-model="content" 
+              class="form-textarea" 
+              rows="6" 
+              placeholder="输入备注文字..."
+              @keydown.enter.exact.prevent="handleEnter"
+              @keydown.esc.prevent="handleEsc"
+              ref="textareaRef"
+            ></textarea>
           </div>
         </div>
         <div class="dialog-footer">
@@ -24,38 +35,82 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 
+// 定义组件属性
 const props = defineProps({
   visible: { type: Boolean, default: false },
   defaultContent: { type: String, default: '' },
 })
 
+// 定义组件事件
 const emit = defineEmits(['update:visible', 'confirm', 'remove'])
 
+// 响应式数据
 const content = ref('')
 const isEdit = ref(false)
+const textareaRef = ref(null)
 
+// 监听可见状态变化，初始化表单数据
 watch(() => props.visible, (val) => {
   if (val) {
     content.value = props.defaultContent
     isEdit.value = !!props.defaultContent
+    // 在下一个tick聚焦到文本域
+    nextTick(() => {
+      if (textareaRef.value) {
+        textareaRef.value.focus()
+        // 将光标定位到文本末尾
+        textareaRef.value.setSelectionRange(content.value.length, content.value.length)
+      }
+    })
   }
 })
 
+/**
+ * 关闭对话框
+ */
 function close() {
   emit('update:visible', false)
 }
 
+/**
+ * 确认提交备注
+ */
 function confirm() {
   const c = content.value.trim()
-  if (!c) { alert('请输入备注内容'); return }
+  if (!c) { 
+    alert('请输入备注内容'); 
+    return 
+  }
   emit('confirm', { content: c })
   close()
 }
 
+/**
+ * 移除备注（仅编辑模式）
+ */
 function remove() {
   emit('remove')
+  close()
+}
+
+/**
+ * 处理回车键提交事件
+ * 当用户按住Shift键时不触发提交，允许换行
+ */
+function handleEnter(event) {
+  // 如果按住了Shift键，则允许换行而不是提交
+  if (event.shiftKey) {
+    return
+  }
+  confirm()
+}
+
+/**
+ * 处理ESC键关闭事件
+ */
+function handleEsc() {
   close()
 }
 </script>
@@ -188,4 +243,5 @@ function remove() {
 }
 
 .btn--danger:hover { background: rgba(231, 76, 60, 0.05); }
+
 </style>

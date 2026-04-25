@@ -140,6 +140,18 @@
         <label class="section-label-title">背景</label>
         <div class="section-group-row">
           <div class="section-group-item">
+            <label class="section-label">高度</label>
+            <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="500" :show-slider=false
+              @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
+          </div>
+          <div class="section-group-item">
+            <label class="section-label">长度</label>
+            <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="500" :show-slider=false
+              @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
+          </div>
+        </div>
+        <div class="section-group-row">
+          <div class="section-group-item">
             <label class="section-label">颜色</label>
             <ColorInput v-model="currentBg" />
           </div>
@@ -168,26 +180,6 @@
             <label class="section-label">宽度</label>
             <SliderInput v-model="currentLineWidth" label="" unit="" :min="1" :max="50" :show-slider=false
               @update:model-value="(val) => $emit('set-style', 'lineWidth', val)" />
-          </div>
-        </div>
-
-
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="style-section">
-        <label class="section-label-title">宽高</label>
-        <div class="section-group-row">
-          <div class="section-group-item">
-            <label class="section-label">高度</label>
-            <SliderInput v-model="currentPaddingY" label="" unit="" :min="1" :max="500" :show-slider=false
-              @update:model-value="(val) => $emit('set-style', 'paddingY', val)" />
-          </div>
-          <div class="section-group-item">
-            <label class="section-label">长度</label>
-            <SliderInput v-model="currentPaddingX" label="" unit="" :min="1" :max="500" :show-slider=false
-              @update:model-value="(val) => $emit('set-style', 'paddingX', val)" />
           </div>
         </div>
       </div>
@@ -389,9 +381,7 @@ const currentBorderDasharray = computed(() => getStyle('borderDasharray'))
 
 const currentLineDasharray = computed(() => getStyle('lineDasharray'))
 const currentLineWidth = computed({
-  get() { 
-    console.log('get currentLineWidth',getStyle('lineWidth'))
-    return getStyle('lineWidth') },
+  get() { return getStyle('lineWidth') },
   set(val) { emit('set-style', 'lineWidth', val) }
 })
 const currentLineColor = computed({

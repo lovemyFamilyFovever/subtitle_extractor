@@ -16,7 +16,7 @@
 
     <div class="panel-body customScrollbar">
       <div class="file-list">
-        <div class="file-item" v-for="file in FileList" :key="file.id" :class="{ active: file.id === activeIndex }"
+        <div class="file-item" v-for="file in fileList" :key="file.id" :class="{ active: file.id === activeIndex }"
           @click="$emit('load-file', file)" style="cursor: pointer;">
           <div class="file-icon">
             <i class="fa fa-file"></i>
@@ -32,7 +32,7 @@
           </button>
         </div>
 
-        <div v-if="!FileList || FileList.length === 0" class="file-empty">
+        <div v-if="!fileList || fileList.length === 0" class="file-empty">
           暂无文件，请先点击「加载列表」打开文件
         </div>
       </div>
@@ -42,7 +42,7 @@
 
 <script setup>
 defineProps({
-  FileList: { type: Array, default: () => [] },
+  fileList: { type: Array, default: () => [] },
   activeIndex: { type: Number, default: -1 },
 })
 

@@ -8,42 +8,8 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useMindMap } from '@/composables/useMindMap'
 
-const { init, destroy, removeNode, insertSiblingNode, getActiveNodeList } = useMindMap()
+const { init, destroy } = useMindMap()
 const containerRef = ref(null)
-
-function handleKeyDown(e) {
-  const tag = e.target.tagName
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-  if (isNodeEditing()) return
-
-  const hasNode = getActiveNodeList().length > 0
-
-  if (e.key === 'Delete' || e.key === 'Backspace') {
-    if (hasNode) { 
-      e.preventDefault()
-      e.stopPropagation()
-      removeNode()
-    }
-  }
-
-  if (e.key === 'Enter') {
-    if (hasNode) {
-      e.preventDefault()
-      e.stopPropagation()
-      insertSiblingNode()
-    }
-  }
-}
-
-function isNodeEditing() {
-  const activeEl = document.activeElement
-  if (activeEl?.getAttribute?.('contenteditable') === 'true') return true
-  if (containerRef.value) {
-    const editing = containerRef.value.querySelector('[contenteditable="true"]:focus')
-    if (editing) return true
-  }
-  return false
-}
 
 onMounted(async () => {
   await nextTick()
@@ -52,11 +18,9 @@ onMounted(async () => {
   if (!containerRef.value) return
 
   init(containerRef.value)
-  document.addEventListener('keydown', handleKeyDown)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleKeyDown)
   // 关键：组件卸载时销毁实例
   destroy()
 })

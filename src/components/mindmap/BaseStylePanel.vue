@@ -7,7 +7,7 @@
 
             <div class="style-section">
                 <label class="section-label-title">主题颜色</label>
-                <Dropdown v-model="currentNodeColorList" :options="useNodeColorList" />
+                <Dropdown v-model="currentNodeColorList" :options="nodeColorList" />
             </div>
 
             <div class="divider"></div>
@@ -171,7 +171,7 @@ import SliderInput from '../SliderInput.vue'
 import Dropdown from '../Dropdown.vue'
 import ColorInput from '../ColorInput.vue'
 import { useColorConverter } from '@/utils/colorConverter.js'
-import useNodeColorList from '@/composables/useNodeColorList.js'
+import nodeColorList from '@/utils/nodeColorList.js'
 
 const toHexFormat = useColorConverter();
 
@@ -261,7 +261,7 @@ const syncBackgroundConfig = () => {
             }
             if (bg.backgroundImage) {
                 // 从 SVG 数据中提取 stroke 颜色值
-                const colorMatch = bg.backgroundImage.match(/stroke='([^']+)'/)
+                const colorMatch = bg.backgroundImage.match(/stroke=["']([^"']+)["']/)
                 if (colorMatch && colorMatch[1]) {
                     currentGridColor.value = decodeURIComponent(colorMatch[1])
                 } else {
@@ -273,7 +273,7 @@ const syncBackgroundConfig = () => {
             currentBackgroundIndex.value = 3
             if (bg.backgroundImage) {
                 // 从backgroundImage中提取base64数据
-                const match = bg.backgroundImage.match(/url$$["']?(data:image\/.*?;base64,.*?)["']?$$/)
+                const match = bg.backgroundImage.match(/url(["']?(data:image\/.*?;base64,.*?)["']?)/)
                 if (match && match[1]) {
                     const base64 = match[1]
                     sourceImage.value = {
@@ -615,10 +615,8 @@ function handleOutsideClick(e) {
 
 // ==================== 组件卸载 ====================
 onBeforeUnmount(() => {
-    // 移除事件监听
     document.removeEventListener('mousedown', handleOutsideClick)
-    // 释放图片URL
-    if (sourceImage.value) {
+    if (sourceImage.value && sourceImage.value.url?.startsWith('blob:')) {
         URL.revokeObjectURL(sourceImage.value.url)
     }
 })

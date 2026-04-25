@@ -22,7 +22,7 @@
         </h2>
 
         <!-- 关闭按钮 -->
-        <button class="close-btn" @click="close" :aria-label="`关闭${title ? ' ' + title : ''}对话框`" title="关闭">
+        <button type="button" class="close-btn" @click="close" :aria-label="`关闭${title ? ' ' + title : ''}对话框`" title="关闭">
           <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
       </div>

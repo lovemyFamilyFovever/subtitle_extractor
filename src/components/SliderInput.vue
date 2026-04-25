@@ -35,7 +35,9 @@ const onInput = (e) => {
 }
 
 const pct = computed(() => {
-  return ((props.modelValue - props.min) / (props.max - props.min) * 100).toFixed(1) + '%'
+  const range = props.max - props.min
+  if (range <= 0) return '0%'
+  return ((props.modelValue - props.min) / range * 100).toFixed(1) + '%'
 })
 
 const onTextChange = (e) => {

@@ -17,7 +17,7 @@
       <ThemePanel v-if="showThemePanel" @close="closePanel" @set-theme="setTheme" :current-theme="currentTheme"
         :light-theme-list="lightThemeList" :dark-theme-list="darkThemeList" :theme-preview-map="themePreviewMap" />
 
-      <Structure v-if="showStructure" @close="closePanel" @set-layout="setLayout" :get-layout="getLayout" />
+      <StructurePanel v-if="showStructure" @close="closePanel" @set-layout="setLayout" :get-layout="getLayout" />
 
       <OutlinePanel v-if="showOutline" @close="closePanel" :tree="outlineTree" />
 
@@ -29,7 +29,7 @@
       <NodeStylePanel v-if="showNodeStyle" :active-nodes="activeNodes" @set-style="setNodeStyle"
         @set-styles="setStyles" />
 
-      <FileList v-if="showFileList" @close="closePanel" :FileList="fileList" :active-index="currentFileIndex"
+      <FileListPanel v-if="showFileList" @close="closePanel" :file-list="fileList" :active-index="currentFileIndex"
         @load-file="handleLoadFile" @remove-file="handleRemoveFile" @add-files="handleAddFiles" />
 
     </div>
@@ -37,7 +37,7 @@
     <HyperlinkDialog v-model:visible="showHyperlinkDlg" :default-url="hyperlinkDefaultUrl"
       :default-title="hyperlinkDefaultTitle" @confirm="handleHyperlinkConfirm" @remove="handleHyperlinkRemove" />
 
-    <NoteDialog v-model:visible="showNoteDlg" :default-content="noteDefaultContent" @confirm="handleNoteConfirm"
+    <NoteDialogPanel v-model:visible="showNoteDlg" :default-content="noteDefaultContent" @confirm="handleNoteConfirm"
       @remove="handleNoteRemove" />
 
     <ImageDialog v-model:visible="showImageDlg" @confirm="handleImageConfirm" />
@@ -47,21 +47,26 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 import { useMindMap } from '@/composables/useMindMap'
+import { useMindMapPanels } from '@/composables/useMindMapPanels'
+import { useMindMapFileManager } from '@/composables/useMindMapFileManager'
+import { useMindMapAnnotations } from '@/composables/useMindMapAnnotations'
+import { useMindMapImages } from '@/composables/useMindMapImages'
+import { useMindMapKeyboard } from '@/composables/useMindMapKeyboard'
 import MindMapToolbar from '@/components/mindmap/MindMapToolbar.vue'
 import MindMapCore from '@/components/mindmap/MindMapCore.vue'
-import Structure from '@/components/mindmap/Structure.vue'
+import StructurePanel from '@/components/mindmap/StructurePanel.vue'
 import ThemePanel from '@/components/mindmap/ThemePanel.vue'
 import NodeStylePanel from '@/components/mindmap/NodeStylePanel.vue'
 import OutlinePanel from '@/components/mindmap/OutlinePanel.vue'
 import BaseStylePanel from '@/components/mindmap/BaseStylePanel.vue'
 import ImageViewer from '@/components/ImageViewer.vue'
-import FileList from '@/components/mindmap/FileList.vue'
+import FileListPanel from '@/components/mindmap/FileListPanel.vue'
 import MindMapOverlay from '@/components/mindmap/MindMapOverlay.vue'
 import HyperlinkDialog from '@/components/mindmap/HyperlinkDialog.vue'
-import NoteDialog from '@/components/mindmap/NoteDialog.vue'
+import NoteDialogPanel from '@/components/mindmap/NoteDialogPanel.vue'
 import ImageDialog from '@/components/mindmap/ImageDialog.vue'
 
 
@@ -80,315 +85,75 @@ const {
 
 const overlayRef = ref(null)
 
-// ============================================================
-// 面板
-// ============================================================
-const activePanel = ref(null)
+const {
+  fileList,
+  currentFileIndex,
+  openFileList,
+  handleLoadFile,
+  handleAddFiles,
+  handleRemoveFile,
+  handleSave,
+} = useMindMapFileManager({ openLocalFile, setData, getData, saveToLocalFile })
 
-const showThemePanel = computed(() => activePanel.value === 'theme')
-const showStructure = computed(() => activePanel.value === 'structure')
-const showOutline = computed(() => activePanel.value === 'outline')
-const showBaseStyle = computed(() => activePanel.value === 'basestyle')
+const {
+  activePanel,
+  showThemePanel,
+  showStructure,
+  showOutline,
+  showBaseStyle,
+  showFileList,
+  openPanel,
+  closePanel,
+  togglePanel,
+  handleToggleTheme,
+  handleToggleLayout,
+  handleToggleOutline,
+  handleToggleBaseStyle,
+} = useMindMapPanels(activeNodes)
+
+function handleOpen() {
+  openFileList(openPanel)
+}
+
 const showNodeStyle = computed(() => activePanel.value === 'node' && activeNodes.value.length > 0 && !isReadonly.value)
-const showFileList = computed(() => activePanel.value === 'filelist')
 
+const {
+  hyperlinkPositions,
+  notePositions,
+  showHyperlinkDlg,
+  hyperlinkDefaultUrl,
+  hyperlinkDefaultTitle,
+  openHyperlinkDialog,
+  handleHyperlinkConfirm,
+  handleHyperlinkRemove,
+  showNoteDlg,
+  noteDefaultContent,
+  openNoteDialog,
+  handleNoteConfirm,
+  handleNoteRemove,
+} = useMindMapAnnotations(activeNodes, overlayRef)
 
-// 统一的面板切换函数，所有面板都走这里
-function openPanel(name) {
-  activePanel.value = name
+const {
+  showImageDlg,
+  showImageViewer,
+  viewerImages,
+  viewerIndex,
+  handleInsertImage,
+  handleImageConfirm,
+} = useMindMapImages(activeNodes, imageDblClickData, collectAllImages, insertImageToNode)
+
+const isNodeEditing = () => {
+  const activeEl = document.activeElement
+  return activeEl?.getAttribute?.('contenteditable') === 'true' || ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl?.tagName)
 }
 
-function closePanel() {
-  activePanel.value = null
-}
-
-function togglePanel(name) {
-  activePanel.value = activePanel.value === name ? null : name
-}
-
-// toolbar 按钮统一走 togglePanel
-function handleToggleTheme() { togglePanel('theme') }
-function handleToggleLayout() { togglePanel('structure') }
-function handleToggleOutline() { togglePanel('outline') }
-function handleToggleBaseStyle() { togglePanel('basestyle') }
-
-// ============================================================
-// 节点选中 → 面板联动（统一走 openPanel / closePanel）
-// ============================================================
-watch(activeNodes, (nodes, prevNodes) => {
-  const count = nodes.length
-  const prevCount = prevNodes?.length ?? 0
-  const current = activePanel.value
-
-  // 选中节点时
-  if (count > 0) {
-    // 从无选中 → 有选中，或当前是 basestyle 面板，自动切到节点面板
-    openPanel('node')
-    return
-  }
-
-  // 取消选中时（count === 0）
-  // 如果当前是节点面板，自动关闭
-  if (current === 'node') {
-    closePanel()
-  }
-  // 其他面板（theme / structure / outline / basestyle / filelist）不受影响
-})
-
-
-// ============================================================
-// 文件列表
-// ============================================================
-const fileList = ref([])
-const currentFileIndex = ref(-1)
-
-async function handleOpen() {
-  const files = await openLocalFile()
-  if (!files || files.length === 0) return
-  fileList.value = files
-  currentFileIndex.value = -1
-  activePanel.value = 'filelist'
-}
-
-function handleLoadFile(file) {
-  if (file._raw?.data) {
-    setData(file._raw.data)
-    currentFileIndex.value = file.id
-  }
-}
-
-async function handleAddFiles() {
-  const newFiles = await openLocalFile()
-  if (!newFiles || newFiles.length === 0) return
-
-  const existingNames = new Set(fileList.value.map(f => f.name))
-  const duplicates = newFiles.filter(f => existingNames.has(f.name))
-
-  if (duplicates.length > 0) {
-    const names = duplicates.map(f => f.name).join('、')
-    const confirmed = confirm(`以下文件已存在：\n${names}\n\n是否覆盖？\n\n点"确定"覆盖，点"取消"跳过重复文件。`)
-    if (!confirmed) {
-      const nonDuplicates = newFiles.filter(f => !existingNames.has(f.name))
-      if (nonDuplicates.length === 0) return
-      appendFiles(nonDuplicates)
-      return
-    }
-    const newNames = new Set(newFiles.map(f => f.name))
-    fileList.value = fileList.value.filter(f => !newNames.has(f.name))
-  }
-
-  appendFiles(newFiles)
-}
-
-function appendFiles(files) {
-  const maxId = fileList.value.reduce((max, f) => Math.max(max, f.id), -1)
-  const offset = maxId + 1
-  const formatted = files.map((f, i) => ({
-    id: offset + i,
-    name: f.name,
-    time: f.time,
-    size: f.size,
-    _raw: f._raw,
-  }))
-  fileList.value = [...fileList.value, ...formatted]
-}
-
-function handleRemoveFile(id) {
-  fileList.value = fileList.value.filter(f => f.id !== id)
-  if (currentFileIndex.value === id) currentFileIndex.value = -1
-}
-
-// ============================================================
-// Ctrl+S 自动保存
-// ============================================================
-function getCurrentFileHandle() {
-  if (currentFileIndex.value < 0) return null
-  const file = fileList.value.find(f => f.id === currentFileIndex.value)
-  return file?._raw?.fileHandle || null
-}
-
-// ★ 简化 handleSave 中的降级路径
-async function handleSave() {
-  const fileHandle = getCurrentFileHandle()
-
-  if (!fileHandle) {
-    const data = getData()
-    if (!data) return
-    const saveData = {
-      data: data.data,
-      children: data.children || [],
-      customBackground: data.customBackground || null,
-    }
-    const json = JSON.stringify(saveData, null, 2)
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = generateSafeFileName('json')  // ✅ 安全文件名
-    a.click()
-    URL.revokeObjectURL(url)
-    return
-  }
-
-  const success = await saveToLocalFile(fileHandle)
-  if (success) console.log('保存成功')
-}
-
-
-// 统一的文件名生成函数（整个文件复用）
-function generateSafeFileName(ext = 'json') {
-  const d = new Date()
-  const pad = (n, len = 2) => String(n).padStart(len, '0')
-  return `思维导图_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}.${ext}`
-}
-
-
-
-function handleKeydown(e) {
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault()
-    handleSave()
-  }
-  if (e.key === 'Delete' && isAssociativeLineMode.value) {
-    removeLine();
-  }
-
-}
-
-onMounted(() => {
-  document.addEventListener('keydown', handleKeydown)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', handleKeydown)
-})
-
-// ============================================================
-// Overlay 坐标
-// ============================================================
-const hyperlinkPositions = computed(() => {
-  const items = []
-  for (const node of activeNodes.value) {
-    const data = node.nodeData?.data || {}
-    if (!data.hyperlink) continue
-    const left = node.left || 0
-    const top = node.top || 0
-    const w = node.width || 100
-    const h = node.height || 40
-    items.push({
-      id: 'hl_' + (node.uid || ''),
-      nodeId: node.uid || '',
-      url: data.hyperlink,
-      title: data.hyperlinkTitle || '',
-      style: { left: (left + w - 18) + 'px', top: (top + h - 18) + 'px' }
-    })
-  }
-  return items
-})
-
-const notePositions = computed(() => {
-  const items = []
-  for (const node of activeNodes.value) {
-    const data = node.nodeData?.data || {}
-    if (!data.note) continue
-    const left = node.left || 0
-    const top = node.top || 0
-    const w = node.width || 100
-    const h = node.height || 40
-    items.push({
-      id: 'note_' + (node.uid || ''),
-      nodeId: node.uid || '',
-      preview: String(data.note).slice(0, 30),
-      style: { left: (left + w - 18) + 'px', top: (top + h - 18) + 'px' }
-    })
-  }
-  return items
-})
-
-// ============================================================
-// 超链接
-// ============================================================
-const showHyperlinkDlg = ref(false)
-const hyperlinkDefaultUrl = ref('')
-const hyperlinkDefaultTitle = ref('')
-
-function openHyperlinkDialog() {
-  if (!activeNodes.value.length) { alert('请先选中一个节点'); return }
-  const node = activeNodes.value[0]
-  hyperlinkDefaultUrl.value = node.getData?.('hyperlink') || ''
-  hyperlinkDefaultTitle.value = node.getData?.('hyperlinkTitle') || ''
-  showHyperlinkDlg.value = true
-}
-
-function handleHyperlinkConfirm({ url, title }) {
-  activeNodes.value.forEach(node => {
-    if (typeof node.setHyperlink === 'function') node.setHyperlink(url, title)
-  })
-  nextTick(() => overlayRef.value?.refresh())
-}
-
-function handleHyperlinkRemove() {
-  activeNodes.value.forEach(node => {
-    if (typeof node.setHyperlink === 'function') node.setHyperlink('', '')
-  })
-  nextTick(() => overlayRef.value?.refresh())
-}
-
-// ============================================================
-// 备注
-// ============================================================
-const showNoteDlg = ref(false)
-const noteDefaultContent = ref('')
-
-function openNoteDialog() {
-  if (!activeNodes.value.length) { alert('请先选中一个节点'); return }
-  const node = activeNodes.value[0]
-  noteDefaultContent.value = node.getData?.('note') || ''
-  showNoteDlg.value = true
-}
-
-function handleNoteConfirm({ content }) {
-  activeNodes.value.forEach(node => {
-    if (typeof node.setNote === 'function') node.setNote(content)
-  })
-  nextTick(() => overlayRef.value?.refresh())
-}
-
-function handleNoteRemove() {
-  activeNodes.value.forEach(node => {
-    if (typeof node.setNote === 'function') node.setNote('')
-  })
-  nextTick(() => overlayRef.value?.refresh())
-}
-
-// ============================================================
-// 图片
-// ============================================================
-const showImageDlg = ref(false)
-
-function handleImageConfirm({ url, title, width, height }) {
-  insertImageToNode(url, title, width, height)
-}
-
-function handleInsertImage() {
-  if (!activeNodes.value.length) { alert('请先选中一个节点'); return }
-  showImageDlg.value = true
-}
-
-// ============================================================
-// 图片查看器
-// ============================================================
-const showImageViewer = ref(false)
-const viewerImages = ref([])
-const viewerIndex = ref(0)
-
-watch(imageDblClickData, (data) => {
-  if (!data || !data.imgSrc) return
-  const allImages = collectAllImages()
-  if (!allImages.length) return
-  viewerImages.value = allImages
-  viewerIndex.value = allImages.findIndex(obj => obj.imgSrc === data.imgSrc)
-  showImageViewer.value = true
+useMindMapKeyboard({
+  handleSave,
+  removeLine,
+  removeNode,
+  insertSiblingNode,
+  isAssociativeLineMode,
+  isNodeEditing,
 })
 
 // ============================================================
