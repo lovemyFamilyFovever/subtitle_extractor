@@ -487,7 +487,8 @@ const onFileChange = (e) => {
     if (file) {
         // 检查文件大小（可选，防止过大图片）
         if (file.size > 5 * 1024 * 1024) { // 5MB限制
-            alert('图片大小不能超过5MB')
+            // 使用全局提示框
+            alert('图片大小不能超过5MB', 'warning')
             return
         }
         loadFile(file)
@@ -520,15 +521,17 @@ const loadFile = (file) => {
             applySource()
         }
 
+        // 使用全局提示框
         img.onerror = () => {
-            alert('图片加载失败，请选择有效的图片文件')
+            alert('图片加载失败，请选择有效的图片文件', 'error')
         }
 
         img.src = base64
     }
 
+    // 使用全局提示框
     reader.onerror = () => {
-        alert('读取文件失败')
+        alert('读取文件失败', 'error')
     }
 
     reader.readAsDataURL(file)
@@ -621,5 +624,3 @@ onBeforeUnmount(() => {
     }
 })
 </script>
-
-<style src="@/styles/mindmap.css" scoped></style>

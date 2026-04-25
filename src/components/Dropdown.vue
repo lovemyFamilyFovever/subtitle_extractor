@@ -3,8 +3,8 @@
     <button class="dropdown-toggle" @click="toggleDropdown">
       <span class="selected-text-wrapper">
         <span v-if="selectedItem && selectedItem.colors" class="selected-colors-preview">
-          <span class="color-preview" v-for="(color, index) in selectedItem.colors" :key="index" 
-                :style="{ backgroundColor: color.fillColor }"></span>
+          <span class="color-preview" v-for="(color, index) in selectedItem.colors" :key="index"
+            :style="{ backgroundColor: color.fillColor }"></span>
         </span>
         <span class="selected-text" v-html="selectedLabel"></span>
       </span>
@@ -13,12 +13,13 @@
 
     <div class="dropdown-menu" :class="{ open: isOpen }">
       <ul>
-        <li v-for="(item,index) in options" :key="index" :class="{ selected: selectedValue === item.value }"
+        <li v-for="(item, index) in options" :key="index" :class="{ selected: selectedValue === item.value }"
           @click="selectOption(item)">
           <span v-if="item.svg" v-html="item.svg" class="option-icon"></span>
 
           <span v-if="item.colors" class="option-icon">
-            <span class="color-preview" v-for="(color, index) in item.colors" :key="index" :style="{ backgroundColor: color.fillColor }"></span>
+            <span class="color-preview" v-for="(color, index) in item.colors" :key="index"
+              :style="{ backgroundColor: color.fillColor }"></span>
           </span>
 
           <span class="option-label">{{ item.label }}</span>
@@ -29,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount,watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 // 定义选项数据
 const props = defineProps({
@@ -111,8 +112,10 @@ onBeforeUnmount(() => {
 }
 
 .dropdown-toggle:hover {
-  background: #f9f9f9;
-  border-color: #bbb;
+
+  border-color: #409eff;
+  /* 1. 改变边框色 */
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15);
 }
 
 .arrow {
@@ -205,11 +208,11 @@ onBeforeUnmount(() => {
   flex: 1;
 }
 
-.option-icon{
+.option-icon {
   display: flex;
 }
 
-.color-preview{
+.color-preview {
   width: 20px;
   height: 20px;
 }

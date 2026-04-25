@@ -412,7 +412,9 @@ watch(selectedColor, (newColor) => {
 }
 
 .color-picker-trigger:hover {
-  border-color: #999;
+    border-color: #409eff;
+  /* 1. 改变边框色 */
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15);
 }
 
 .color-preview {

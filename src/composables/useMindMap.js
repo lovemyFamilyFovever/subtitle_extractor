@@ -453,11 +453,39 @@ export function useMindMap() {
     return insertImageToNodeHelper(mindMapInstance, getActiveNodeList(), url, title, width, height)
   }
 
+  const loadFile = (file) => {
+    const reader = new FileReader()
 
+    reader.onload = (e) => {
+        const base64 = e.target.result
+        const img = new Image()
 
+        img.onload = () => {
+            sourceImage.value = {
+                id: Date.now(),
+                name: file.name,
+                size: file.size,
+                url: base64,  // 使用base64而不是blob URL
+                img
+            }
+            applySource()
+        }
 
+        // 使用全局提示框
+        img.onerror = () => {
+            alert('图片加载失败，请选择有效的图片文件', 'error')
+        }
 
+        img.src = base64
+    }
 
+    // 使用全局提示框
+    reader.onerror = () => {
+        alert('读取文件失败', 'error')
+    }
+
+    reader.readAsDataURL(file)
+}
 
   // ========== 关联线 ==========
   function toggleAssociativeLineMode() {

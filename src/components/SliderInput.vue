@@ -141,6 +141,13 @@ const onTextFocus = (e) => {
   color: rgba(0, 0, 0, 0.75);
 }
 
+.form-input:hover {
+  border-color: #409eff;
+  /* 1. 改变边框色 */
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.15);
+  /* 2. 增加外阴影 */
+}
+
 .form-input::-webkit-outer-spin-button,
 .form-input::-webkit-inner-spin-button {
   -webkit-appearance: none;

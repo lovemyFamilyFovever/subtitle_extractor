@@ -7,10 +7,6 @@ export function useMindMapImages(activeNodes, imageDblClickData, collectAllImage
   const viewerIndex = ref(0)
 
   function handleInsertImage() {
-    if (!activeNodes.value.length) {
-      alert('请先选中一个节点')
-      return
-    }
     showImageDlg.value = true
   }
 

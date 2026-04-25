@@ -80,7 +80,8 @@ function close() {
 function confirm() {
   const c = content.value.trim()
   if (!c) { 
-    alert('请输入备注内容'); 
+    // 使用全局提示框替代原生alert
+    alert('请输入备注内容', 'error')
     return 
   }
   emit('confirm', { content: c })
@@ -243,5 +244,4 @@ function handleEsc() {
 }
 
 .btn--danger:hover { background: rgba(231, 76, 60, 0.05); }
-
 </style>

@@ -48,10 +48,6 @@ export function useMindMapAnnotations(activeNodes, overlayRef) {
   })
 
   function openHyperlinkDialog() {
-    if (!activeNodes.value.length) {
-      alert('请先选中一个节点')
-      return
-    }
     const node = activeNodes.value[0]
     hyperlinkDefaultUrl.value = node.getData?.('hyperlink') || ''
     hyperlinkDefaultTitle.value = node.getData?.('hyperlinkTitle') || ''
@@ -73,10 +69,7 @@ export function useMindMapAnnotations(activeNodes, overlayRef) {
   }
 
   function openNoteDialog() {
-    if (!activeNodes.value.length) {
-      alert('请先选中一个节点')
-      return
-    }
+
     const node = activeNodes.value[0]
     noteDefaultContent.value = node.getData?.('note') || ''
     showNoteDlg.value = true
