@@ -32,17 +32,17 @@
       <FileListPanel v-if="showFileList" @close="closePanel" :file-list="fileList" :active-index="currentFileIndex"
         @load-file="handleLoadFile" @remove-file="handleRemoveFile" @add-files="handleAddFiles" />
 
+      <HyperlinkDialog v-model:visible="showHyperlinkDlg" :default-url="hyperlinkDefaultUrl"
+        :default-title="hyperlinkDefaultTitle" @confirm="handleHyperlinkConfirm" @remove="handleHyperlinkRemove" />
+
+      <NoteDialogPanel v-model:visible="showNoteDlg" :default-content="noteDefaultContent" @confirm="handleNoteConfirm"
+        @remove="handleNoteRemove" />
+
+      <ImageDialog v-model:visible="showImageDlg" @confirm="handleImageConfirm" />
+
+      <ImageViewer v-model="showImageViewer" :images="viewerImages" :viewer-index="viewerIndex" />
+
     </div>
-
-    <HyperlinkDialog v-model:visible="showHyperlinkDlg" :default-url="hyperlinkDefaultUrl"
-      :default-title="hyperlinkDefaultTitle" @confirm="handleHyperlinkConfirm" @remove="handleHyperlinkRemove" />
-
-    <NoteDialogPanel v-model:visible="showNoteDlg" :default-content="noteDefaultContent" @confirm="handleNoteConfirm"
-      @remove="handleNoteRemove" />
-
-    <ImageDialog v-model:visible="showImageDlg" @confirm="handleImageConfirm" />
-
-    <ImageViewer v-model="showImageViewer" :images="viewerImages" :viewer-index="viewerIndex" />
 
   </div>
 </template>

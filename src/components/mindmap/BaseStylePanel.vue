@@ -624,3 +624,8 @@ onBeforeUnmount(() => {
     }
 })
 </script>
+
+
+
+<style src="@/styles/mindmap.css" scoped></style>
+
