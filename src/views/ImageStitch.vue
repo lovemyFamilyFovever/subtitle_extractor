@@ -86,6 +86,11 @@
           <SliderInput v-model="radius" label="" unit="px" :min="0" :max="80" />
         </div>
 
+        <div class="setting-item">
+          <span class="form-label">输出缩放</span>
+          <SliderInput v-model="scale" label="" unit="x" :min="0.5" :max="3" :step="0.1" />
+        </div>
+
         <!-- 背景色 -->
         <div class="setting-item">
           <span class="form-label">背景色</span>
@@ -259,10 +264,10 @@ const applyCustomBgColor = () => {
 const spacing = ref(0)     // 拼接间距
 const format = ref('png') // 输出格式
 const compressionOptions = [
-  { label: '不压缩', value: 1.0 },
-  { label: '2x 压缩', value: 0.5 },
-  { label: '4x 压缩', value: 0.25 },
-  { label: '8x 压缩', value: 0.125 }
+  { label: '高质量', value: 1.0 },
+  { label: '中等', value: 0.7 },
+  { label: '较低', value: 0.4 },
+  { label: '低质量', value: 0.15 }
 ]
 const compression = ref(1) // 压缩级别: 1(不压缩), 2, 4, 8
 
@@ -311,7 +316,7 @@ const onPaste = (e) => {
 
 /**
  * 核心：把 File 数组转为我们需要的图片对象
- * 使用 Promise.all 并发加载所有图片，提升速度
+ * 使用 Promise.allSettled 并发加载所有图片，避免因单张失败导致整体失败
  */
 const addFiles = async (files) => {
   // 过滤重复文件（根据 name+size），跳过已存在的图片
@@ -324,9 +329,14 @@ const addFiles = async (files) => {
     uniqueFiles.push(file)
   }
 
-  // 并发创建所有图片对象
-  const newItems = await Promise.all(
-    uniqueFiles.map(file => new Promise((resolve) => {
+  if (uniqueFiles.length === 0) {
+    showToast('所有图片已存在，未添加新图片', 'error')
+    return
+  }
+
+  // 并发创建所有图片对象，使用 allSettled 避免单张失败影响整体
+  const results = await Promise.allSettled(
+    uniqueFiles.map(file => new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file)
       const img = new Image()
       img.onload = () => resolve({
@@ -337,12 +347,26 @@ const addFiles = async (files) => {
         img,      // 保存 HTMLImageElement，拼接时直接用
         rotation: 0
       })
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        reject(new Error(`图片加载失败: ${file.name}`))
+      }
       img.src = url
     }))
   )
 
-  images.value.push(...newItems)
-  showToast(`已添加 ${newItems.length} 张图片`, 'success')
+  const newItems = results
+    .filter(r => r.status === 'fulfilled')
+    .map(r => r.value)
+
+  const failed = results.filter(r => r.status === 'rejected').length
+
+  if (newItems.length > 0) {
+    images.value.push(...newItems)
+    showToast(`已添加 ${newItems.length} 张图片${failed > 0 ? `，${failed} 张失败` : ''}`, failed > 0 ? 'error' : 'success')
+  } else if (failed > 0) {
+    showToast(`${failed} 张图片加载失败`, 'error')
+  }
 }
 
 /** 删除指定图片 */
@@ -373,7 +397,10 @@ const onDragEnd = () => {
   if (dragIndex.value !== -1 && dragTargetIndex.value !== -1 && dragIndex.value !== dragTargetIndex.value) {
     const arr = [...images.value]
     const item = arr.splice(dragIndex.value, 1)[0]  // 取出
-    arr.splice(dragTargetIndex.value, 0, item)        // 插入
+    let targetIndex = dragTargetIndex.value
+    // 移除元素后，如果原索引小于目标索引，目标索引需减1
+    if (dragIndex.value < targetIndex) targetIndex--
+    arr.splice(targetIndex, 0, item)        // 插入
     images.value = arr
   }
   dragIndex.value = -1
@@ -512,17 +539,13 @@ const stitchImages = (renderScale) => {
 
     ctx.save()
 
-    // 网格模式：裁剪区域是整个格子
+    // 网格模式：裁剪区域是图片实际显示区域（非格子）
     if (layoutMode === 'grid' && pos.cellW !== undefined) {
-      const clipX = pos.cellX * renderScale
-      const clipY = pos.cellY * renderScale
-      const clipW = pos.cellW * renderScale
-      const clipH = pos.cellH * renderScale
       if (radiusPx > 0) {
-        roundRect(ctx, clipX, clipY, clipW, clipH, radiusPx * renderScale)
+        roundRect(ctx, sx, sy, sw, sh, radiusPx * renderScale)
       } else {
         ctx.beginPath()
-        ctx.rect(clipX, clipY, clipW, clipH)
+        ctx.rect(sx, sy, sw, sh)
       }
       ctx.clip()
     } else if (radiusPx > 0) {
@@ -583,11 +606,6 @@ const updatePreview = () => {
   canvas.width = result.width
   canvas.height = result.height
   canvas.getContext('2d').drawImage(result, 0, 0)
-
-  // 重置缩放和平移
-  zoomScale.value = 1
-  panX.value = 0
-  panY.value = 0
 
   // 显示实际输出尺寸（预览是 0.5，所以 ×2 再 ×scale 得到实际值）
   const actualW = Math.ceil(result.width / 0.5 * scale.value)
