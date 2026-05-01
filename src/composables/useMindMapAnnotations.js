@@ -49,6 +49,7 @@ export function useMindMapAnnotations(activeNodes, overlayRef) {
 
   function openHyperlinkDialog() {
     const node = activeNodes.value[0]
+    if (!node) return
     hyperlinkDefaultUrl.value = node.getData?.('hyperlink') || ''
     hyperlinkDefaultTitle.value = node.getData?.('hyperlinkTitle') || ''
     showHyperlinkDlg.value = true
@@ -69,8 +70,8 @@ export function useMindMapAnnotations(activeNodes, overlayRef) {
   }
 
   function openNoteDialog() {
-
     const node = activeNodes.value[0]
+    if (!node) return
     noteDefaultContent.value = node.getData?.('note') || ''
     showNoteDlg.value = true
   }

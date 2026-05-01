@@ -15,6 +15,10 @@ export function useMindMapFileManager({ openLocalFile, setData, getData, saveToL
   function handleLoadFile(file) {
     if (file._raw?.data) {
       setData(file._raw.data)
+      // 加载新文件后清空撤销历史，防止上一个文件的 undo 栈混入
+      if (window.mindMapInstance?.command?.clearHistory) {
+        window.mindMapInstance.command.clearHistory()
+      }
       currentFileIndex.value = file.id
     }
   }

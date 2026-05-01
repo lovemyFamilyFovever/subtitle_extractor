@@ -214,8 +214,7 @@ export function useMindMap() {
       layout: currentLayout.value,
       initRootNodePosition: ['20%', 'center'], // 根节点位置
       customQuickCreateChildBtnClick: (node) => {
-        // 使用优化后的逻辑，直接基于当前节点计数获取颜色
-        const color = getNextNodeColorOptimized(currentNodeColorListName.value, node.mindMap)
+        const color = getNextNodeColorOptimized()
         if (!color) {
           node.mindMap.execCommand('INSERT_CHILD_NODE', false, [node])
         } else {
@@ -373,7 +372,7 @@ export function useMindMap() {
 
   function insertChildNode() {
     if (!mindMapInstance) return
-    const color = getNextNodeColorOptimized(currentNodeColorListName.value, mindMapInstance)
+    const color = getNextNodeColorOptimized()
     if (!color) {
       mindMapInstance.execCommand('INSERT_CHILD_NODE')
     } else {
@@ -383,14 +382,12 @@ export function useMindMap() {
         ...color
       })
     }
-    // 插入子节点后增加节点计数
-    nodeCount.value++
   }
 
 
   function insertSiblingNode() {
     if (!mindMapInstance) return
-    const color = getNextNodeColorOptimized(currentNodeColorListName.value, mindMapInstance)
+    const color = getNextNodeColorOptimized()
     if (!color) {
       mindMapInstance.execCommand('INSERT_NODE')
     } else {
@@ -400,8 +397,6 @@ export function useMindMap() {
         ...color
       })
     }
-    // 插入兄弟节点后增加节点计数
-    nodeCount.value++
   }
 
 
@@ -429,11 +424,11 @@ export function useMindMap() {
     setThemeConfigHelper(mindMapInstance, key, value)
   }
 
-  function getThemeConfig(key, value) {
-    return getThemeConfigHelper(mindMapInstance, key, value)
+  function getThemeConfig(key) {
+    return getThemeConfigHelper(mindMapInstance, key)
   }
 
-  // ★★★ 新增：设置自定义背景 ★★★
+  // ★★★ 设置自定义背景 ★★★
   function setCustomBackground(bg) {
     customBackground.value = bg
     applyCustomBackground(mindMapInstance, bg)
@@ -441,218 +436,140 @@ export function useMindMap() {
     saveToLocalStorage()
   }
 
-  // ★★★ 新增：获取自定义背景 ★★★
   function getCustomBackground() {
     return customBackground.value
   }
-
-
 
   // ========== 插入图片 ==========
   function insertImageToNode(url, title = '', width, height) {
     return insertImageToNodeHelper(mindMapInstance, getActiveNodeList(), url, title, width, height)
   }
 
-  const loadFile = (file) => {
-    const reader = new FileReader()
-
-    reader.onload = (e) => {
-        const base64 = e.target.result
-        const img = new Image()
-
-        img.onload = () => {
-            sourceImage.value = {
-                id: Date.now(),
-                name: file.name,
-                size: file.size,
-                url: base64,  // 使用base64而不是blob URL
-                img
-            }
-            applySource()
-        }
-
-        // 使用全局提示框
-        img.onerror = () => {
-            alert('图片加载失败，请选择有效的图片文件', 'error')
-        }
-
-        img.src = base64
-    }
-
-    // 使用全局提示框
-    reader.onerror = () => {
-        alert('读取文件失败', 'error')
-    }
-
-    reader.readAsDataURL(file)
-}
-
   // ========== 关联线 ==========
   function toggleAssociativeLineMode() {
     if (!mindMapInstance) return
     isAssociativeLineMode.value = !isAssociativeLineMode.value
     try {
-      if (isAssociativeLineMode.value) {
-        mindMapInstance.associativeLine?.createLineFromActiveNode?.()
-      } else {
-        mindMapInstance.associativeLine?.cancelCreateLine?.()
-      }
+      const action = isAssociativeLineMode.value ? 'createLineFromActiveNode' : 'cancelCreateLine'
+      mindMapInstance.associativeLine?.[action]?.()
     } catch (e) { /* ignore */ }
   }
 
   // ========== 主题/布局 ==========
   function setTheme(themeValue) {
     currentTheme.value = themeValue
-    if (mindMapInstance) {
-      try {
-        mindMapInstance.setTheme(themeValue)
-      } catch (e) { /* ignore */ }
-    }
+    mindMapInstance?.setTheme(themeValue)
   }
 
   function setLayout(layout) {
     currentLayout.value = layout
-    if (mindMapInstance) {
-      try { mindMapInstance.setLayout(layout) } catch (e) { /* ignore */ }
-    }
+    mindMapInstance?.setLayout(layout)
   }
 
   function getLayout() {
-    if (!mindMapInstance) return currentLayout.value
-    return mindMapInstance.getLayout()
+    return mindMapInstance?.getLayout() ?? currentLayout.value
   }
 
+  // ========== 视图操作 ==========
+  function doViewAction(fn) {
+    if (!mindMapInstance?.view) return
+    try {
+      fn(mindMapInstance.view)
+      scale.value = mindMapInstance.view.scale ?? scale.value
+    } catch (e) { /* ignore */ }
+  }
 
   function zoomIn() {
-    if (!mindMapInstance) return
-    try {
-      mindMapInstance.view.enlarge()
-      scale.value = mindMapInstance.view.scale
-    } catch (e) { /* ignore */ }
+    doViewAction(v => v.enlarge())
   }
 
   function zoomOut() {
-    if (!mindMapInstance) return
-    try {
-      mindMapInstance.view.narrow()
-      scale.value = mindMapInstance.view.scale
-    } catch (e) { /* ignore */ }
+    doViewAction(v => v.narrow())
   }
 
   function fit() {
-    if (!mindMapInstance) return
-    try {
-      mindMapInstance.view.fit()
-      scale.value = mindMapInstance.view.scale
-    } catch (e) { /* ignore */ }
+    doViewAction(v => v.fit())
   }
 
   function resetPosition() {
-    if (!mindMapInstance) return
-    try { mindMapInstance.view.reset() } catch (e) { /* ignore */ }
+    doViewAction(v => v.reset())
   }
 
   function setScale(val) {
-    if (!mindMapInstance) return
-    try {
-      mindMapInstance.view.setScale(val)
-      scale.value = val
-    } catch (e) { /* ignore */ }
+    doViewAction(v => v.setScale(val))
   }
 
-  // ★ 替换原来的 getData 函数
+  // ========== 数据存取 ==========
   function getData() {
     return buildSaveData()
   }
 
-
-  // ★★★ 修改：setData 时恢复 customBackground ★★★
   function setData(data) {
     if (!mindMapInstance) return
     try {
       let bgToRestore = null
 
       if (data.root) {
-        // 完整数据格式
         mindMapInstance.setFullData(data)
-        bgToRestore = data.customBackground || null
+        bgToRestore = data.customBackground ?? null
       } else {
-        // 纯节点数据格式，检查是否有 customBackground
         const { customBackground: bg, ...nodeData } = data
         mindMapInstance.setData(nodeData)
-        bgToRestore = bg || null
+        bgToRestore = bg ?? null
       }
 
       mindMapInstance.view.reset()
 
-      // ★★★ 恢复自定义背景 ★★★
       if (bgToRestore) {
         customBackground.value = bgToRestore
-        setTimeout(() => {
-          applyCustomBackground(bgToRestore)
-        }, 100)
+        requestAnimationFrame(() => applyCustomBackground(bgToRestore))
       } else {
         customBackground.value = null
       }
 
-      // ★ 更新节点计数
       updateNodeCount()
-
-      // ★ 新增：加载文件后立即缓存新数据
       saveToLocalStorage()
-
     } catch (e) { /* ignore */ }
     hasUnsavedChanges.value = false
   }
 
   function toggleReadonly() {
     isReadonly.value = !isReadonly.value
-    if (mindMapInstance) {
-      try { mindMapInstance.setMode(isReadonly.value ? 'readonly' : 'edit') } catch (e) { /* ignore */ }
-    }
+    mindMapInstance?.setMode(isReadonly.value ? 'readonly' : 'edit')
   }
 
   function render() {
-    if (mindMapInstance) {
-      try { mindMapInstance.render() } catch (e) { /* ignore */ }
-    }
+    mindMapInstance?.render()
   }
 
   function getOutlineTree() {
-    if (!mindMapInstance) return null
     try {
-      const data = mindMapInstance.getData()
-      return data || null
+      return mindMapInstance?.getData() ?? null
     } catch (e) {
       return null
     }
   }
 
-
   // ========== 统一保存数据构造 ==========
   function buildSaveData() {
-    if (!mindMapInstance) return null
     try {
-      const data = mindMapInstance.getData()
+      const data = mindMapInstance?.getData()
       if (!data) return null
       return {
         data: data.data,
-        children: data.children || [],
-        customBackground: customBackground.value || null,
+        children: data.children ?? [],
+        customBackground: customBackground.value ?? null,
       }
     } catch (e) {
       return null
     }
   }
 
-  // ★ 新增：优化版本的获取节点颜色函数
-  function getNextNodeColorOptimized(currentNodeColorListName, mindMapInstance) {
-    const colors = getCurrentColors(currentNodeColorListName)
-    if (!colors || !mindMapInstance) return null
-    
-    // 直接使用维护的节点计数，时间复杂度 O(1)
-    const index = nodeCount.value % colors.length
-    return colors[index]
+  // ========== 节点颜色 ==========
+  function getNextNodeColorOptimized() {
+    const colors = getCurrentColors(currentNodeColorListName.value)
+    if (!colors?.length) return null
+    return colors[nodeCount.value % colors.length]
   }
 
   return {

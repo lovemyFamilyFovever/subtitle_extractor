@@ -648,7 +648,7 @@ function handleNewFile() {
   transform: scale(1);
 }
 
-form-input {
+.form-input {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid rgba(0, 0, 0, 0.08);
